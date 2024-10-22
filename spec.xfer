@@ -1,0 +1,208 @@
+<@ 
+encoding <"UTF-8"> 
+version <"0.1.0"> 
+urn <"https://parkscomputing.com/xfer/0.1.0">
+@>
+
+<(
+<<Hello, Xfer!>>
+
+<<This is untyped literal text. It will be rendered verbatim by the parser in the document's default encoding.>>
+
+<!This is a comment, both single-line and multi-line. Comment text is ignored by the parser.!>
+
+<! 
+An element opens with < followed by a reserved, non-alphanumeric, non-whitespace character. It closes with the 
+same reserved character, followed by >.
+!>
+
+<<untyped>>
+<#123#>
+<"string">
+
+<!
+To allow an element to contain conflicting characters or other elements, the reserved character in the delimiter 
+may be repeated as many times as necessary. The closing delimiter must contain the same number of repeated 
+characters as the opening delimiter.
+!>
+
+<<May not contain two consecutive right-angle brackets>>
+<<<May contain >> characters>>>
+<!!May contain an <!embedded comment!>.!!>
+<"A string may already contain "quoted text"">
+<""This string may contain an <"Xfer string">"">
+
+<!
+A delimiter may also be disambiguated with one or more alphanumeric characters (letters, digits, or underscores) 
+inserted between the < and the reserved character for the opening delimiter. The same alphanumeric string must 
+appear between the reserved character and > in the closing delimiter.
+
+Examples:
+!>
+
+<a<>>a>  <! May contain a right-angle-bracket character !>
+<a!<! comment !>!a>  <! May contain an embedded Xfer comment !>
+<x"This string may contain an <"another Xfer string">"x>
+
+<!
+Untyped Literals
+
+Untyped literals are interpreted verbatim in the default encoding for the document (UTF-8 unless otherwise specified).
+!>
+
+<<Hello, World!>>
+<<12345>>
+<<123.45>>
+<<true>>
+<< >>
+<a<>>a> <! renders as ">" !>
+
+<!
+Whitespace
+
+Whitespace (spaces and tabs) is ignored by the parser and removed from output unless it is part of an literal value 
+or a string value.
+!>
+
+<< 12345 >> <! renders as " 12345 " !>
+<" 12345 "> <! renders as " 12345 " !>
+<< >> <! renders as " " !>
+<<   >> <! renders as "   " !>
+<# 12345 #> <! interpreted as integer 12345, equivalent to <# <<12345>> #> !>
+
+<! All of the following objects are equivalent !>
+
+<{ <<key>> <"value"> }>
+<{ key <"value"> }>
+<{<<key>> <"value">}>
+<{key <"value">}>
+<{<<key>><"value">}>
+<{key<"value">}>
+<{
+    key <"value">
+}>
+<{
+    key
+    <"value">
+}>
+
+
+<! Characters !>
+
+<\ <{ UTF-8 <$2764$> }> \> <! UTF-8 character defined by hexadecimal value !>
+<\2764\> <! Defaults to UTF-8 defined by hexadecimal value !>
+
+<!
+Strings
+
+By default, string contents are encoded in the default document encoding.
+!>
+
+<"Hello, World!">
+
+<!
+Strings may also be composed from untyped literals, characters, and other strings.
+!>
+
+<" <<Hello>> <<,>> <\20\> <"World"> <<!>> ">
+
+<!
+Strings may also be encoded in other formats using an explicit encoding directive. The encoding directive is an 
+object with a single key-value pair. The key is the encoding format, and the value is an Xfer literal containing 
+the string to be encoded or a property bag of values to be composed into a string.
+!>
+
+<" <{ utf-16 <<Hello, World!>> }> ">
+<" <{ utf-16 <( <<Hello>> <<,>> <\20\> <"World"> <<!>> )> }> ">
+
+<{
+string <" <{ UTF-8 <<The computer science professor said, "Strings are troublesome.">> }> ">
+stringDefaultUtf8 <"The computer science professor said, "Strings are troublesome."">
+
+character <\2764\>
+decimal <*123*>
+integer <#123#>
+floatingPoint <^123.45^>
+binary <%1010%>
+hexadecimal <$FF$>
+isoDateTime <|2021-12-31T00:00:00.000|>
+
+boolean <{ 
+    trueValues <[ <~true~> <~yes~> <~on~> <~1~> ]>
+    falseValues <[ <~false~> <~no~> <~off~> <~0~> ]>
+}>
+
+emptyPropertyBag <()> <! Interpreted as an empty object by the implementation !>
+emptyObject <{}> <! May be interpreted as null by the implementation !>
+emptyArray <[]> <! May be interpreted as null by the implementation !>
+emptyString <""> <! May be interpreted as null by the implementation !>
+emptyCharacter <\\> <! May be interpreted as NUL/zero by the implementation !>
+emptyDecimal <**> <! May be interpreted as a zero by the implementation !>
+emptyInteger <##> <! May be interpreted as a zero by the implementation !>
+emptyFloatingPoint <^^> <! May be interpreted as a zero by the implementation !>
+emptyBinary <%%> <! May be interpreted as a zero by the implementation !>
+emptyHexadecimal <$$> <! May be interpreted as a zero by the implementation !>
+emptyBoolean <~~> <! May be interpreted as false by the implementation !>
+placeholder <|placeholderName|>
+}>
+
+
+<! Xfer Documents !>
+
+<(<"Hello"> <\ <#44#> \> <\20\> <"World">)> <! Xfer document containing a property bag of values of different types !>
+
+<{message<"Hello, World!">}> <! Xfer document containing one object with one key and one value !>
+
+<{
+message <"Hello, World!">
+id <#42#>
+pi <^3.14^>
+isInProgress <~true~>
+isComplete <~false~>
+object <{
+    name <"John Doe">
+    age <#30#>
+    isStudent <~true~>
+    address <{
+        street <"123 Main St">
+        city <"Anytown">
+        state <"CA">
+        zip <"12345">
+    }>
+    phones <[
+        <{
+            type <"home"> number <"123-456-7890">
+        }>
+        <{
+            type <"cell"> number <"234-567-8901">
+        }>
+    ]>
+}>
+
+
+<! Comparison of an Xfer document and a JSON document 
+
+<{message<"Hello, World!">}> <! Xfer document !>
+
+<!
+
+{message:"Hello, World!"} <! JSON document !>
+
+!>
+
+<!! Minified Xfer document 
+
+<{string<"Hello, World!">number<#12345#>float<^123.45^>boolean_true<~true~>
+boolean_false<~false~>object<{name<"John Doe">age<#30#>address<{
+street<"123 Main St">city<"Springfield">zipcode<"12345">}>phones<[
+<{type<"home">number<"555-1234">}><{type<"work">number<"555-5678">}>]>
+}>array_of_strings<[<"apple"><"banana"><"cherry">]>array_of_numbers<[
+<#1#><#2#><#3#><#4#><#5#>]>array_of_booleans<[<~true~><~false~><~true~>]>
+array_of_objects<[<{type<"car">make<"Toyota">model<"Camry">year<#2020#>}>
+<{type<"bike">brand<"Trek">model<"Emonda">year<#2021#>}>]>nested_array<[
+<[<#1#><#2#><#3#>]><[<#4#><#5#><#6#>]><[<#7#><#8#><#9#>]>]>
+escaped_characters<" <<A string with "double quotes" and a newline>> <@nl@> <<character.>> ">
+unicode<\2764\>}>
+!!>
+
+)>

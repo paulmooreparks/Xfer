@@ -1,0 +1,61 @@
+<document> ::= <metadata>? <property_bag>
+
+<metadata> ::= "<@" <key_value_pairs> "@>" | <empty>
+
+<key_value_pairs> ::= <key_value_pair> <key_value_pairs>? | <empty>
+<key_value_pair> ::= <string> <element>
+
+<property_bag> ::= "<(" <elements> ")>"
+<elements> ::= <element> <elements>? | <empty>
+
+<element> ::= <object>
+             | <array>
+             | <string>
+             | <untyped_text>
+             | <numeric>
+             | <float>
+             | <boolean>
+             | <iso_date>
+             | <binary>
+             | <hexadecimal>
+             | <utf8_char>
+             | <comment>
+             | <placeholder>
+
+<object> ::= "<{" <key_value_pairs> "}>"
+<array> ::= "<[" <elements> "]>"
+
+<string> ::= "<\"" <content> "\">"
+<untyped_text> ::= "<." <content> ".>"
+<numeric> ::= "<#" <digits> "#>"
+<float> ::= "<^" <digits> "." <digits> "^>"
+<boolean> ::= "<~" <bool_value> "~>"
+<iso_date> ::= "<&" <iso_date_value> "&>"
+<binary> ::= "<%" <binary_digits> "%>"
+<hexadecimal> ::= "<$" <hex_digits> "$>"
+<utf8_char> ::= "<\\" <hex_digits> "\\>"
+
+<comment> ::= "<!" <content> "!>"
+<placeholder> ::= "<|" <identifier> "|>"
+
+<identifier> ::= <alpha> <alpha_numeric_sequence>?
+<alpha_numeric_sequence> ::= <alpha_numeric> <alpha_numeric_sequence>? | <empty>
+
+<alpha> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | 
+            "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | 
+            "u" | "v" | "w" | "x" | "y" | "z" | 
+            "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | 
+            "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | 
+            "U" | "V" | "W" | "X" | "Y" | "Z"
+
+<alpha_numeric> ::= <alpha> | "0" | "1" | "2" | "3" | "4" | "5" | 
+                    "6" | "7" | "8" | "9" | "_"
+
+<content> ::= <any_char> <content>? | <empty>
+
+<digits> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" <digits>? | <empty>
+<binary_digits> ::= "0" | "1" <binary_digits>? | <empty>
+<hex_digits> ::= <digits> | "A" | "B" | "C" | "D" | "E" | "F" | "a" | "b" | "c" | "d" | "e" | "f" <hex_digits>? | <empty>
+
+<bool_value> ::= "true" | "false" | "t" | "f" | "yes" | "no" | "on" | "off" | "1" | "0" | "+" | "-"
+<empty> ::= ""

@@ -1,0 +1,65 @@
+{
+    "string": "Hello, World!",
+    "number": 12345,
+    "float": 123.45,
+    "boolean_true": true,
+    "boolean_false": false,
+    "null_value": null,
+    "object": {
+        "name": "John Doe",
+        "age": 30,
+        "address": {
+            "street": "123 Main St",
+            "city": "Springfield",
+            "zipcode": "12345"
+        },
+        "phones": [
+            {
+                "type": "home",
+                "number": "555-1234"
+            },
+            {
+                "type": "work",
+                "number": "555-5678"
+            }
+        ]
+    },
+    "array_of_strings": [
+        "apple",
+        "banana",
+        "cherry"
+    ],
+    "array_of_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5
+    ],
+    "array_of_booleans": [
+        true,
+        false,
+        true
+    ],
+    "array_of_objects": [
+        {
+            "type": "car",
+            "make": "Toyota",
+            "model": "Camry",
+            "year": 2020
+        },
+        {
+            "type": "bike",
+            "brand": "Trek",
+            "model": "Emonda",
+            "year": 2021
+        }
+    ],
+    "nested_array": [
+        [ 1, 2, 3 ],
+        [ 4, 5, 6 ],
+        [ 7, 8, 9 ]
+    ],
+    "escaped_characters": "A string with \"double quotes\" and a newline\ncharacter.",
+    "unicode": "\u2764" /* Unicode for a heart symbol */
+}

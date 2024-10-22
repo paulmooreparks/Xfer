@@ -1,0 +1,83 @@
+-- Top-Level Structures
+Document. Document ::= MetadataOpt PropertyBag ;
+
+MetadataOpt. MetadataOpt ::= Metadata | ;
+
+Metadata. Metadata ::= "<@" KeyValuePairs "@="">
+    " ;
+
+    KeyValuePairs. KeyValuePairs ::= KeyValuePair KeyValuePairs | ;
+    KeyValuePair. KeyValuePair ::= String Element ;
+
+    PropertyBag. PropertyBag ::= "<(" Elements ")>" ;
+
+    Elements. Elements ::= Element Elements | ;
+
+    -- Elements
+    ElementObject. Element ::= Object ;
+    ElementArray. Element ::= Array ;
+    ElementString. Element ::= String ;
+    ElementUntyped. Element ::= UntypedText ;
+    ElementNumeric. Element ::= Numeric ;
+    ElementFloat. Element ::= Float ;
+    ElementBoolean. Element ::= Boolean ;
+    ElementDate. Element ::= IsoDate ;
+    ElementBinary. Element ::= Binary ;
+    ElementHex. Element ::= Hexadecimal ;
+    ElementUtf8. Element ::= Utf8Char ;
+    ElementComment. Element ::= Comment ;
+    ElementPlaceholder. Element ::= Placeholder ;
+
+    Object. Object ::= "<{" KeyValuePairs "}>" ;
+    Array. Array ::= "<[" Elements "]>" ;
+
+    -- Specific Elements
+    String. String ::= "<\"" Content "\">" ;
+    UntypedText. UntypedText ::= "<." Content ".="">
+        " ;
+        Numeric. Numeric ::= "<#" Digits "#>" ;
+        Float. Float ::= "<^" Digits "." Digits "^>" ;
+        Boolean. Boolean ::= "<~" BoolValue "~="">
+            " ;
+            IsoDate. IsoDate ::= "<&" DateValue "&>" ;
+            Binary. Binary ::= "<%" BinaryDigits "%>" ;
+            Hexadecimal. Hexadecimal ::= "<$" HexDigits "$>" ;
+            Utf8Char. Utf8Char ::= "<\\" HexDigits "\\>" ;
+
+            Comment. Comment ::= "<!" Content "!>" ;
+            Placeholder. Placeholder ::= "<|" Identifier "|>" ;
+
+            -- Identifiers
+            Identifier. Identifier ::= Alpha AlphaNumSeqOpt ;
+            AlphaNumSeqOpt. AlphaNumSeqOpt ::= AlphaNumSeq | ;
+            AlphaNumSeq. AlphaNumSeq ::= AlphaNumeric AlphaNumSeq | ;
+
+            -- Character Sets
+            Alpha. Alpha ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h"
+            | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p"
+            | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x"
+            | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F"
+            | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N"
+            | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V"
+            | "W" | "X" | "Y" | "Z" ;
+
+            AlphaNumeric. AlphaNumeric ::= Alpha | "0" | "1" | "2" | "3"
+            | "4" | "5" | "6" | "7" | "8" | "9" | "_" ;
+
+            Content. Content ::= Char Content | ;
+            Char. Char ::= any ;  -- Represents any valid character
+
+            Digits. Digits ::= Digit Digits | ;
+            Digit. Digit ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+
+            BinaryDigits. BinaryDigits ::= "0" | "1" BinaryDigits | ;
+
+            HexDigits. HexDigits ::= Digit | "A" | "B" | "C" | "D" | "E" | "F"
+            | "a" | "b" | "c" | "d" | "e" | "f" HexDigits | ;
+
+            BoolValue. BoolValue ::= "true" | "false" | "t" | "f"
+            | "yes" | "no" | "on" | "off"
+            | "1" | "0" | "+" | "-" ;
+
+            DateValue. DateValue ::= Digit Digit "-" Digit Digit "-" Digit Digit Digit Digit ;
+        

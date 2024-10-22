@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "xferc": {
+      "commandName": "Project",
+      "commandLineArgs": "parse C:\\Users\\paul\\source\\repos\\xfer\\sample.xfer"
+    }
+  }
+}
