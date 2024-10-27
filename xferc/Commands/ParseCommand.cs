@@ -3,6 +3,7 @@
 using System.CommandLine;
 using ParksComputing.Xfer;
 using ParksComputing.Xfer.Services;
+using ParksComputing.Xfer.Models.Elements;
 
 namespace ParksComputing.Xferc;
 
@@ -15,6 +16,20 @@ internal class ParseCommand {
         var document = parser.Parse(input);
 
         Console.WriteLine(document);
+
+        Console.WriteLine(document.Metadata["foo"]);
+        Console.WriteLine(document.Metadata["encoding"]);
+        Console.WriteLine(document.Metadata.Encoding);
+
+        document.Metadata["encoding"] = new StringElement("UTF-16");
+        Console.WriteLine(document.Metadata["encoding"]);
+        Console.WriteLine(document.Metadata.Encoding);
+
+        document.Metadata.Encoding = "UTF-32";
+        Console.WriteLine(document.Metadata["encoding"]);
+        Console.WriteLine(document.Metadata.Encoding);
+
+        Console.WriteLine(document.Metadata.Version);
 
         return Result.Success;
     }

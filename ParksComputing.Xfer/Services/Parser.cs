@@ -7,6 +7,9 @@ namespace ParksComputing.Xfer.Services;
 public class Parser {
     public Parser() { }
 
+    public const char ElementOpeningMarker = '<';
+    public const char ElementClosingMarker = '>';
+
     private string _scanString = string.Empty;
 
     private int Start { get; set; } = 0;
@@ -125,14 +128,14 @@ public class Parser {
         if (ElementOpening(MetadataElement.OpeningMarker)) {
             var metadataElement = new MetadataElement();
 
-            while (CurrentChar != MetadataElement.ClosingMarker && Peek != Element.ElementClosingMarker) {
+            while (CurrentChar != MetadataElement.ClosingMarker && Peek != ElementClosingMarker) {
                 var element = ParseKeyValuePair();
 
                 if (element is KeyValuePairElement keyValuePairElement) {
-                    metadataElement.Add(keyValuePairElement);
+                    metadataElement.AddOrUpdate(keyValuePairElement);
                 }
                 else {
-                    throw new InvalidOperationException("Unexpected element type");
+                    throw new InvalidOperationException($"Unexpected element type: {element.GetType()}");
                 }
             }
 
@@ -152,6 +155,13 @@ public class Parser {
             var valueElement = ParseElement();
             element = new KeyValuePairElement(keywordElement.Value, valueElement);
         }
+        else if (element is StringElement stringElement) {
+            var valueElement = ParseElement();
+            element = new KeyValuePairElement(stringElement.Value, valueElement);
+        }
+        else {
+            throw new InvalidOperationException($"Unexpected key type: {element.GetType()}");
+        }
 
         return element;
     }
@@ -162,13 +172,7 @@ public class Parser {
                 Expand();
             }
 
-            TokenType tokenType;
-
-            if (!IsKeyword(CurrentString, out tokenType)) {
-                tokenType = TokenType.Identifier;
-            }
-
-            var element = new KeywordElement(CurrentString, tokenType);
+            var element = new KeywordElement(CurrentString);
             Advance();
             return element;
         }
@@ -177,7 +181,7 @@ public class Parser {
     }
 
     internal bool ElementOpening(char openingMarker) {
-        if (CurrentChar == Element.ElementOpeningMarker && Peek == openingMarker) {
+        if (CurrentChar == ElementOpeningMarker && Peek == openingMarker) {
             Advance();
             Advance();
             return true;
@@ -187,7 +191,7 @@ public class Parser {
     }
 
     internal bool ElementClosing(char closingMarker) {
-        if (CurrentChar == closingMarker && Peek == Element.ElementClosingMarker) {
+        if (CurrentChar == closingMarker && Peek == ElementClosingMarker) {
             Advance();
             Advance();
             return true;
@@ -199,7 +203,7 @@ public class Parser {
     internal Element ParseElement() {
         while (CurrentChar != '\0') {
             switch (CurrentChar) {
-                case Element.ElementOpeningMarker:
+                case ElementOpeningMarker:
                     Advance();
 
                     switch (CurrentChar) {
@@ -231,23 +235,24 @@ public class Parser {
                             }
                             break;
 
-                        case ObjectElement.OpeningMarker:
-                            Advance();
-                            var objectElement = new ObjectElement();
+                        case ObjectElement.OpeningMarker: {
+                                Advance();
+                                var objectElement = new ObjectElement();
 
-                            while (CurrentChar != '\0') {
-                                if (ElementClosing(ObjectElement.ClosingMarker)) {
-                                    return objectElement;
-                                }
+                                while (CurrentChar != '\0') {
+                                    if (ElementClosing(ObjectElement.ClosingMarker)) {
+                                        return objectElement;
+                                    }
 
 
-                                var element = ParseKeyValuePair();
+                                    var element = ParseKeyValuePair();
 
-                                if (element is KeyValuePairElement kvp) {
-                                    objectElement.Add(kvp);
-                                }
-                                else {
-                                    throw new InvalidOperationException("Unexpected element type");
+                                    if (element is KeyValuePairElement kvp) {
+                                        objectElement.Add(kvp);
+                                    }
+                                    else {
+                                        throw new InvalidOperationException("Unexpected element type");
+                                    }
                                 }
                             }
                             break;
@@ -283,7 +288,7 @@ public class Parser {
                             break;
 
                         default:
-                            break;
+                            throw new InvalidOperationException($"Unknown element delimiter: {CurrentChar}");
                     }
 
                     if (CurrentChar == '\0') {

@@ -1,1 +1,16 @@
-<@encoding<"UTF-8">version<"1.0.0">@><"Hello, Xfer"><{key<"value">}>
+<@
+encoding <"UTF-8">
+version <"1.0.0">
+foo <"bar">
+@>
+
+<"Hello, "Xfer"">
+<"Xfer > Json">
+<"Json < Xfer">
+
+<{
+key<"value">
+foo<"bar">
+<"orange"><"New Black">
+<"Lady Marmalade"><"Patti LaBelle">
+}>

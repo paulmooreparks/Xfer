@@ -15,14 +15,14 @@ public class ObjectElement : Element {
     public ObjectElement() : base("object", new(OpeningMarker, ClosingMarker)) { }
 
     public void Add(KeyValuePairElement value) {
-        Values.Add(value.Key, value.Value);
+        Values.Add(value.Key.Value, value.Value);
     }
 
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
         foreach (var kvp in Values) {
-            sb.Append($"{kvp.Key}{kvp.Value}");
+            sb.Append($"{Services.Parser.ElementOpeningMarker}{StringElement.OpeningMarker}{kvp.Key}{StringElement.ClosingMarker}{Services.Parser.ElementClosingMarker}{kvp.Value}");
         }
         sb.Append(Delimiter.Closing);
         return sb.ToString();
