@@ -7,32 +7,44 @@ using System.Threading.Tasks;
 namespace ParksComputing.Xfer.Models;
 
 public class Delimiter {
-    public char Marker { get; }
+    public char OpeningMarker { get; }
+    public char ClosingMarker { get; }
     public int Count { get; set; }
 
     public string Opening { get; }
     public string Closing { get; }
 
-    public Delimiter(char marker) : this(marker, 1) {
+    internal Delimiter() : this('\0', '\0') { }
+
+    public Delimiter(char openingMarker, char closingMarker) : this(openingMarker, closingMarker, 1) {
     }
-    public Delimiter(char marker, int count) {
+
+    public Delimiter(char openingMarker, char closingMarker, int count) {
         if (count < 1) {
             throw new ArgumentOutOfRangeException(nameof(count), "Count must be at least 1.");
         }
 
-        if (char.IsWhiteSpace(marker) || char.IsLetterOrDigit(marker)) {
-            throw new ArgumentException("Marker cannot be an alphanumeric or whitespace character.", nameof(marker));
-        }
+        ValidateMarker(openingMarker, nameof(openingMarker));
+        ValidateMarker(closingMarker, nameof(closingMarker));
 
-        Marker = marker;
+        OpeningMarker = openingMarker;
+        ClosingMarker = closingMarker;
         Count = count;
 
-        var repeatedMarker = new string(marker, count);
-        Opening = "<" + repeatedMarker;
-        Closing = repeatedMarker + ">";
+        var repeatedOpening = new string(openingMarker, count);
+        var repeatedClosing = new string(closingMarker, count);
+
+        Opening = "<" + repeatedOpening;
+        Closing = repeatedClosing + ">";
+    }
+
+    private static void ValidateMarker(char marker, string paramName) {
+        if (char.IsWhiteSpace(marker) || char.IsLetterOrDigit(marker)) {
+            throw new ArgumentException("Marker cannot be an alphanumeric or whitespace character.", paramName);
+        }
     }
 
     public override string ToString() {
-        return Opening;
+        return $"{Opening}...{Closing}";
     }
 }

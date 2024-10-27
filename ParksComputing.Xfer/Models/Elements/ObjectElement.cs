@@ -6,14 +6,13 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class MetadataElement : Element
-{
+public class ObjectElement : Element {
     public Dictionary<string, Element> Values { get; set; } = new ();
 
-    public const char OpeningMarker = '@';
-    public const char ClosingMarker = OpeningMarker;
+    public const char OpeningMarker = '{';
+    public const char ClosingMarker = '}';
 
-    public MetadataElement() : base("metadata", new(OpeningMarker, ClosingMarker)) { }
+    public ObjectElement() : base("object", new(OpeningMarker, ClosingMarker)) { }
 
     public void Add(KeyValuePairElement value) {
         Values.Add(value.Key, value.Value);
@@ -28,5 +27,4 @@ public class MetadataElement : Element
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }
-
 }

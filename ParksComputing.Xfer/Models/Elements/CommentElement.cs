@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class CommentElement : XferElement {
-    public CommentElement() : base("Comment", new Delimiter('!')) { }
+public class CommentElement : Element {
+    public const char OpeningMarker = '!';
+    public const char ClosingMarker = OpeningMarker;
+
+    public CommentElement() : base("comment", new(OpeningMarker, ClosingMarker)) { }
 }

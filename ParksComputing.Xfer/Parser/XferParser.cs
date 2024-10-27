@@ -17,8 +17,8 @@ namespace ParksComputing.Xfer.Parser {
         public XferDocument Parse(string input) {
             _input = input;
             _position = 0;
-            var tokenizer = new Tokenizer();
-            var tokens = tokenizer.Tokenize(input);
+            var parser = new Services.Parser();
+            var tokens = parser.Parse(input);
 
             /*
             SkipWhitespace();

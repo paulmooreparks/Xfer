@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class XferElement
+public abstract class Element
 {
-    public string Name { get; }
-    public Delimiter Delimiter { get; set; }
+    public const char ElementOpeningMarker = '<';
+    public const char ElementClosingMarker = '>';
 
-    public XferElement(string name, Delimiter delimiter)
+    public string Name { get; }
+    public Delimiter Delimiter { get; set; } = new Delimiter(ElementOpeningMarker, ElementClosingMarker);
+
+    public Element(string name, Delimiter delimiter)
     {
         Name = name;
         Delimiter = delimiter;

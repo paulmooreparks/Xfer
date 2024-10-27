@@ -2,7 +2,7 @@
 
 using System.CommandLine;
 using ParksComputing.Xfer;
-using ParksComputing.Xfer.Parser;
+using ParksComputing.Xfer.Services;
 
 namespace ParksComputing.Xferc;
 
@@ -11,16 +11,10 @@ namespace ParksComputing.Xferc;
 internal class ParseCommand {
     public int Execute(string file) {
         var input = File.ReadAllText(file);
-        var parser = new XferParser();
-        var result = parser.Parse(input);
+        var parser = new Parser();
+        var document = parser.Parse(input);
 
-        Console.WriteLine("Metadata:");
-        foreach (var kvp in result.Metadata) {
-            Console.WriteLine($"{kvp.Key}: {kvp.Value}");
-        }
-
-        Console.WriteLine("Content:");
-        result.Content.ForEach(Console.WriteLine);
+        Console.WriteLine(document);
 
         return Result.Success;
     }

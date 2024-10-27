@@ -1,6 +1,6 @@
 ﻿namespace ParksComputing.Xfer.Models;
 
-internal enum TokenType {
+public enum TokenType {
     None,
     ElementOpen,
     ElementClose,
