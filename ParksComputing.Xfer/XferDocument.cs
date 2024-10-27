@@ -35,5 +35,17 @@ namespace ParksComputing.Xfer
             sb.Append(Root);
             return sb.ToString();
         }
+
+        public byte[] ToByteArray() {
+            var stringRepresentation = ToString();
+            return Metadata.Encoding switch {
+                "UTF-8" => Encoding.UTF8.GetBytes(stringRepresentation),
+                "UTF-16" => Encoding.Unicode.GetBytes(stringRepresentation),
+                "UTF-32" => Encoding.UTF32.GetBytes(stringRepresentation),
+                "Unicode" => Encoding.Unicode.GetBytes(stringRepresentation),
+                "ASCII" => Encoding.ASCII.GetBytes(stringRepresentation),
+                _ => throw new NotSupportedException($"Encoding '{Metadata.Encoding}' is not supported.")
+            };
+        }
     }
 }

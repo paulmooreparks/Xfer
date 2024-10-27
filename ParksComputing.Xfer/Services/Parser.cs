@@ -1,14 +1,21 @@
 ﻿using System.Globalization;
+using System.Text;
 using ParksComputing.Xfer.Models;
 using ParksComputing.Xfer.Models.Elements;
 
 namespace ParksComputing.Xfer.Services;
 
 public class Parser {
-    public Parser() { }
+    public Parser() : this(Encoding.UTF8) { }
+
+    public Parser(Encoding encoding) { 
+        Encoding = encoding;
+    }
 
     public const char ElementOpeningMarker = '<';
     public const char ElementClosingMarker = '>';
+
+    public Encoding Encoding { get; private set; } = Encoding.UTF8;
 
     private string _scanString = string.Empty;
 
@@ -90,12 +97,13 @@ public class Parser {
         return Keywords.TryGetValue(compare.ToLower(), out tokenType);
     }
 
-    public XferDocument Parse(string input) {
-        if (string.IsNullOrEmpty(input)) {
+    public XferDocument Parse(byte[] input) {
+        if (input == null || input.Length == 0) {
             throw new ArgumentNullException(nameof(input));
         }
 
-        ScanString = input;
+        // Convert byte array to string using the specified encoding
+        ScanString = Encoding.GetString(input);
 
         if (CurrentChar == '\0') {
             return new XferDocument();
@@ -112,6 +120,17 @@ public class Parser {
         if (element is MetadataElement metadataElement) {
             document.Metadata = metadataElement;
         }
+
+        var encodingName = document.Metadata.Encoding;
+
+        Encoding = encodingName switch {
+            "UTF-8" => Encoding.UTF8,
+            "UTF-16" => Encoding.Unicode,
+            "UTF-32" => Encoding.UTF32,
+            "Unicode" => Encoding.Unicode,
+            "ASCII" => Encoding.ASCII,
+            _ => throw new NotSupportedException($"Encoding '{encodingName}' is not supported.")
+        };
 
         while (CurrentChar != '\0') {
             var content = ParseElement();
