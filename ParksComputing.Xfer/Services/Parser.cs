@@ -247,7 +247,7 @@ public class Parser {
                                     var element = ParseKeyValuePair();
 
                                     if (element is KeyValuePairElement kvp) {
-                                        objectElement.Add(kvp);
+                                        objectElement.AddOrUpdate(kvp);
                                     }
                                     else {
                                         throw new InvalidOperationException("Unexpected element type");
