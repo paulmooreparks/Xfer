@@ -12,12 +12,6 @@ namespace ParksComputing.Xferc;
 [Argument(typeof(string), "file", "The path to the Xfer document")]
 internal class ParseCommand {
     public int Execute(string file) {
-#if false
-        var input = File.ReadAllText(file);
-        var parser = new Parser();
-        var document = parser.Parse(input);
-#endif
-
         var inputBytes = File.ReadAllBytes(file);
         var parser = new Parser();
         var document = parser.Parse(inputBytes);
@@ -26,16 +20,8 @@ internal class ParseCommand {
 
         Console.WriteLine(document.Metadata["foo"]);
         Console.WriteLine(document.Metadata["encoding"]);
-        Console.WriteLine(document.Metadata.Encoding);
 
-        document.Metadata["encoding"] = new StringElement("UTF-16");
-        Console.WriteLine(document.Metadata["encoding"]);
         Console.WriteLine(document.Metadata.Encoding);
-
-        document.Metadata.Encoding = "UTF-32";
-        Console.WriteLine(document.Metadata["encoding"]);
-        Console.WriteLine(document.Metadata.Encoding);
-
         Console.WriteLine(document.Metadata.Version);
 
         return Result.Success;

@@ -15,7 +15,7 @@ public class ObjectElement : Element {
     public ObjectElement() : base("object", new(OpeningMarker, ClosingMarker)) { }
 
     public void Add(KeyValuePairElement value) {
-        Values.Add(value.Key.Value, value.Value);
+        Values.Add(value.Key, value.Value);
     }
 
     public override string ToString() {

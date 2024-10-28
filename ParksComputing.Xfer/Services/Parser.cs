@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
+
+using ParksComputing.Xfer.Extensions;
 using ParksComputing.Xfer.Models;
 using ParksComputing.Xfer.Models.Elements;
 
@@ -83,18 +85,8 @@ public class Parser {
         return CurrentString;
     }
 
-    private bool IsIdentifierChar(char c) {
+    private bool IsKeywordChar(char c) {
         return char.IsLetterOrDigit(c) | c == '_' | c == '-';
-    }
-
-    private static readonly Dictionary<string, TokenType> Keywords = new Dictionary<string, TokenType>() {
-        {"encoding", TokenType.EncodingKey},
-        {"version", TokenType.VersionKey},
-        {"urn", TokenType.UrnKey}
-    };
-
-    private bool IsKeyword(string compare, out TokenType tokenType) {
-        return Keywords.TryGetValue(compare.ToLower(), out tokenType);
     }
 
     public XferDocument Parse(byte[] input) {
@@ -114,23 +106,11 @@ public class Parser {
 
     internal XferDocument ParseDocument() {
         var document = new XferDocument();
-
         var element = ParseMetadata();
 
         if (element is MetadataElement metadataElement) {
             document.Metadata = metadataElement;
         }
-
-        var encodingName = document.Metadata.Encoding;
-
-        Encoding = encodingName switch {
-            "UTF-8" => Encoding.UTF8,
-            "UTF-16" => Encoding.Unicode,
-            "UTF-32" => Encoding.UTF32,
-            "Unicode" => Encoding.Unicode,
-            "ASCII" => Encoding.ASCII,
-            _ => throw new NotSupportedException($"Encoding '{encodingName}' is not supported.")
-        };
 
         while (CurrentChar != '\0') {
             var content = ParseElement();
@@ -172,11 +152,11 @@ public class Parser {
 
         if (element is KeywordElement keywordElement) {
             var valueElement = ParseElement();
-            element = new KeyValuePairElement(keywordElement.Value, valueElement);
+            element = new KeyValuePairElement(keywordElement, valueElement);
         }
         else if (element is StringElement stringElement) {
             var valueElement = ParseElement();
-            element = new KeyValuePairElement(stringElement.Value, valueElement);
+            element = new KeyValuePairElement(stringElement, valueElement);
         }
         else {
             throw new InvalidOperationException($"Unexpected key type: {element.GetType()}");
@@ -186,8 +166,8 @@ public class Parser {
     }
 
     internal Element ParseKeyword() {
-        if (IsIdentifierChar(Peek)) {
-            while (IsIdentifierChar(Peek)) {
+        if (Peek.IsKeywordChar()) {
+            while (Peek.IsKeywordChar()) {
                 Expand();
             }
 
