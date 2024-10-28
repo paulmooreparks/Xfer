@@ -5,6 +5,9 @@ using ParksComputing.Xfer.Extensions;
 namespace ParksComputing.Xfer.Models.Elements;
 
 public class MetadataElement : Element {
+    public const char OpeningMarker = '@';
+    public const char ClosingMarker = OpeningMarker;
+
     private Dictionary<string, Tuple<Element, Element>> _values = new ();
     public IReadOnlyDictionary<string, Tuple<Element, Element>> Values => _values;
 
@@ -35,9 +38,6 @@ public class MetadataElement : Element {
             }
         }
     }
-
-    public const char OpeningMarker = '@';
-    public const char ClosingMarker = OpeningMarker;
 
     // We may do more with this in the future....
     public string Encoding => "UTF-8";
@@ -120,7 +120,12 @@ public class MetadataElement : Element {
     }
 
     public void AddOrUpdate(KeyValuePairElement value) {
-        this[value.Key] = value.Value;
+        if (_values.TryGetValue(value.Key, out Tuple<Element, Element>? tuple)) {
+            _values[value.Key] = new Tuple<Element, Element>(value.KeyElement, value.Value);
+        }
+        else {
+            _values.Add(value.Key, new Tuple<Element, Element>(value.KeyElement, value.Value));
+        }
     }
 
     public override string ToString() {

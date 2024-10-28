@@ -18,10 +18,9 @@ internal class ParseCommand {
 
         Console.WriteLine(document);
 
+        Console.WriteLine(document.Metadata["version"]);
         Console.WriteLine(document.Metadata["foo"]);
-        Console.WriteLine(document.Metadata["encoding"]);
 
-        Console.WriteLine(document.Metadata.Encoding);
         Console.WriteLine(document.Metadata.Version);
 
         return Result.Success;

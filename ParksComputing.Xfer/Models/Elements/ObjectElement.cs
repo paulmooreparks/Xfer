@@ -41,7 +41,12 @@ public class ObjectElement : Element {
     }
 
     public void AddOrUpdate(KeyValuePairElement value) {
-        this[value.Key] = value.Value;
+        if (_values.TryGetValue(value.Key, out Tuple<Element, Element>? tuple)) {
+            _values[value.Key] = new Tuple<Element, Element>(value.KeyElement, value.Value);
+        }
+        else {
+            _values.Add(value.Key, new Tuple<Element, Element>(value.KeyElement, value.Value));
+        }
     }
 
     public override string ToString() {

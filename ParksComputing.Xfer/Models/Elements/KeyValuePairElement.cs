@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 public class KeyValuePairElement : Element {
+    public const char OpeningMarker = '=';
+    public const char ClosingMarker = OpeningMarker;
+
     public Element KeyElement { get; set; }
     public string Key { get; }
     public Element Value { get; set; }
-
-    public const char OpeningMarker = '=';
-    public const char ClosingMarker = OpeningMarker;
 
     public KeyValuePairElement(Element key, Element value) : base("keyValuePair", new(OpeningMarker, ClosingMarker)) {
         KeyElement = key;
