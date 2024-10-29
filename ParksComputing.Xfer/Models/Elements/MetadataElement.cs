@@ -1,6 +1,7 @@
 ﻿using System.Text;
 
 using ParksComputing.Xfer.Extensions;
+using ParksComputing.Xfer.Services;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
@@ -132,7 +133,7 @@ public class MetadataElement : Element {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
         foreach (var value in _values.Values) {
-            sb.Append($"{value.Item1}{value.Item2}");
+            sb.Append($"{Parser.ElementOpeningMarker}{KeyValuePairElement.OpeningMarker}{value.Item1}{value.Item2}{KeyValuePairElement.ClosingMarker}{Parser.ElementClosingMarker}");
         }
         sb.Append(Delimiter.Closing);
         return sb.ToString();

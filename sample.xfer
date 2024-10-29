@@ -1,15 +1,15 @@
 <@
-version <"1.0.0">
-foo <"bar">
+<: version <"1.0.0"> :>
+<: foo <" bar "> :>
 @>
 
 <"Hello, "Xfer"">
-<"Xfer > Json">
-<"Json < Xfer">
+<" Xfer > Json ">
+<" Json < Xfer ">
 
 <{
-key<"value">
-foo<"bar">
-<"orange"><"New Black">
-<"Lady Marmalade"><"Patti LaBelle">
+    <: Lady_Marmalade <"Patti LaBelle"> :>
+    <: key <"value"> :>
+    <: foo <"bar"> :>
+    <: orange <"New Black"> :>
 }>

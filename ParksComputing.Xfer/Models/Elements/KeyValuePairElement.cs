@@ -6,21 +6,21 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 public class KeyValuePairElement : Element {
-    public const char OpeningMarker = '=';
+    public const char OpeningMarker = ':';
     public const char ClosingMarker = OpeningMarker;
 
     public Element KeyElement { get; set; }
     public string Key { get; }
     public Element Value { get; set; }
 
-    public KeyValuePairElement(Element key, Element value) : base("keyValuePair", new(OpeningMarker, ClosingMarker)) {
-        KeyElement = key;
-        Value = value;
+    public KeyValuePairElement(Element keyElement) : base("keyValuePair", new(OpeningMarker, ClosingMarker)) {
+        KeyElement = keyElement;
+        Value = new EmptyElement();
 
-        if (key is StringElement se) {
+        if (keyElement is StringElement se) {
             Key = se.Value;
-        } 
-        else if (key is KeywordElement ke) {
+        }
+        else if (keyElement is KeywordElement ke) {
             Key = ke.Value;
         }
         else {
@@ -28,7 +28,11 @@ public class KeyValuePairElement : Element {
         }
     }
 
+    public KeyValuePairElement(Element keyElement, Element value) : this(keyElement) {
+        Value = value;
+    }
+
     public override string ToString() {
-        return $"{KeyElement} {Value}";
+        return $"{Delimiter.Opening}{KeyElement} {Value}{Delimiter.Closing}";
     }
 }
