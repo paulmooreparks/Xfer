@@ -1,16 +1,16 @@
-<!!<!comment!>!!><@
-    <: version <"1.0.0"> :>
-    <: foo <" bar "> :>
-@>
+<! This is a sample Xfer document. !>
+<@ <: version <"1.0.0"> :> @>
 
-<""<"Xfer"> is an Xfer string element <!and this is an Xfer comment!>."">
-<"Hello, "Xfer" ">
+<"Hello, "Xfer"!">
 <" Xfer > Json ">
 <" Json < Xfer ">
 
+<! An example of embedding a string element and a comment inside an Xfer string. !>
+<""<"Xfer"> is an Xfer string element <!and this is an Xfer comment!>."">
+
+<!! A comment <! inside another comment !> !!>
+
 <{
-    <: Lady_Marmalade <"Patti LaBelle"> :>
     <: key <"value"> :>
-    <: foo <"bar"> :>
-    <: orange <"New Black"> :>
+    <: Orange <"New Black"> :>
 }>
