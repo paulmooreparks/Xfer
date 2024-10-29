@@ -1,9 +1,10 @@
-<@
-<: version <"1.0.0"> :>
-<: foo <" bar "> :>
+<!!<!comment!>!!><@
+    <: version <"1.0.0"> :>
+    <: foo <" bar "> :>
 @>
 
-<"Hello, "Xfer"">
+<""<"Xfer"> is an Xfer string element <!and this is an Xfer comment!>."">
+<"Hello, "Xfer" ">
 <" Xfer > Json ">
 <" Json < Xfer ">
 

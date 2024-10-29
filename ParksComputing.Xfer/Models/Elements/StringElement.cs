@@ -12,7 +12,7 @@ public class StringElement : Element {
 
     public string Value { get; set; } = string.Empty;
 
-    public StringElement(string text) : base("string", new(OpeningMarker, ClosingMarker)) { 
+    public StringElement(string text, int markerCount = 1) : base("string", new(OpeningMarker, ClosingMarker, markerCount)) { 
         Value = text;
     }
 

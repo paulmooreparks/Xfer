@@ -37,7 +37,9 @@ public class Parser {
 
     private char CurrentChar {
         get {
-            if (Position >= ScanString.Length) { return '\0'; }
+            if (Position >= ScanString.Length) { 
+                return '\0'; 
+            }
             return ScanString[Position];
         }
     }
@@ -92,18 +94,54 @@ public class Parser {
         UpdateRowColumn();
 
         if (CurrentChar == ElementOpeningMarker && Peek == CommentElement.OpeningMarker) {
+            int markerCount = 1;
             ++Position;
             ++CurrentColumn;
             ++Position;
             ++CurrentColumn;
 
+            while (CurrentChar == CommentElement.OpeningMarker) {
+                ++markerCount;
+                ++Position;
+                ++CurrentColumn;
+            }
+
             while (IsCharAvailable()) {
-                if (CurrentChar == CommentElement.OpeningMarker && Peek == ElementClosingMarker) {
-                    ++Position;
-                    ++CurrentColumn;
-                    ++Position;
-                    ++CurrentColumn;
-                    break;
+                if (CurrentChar == CommentElement.ClosingMarker) {
+                    int tmpMarkerCount = markerCount;
+                    --markerCount;
+
+                    if (Peek == ElementClosingMarker && markerCount == 0) {
+                        ++Position;
+                        ++CurrentColumn;
+                        ++Position;
+                        ++CurrentColumn;
+                        break;
+                    }
+
+                    bool commentClosed = false;
+
+                    while (markerCount > 0 && Peek == CommentElement.ClosingMarker) {
+                        ++Position;
+                        ++CurrentColumn;
+                        --markerCount;
+
+                        if (Peek == ElementClosingMarker && markerCount == 0) {
+                            ++Position;
+                            ++CurrentColumn;
+                            ++Position;
+                            ++CurrentColumn;
+                            commentClosed = true;
+                            break;
+                        }
+                    }
+
+                    if (commentClosed) {
+                        break;
+                    }
+                    else {
+                        markerCount = tmpMarkerCount;
+                    }
                 }
 
                 ++Position;
@@ -113,6 +151,56 @@ public class Parser {
 
         Start = Position;
         return CurrentChar;
+    }
+
+    internal bool ElementOpening(char openingMarker, out int markerCount) {
+        markerCount = 1;
+        if (CurrentChar == ElementOpeningMarker && Peek == openingMarker) {
+            Advance();
+            Advance();
+
+            while (CurrentChar == openingMarker) {
+                ++markerCount;
+                ++Position;
+                Start = Position;
+                ++CurrentColumn;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    internal bool ElementClosing(char closingMarker, int markerCount) {
+        if (CurrentChar == closingMarker) {
+            --markerCount;
+
+            if (Peek == ElementClosingMarker && markerCount == 0) {
+                Advance();
+                Advance();
+                SkipWhitespace();
+                return true;
+            }
+
+            int tmpPosition = Position;
+
+            while (markerCount > 0 && Peek == closingMarker) {
+                Advance();
+                --markerCount;
+
+                if (Peek == ElementClosingMarker && markerCount == 0) {
+                    Advance();
+                    Advance();
+                    SkipWhitespace();
+                    return true;
+                }
+            }
+
+            Position = tmpPosition;
+        }
+
+        return false;
     }
 
     private void SkipWhitespace() {
@@ -156,6 +244,9 @@ public class Parser {
         if (element is MetadataElement metadataElement) {
             document.Metadata = metadataElement;
         }
+        else {
+            document.Root.Add(element);
+        }
 
         while (IsCharAvailable()) {
             var content = ParseElement();
@@ -168,126 +259,141 @@ public class Parser {
 
     internal Element ParseElement() {
         SkipWhitespace();
+
         while (IsCharAvailable()) {
-            if (ElementOpening(StringElement.OpeningMarker)) {
-                string value = CurrentString;
+            {
+                if (ElementOpening(StringElement.OpeningMarker, out int markerCount)) {
+                    string value = CurrentString;
 
-                while (IsCharAvailable()) {
-                    if (ElementClosing(StringElement.ClosingMarker)) {
-                        return new StringElement(value);
-                    }
+                    while (IsCharAvailable()) {
+                        if (ElementClosing(StringElement.ClosingMarker, markerCount)) {
+                            return new StringElement(value, markerCount);
+                        }
 
-                    value = CurrentString;
-                    Expand();
-                }
-            }
-
-            if (ElementOpening(KeyValuePairElement.OpeningMarker)) {
-                SkipWhitespace();
-                while (Peek.IsKeywordChar()) {
-                    Expand();
-                }
-
-                if (string.IsNullOrEmpty(CurrentString)) {
-                    throw new InvalidOperationException("Key must be a non-empty string.");
-                }
-
-                var keyElement = new KeywordElement(CurrentString);
-                Advance();
-                SkipWhitespace();
-
-                var keyValuePairElement = new KeyValuePairElement(keyElement);
-
-                while (IsCharAvailable()) {
-                    if (ElementClosing(KeyValuePairElement.ClosingMarker)) {
-                        return keyValuePairElement;
-                    }
-
-                    Element valueElement = ParseElement();
-                    keyValuePairElement.Value = valueElement;
-                }
-            }
-            
-            if (ElementOpening(PropertyBagElement.OpeningMarker)) {
-                SkipWhitespace();
-                var propBagElement = new PropertyBagElement();
-
-                while (IsCharAvailable()) {
-                    if (ElementClosing(PropertyBagElement.ClosingMarker)) {
-                        return propBagElement;
-                    }
-
-                    var element = ParseElement();
-                    propBagElement.Add(element);
-                }
-            }
-            
-            if (ElementOpening(MetadataElement.OpeningMarker)) {
-                SkipWhitespace();
-                var metadataElement = new MetadataElement();
-
-                while (IsCharAvailable()) {
-                    if (ElementClosing(MetadataElement.ClosingMarker)) {
-                        return metadataElement;
-                    }
-
-                    var element = ParseElement();
-
-                    if (element is KeyValuePairElement kvp) {
-                        metadataElement.AddOrUpdate(kvp);
-                    }
-                    else {
-                        throw new InvalidOperationException("Unexpected element type");
+                        value = CurrentString;
+                        Expand();
                     }
                 }
             }
-            
-            if (ElementOpening(ObjectElement.OpeningMarker)) {
-                SkipWhitespace();
-                var objectElement = new ObjectElement();
 
-                while (IsCharAvailable()) {
-                    if (ElementClosing(ObjectElement.ClosingMarker)) {
-                        return objectElement;
+            {
+                if (ElementOpening(KeyValuePairElement.OpeningMarker, out int markerCount)) {
+                    SkipWhitespace();
+                    while (Peek.IsKeywordChar()) {
+                        Expand();
                     }
 
-                    var element = ParseElement();
-
-                    if (element is KeyValuePairElement kvp) {
-                        objectElement.AddOrUpdate(kvp);
-                    }
-                    else {
-                        throw new InvalidOperationException("Unexpected element type");
-                    }
-                }
-            }
-            
-            if (ElementOpening(ArrayElement.OpeningMarker)) {
-                SkipWhitespace();
-                var arrayElement = new ArrayElement();
-
-                while (IsCharAvailable()) {
-                    if (ElementClosing(ArrayElement.ClosingMarker)) {
-                        return arrayElement;
+                    if (string.IsNullOrEmpty(CurrentString)) {
+                        throw new InvalidOperationException("Key must be a non-empty string.");
                     }
 
-                    var element = ParseElement();
-                    arrayElement.Add(element);
-                }
-            }
-
-            if (ElementOpening(CommentElement.OpeningMarker)) {
-                SkipWhitespace();
-
-                while (IsCharAvailable()) {
-                    if (ElementClosing(CommentElement.ClosingMarker)) {
-                        break;
-                    }
-
+                    var keyElement = new KeywordElement(CurrentString);
                     Advance();
-                }
+                    SkipWhitespace();
 
-                continue;
+                    var keyValuePairElement = new KeyValuePairElement(keyElement);
+
+                    while (IsCharAvailable()) {
+                        if (ElementClosing(KeyValuePairElement.ClosingMarker, markerCount)) {
+                            return keyValuePairElement;
+                        }
+
+                        Element valueElement = ParseElement();
+                        keyValuePairElement.Value = valueElement;
+                    }
+                }
+            }
+
+            {
+                if (ElementOpening(PropertyBagElement.OpeningMarker, out int markerCount)) {
+                    SkipWhitespace();
+                    var propBagElement = new PropertyBagElement();
+
+                    while (IsCharAvailable()) {
+                        if (ElementClosing(PropertyBagElement.ClosingMarker, markerCount)) {
+                            return propBagElement;
+                        }
+
+                        var element = ParseElement();
+                        propBagElement.Add(element);
+                    }
+                }
+            }
+
+            {
+                if (ElementOpening(MetadataElement.OpeningMarker, out int markerCount)) {
+                    SkipWhitespace();
+                    var metadataElement = new MetadataElement();
+
+                    while (IsCharAvailable()) {
+                        if (ElementClosing(MetadataElement.ClosingMarker, markerCount)) {
+                            return metadataElement;
+                        }
+
+                        var element = ParseElement();
+
+                        if (element is KeyValuePairElement kvp) {
+                            metadataElement.AddOrUpdate(kvp);
+                        }
+                        else {
+                            throw new InvalidOperationException("Unexpected element type");
+                        }
+                    }
+                }
+            }
+
+            {
+                if (ElementOpening(ObjectElement.OpeningMarker, out int markerCount)) {
+                    SkipWhitespace();
+                    var objectElement = new ObjectElement();
+
+                    while (IsCharAvailable()) {
+                        if (ElementClosing(ObjectElement.ClosingMarker, markerCount)) {
+                            return objectElement;
+                        }
+
+                        var element = ParseElement();
+
+                        if (element is KeyValuePairElement kvp) {
+                            objectElement.AddOrUpdate(kvp);
+                        }
+                        else {
+                            throw new InvalidOperationException("Unexpected element type");
+                        }
+                    }
+                }
+            }
+
+            {
+                if (ElementOpening(ArrayElement.OpeningMarker, out int markerCount)) {
+                    SkipWhitespace();
+                    var arrayElement = new ArrayElement();
+
+                    while (IsCharAvailable()) {
+                        if (ElementClosing(ArrayElement.ClosingMarker, markerCount)) {
+                            return arrayElement;
+                        }
+
+                        var element = ParseElement();
+                        arrayElement.Add(element);
+                    }
+                }
+            }
+
+            {
+                if (ElementOpening(CommentElement.OpeningMarker, out int markerCount)) {
+                    SkipWhitespace();
+
+                    while (IsCharAvailable()) {
+                        if (ElementClosing(CommentElement.ClosingMarker, markerCount)) {
+                            break;
+                        }
+
+                        Advance();
+                    }
+
+                    continue;
+                }
             }
 
             throw new InvalidOperationException($"Expected element at row {CurrentRow}, column {CurrentColumn}.");
@@ -325,27 +431,6 @@ public class Parser {
             return element;
         }
 #endif
-    }
-
-    internal bool ElementOpening(char openingMarker) {
-        if (CurrentChar == ElementOpeningMarker && Peek == openingMarker) {
-            Advance();
-            Advance();
-            return true;
-        }
-
-        return false;
-    }
-
-    internal bool ElementClosing(char closingMarker) {
-        if (CurrentChar == closingMarker && Peek == ElementClosingMarker) {
-            Advance();
-            Advance();
-            SkipWhitespace();
-            return true;
-        }
-
-        return false;
     }
 
 }
