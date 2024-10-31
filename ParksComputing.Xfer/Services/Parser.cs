@@ -58,6 +58,13 @@ public class Parser {
         }
     }
 
+    private char PreviousChar {
+        get {
+            if (Position - 1 < 0) { return '\0'; }
+            return ScanString[Position - 1];
+        }
+    }
+
     private string Remaining {
         get {
             if (Position >= ScanString.Length) { return string.Empty; }
@@ -69,23 +76,19 @@ public class Parser {
     private int CurrentColumn { get; set; } = 1;
 
     private void UpdateRowColumn() {
-        if (CurrentChar == '\n') // Unix/Linux and macOS line ending (LF)
-        {
-            CurrentRow++;
+        if (CurrentChar == '\n') {
+            if (PreviousChar != '\r') {
+                CurrentRow++;
+            }
+
             CurrentColumn = 1;
         }
-        else if (CurrentChar == '\r') // Windows line ending (CR)
-        {
-            // Check for the next character to handle \r\n correctly (Windows CRLF)
-            if (Peek == '\n') {
-                ++Position;
-                ++Position;
-            }
+        else if (CurrentChar == '\r') {
             CurrentRow++;
             CurrentColumn = 1;
         }
         else {
-            ++CurrentColumn;
+            CurrentColumn++;
         }
     }
 
@@ -153,17 +156,15 @@ public class Parser {
         return CurrentChar;
     }
 
-    internal bool ElementOpening(char openingMarker, out int markerCount) {
-        markerCount = 1;
+    internal bool ElementOpening(char openingMarker, ref int markerCount) {
         if (CurrentChar == ElementOpeningMarker && Peek == openingMarker) {
+            markerCount = 1;
             Advance();
             Advance();
 
             while (CurrentChar == openingMarker) {
                 ++markerCount;
-                ++Position;
-                Start = Position;
-                ++CurrentColumn;
+                Advance();
             }
 
             return true;
@@ -179,7 +180,6 @@ public class Parser {
             if (Peek == ElementClosingMarker && markerCount == 0) {
                 Advance();
                 Advance();
-                SkipWhitespace();
                 return true;
             }
 
@@ -192,7 +192,6 @@ public class Parser {
                 if (Peek == ElementClosingMarker && markerCount == 0) {
                     Advance();
                     Advance();
-                    SkipWhitespace();
                     return true;
                 }
             }
@@ -219,6 +218,7 @@ public class Parser {
     private bool IsCharAvailable() => CurrentChar != '\0';
 
     private bool IsKeywordChar(char c) {
+        /* We may want to add more characters to this list. */
         return char.IsLetterOrDigit(c) | c == '_' | c == '-';
     }
 
@@ -227,7 +227,6 @@ public class Parser {
             throw new ArgumentNullException(nameof(input));
         }
 
-        // Convert byte array to string using the specified encoding
         ScanString = Encoding.GetString(input);
 
         if (CurrentChar == '\0') {
@@ -261,176 +260,244 @@ public class Parser {
         SkipWhitespace();
 
         while (IsCharAvailable()) {
-            {
-                if (ElementOpening(StringElement.OpeningMarker, out int markerCount)) {
-                    string value = CurrentString;
+            int markerCount = 1;
 
-                    while (IsCharAvailable()) {
-                        if (ElementClosing(StringElement.ClosingMarker, markerCount)) {
-                            return new StringElement(value, markerCount);
-                        }
-
-                        value = CurrentString;
-                        Expand();
-                    }
-                }
+            if (ElementOpening(StringElement.OpeningMarker, ref markerCount)) {
+                var stringElement = ParseStringElement(markerCount);
+                SkipWhitespace();
+                return stringElement;
             }
 
-            {
-                if (ElementOpening(KeyValuePairElement.OpeningMarker, out int markerCount)) {
-                    SkipWhitespace();
-                    while (Peek.IsKeywordChar()) {
-                        Expand();
-                    }
-
-                    if (string.IsNullOrEmpty(CurrentString)) {
-                        throw new InvalidOperationException("Key must be a non-empty string.");
-                    }
-
-                    var keyElement = new KeywordElement(CurrentString);
-                    Advance();
-                    SkipWhitespace();
-
-                    var keyValuePairElement = new KeyValuePairElement(keyElement);
-
-                    while (IsCharAvailable()) {
-                        if (ElementClosing(KeyValuePairElement.ClosingMarker, markerCount)) {
-                            return keyValuePairElement;
-                        }
-
-                        Element valueElement = ParseElement();
-                        keyValuePairElement.Value = valueElement;
-                    }
-                }
+            if (ElementOpening(CharacterElement.OpeningMarker, ref markerCount)) {
+                var characterElement = ParseCharacterElement(markerCount);
+                SkipWhitespace();
+                return characterElement;
             }
 
-            {
-                if (ElementOpening(PropertyBagElement.OpeningMarker, out int markerCount)) {
-                    SkipWhitespace();
-                    var propBagElement = new PropertyBagElement();
-
-                    while (IsCharAvailable()) {
-                        if (ElementClosing(PropertyBagElement.ClosingMarker, markerCount)) {
-                            return propBagElement;
-                        }
-
-                        var element = ParseElement();
-                        propBagElement.Add(element);
-                    }
-                }
+            if (ElementOpening(KeyValuePairElement.OpeningMarker, ref markerCount)) {
+                var keyValuePairElement = ParseKeyValuePairElement(markerCount);
+                SkipWhitespace();
+                return keyValuePairElement;
             }
 
-            {
-                if (ElementOpening(MetadataElement.OpeningMarker, out int markerCount)) {
-                    SkipWhitespace();
-                    var metadataElement = new MetadataElement();
-
-                    while (IsCharAvailable()) {
-                        if (ElementClosing(MetadataElement.ClosingMarker, markerCount)) {
-                            return metadataElement;
-                        }
-
-                        var element = ParseElement();
-
-                        if (element is KeyValuePairElement kvp) {
-                            metadataElement.AddOrUpdate(kvp);
-                        }
-                        else {
-                            throw new InvalidOperationException("Unexpected element type");
-                        }
-                    }
-                }
+            if (ElementOpening(PropertyBagElement.OpeningMarker, ref markerCount)) {
+                var propertyBagElement = ParsePropertyBagElement(markerCount);
+                SkipWhitespace();
+                return propertyBagElement;
             }
 
-            {
-                if (ElementOpening(ObjectElement.OpeningMarker, out int markerCount)) {
-                    SkipWhitespace();
-                    var objectElement = new ObjectElement();
-
-                    while (IsCharAvailable()) {
-                        if (ElementClosing(ObjectElement.ClosingMarker, markerCount)) {
-                            return objectElement;
-                        }
-
-                        var element = ParseElement();
-
-                        if (element is KeyValuePairElement kvp) {
-                            objectElement.AddOrUpdate(kvp);
-                        }
-                        else {
-                            throw new InvalidOperationException("Unexpected element type");
-                        }
-                    }
-                }
+            if (ElementOpening(MetadataElement.OpeningMarker, ref markerCount)) {
+                var metadataElement = ParseMetadataElement(markerCount);
+                SkipWhitespace();
+                return metadataElement;
             }
 
-            {
-                if (ElementOpening(ArrayElement.OpeningMarker, out int markerCount)) {
-                    SkipWhitespace();
-                    var arrayElement = new ArrayElement();
-
-                    while (IsCharAvailable()) {
-                        if (ElementClosing(ArrayElement.ClosingMarker, markerCount)) {
-                            return arrayElement;
-                        }
-
-                        var element = ParseElement();
-                        arrayElement.Add(element);
-                    }
-                }
+            if (ElementOpening(ObjectElement.OpeningMarker, ref markerCount)) {
+                var objectElement = ParseObjectElement(markerCount);
+                SkipWhitespace();
+                return objectElement;
             }
 
-            {
-                if (ElementOpening(CommentElement.OpeningMarker, out int markerCount)) {
-                    SkipWhitespace();
+            if (ElementOpening(ArrayElement.OpeningMarker, ref markerCount)) {
+                var arrayElement = ParseArrayElement(markerCount);
+                SkipWhitespace();
+                return arrayElement;
+            }
 
-                    while (IsCharAvailable()) {
-                        if (ElementClosing(CommentElement.ClosingMarker, markerCount)) {
-                            break;
-                        }
-
-                        Advance();
-                    }
-
-                    continue;
-                }
+            if (ElementOpening(CommentElement.OpeningMarker, ref markerCount)) {
+                // Parse comment but don't return it, as comments are not part of the logical output.
+                ParseCommentElement(markerCount);
+                SkipWhitespace();
+                continue;
             }
 
             throw new InvalidOperationException($"Expected element at row {CurrentRow}, column {CurrentColumn}.");
         }
 
         return new EmptyElement();
-
-#if false
-        if (char.IsDigit(CurrentChar) || CurrentChar.ToString() == NumberFormatInfo.CurrentInfo.NumberDecimalSeparator) {
-            while (char.IsDigit(Peek) || Peek.ToString() == NumberFormatInfo.CurrentInfo.NumberDecimalSeparator) {
-                Expand();
-            }
-
-            if (double.TryParse(CurrentString, out double doubleValue)) {
-                var element = new DoubleElement(doubleValue);
-                return element;
-            }
-            else if (int.TryParse(CurrentString, out int intValue)) {
-                var element = new IntegerElement(intValue);
-                return element;
-            }
-        }
-        else if (IsIdentifierChar(CurrentChar)) {
-            while (IsIdentifierChar(Peek)) {
-                Expand();
-            }
-
-            TokenType tokenType;
-
-            if (!IsKeyword(CurrentString, out tokenType)) {
-                tokenType = TokenType.Identifier;
-            }
-
-            var element = new KeywordElement(CurrentString, tokenType);
-            return element;
-        }
-#endif
     }
 
+    private void ParseCommentElement(int markerCount) {
+        while (IsCharAvailable()) {
+            if (ElementClosing(CommentElement.ClosingMarker, markerCount)) {
+                break;
+            }
+
+            Advance();
+        }
+    }
+
+    private ArrayElement ParseArrayElement(int markerCount) {
+        SkipWhitespace();
+        var arrayElement = new ArrayElement();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(ArrayElement.ClosingMarker, markerCount)) {
+                return arrayElement;
+            }
+
+            var element = ParseElement();
+            arrayElement.Add(element);
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {ArrayElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private ObjectElement ParseObjectElement(int markerCount) {
+        SkipWhitespace();
+        var objectElement = new ObjectElement();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(ObjectElement.ClosingMarker, markerCount)) {
+                return objectElement;
+            }
+
+            var element = ParseElement();
+
+            if (element is KeyValuePairElement kvp) {
+                objectElement.AddOrUpdate(kvp);
+            }
+            else {
+                throw new InvalidOperationException("Unexpected element type");
+            }
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {ObjectElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private MetadataElement ParseMetadataElement(int markerCount) {
+        SkipWhitespace();
+        var metadataElement = new MetadataElement();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(MetadataElement.ClosingMarker, markerCount)) {
+                return metadataElement;
+            }
+
+            var element = ParseElement();
+
+            if (element is KeyValuePairElement kvp) {
+                metadataElement.AddOrUpdate(kvp);
+            }
+            else {
+                throw new InvalidOperationException("Unexpected element type");
+            }
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {MetadataElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private PropertyBagElement ParsePropertyBagElement(int markerCount) {
+        SkipWhitespace();
+        var propBagElement = new PropertyBagElement();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(PropertyBagElement.ClosingMarker, markerCount)) {
+                return propBagElement;
+            }
+
+            var element = ParseElement();
+            propBagElement.Add(element);
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {PropertyBagElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private KeyValuePairElement ParseKeyValuePairElement(int markerCount) {
+        SkipWhitespace();
+        while (Peek.IsKeywordChar()) {
+            Expand();
+        }
+
+        if (string.IsNullOrEmpty(CurrentString)) {
+            throw new InvalidOperationException("Key must be a non-empty string.");
+        }
+
+        var keyElement = new KeywordElement(CurrentString);
+        Advance();
+        SkipWhitespace();
+
+        var keyValuePairElement = new KeyValuePairElement(keyElement);
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(KeyValuePairElement.ClosingMarker, markerCount)) {
+                return keyValuePairElement;
+            }
+
+            Element valueElement = ParseElement();
+            keyValuePairElement.Value = valueElement;
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {KeywordElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    /* 
+    The following two methods need a LOT of work to handle the vagaries of Unicode. 
+    I'm just trying to get through the basic scenarios first.
+    */
+
+    private CharacterElement ParseCharacterElement(int markerCount) {
+        StringBuilder charContent = new();
+
+        while (IsCharAvailable() && !ElementClosing(CharacterElement.ClosingMarker, markerCount)) {
+            charContent.Append(CurrentChar);
+            Advance();
+        }
+
+        string charString = charContent.ToString();
+
+        // Determine if it's a keyword or a hexadecimal value
+        if (charString.StartsWith("$")) {
+            // Hexadecimal value, e.g., <\$2764\>
+            string hexValue = charString.Substring(1);
+            if (int.TryParse(hexValue, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int codePoint)) {
+                char character = (char)codePoint;
+                return new CharacterElement(character);
+            }
+            else {
+                throw new InvalidOperationException($"Invalid hexadecimal value '{hexValue}' at row {CurrentRow}, column {CurrentColumn}.");
+            }
+        }
+        else {
+            return charString switch {
+                "nl" => new CharacterElement('\n'),
+                "cr" => new CharacterElement('\r'),
+                "tab" => new CharacterElement('\t'),
+                "vtab" => new CharacterElement('\v'),
+                "bksp" => new CharacterElement('\b'),
+                "ff" => new CharacterElement('\f'),
+                "nul" => new CharacterElement('\0'),
+                "bel" => new CharacterElement('\a'),
+                "quote" => new CharacterElement('"'),
+                "apos" => new CharacterElement('\''),
+                "backslash" => new CharacterElement('\\'),
+                "lt" => new CharacterElement('<'),
+                "gt" => new CharacterElement('>'),
+                _ => throw new InvalidOperationException($"Unknown character keyword '{charString}' at row {CurrentRow}, column {CurrentColumn}.")
+            };
+        }
+    }
+
+    private StringElement ParseStringElement(int markerCount) {
+        StringBuilder valueBuilder = new StringBuilder();
+        int embeddedMarkerCount = 1;
+
+        while (IsCharAvailable()) {
+            if (ElementOpening(CharacterElement.OpeningMarker, ref embeddedMarkerCount)) {
+                CharacterElement characterElement = ParseCharacterElement(embeddedMarkerCount);
+                valueBuilder.Append(characterElement.Value);
+                continue;
+            }
+
+            if (ElementClosing(StringElement.ClosingMarker, markerCount)) {
+                return new StringElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        // Handle the case where the closing marker is not found (error)
+        throw new InvalidOperationException($"Unexpected end of string element at row {CurrentRow}, column {CurrentColumn}.");
+    }
 }

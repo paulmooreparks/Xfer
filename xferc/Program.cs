@@ -1,4 +1,5 @@
-﻿using Cliffer;
+﻿using System.Text;
+using Cliffer;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,8 +28,8 @@ internal class XfercProgram {
 
     static async Task<int> Main(string[] args) {
         var cli = new ClifferBuilder()
-            .ConfigureAppConfiguration((configurationBuiler) => {
-                configurationBuiler.AddJsonFile(_configFilePath, true);
+            .ConfigureAppConfiguration((configurationBuilder) => {
+                configurationBuilder.AddJsonFile(_configFilePath, true);
             })
             .ConfigureServices(services => {
                 services.AddSingleton<PersistenceService>();
@@ -40,6 +41,8 @@ internal class XfercProgram {
         ClifferEventHandler.OnExit += () => {
             var persistenceService = Utility.GetService<PersistenceService>()!;
         };
+
+        Console.OutputEncoding = Encoding.UTF8;
 
         return await cli.RunAsync(args);
     }

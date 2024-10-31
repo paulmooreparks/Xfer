@@ -5,6 +5,7 @@ using ParksComputing.Xfer.Extensions;
 namespace ParksComputing.Xfer.Models.Elements;
 
 public class ObjectElement : Element {
+    public static readonly string ElementName = "object";
     public const char OpeningMarker = '{';
     public const char ClosingMarker = '}';
 
@@ -20,7 +21,7 @@ public class ObjectElement : Element {
         }
     }
 
-    public ObjectElement() : base("object", new(OpeningMarker, ClosingMarker)) { }
+    public ObjectElement() : base(ElementName, new(OpeningMarker, ClosingMarker)) { }
 
     private void SetOrUpdateValue<TElement>(string key, TElement element) where TElement : Element {
         if (_values.TryGetValue(key, out Tuple<Element, Element>? tuple)) {

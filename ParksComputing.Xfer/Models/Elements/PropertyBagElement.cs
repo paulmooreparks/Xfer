@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace ParksComputing.Xfer.Models.Elements;
 
 public class PropertyBagElement : Element {
+    public static readonly string ElementName = "propertyBag";
     public const char OpeningMarker = '(';
     public const char ClosingMarker = ')';
 
@@ -18,7 +19,7 @@ public class PropertyBagElement : Element {
         } 
     }
 
-    public PropertyBagElement() : base("propertyBag", new(OpeningMarker, ClosingMarker)) { }
+    public PropertyBagElement() : base(ElementName, new(OpeningMarker, ClosingMarker)) { }
 
     public PropertyBagElement(IEnumerable<Element> values) : this() {
         _items.AddRange(values);

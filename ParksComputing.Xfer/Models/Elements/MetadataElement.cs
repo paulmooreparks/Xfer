@@ -6,8 +6,10 @@ using ParksComputing.Xfer.Services;
 namespace ParksComputing.Xfer.Models.Elements;
 
 public class MetadataElement : Element {
+    public static readonly string ElementName = "metadata";
     public const char OpeningMarker = '@';
     public const char ClosingMarker = OpeningMarker;
+    public static readonly string DefaultVersion = "1.0.0";
 
     private Dictionary<string, Tuple<Element, Element>> _values = new ();
     public IReadOnlyDictionary<string, Tuple<Element, Element>> Values => _values;
@@ -79,10 +81,10 @@ public class MetadataElement : Element {
         }
     }
 
-    public MetadataElement() : this(string.Empty) {
+    public MetadataElement() : this(DefaultVersion) {
     }
 
-    public MetadataElement(string version) : base("metadata", new(OpeningMarker, ClosingMarker)) {
+    public MetadataElement(string version) : base(ElementName, new(OpeningMarker, ClosingMarker)) {
         Version = version;
     }
 

@@ -7,5 +7,6 @@ using System.Threading.Tasks;
 namespace ParksComputing.Xfer.Models.Elements;
 
 public class EmptyElement : Element {
-    public EmptyElement() : base("empty", new('\0', '\0')) { }
+    public static readonly string ElementName = "empty";
+    public EmptyElement() : base(ElementName, new('\0', '\0')) { }
 }

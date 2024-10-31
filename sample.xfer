@@ -1,12 +1,15 @@
 <! This is a sample Xfer document. !>
 <@ <: version <"1.0.0"> :> @>
 
-<"Hello, "Xfer"!">
+<"Hello, Xfer!">
 <" Xfer > Json ">
 <" Json < Xfer ">
+<" I <\$2764\> Xfer ">
 
 <! An example of embedding a string element and a comment inside an Xfer string. !>
-<""<"Xfer"> is an Xfer string element <!and this is an Xfer comment!>."">
+<""
+<"Xfer"> is an Xfer string element <!and this is an Xfer comment!>.
+"">
 
 <!! A comment <! inside another comment !> !!>
 
@@ -14,3 +17,14 @@
     <: key <"value"> :>
     <: Orange <"New Black"> :>
 }>
+
+<"
+/* Now it's possible to embed code with less worry */
+namespace HelloWorldApp;
+
+class Program {
+    static void Main(string[] args) {
+        Console.WriteLine("Hello, Xfer!");
+    }
+}
+">

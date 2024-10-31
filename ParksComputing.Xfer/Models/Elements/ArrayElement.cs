@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace ParksComputing.Xfer.Models.Elements;
 
 public class ArrayElement : Element {
+    public static readonly string ElementName = "array";
     public const char OpeningMarker = '[';
     public const char ClosingMarker = ']';
 
@@ -33,7 +34,7 @@ public class ArrayElement : Element {
         }
     }
 
-    public ArrayElement() : base("array", new(OpeningMarker, ClosingMarker)) { }
+    public ArrayElement() : base(ElementName, new(OpeningMarker, ClosingMarker)) { }
 
     public ArrayElement(IEnumerable<Element> values) : this() {
         _items.AddRange(values);
