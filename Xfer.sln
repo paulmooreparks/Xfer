@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
+		rowcoltest.xfer = rowcoltest.xfer
 		sample.xfer = sample.xfer
 		spec.xfer = spec.xfer
 		xfer.bnf.txt = xfer.bnf.txt
@@ -14,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.Xfer", "ParksComputing.Xfer\ParksComputing.Xfer.csproj", "{AA9F7D57-6494-4294-8451-B0B2F8AA1FF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xferc", "xferc\xferc.csproj", "{0812F3D3-4597-44FE-B034-1C7A98593D77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "xferc", "xferc\xferc.csproj", "{0812F3D3-4597-44FE-B034-1C7A98593D77}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

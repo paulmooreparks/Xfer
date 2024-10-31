@@ -81,11 +81,11 @@ public class Parser {
                 CurrentRow++;
             }
 
-            CurrentColumn = 1;
+            CurrentColumn = 0;
         }
         else if (CurrentChar == '\r') {
             CurrentRow++;
-            CurrentColumn = 1;
+            CurrentColumn = 0;
         }
         else {
             CurrentColumn++;
@@ -99,14 +99,14 @@ public class Parser {
         if (CurrentChar == ElementOpeningMarker && Peek == CommentElement.OpeningMarker) {
             int markerCount = 1;
             ++Position;
-            ++CurrentColumn;
+            UpdateRowColumn();
             ++Position;
-            ++CurrentColumn;
+            UpdateRowColumn();
 
             while (CurrentChar == CommentElement.OpeningMarker) {
                 ++markerCount;
                 ++Position;
-                ++CurrentColumn;
+                UpdateRowColumn();
             }
 
             while (IsCharAvailable()) {
@@ -116,9 +116,9 @@ public class Parser {
 
                     if (Peek == ElementClosingMarker && markerCount == 0) {
                         ++Position;
-                        ++CurrentColumn;
+                        UpdateRowColumn();
                         ++Position;
-                        ++CurrentColumn;
+                        UpdateRowColumn();
                         break;
                     }
 
@@ -126,14 +126,14 @@ public class Parser {
 
                     while (markerCount > 0 && Peek == CommentElement.ClosingMarker) {
                         ++Position;
-                        ++CurrentColumn;
+                        UpdateRowColumn();
                         --markerCount;
 
                         if (Peek == ElementClosingMarker && markerCount == 0) {
                             ++Position;
-                            ++CurrentColumn;
+                            UpdateRowColumn();
                             ++Position;
-                            ++CurrentColumn;
+                            UpdateRowColumn();
                             commentClosed = true;
                             break;
                         }
@@ -446,7 +446,6 @@ public class Parser {
 
         string charString = charContent.ToString();
 
-        // Determine if it's a keyword or a hexadecimal value
         if (charString.StartsWith("$")) {
             // Hexadecimal value, e.g., <\$2764\>
             string hexValue = charString.Substring(1);
@@ -458,15 +457,40 @@ public class Parser {
                 throw new InvalidOperationException($"Invalid hexadecimal value '{hexValue}' at row {CurrentRow}, column {CurrentColumn}.");
             }
         }
+        else if (charString.StartsWith("#")) {
+            // Integer value, e.g., <\#65\>
+            string intValue = charString.Substring(1);
+            if (int.TryParse(intValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out int codePoint)) {
+                char character = (char)codePoint;
+                return new CharacterElement(character);
+            }
+            else {
+                throw new InvalidOperationException($"Invalid integer value '{intValue}' at row {CurrentRow}, column {CurrentColumn}.");
+            }
+        }
+        else if (charString.StartsWith("%")) {
+            // Binary value, e.g., <\%01000001\> (which represents 'A')
+            string binaryValue = charString.Substring(1);
+            try {
+                int codePoint = Convert.ToInt32(binaryValue, 2);
+                char character = (char)codePoint;
+                return new CharacterElement(character);
+            }
+            catch (FormatException) {
+                throw new InvalidOperationException($"Invalid binary value '{binaryValue}' at row {CurrentRow}, column {CurrentColumn}.");
+            }
+        }
         else {
-            return charString switch {
-                "nl" => new CharacterElement('\n'),
+            // Keyword, e.g., <\nl\> for newline
+            return charString.ToLower() switch {
+                "nul" => new CharacterElement('\0'),
                 "cr" => new CharacterElement('\r'),
+                "lf" => new CharacterElement('\n'),
+                "nl" => new CharacterElement('\n'),
                 "tab" => new CharacterElement('\t'),
                 "vtab" => new CharacterElement('\v'),
                 "bksp" => new CharacterElement('\b'),
                 "ff" => new CharacterElement('\f'),
-                "nul" => new CharacterElement('\0'),
                 "bel" => new CharacterElement('\a'),
                 "quote" => new CharacterElement('"'),
                 "apos" => new CharacterElement('\''),
@@ -480,9 +504,10 @@ public class Parser {
 
     private StringElement ParseStringElement(int markerCount) {
         StringBuilder valueBuilder = new StringBuilder();
-        int embeddedMarkerCount = 1;
 
         while (IsCharAvailable()) {
+            int embeddedMarkerCount = 1;
+
             if (ElementOpening(CharacterElement.OpeningMarker, ref embeddedMarkerCount)) {
                 CharacterElement characterElement = ParseCharacterElement(embeddedMarkerCount);
                 valueBuilder.Append(characterElement.Value);
