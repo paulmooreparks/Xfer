@@ -6,22 +6,27 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class DoubleElement : Element {
-    public static readonly string ElementName = "double";
-    public const char OpeningMarker = '*';
+public class BinaryElement : Element {
+    public static readonly string ElementName = "binary";
+    public const char OpeningMarker = '%';
     public const char ClosingMarker = OpeningMarker;
 
-    public double Value { get; set; }
+    public long Value { get; set; }
 
-    public DoubleElement(double value)
+    public BinaryElement(int value)
         : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
         Value = value;
+    }
+
+    public BinaryElement(byte[] bytes)
+        : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
+        Value = BitConverter.ToInt64(bytes, 0);
     }
 
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        sb.Append(Value);
+        sb.Append(Convert.ToString(Value, 2));
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }

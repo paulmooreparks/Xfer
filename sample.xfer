@@ -13,12 +13,23 @@
 
 <!! A comment <! inside another comment !> !!>
 
+<"A string may contain character elements<\$20\>inside of it, which will be parsed.">
+<.When character elements are inside a literal<\$20\>element, they are not parsed.>
+
 <{
-    <: key <"value"> :>
-    <: Orange <"New Black"> :>
+    <: string <"value"> :>
+    <: boolean <~true~> :>
+    <: integer <#42#> :>
+    <: long <+5000000000+> :>
+    <: hexInteger <+ $BAADF00D +> :>
+    <: binaryInteger <# %10101010 #> :>
+    <: float <^3.14^> :>
+    <: double <^3.14159^> :>
+    <: decimal <*3.14159*> :>
+    <: date <&2019-01-01&> :>
 }>
 
-<"
+<.
 /* Now it's possible to embed code with less worry */
 namespace HelloWorldApp;
 
@@ -27,4 +38,4 @@ class Program {
         Console.WriteLine("Hello, Xfer!");
     }
 }
-">
+.>

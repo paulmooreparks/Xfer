@@ -11,9 +11,18 @@ public class IntegerElement : Element {
     public const char OpeningMarker = '#';
     public const char ClosingMarker = OpeningMarker;
 
-    public int Value { get; set; } = 0;
+    public int Value { get; set; }
 
-    public IntegerElement(int value) : base(ElementName, new(OpeningMarker, ClosingMarker)) { 
+    public IntegerElement(int value)
+        : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
         Value = value;
+    }
+
+    public override string ToString() {
+        var sb = new StringBuilder();
+        sb.Append(Delimiter.Opening);
+        sb.Append(Value);
+        sb.Append(Delimiter.Closing);
+        return sb.ToString();
     }
 }

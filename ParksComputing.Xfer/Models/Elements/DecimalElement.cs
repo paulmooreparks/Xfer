@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class DoubleElement : Element {
-    public static readonly string ElementName = "double";
+public class DecimalElement : Element {
+    public static readonly string ElementName = "decimal";
     public const char OpeningMarker = '*';
     public const char ClosingMarker = OpeningMarker;
 
-    public double Value { get; set; }
+    public decimal Value { get; set; }
 
-    public DoubleElement(double value)
+    public DecimalElement(decimal value)
         : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
         Value = value;
     }

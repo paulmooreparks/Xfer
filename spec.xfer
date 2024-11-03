@@ -105,10 +105,16 @@ the string to be encoded or a property bag of values to be composed into a strin
 <:string <"The computer science professor said, "Strings are troublesome."">:>
 <:stringDefaultUtf8 <"The computer science professor said, "Strings are troublesome."">:>
 
-<:character <\2764\>:>
-<:decimal <*123*>:>
+<:character 
+    <{
+        <\$2764\>
+        <\#10084\>
+        <\%10011101001100\>
+    }>
+:>
+<:decimal <*123.45*>:>
 <:integer <#123#>:>
-<:floatingPoint <^123.45^>:>
+<:double <^123.45^>:>
 <:binary <%1010%>:>
 <:hexadecimal <$FF$>:>
 <:isoDateTime <|2021-12-31T00:00:00.000|>:>

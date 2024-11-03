@@ -10,7 +10,7 @@ namespace ParksComputing.Xfer.Services;
 public class Parser {
     public Parser() : this(Encoding.UTF8) { }
 
-    public Parser(Encoding encoding) { 
+    public Parser(Encoding encoding) {
         Encoding = encoding;
     }
 
@@ -37,8 +37,8 @@ public class Parser {
 
     private char CurrentChar {
         get {
-            if (Position >= ScanString.Length) { 
-                return '\0'; 
+            if (Position >= ScanString.Length) {
+                return '\0';
             }
             return ScanString[Position];
         }
@@ -222,6 +222,14 @@ public class Parser {
         return char.IsLetterOrDigit(c) | c == '_' | c == '-';
     }
 
+    public XferDocument Parse(string input) {
+        if (string.IsNullOrEmpty(input)) {
+            throw new ArgumentNullException(nameof(input));
+        }
+
+        return Parse(Encoding.UTF8.GetBytes(input));
+    }
+
     public XferDocument Parse(byte[] input) {
         if (input == null || input.Length == 0) {
             throw new ArgumentNullException(nameof(input));
@@ -268,6 +276,12 @@ public class Parser {
                 return stringElement;
             }
 
+            if (ElementOpening(LiteralElement.OpeningMarker, ref markerCount)) {
+                var literalElement = ParseLiteralElement(markerCount);
+                SkipWhitespace();
+                return literalElement;
+            }
+
             if (ElementOpening(CharacterElement.OpeningMarker, ref markerCount)) {
                 var characterElement = ParseCharacterElement(markerCount);
                 SkipWhitespace();
@@ -302,6 +316,48 @@ public class Parser {
                 var arrayElement = ParseArrayElement(markerCount);
                 SkipWhitespace();
                 return arrayElement;
+            }
+
+            if (ElementOpening(IntegerElement.OpeningMarker, ref markerCount)) {
+                var integerElement = ParseIntegerElement(markerCount);
+                SkipWhitespace();
+                return integerElement;
+            }
+
+            if (ElementOpening(LongIntegerElement.OpeningMarker, ref markerCount)) {
+                var longIntegerElement = ParseLongIntegerElement(markerCount);
+                SkipWhitespace();
+                return longIntegerElement;
+            }
+
+            if (ElementOpening(DecimalElement.OpeningMarker, ref markerCount)) {
+                var decimalElement = ParseDecimalElement(markerCount);
+                SkipWhitespace();
+                return decimalElement;
+            }
+
+            if (ElementOpening(FloatElement.OpeningMarker, ref markerCount)) {
+                var floatElement = ParseFloatElement(markerCount);
+                SkipWhitespace();
+                return floatElement;
+            }
+
+            if (ElementOpening(DoubleElement.OpeningMarker, ref markerCount)) {
+                var doubleElement = ParseDoubleElement(markerCount);
+                SkipWhitespace();
+                return doubleElement;
+            }
+
+            if (ElementOpening(BooleanElement.OpeningMarker, ref markerCount)) {
+                var booleanElement = ParseBooleanElement(markerCount);
+                SkipWhitespace();
+                return booleanElement;
+            }
+
+            if (ElementOpening(DateElement.OpeningMarker, ref markerCount)) {
+                var dateElement = ParseDateElement(markerCount);
+                SkipWhitespace();
+                return dateElement;
             }
 
             if (ElementOpening(CommentElement.OpeningMarker, ref markerCount)) {
@@ -446,41 +502,11 @@ public class Parser {
 
         string charString = charContent.ToString();
 
-        if (charString.StartsWith("$")) {
-            // Hexadecimal value, e.g., <\$2764\>
-            string hexValue = charString.Substring(1);
-            if (int.TryParse(hexValue, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int codePoint)) {
-                char character = (char)codePoint;
-                return new CharacterElement(character);
-            }
-            else {
-                throw new InvalidOperationException($"Invalid hexadecimal value '{hexValue}' at row {CurrentRow}, column {CurrentColumn}.");
-            }
+        if (string.IsNullOrEmpty(charString)) {
+            throw new InvalidOperationException($"Empty character element at row {CurrentRow}, column {CurrentColumn}.");
         }
-        else if (charString.StartsWith("#")) {
-            // Integer value, e.g., <\#65\>
-            string intValue = charString.Substring(1);
-            if (int.TryParse(intValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out int codePoint)) {
-                char character = (char)codePoint;
-                return new CharacterElement(character);
-            }
-            else {
-                throw new InvalidOperationException($"Invalid integer value '{intValue}' at row {CurrentRow}, column {CurrentColumn}.");
-            }
-        }
-        else if (charString.StartsWith("%")) {
-            // Binary value, e.g., <\%01000001\> (which represents 'A')
-            string binaryValue = charString.Substring(1);
-            try {
-                int codePoint = Convert.ToInt32(binaryValue, 2);
-                char character = (char)codePoint;
-                return new CharacterElement(character);
-            }
-            catch (FormatException) {
-                throw new InvalidOperationException($"Invalid binary value '{binaryValue}' at row {CurrentRow}, column {CurrentColumn}.");
-            }
-        }
-        else {
+
+        if (char.IsLetter(charString[0])) {
             // Keyword, e.g., <\nl\> for newline
             return charString.ToLower() switch {
                 "nul" => new CharacterElement('\0'),
@@ -500,6 +526,10 @@ public class Parser {
                 _ => throw new InvalidOperationException($"Unknown character keyword '{charString}' at row {CurrentRow}, column {CurrentColumn}.")
             };
         }
+
+        var codePoint = ParseNumericValue<int>(charString);
+        char character = (char)codePoint;
+        return new CharacterElement(character);
     }
 
     private StringElement ParseStringElement(int markerCount) {
@@ -523,6 +553,208 @@ public class Parser {
         }
 
         // Handle the case where the closing marker is not found (error)
-        throw new InvalidOperationException($"Unexpected end of string element at row {CurrentRow}, column {CurrentColumn}.");
+        throw new InvalidOperationException($"Unexpected end of {StringElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private LiteralElement ParseLiteralElement(int markerCount) {
+        StringBuilder valueBuilder = new StringBuilder();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(LiteralElement.ClosingMarker, markerCount)) {
+                return new LiteralElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        // Handle the case where the closing marker is not found (error)
+        throw new InvalidOperationException($"Unexpected end of {LiteralElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private IntegerElement ParseIntegerElement(int markerCount) {
+        SkipWhitespace();
+        StringBuilder valueBuilder = new StringBuilder();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(IntegerElement.ClosingMarker, markerCount)) {
+                var value = ParseNumericValue<int>(valueBuilder.ToString());
+                return new IntegerElement(value);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {IntegerElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+
+    private DateElement ParseDateElement(int markerCount) {
+        SkipWhitespace();
+        StringBuilder valueBuilder = new StringBuilder();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(DateElement.ClosingMarker, markerCount)) {
+                var value = valueBuilder.ToString();
+                return new DateElement(value);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {DateElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }        
+    
+    private LongIntegerElement ParseLongIntegerElement(int markerCount) {
+        SkipWhitespace();
+        StringBuilder valueBuilder = new StringBuilder();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(LongIntegerElement.ClosingMarker, markerCount)) {
+                var value = ParseNumericValue<long>(valueBuilder.ToString());
+                return new LongIntegerElement(value);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {LongIntegerElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private DecimalElement ParseDecimalElement(int markerCount) {
+        SkipWhitespace();
+        StringBuilder valueBuilder = new StringBuilder();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(DecimalElement.ClosingMarker, markerCount)) {
+                var value = ParseNumericValue<decimal>(valueBuilder.ToString());
+                return new DecimalElement(value);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {DecimalElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private FloatElement ParseFloatElement(int markerCount) {
+        SkipWhitespace();
+        StringBuilder valueBuilder = new StringBuilder();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(FloatElement.ClosingMarker, markerCount)) {
+                var value = ParseNumericValue<float>(valueBuilder.ToString());
+                return new FloatElement(value);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {FloatElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private DoubleElement ParseDoubleElement(int markerCount) {
+        SkipWhitespace();
+        StringBuilder valueBuilder = new StringBuilder();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(DoubleElement.ClosingMarker, markerCount)) {
+                var value = ParseNumericValue<double>(valueBuilder.ToString());
+                return new DoubleElement(value);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {DoubleElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private BooleanElement ParseBooleanElement(int markerCount) {
+        SkipWhitespace();
+        StringBuilder valueBuilder = new StringBuilder();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(BooleanElement.ClosingMarker, markerCount)) {
+                string valueString = valueBuilder.ToString().ToLower();
+                bool value = valueString switch {
+                    "true" => true,
+                    "false" => false,
+                    _ => throw new InvalidOperationException($"Invalid boolean value '{valueString}' at row {CurrentRow}, column {CurrentColumn}.")
+                };
+
+                return new BooleanElement(value);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {BooleanElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private T ParseNumericValue<T>(string valueString) where T : struct, IConvertible {
+        if (string.IsNullOrEmpty(valueString)) {
+            throw new ArgumentException("The numeric value string cannot be null or empty.", nameof(valueString));
+        }
+
+        char basePrefix = valueString[0];
+        string numberString = valueString;
+
+        // Determine the base (Hexadecimal, Binary, Decimal).
+        int numberBase = 10; // Default to decimal
+
+        if (basePrefix == '$' || basePrefix == '%') {
+            numberBase = basePrefix == '$' ? 16 : 2;
+            numberString = valueString.Substring(1); // Remove base prefix character
+        }
+
+        try {
+            if (numberBase == 10) {
+                // Handle decimal values
+                if (typeof(T) == typeof(float)) {
+                    return (T)Convert.ChangeType(float.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                }
+                else if (typeof(T) == typeof(double)) {
+                    return (T)Convert.ChangeType(double.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                }
+                else if (typeof(T) == typeof(short)) {
+                    return (T)Convert.ChangeType(short.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                }
+                else if (typeof(T) == typeof(int)) {
+                    return (T)Convert.ChangeType(int.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                }
+                else if (typeof(T) == typeof(long)) {
+                    return (T)Convert.ChangeType(long.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                }
+                else if (typeof(T) == typeof(decimal)) {
+                    return (T)Convert.ChangeType(decimal.Parse(valueString, CultureInfo.InvariantCulture), typeof(T));
+                }
+                else {
+                    throw new InvalidOperationException($"Unsupported type '{typeof(T)}' for decimal value parsing at row {CurrentRow}, column {CurrentColumn}.");
+                }
+            }
+            else if (numberBase == 16) {
+                // Handle hexadecimal values
+                long hexValue = long.Parse(numberString, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                return (T)Convert.ChangeType(hexValue, typeof(T));
+            }
+            else if (numberBase == 2) {
+                // Handle binary values
+                long binaryValue = long.Parse(numberString, NumberStyles.BinaryNumber, CultureInfo.InvariantCulture);
+                return (T)Convert.ChangeType(binaryValue, typeof(T));
+            }
+            else {
+                throw new InvalidOperationException($"Unsupported numeric base '{numberBase}' at row {CurrentRow}, column {CurrentColumn}.");
+            }
+        }
+        catch (Exception ex) {
+            throw new InvalidOperationException($"Failed to parse numeric value '{valueString}' at row {CurrentRow}, column {CurrentColumn}. Error: {ex.Message}");
+        }
     }
 }

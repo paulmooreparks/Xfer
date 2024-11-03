@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class DoubleElement : Element {
-    public static readonly string ElementName = "double";
-    public const char OpeningMarker = '*';
+public class HexadecimalElement : Element {
+    public static readonly string ElementName = "hexadecimal";
+    public const char OpeningMarker = '$';
     public const char ClosingMarker = OpeningMarker;
 
-    public double Value { get; set; }
+    public int Value { get; set; }
 
-    public DoubleElement(double value)
+    public HexadecimalElement(int value)
         : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
         Value = value;
     }
@@ -21,7 +21,7 @@ public class DoubleElement : Element {
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        sb.Append(Value);
+        sb.Append(Value.ToString("X"));
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }
