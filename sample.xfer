@@ -14,22 +14,27 @@
 <!! A comment <! inside another comment !> !!>
 
 <"A string may contain character elements<\$20\>inside of it, which will be parsed.">
-<.When character elements are inside a literal<\$20\>element, they are not parsed.>
+<_When character elements are inside a literal<\$20\>element, they are not parsed_>
+<__A literal may contain <_another literal_> if its markers are repeated__>
 
 <{
     <: string <"value"> :>
     <: boolean <~true~> :>
     <: integer <#42#> :>
-    <: long <+5000000000+> :>
-    <: hexInteger <+ $BAADF00D +> :>
+    <: long <`5000000000`> :>
+    <: hexLongInteger <`$BAADF00D`> :>
     <: binaryInteger <# %10101010 #> :>
-    <: float <^3.14^> :>
-    <: double <^3.14159^> :>
-    <: decimal <*3.14159*> :>
+    <: double <^3.1415926535^> :> 
+    <: decimal <*123.45*> :>
     <: date <&2019-01-01&> :>
+    <: object <{ 
+            <:key <"value">:> 
+            <: boolean <~false~> :>
+        }> 
+    :>
 }>
 
-<.
+<_
 /* Now it's possible to embed code with less worry */
 namespace HelloWorldApp;
 
@@ -38,4 +43,6 @@ class Program {
         Console.WriteLine("Hello, Xfer!");
     }
 }
-.>
+_>
+
+<! parse ..\..\..\..\sample.xfer !>

@@ -11,10 +11,10 @@ namespace ParksComputing.Xferc.Commands;
 // [Argument(typeof(string), "file", "The path to the class file for which to serialize to Xfer")]
 internal class SerializeCommand {
     public int Execute(string file) {
-        var data = new SampleData {
+        var data = new {
             Name = "John Doe",
             Age = 42,
-            CreatedAt = DateTime.UtcNow
+            created_at = DateTime.UtcNow
         };
 
         string xferDocument = XferConverter.Serialize(data);
@@ -30,7 +30,6 @@ internal class SerializeCommand {
 }
 
 public class SampleData {
-    [XferProperty]
     public string Name { get; set; } = string.Empty;
 
     [XferProperty]

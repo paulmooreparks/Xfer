@@ -28,9 +28,8 @@ public class XferConverter {
     private static Element SerializeValue(object value) {
         return value switch {
             int intValue => new IntegerElement(intValue),
-            long longValue => new LongIntegerElement(longValue),
+            long longValue => new LongElement(longValue),
             bool boolValue => new BooleanElement(boolValue),
-            float floatValue => new FloatElement(floatValue),
             double doubleValue => new DoubleElement(doubleValue),
             decimal decimalValue => new DecimalElement(decimalValue),
             DateTime dateTimeValue => new DateElement(dateTimeValue.ToString("yyyy-MM-ddTHH:mm:ss")),
@@ -72,9 +71,8 @@ public class XferConverter {
     private static object? DeserializeValue(Element element, Type targetType) {
         return element switch {
             IntegerElement intElement when targetType == typeof(int) => intElement.Value,
-            LongIntegerElement longElement when targetType == typeof(long) => longElement.Value,
+            LongElement longElement when targetType == typeof(long) => longElement.Value,
             BooleanElement boolElement when targetType == typeof(bool) => boolElement.Value,
-            FloatElement floatElement when targetType == typeof(float) => (float)floatElement.Value,
             DoubleElement doubleElement when targetType == typeof(double) => doubleElement.Value,
             DecimalElement decimalElement when targetType == typeof(decimal) => decimalElement.Value,
             DateElement dateElement when targetType == typeof(DateTime) => dateElement.Value,

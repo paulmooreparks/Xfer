@@ -8,7 +8,7 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class DoubleElement : Element {
     public static readonly string ElementName = "double";
-    public const char OpeningMarker = '*';
+    public const char OpeningMarker = '^';
     public const char ClosingMarker = OpeningMarker;
 
     public double Value { get; set; }

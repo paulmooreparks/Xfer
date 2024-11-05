@@ -324,7 +324,7 @@ public class Parser {
                 return integerElement;
             }
 
-            if (ElementOpening(LongIntegerElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(LongElement.OpeningMarker, ref markerCount)) {
                 var longIntegerElement = ParseLongIntegerElement(markerCount);
                 SkipWhitespace();
                 return longIntegerElement;
@@ -334,12 +334,6 @@ public class Parser {
                 var decimalElement = ParseDecimalElement(markerCount);
                 SkipWhitespace();
                 return decimalElement;
-            }
-
-            if (ElementOpening(FloatElement.OpeningMarker, ref markerCount)) {
-                var floatElement = ParseFloatElement(markerCount);
-                SkipWhitespace();
-                return floatElement;
             }
 
             if (ElementOpening(DoubleElement.OpeningMarker, ref markerCount)) {
@@ -607,21 +601,21 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {DateElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }        
     
-    private LongIntegerElement ParseLongIntegerElement(int markerCount) {
+    private LongElement ParseLongIntegerElement(int markerCount) {
         SkipWhitespace();
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementClosing(LongIntegerElement.ClosingMarker, markerCount)) {
+            if (ElementClosing(LongElement.ClosingMarker, markerCount)) {
                 var value = ParseNumericValue<long>(valueBuilder.ToString());
-                return new LongIntegerElement(value);
+                return new LongElement(value);
             }
 
             valueBuilder.Append(CurrentChar);
             Expand();
         }
 
-        throw new InvalidOperationException($"Unexpected end of {LongIntegerElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+        throw new InvalidOperationException($"Unexpected end of {LongElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
     private DecimalElement ParseDecimalElement(int markerCount) {
@@ -639,23 +633,6 @@ public class Parser {
         }
 
         throw new InvalidOperationException($"Unexpected end of {DecimalElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
-    }
-
-    private FloatElement ParseFloatElement(int markerCount) {
-        SkipWhitespace();
-        StringBuilder valueBuilder = new StringBuilder();
-
-        while (IsCharAvailable()) {
-            if (ElementClosing(FloatElement.ClosingMarker, markerCount)) {
-                var value = ParseNumericValue<float>(valueBuilder.ToString());
-                return new FloatElement(value);
-            }
-
-            valueBuilder.Append(CurrentChar);
-            Expand();
-        }
-
-        throw new InvalidOperationException($"Unexpected end of {FloatElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
     private DoubleElement ParseDoubleElement(int markerCount) {

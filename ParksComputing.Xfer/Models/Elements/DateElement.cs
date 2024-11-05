@@ -19,6 +19,10 @@ namespace ParksComputing.Xfer.Models.Elements {
             Value = dateValue;
         }
 
+        public DateElement(DateTime dateValue) : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
+            Value = dateValue;
+        }
+
         public override string ToString() {
             return Value.TimeOfDay == TimeSpan.Zero
                 ? $"{Delimiter.Opening}{Value:yyyy-MM-dd}{Delimiter.Closing}"
