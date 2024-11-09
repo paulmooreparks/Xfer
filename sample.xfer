@@ -39,6 +39,7 @@ may also be embedded in eval elements, and their evaluated results will become p
 
 <{
     <: string <"value"> :> </ String marker is " />
+    <: evalString <_Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><__as<\$20\>is__>._> :> </ Evaluated element marker is _ />
     <: character <\65\> :> </ Character marker is \ />
     <: boolean <~true~> :> </ Boolean marker is ~ />
     <: integer <#42#> :> </ Integer marker is # />
@@ -48,8 +49,8 @@ may also be embedded in eval elements, and their evaluated results will become p
     <: double <^3.1415926535^> :> </ Double marker is ^ />
     <: decimal <*123.45*> :> </ Decimal marker is * />
     <: date <@2019-01-01@> :> </ Date marker is @ />
+    <: placeholder <_<|USERPROFILE|>_> :> </ Placeholder marker is | />
     <:: keyValuePair <:key <"value"> :> ::> </ Key-value pair marker is : />
-    <// <: placeholder <|keyword|> :> </ Placeholder marker is | /> //>
     <: 
         array <[
             <#1#> 

@@ -364,6 +364,12 @@ public class Parser {
                 return dateElement;
             }
 
+            if (ElementOpening(PlaceholderElement.OpeningMarker, ref markerCount)) {
+                var placeholderElement = ParsePlaceholderElement(markerCount);
+                SkipWhitespace();
+                return placeholderElement;
+            }
+
             if (ElementOpening(CommentElement.OpeningMarker, ref markerCount)) {
                 // Parse comment but don't return it, as comments are not part of the logical output.
                 ParseCommentElement(markerCount);
@@ -463,6 +469,29 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {PropertyBagElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
+    private PlaceholderElement ParsePlaceholderElement(int markerCount) {
+        SkipWhitespace();
+        StringBuilder valueBuilder = new StringBuilder();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing(PlaceholderElement.ClosingMarker, markerCount)) {
+                var variable = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
+
+                if (string.IsNullOrEmpty(variable)) {
+                    throw new InvalidOperationException("Placeholder variable must be a non-empty string.");
+                }
+
+                var value = Environment.GetEnvironmentVariable(variable);
+                return new PlaceholderElement(value ?? string.Empty, markerCount);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {EvaluatedElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
     private KeyValuePairElement ParseKeyValuePairElement(int markerCount) {
         SkipWhitespace();
         while (Peek.IsKeywordChar()) {
@@ -543,15 +572,15 @@ public class Parser {
         while (IsCharAvailable()) {
             int embeddedMarkerCount = 1;
 
-            if (ElementOpening(CharacterElement.OpeningMarker, ref embeddedMarkerCount)) {
-                CharacterElement characterElement = ParseCharacterElement(embeddedMarkerCount);
-                valueBuilder.Append(characterElement.Value);
-                continue;
-            }
-
             if (ElementOpening(StringElement.OpeningMarker, ref embeddedMarkerCount)) {
                 StringElement stringElement = ParseStringElement(embeddedMarkerCount);
                 valueBuilder.Append(stringElement.Value);
+                continue;
+            }
+
+            if (ElementOpening(CharacterElement.OpeningMarker, ref embeddedMarkerCount)) {
+                CharacterElement characterElement = ParseCharacterElement(embeddedMarkerCount);
+                valueBuilder.Append(characterElement.Value);
                 continue;
             }
 
@@ -593,6 +622,12 @@ public class Parser {
 
             if (ElementOpening(EvaluatedElement.OpeningMarker, ref embeddedMarkerCount)) {
                 EvaluatedElement evaluatedElement = ParseEvaluatedElement(embeddedMarkerCount);
+                valueBuilder.Append(evaluatedElement.Value);
+                continue;
+            }
+
+            if (ElementOpening(PlaceholderElement.OpeningMarker, ref embeddedMarkerCount)) {
+                PlaceholderElement evaluatedElement = ParsePlaceholderElement(embeddedMarkerCount);
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
