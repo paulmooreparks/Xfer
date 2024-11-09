@@ -14,6 +14,16 @@ public class ArrayElement : Element {
     private List<Element> _items = new();
     private Type? _elementType;
 
+    public override string Value { 
+        get {
+            var sb = new StringBuilder();
+            foreach (var item in _items) {
+                sb.Append(item.ToString());
+            }
+            return sb.ToString();
+        }
+    }
+
     public IEnumerable<Element> Values {
         get {
             return _items;
@@ -60,9 +70,7 @@ public class ArrayElement : Element {
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        foreach (var item in _items) {
-            sb.Append(item.ToString());
-        }
+        sb.Append(Value);
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }

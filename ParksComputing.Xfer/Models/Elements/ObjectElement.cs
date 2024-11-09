@@ -10,12 +10,12 @@ public class ObjectElement : Element {
     public const char OpeningMarker = '{';
     public const char ClosingMarker = '}';
 
-    private Dictionary<string, Tuple<Element, Element>> _values = new();
-    public IReadOnlyDictionary<string, Tuple<Element, Element>> Values => _values;
+    private Dictionary<string, KeyValuePairElement> _values = new();
+    public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
 
     public Element this[string index] {
         get {
-            return _values[index].Item2;
+            return _values[index].TypedValue;
         }
         set {
             SetOrUpdateValue(index, value);
@@ -25,8 +25,8 @@ public class ObjectElement : Element {
     public ObjectElement() : base(ElementName, new(OpeningMarker, ClosingMarker)) { }
 
     private void SetOrUpdateValue<TElement>(string key, TElement element) where TElement : Element {
-        if (_values.TryGetValue(key, out Tuple<Element, Element>? tuple)) {
-            _values[key] = new Tuple<Element, Element>(tuple.Item1, element);
+        if (_values.TryGetValue(key, out KeyValuePairElement? kvp)) {
+            _values[key] = new KeyValuePairElement(kvp.TypedValue, element);
         }
         else {
             Element keyElement;
@@ -38,29 +38,33 @@ public class ObjectElement : Element {
                 keyElement = new StringElement(key);
             }
 
-            _values.Add(key, new Tuple<Element, Element>(keyElement, element));
+            _values.Add(key, new KeyValuePairElement(keyElement, element));
         }
     }
 
     public void AddOrUpdate(KeyValuePairElement value) {
-        if (_values.TryGetValue(value.Key, out Tuple<Element, Element>? tuple)) {
-            _values[value.Key] = new Tuple<Element, Element>(value.KeyElement, value.Value);
+        if (_values.TryGetValue(value.Key, out KeyValuePairElement? tuple)) {
+            _values[value.Key] = value;
         }
         else {
-            _values.Add(value.Key, new Tuple<Element, Element>(value.KeyElement, value.Value));
+            _values.Add(value.Key, value);
+        }
+    }
+
+    public override string Value {
+        get {
+            var sb = new StringBuilder();
+            foreach (var value in _values.Values) {
+                sb.Append($"{value}");
+            }
+            return sb.ToString();
         }
     }
 
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        foreach (var value in _values.Values) {
-            sb.Append(Parser.ElementOpeningMarker);
-            sb.Append(KeyValuePairElement.OpeningMarker);
-            sb.Append($"{value.Item1}{value.Item2}");
-            sb.Append(KeyValuePairElement.ClosingMarker);
-            sb.Append(Parser.ElementClosingMarker);
-        }
+        sb.Append(Value);
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }

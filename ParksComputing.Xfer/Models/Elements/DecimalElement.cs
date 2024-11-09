@@ -11,11 +11,12 @@ public class DecimalElement : Element {
     public const char OpeningMarker = '*';
     public const char ClosingMarker = OpeningMarker;
 
-    public decimal Value { get; set; }
+    public decimal TypedValue { get; set; }
+    public override string Value => TypedValue.ToString();
 
     public DecimalElement(decimal value)
         : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
-        Value = value;
+        TypedValue = value;
     }
 
     public override string ToString() {

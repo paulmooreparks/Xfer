@@ -47,3 +47,13 @@ internal class XfercProgram {
         return await cli.RunAsync(args);
     }
 }
+
+internal abstract class Element<T> {
+    public abstract T TypedValue { get; set; }
+    public abstract string Value { get; }
+}
+
+internal class IntegerElement : Element<int> {
+    public override int TypedValue { get; set; }
+    public override string Value => TypedValue.ToString();
+}

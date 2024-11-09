@@ -7,7 +7,7 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class MetadataElement : Element {
     public static readonly string ElementName = "metadata";
-    public const char OpeningMarker = '@';
+    public const char OpeningMarker = '!';
     public const char ClosingMarker = OpeningMarker;
     public static readonly string DefaultVersion = "1.0.0";
 
@@ -32,7 +32,7 @@ public class MetadataElement : Element {
 
                 case "ttl":
                     SetOrThrow<IntegerElement>(value, index);
-                    Ttl = ((IntegerElement)value).Value;
+                    Ttl = ((IntegerElement)value).TypedValue;
                     break;
 
                 default:
@@ -124,19 +124,27 @@ public class MetadataElement : Element {
 
     public void AddOrUpdate(KeyValuePairElement value) {
         if (_values.TryGetValue(value.Key, out Tuple<Element, Element>? tuple)) {
-            _values[value.Key] = new Tuple<Element, Element>(value.KeyElement, value.Value);
+            _values[value.Key] = new Tuple<Element, Element>(value.KeyElement, value.TypedValue);
         }
         else {
-            _values.Add(value.Key, new Tuple<Element, Element>(value.KeyElement, value.Value));
+            _values.Add(value.Key, new Tuple<Element, Element>(value.KeyElement, value.TypedValue));
+        }
+    }
+
+    public override string Value {
+        get {
+            var sb = new StringBuilder();
+            foreach (var value in _values.Values) {
+                sb.Append($"{Parser.ElementOpeningMarker}{KeyValuePairElement.OpeningMarker}{value.Item1}{value.Item2}{KeyValuePairElement.ClosingMarker}{Parser.ElementClosingMarker}");
+            }
+            return sb.ToString();
         }
     }
 
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        foreach (var value in _values.Values) {
-            sb.Append($"{Parser.ElementOpeningMarker}{KeyValuePairElement.OpeningMarker}{value.Item1}{value.Item2}{KeyValuePairElement.ClosingMarker}{Parser.ElementClosingMarker}");
-        }
+        sb.Append(Value);
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }

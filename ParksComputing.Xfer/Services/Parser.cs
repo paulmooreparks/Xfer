@@ -202,6 +202,13 @@ public class Parser {
         return false;
     }
 
+    private void SkipBOM() {
+        // If the current character is the BOM (0xFEFF), advance the position
+        if (Position == 0 && CurrentChar == '\uFEFF') {
+            Advance();
+        }
+    }
+
     private void SkipWhitespace() {
         while (char.IsWhiteSpace(CurrentChar)) {
             Advance();
@@ -241,6 +248,9 @@ public class Parser {
             return new XferDocument();
         }
 
+        // Maybe do something with the BOM here?
+        SkipBOM();
+
         return ParseDocument();
     }
 
@@ -276,8 +286,8 @@ public class Parser {
                 return stringElement;
             }
 
-            if (ElementOpening(LiteralElement.OpeningMarker, ref markerCount)) {
-                var literalElement = ParseLiteralElement(markerCount);
+            if (ElementOpening(EvaluatedElement.OpeningMarker, ref markerCount)) {
+                var literalElement = ParseEvaluatedElement(markerCount);
                 SkipWhitespace();
                 return literalElement;
             }
@@ -467,7 +477,7 @@ public class Parser {
         Advance();
         SkipWhitespace();
 
-        var keyValuePairElement = new KeyValuePairElement(keyElement);
+        var keyValuePairElement = new KeyValuePairElement(keyElement, markerCount);
 
         while (IsCharAvailable()) {
             if (ElementClosing(KeyValuePairElement.ClosingMarker, markerCount)) {
@@ -475,7 +485,8 @@ public class Parser {
             }
 
             Element valueElement = ParseElement();
-            keyValuePairElement.Value = valueElement;
+            SkipWhitespace();
+            keyValuePairElement.TypedValue = valueElement;
         }
 
         throw new InvalidOperationException($"Unexpected end of {KeywordElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
@@ -526,7 +537,7 @@ public class Parser {
         return new CharacterElement(character);
     }
 
-    private StringElement ParseStringElement(int markerCount) {
+    private EvaluatedElement ParseEvaluatedElement(int markerCount) {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
@@ -538,6 +549,69 @@ public class Parser {
                 continue;
             }
 
+            if (ElementOpening(StringElement.OpeningMarker, ref embeddedMarkerCount)) {
+                StringElement stringElement = ParseStringElement(embeddedMarkerCount);
+                valueBuilder.Append(stringElement.Value);
+                continue;
+            }
+
+            if (ElementOpening(IntegerElement.OpeningMarker, ref embeddedMarkerCount)) {
+                IntegerElement integerElement = ParseIntegerElement(embeddedMarkerCount);
+                valueBuilder.Append(integerElement.Value);
+                continue;
+            }
+
+            if (ElementOpening(LongElement.OpeningMarker, ref embeddedMarkerCount)) {
+                LongElement longElement = ParseLongIntegerElement(embeddedMarkerCount);
+                valueBuilder.Append(longElement.Value);
+                continue;
+            }
+
+            if (ElementOpening(DecimalElement.OpeningMarker, ref embeddedMarkerCount)) {
+                DecimalElement decimalElement = ParseDecimalElement(embeddedMarkerCount);
+                valueBuilder.Append(decimalElement.Value);
+                continue;
+            }
+
+            if (ElementOpening(DoubleElement.OpeningMarker, ref embeddedMarkerCount)) {
+                DoubleElement doubleElement = ParseDoubleElement(embeddedMarkerCount);
+                valueBuilder.Append(doubleElement.Value);
+                continue;
+            }
+
+            if (ElementOpening(BooleanElement.OpeningMarker, ref embeddedMarkerCount)) {
+                BooleanElement booleanElement = ParseBooleanElement(embeddedMarkerCount);
+                valueBuilder.Append(booleanElement.Value);
+                continue;
+            }
+
+            if (ElementOpening(DateElement.OpeningMarker, ref embeddedMarkerCount)) {
+                DateElement dateElement = ParseDateElement(embeddedMarkerCount);
+                valueBuilder.Append(dateElement.Value);
+                continue;
+            }
+
+            if (ElementOpening(EvaluatedElement.OpeningMarker, ref embeddedMarkerCount)) {
+                EvaluatedElement evaluatedElement = ParseEvaluatedElement(embeddedMarkerCount);
+                valueBuilder.Append(evaluatedElement.Value);
+                continue;
+            }
+
+            if (ElementClosing(EvaluatedElement.ClosingMarker, markerCount)) {
+                return new EvaluatedElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {EvaluatedElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private StringElement ParseStringElement(int markerCount) {
+        StringBuilder valueBuilder = new StringBuilder();
+
+        while (IsCharAvailable()) {
             if (ElementClosing(StringElement.ClosingMarker, markerCount)) {
                 return new StringElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount);
             }
@@ -546,24 +620,7 @@ public class Parser {
             Expand();
         }
 
-        // Handle the case where the closing marker is not found (error)
         throw new InvalidOperationException($"Unexpected end of {StringElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
-    }
-
-    private LiteralElement ParseLiteralElement(int markerCount) {
-        StringBuilder valueBuilder = new StringBuilder();
-
-        while (IsCharAvailable()) {
-            if (ElementClosing(LiteralElement.ClosingMarker, markerCount)) {
-                return new LiteralElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount);
-            }
-
-            valueBuilder.Append(CurrentChar);
-            Expand();
-        }
-
-        // Handle the case where the closing marker is not found (error)
-        throw new InvalidOperationException($"Unexpected end of {LiteralElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
     private IntegerElement ParseIntegerElement(int markerCount) {

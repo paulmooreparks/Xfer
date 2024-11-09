@@ -11,10 +11,11 @@ public class CharacterElement : Element {
     public const char OpeningMarker = '\\';
     public const char ClosingMarker = OpeningMarker;
 
-    public char Value { get; set; } = default;
+    public char TypedValue { get; set; } = default;
+    public override string Value => TypedValue.ToString();
 
     public CharacterElement(char ch, int markerCount = 1) : base(ElementName, new(OpeningMarker, ClosingMarker, markerCount)) {
-        Value = ch;
+        TypedValue = ch;
     }
 
     public override string ToString() {

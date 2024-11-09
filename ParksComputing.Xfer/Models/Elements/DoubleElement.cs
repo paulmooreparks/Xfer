@@ -11,11 +11,12 @@ public class DoubleElement : Element {
     public const char OpeningMarker = '^';
     public const char ClosingMarker = OpeningMarker;
 
-    public double Value { get; set; }
+    public double TypedValue { get; set; }
+    public override string Value => TypedValue.ToString();
 
     public DoubleElement(double value)
         : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
-        Value = value;
+        TypedValue = value;
     }
 
     public override string ToString() {

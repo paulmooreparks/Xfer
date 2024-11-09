@@ -33,12 +33,20 @@ public class PropertyBagElement : Element {
         _items.Add(element);
     }
 
+    public override string Value {
+        get {
+            var sb = new StringBuilder();
+            foreach (var item in _items) {
+                sb.Append(item.ToString());
+            }
+            return sb.ToString();
+        }
+    }
+
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        foreach (var item in _items) {
-            sb.Append(item.ToString());
-        }
+        sb.Append(Value);
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }

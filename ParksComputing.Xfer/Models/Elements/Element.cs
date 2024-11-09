@@ -10,6 +10,7 @@ public abstract class Element
 {
     public string Name { get; }
     public Delimiter Delimiter { get; set; } = new Delimiter('\0', '\0');
+    public abstract string Value { get; }
 
     public Element(string name, Delimiter delimiter)
     {
@@ -19,6 +20,6 @@ public abstract class Element
 
     public override string ToString()
     {
-        return $"{Delimiter.Opening} {Delimiter.Closing}";
+        return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
     }
 }

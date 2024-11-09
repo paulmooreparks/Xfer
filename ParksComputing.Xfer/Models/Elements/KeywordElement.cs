@@ -10,10 +10,11 @@ public class KeywordElement : Element {
     public const char OpeningMarker = '<';
     public const char ClosingMarker = '>';
 
-    public string Value { get; set; } = string.Empty;
+    public string TypedValue { get; set; } = string.Empty;
+    public override string Value => TypedValue;
 
     public KeywordElement(string text) : base(ElementName, new(OpeningMarker, ClosingMarker)) { 
-        Value = text;
+        TypedValue = text;
     }
 
     public override string ToString() {

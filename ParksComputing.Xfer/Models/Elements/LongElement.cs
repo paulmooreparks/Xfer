@@ -8,14 +8,15 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class LongElement : Element {
     public static readonly string ElementName = "longInteger";
-    public const char OpeningMarker = '`';
+    public const char OpeningMarker = '&';
     public const char ClosingMarker = OpeningMarker;
 
-    public long Value { get; set; }
+    public long TypedValue { get; set; }
+    public override string Value => TypedValue.ToString();
 
     public LongElement(long value)
         : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
-        Value = value;
+        TypedValue = value;
     }
 
     public override string ToString() {

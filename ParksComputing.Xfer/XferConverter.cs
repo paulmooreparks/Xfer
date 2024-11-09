@@ -20,7 +20,7 @@ public class XferConverter {
 
             if (value != null) {
                 if (literalAttribute != null) {
-                    obj.AddOrUpdate(new KeyValuePairElement(new KeywordElement(name), new LiteralElement(value.ToString() ?? string.Empty)));
+                    obj.AddOrUpdate(new KeyValuePairElement(new KeywordElement(name), new EvaluatedElement(value.ToString() ?? string.Empty)));
                 }
                 else {
                     Element element = SerializeValue(value);
@@ -57,6 +57,7 @@ public class XferConverter {
             DateTime dateTimeValue => new DateElement(dateTimeValue.ToString("yyyy-MM-ddTHH:mm:ss")),
             string stringValue => new StringElement(stringValue),
             IEnumerable<object> list => new PropertyBagElement(list.Select(SerializeValue)),
+            object objectValue => new EvaluatedElement(objectValue.ToString() ?? string.Empty),
             _ => throw new NotSupportedException($"Type '{value.GetType().Name}' is not supported")
         };
     }
@@ -81,7 +82,7 @@ public class XferConverter {
         if (first is ObjectElement propertyBag) {
             foreach (var element in propertyBag.Values) {
                 if (propertyMap.TryGetValue(element.Key, out var property)) {
-                    object? value = DeserializeValue(element.Value.Item2, property.PropertyType);
+                    object? value = DeserializeValue(element.Value.TypedValue, property.PropertyType);
                     property.SetValue(obj, value);
                 }
             }
@@ -143,8 +144,8 @@ public class XferConverter {
             DateElement dateElement when targetType == typeof(object) => dateElement.Value,
             StringElement stringElement when targetType == typeof(string) => stringElement.Value,
             StringElement stringElement when targetType == typeof(object) => stringElement.Value,
-            LiteralElement literalElement when targetType == typeof(string) => literalElement.Value,
-            LiteralElement literalElement when targetType == typeof(object) => literalElement.Value,
+            EvaluatedElement literalElement when targetType == typeof(string) => literalElement.Value,
+            EvaluatedElement literalElement when targetType == typeof(object) => literalElement.Value,
             _ => throw new NotSupportedException($"Type '{targetType.Name}' is not supported for deserialization")
         };
     }

@@ -11,17 +11,18 @@ public class BooleanElement : Element {
     public const char OpeningMarker = '~';
     public const char ClosingMarker = OpeningMarker;
 
-    public bool Value { get; set; }
+    public bool TypedValue { get; set; }
+    public override string Value => TypedValue.ToString();
 
     public BooleanElement(bool value)
         : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
-        Value = value;
+        TypedValue = value;
     }
 
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        sb.Append(Value ? "true" : "false");
+        sb.Append(Value);
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }

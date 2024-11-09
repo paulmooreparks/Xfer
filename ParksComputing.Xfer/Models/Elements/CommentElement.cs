@@ -8,8 +8,9 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class CommentElement : Element {
     public static readonly string ElementName = "comment";
-    public const char OpeningMarker = '!';
+    public const char OpeningMarker = '/';
     public const char ClosingMarker = OpeningMarker;
+    public override string Value => string.Empty;
 
     public CommentElement() : base(ElementName, new(OpeningMarker, ClosingMarker)) { }
 }

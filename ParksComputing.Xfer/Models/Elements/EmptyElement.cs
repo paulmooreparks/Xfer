@@ -8,5 +8,6 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class EmptyElement : Element {
     public static readonly string ElementName = "empty";
+    public override string Value => string.Empty;
     public EmptyElement() : base(ElementName, new('\0', '\0')) { }
 }

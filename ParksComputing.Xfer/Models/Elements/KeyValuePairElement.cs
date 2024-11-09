@@ -12,11 +12,12 @@ public class KeyValuePairElement : Element {
 
     public Element KeyElement { get; set; }
     public string Key { get; }
-    public Element Value { get; set; }
+    public Element TypedValue { get; set; }
+    public override string Value => TypedValue.ToString();
 
-    public KeyValuePairElement(Element keyElement) : base(ElementName, new(OpeningMarker, ClosingMarker)) {
+    public KeyValuePairElement(Element keyElement, int markerCount = 1) : base(ElementName, new(OpeningMarker, ClosingMarker, markerCount)) {
         KeyElement = keyElement;
-        Value = new EmptyElement();
+        TypedValue = new EmptyElement();
 
         if (keyElement is StringElement se) {
             Key = se.Value;
@@ -29,11 +30,11 @@ public class KeyValuePairElement : Element {
         }
     }
 
-    public KeyValuePairElement(Element keyElement, Element value) : this(keyElement) {
-        Value = value;
+    public KeyValuePairElement(Element keyElement, Element value, int markerCount = 1) : this(keyElement, markerCount) {
+        TypedValue = value;
     }
 
     public override string ToString() {
-        return $"{Delimiter.Opening}{KeyElement} {Value}{Delimiter.Closing}";
+        return $"{Delimiter.Opening}{KeyElement}{TypedValue}{Delimiter.Closing}";
     }
 }

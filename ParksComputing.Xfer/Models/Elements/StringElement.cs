@@ -11,10 +11,11 @@ public class StringElement : Element {
     public const char OpeningMarker = '"';
     public const char ClosingMarker = OpeningMarker;
 
-    public string Value { get; set; } = string.Empty;
+    public string TypedValue { get; set; } = string.Empty;
+    public override string Value => TypedValue;
 
     public StringElement(string text, int markerCount = 1) : base(ElementName, new(OpeningMarker, ClosingMarker, markerCount)) { 
-        Value = text;
+        TypedValue = text;
     }
 
     public override string ToString() {

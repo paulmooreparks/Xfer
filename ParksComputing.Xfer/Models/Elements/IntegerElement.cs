@@ -11,11 +11,12 @@ public class IntegerElement : Element {
     public const char OpeningMarker = '#';
     public const char ClosingMarker = OpeningMarker;
 
-    public int Value { get; set; }
+    public int TypedValue { get; set; }
+    public override string Value => TypedValue.ToString();
 
     public IntegerElement(int value)
         : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
-        Value = value;
+        TypedValue = value;
     }
 
     public override string ToString() {
