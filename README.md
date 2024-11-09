@@ -22,8 +22,6 @@ the first non-comment element in an Xfer document. />
 
 <! <: version <"1.0.0"> :> !>
 
-<:: keyValuePair <:key <"value"> :> ::> 
-
 </ The outermost element of an Xfer document is an implicit property-bag element. It may contain 
 elements of any type. />
 
