@@ -14,9 +14,6 @@ public class Parser {
         Encoding = encoding;
     }
 
-    public const char ElementOpeningMarker = '<';
-    public const char ElementClosingMarker = '>';
-
     public Encoding Encoding { get; private set; } = Encoding.UTF8;
 
     private string _scanString = string.Empty;
@@ -96,7 +93,7 @@ public class Parser {
         ++Position;
         UpdateRowColumn();
 
-        if (CurrentChar == ElementOpeningMarker && Peek == CommentElement.OpeningMarker) {
+        if (CurrentChar == Element.ElementOpeningMarker && Peek == CommentElement.OpeningMarker) {
             int markerCount = 1;
             ++Position;
             UpdateRowColumn();
@@ -114,7 +111,7 @@ public class Parser {
                     int tmpMarkerCount = markerCount;
                     --markerCount;
 
-                    if (Peek == ElementClosingMarker && markerCount == 0) {
+                    if (Peek == Element.ElementClosingMarker && markerCount == 0) {
                         ++Position;
                         UpdateRowColumn();
                         ++Position;
@@ -129,7 +126,7 @@ public class Parser {
                         UpdateRowColumn();
                         --markerCount;
 
-                        if (Peek == ElementClosingMarker && markerCount == 0) {
+                        if (Peek == Element.ElementClosingMarker && markerCount == 0) {
                             ++Position;
                             UpdateRowColumn();
                             ++Position;
@@ -162,7 +159,7 @@ public class Parser {
     }
 
     internal bool ElementOpening(char openingMarker, ref int markerCount) {
-        if (CurrentChar == ElementOpeningMarker && Peek == openingMarker) {
+        if (CurrentChar == Element.ElementOpeningMarker && Peek == openingMarker) {
             markerCount = 1;
             Advance();
             Advance();
@@ -182,7 +179,7 @@ public class Parser {
         if (CurrentChar == closingMarker) {
             --markerCount;
 
-            if (Peek == ElementClosingMarker && markerCount == 0) {
+            if (Peek == Element.ElementClosingMarker && markerCount == 0) {
                 Advance();
                 Advance();
                 return true;
@@ -194,7 +191,7 @@ public class Parser {
                 Advance();
                 --markerCount;
 
-                if (Peek == ElementClosingMarker && markerCount == 0) {
+                if (Peek == Element.ElementClosingMarker && markerCount == 0) {
                     Advance();
                     Advance();
                     return true;
@@ -398,19 +395,43 @@ public class Parser {
         }
     }
 
-    private ArrayElement ParseArrayElement(int markerCount = 1) {
+    private CollectionElement ParseArrayElement(int markerCount = 1) {
         SkipWhitespace();
-        var arrayElement = new ArrayElement();
 
-        while (IsCharAvailable()) {
-            if (ElementClosing(ArrayElement.ClosingMarker, markerCount)) {
-                return arrayElement;
+        if (IsCharAvailable()) {
+            var element = ParseElement();
+
+            /* This looks and feels kind of dirty, for some reason, yet it does the job. Sure, I could put this in a 
+            dictionary or make a factory, but that just moves the ugliness around. */
+
+            CollectionElement arrayElement = element switch {
+                IntegerElement => new TypedArrayElement<IntegerElement>(),
+                LongElement => new TypedArrayElement<LongElement>(),
+                DecimalElement => new TypedArrayElement<DecimalElement>(),
+                DoubleElement => new TypedArrayElement<DoubleElement>(),
+                BooleanElement => new TypedArrayElement<BooleanElement>(),
+                DateElement => new TypedArrayElement<DateElement>(),
+                TextElement => new TypedArrayElement<TextElement>(),
+                CharacterElement => new TypedArrayElement<CharacterElement>(),
+                KeyValuePairElement => new TypedArrayElement<KeyValuePairElement>(),
+                ObjectElement => new TypedArrayElement<ObjectElement>(),
+                MetadataElement => new TypedArrayElement<MetadataElement>(),
+                PropertyBagElement => new TypedArrayElement<PropertyBagElement>(),
+                _ => new ArrayElement() // Will this even happen?
+            };
+
+            arrayElement.Add(element);
+
+            while (IsCharAvailable()) {
+                if (ElementClosing(ArrayElement.ClosingMarker, markerCount)) {
+                    return arrayElement;
+                }
+
+                element = ParseElement();
+                arrayElement.Add(element);
             }
 
-            var element = ParseElement();
-            arrayElement.Add(element);
         }
-
         throw new InvalidOperationException($"Unexpected end of {ArrayElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 

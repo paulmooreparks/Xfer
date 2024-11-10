@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class ArrayElement : Element {
+public class ArrayElement : CollectionElement {
     public static readonly string ElementName = "array";
     public const char OpeningMarker = '[';
     public const char ClosingMarker = ']';
@@ -50,7 +50,7 @@ public class ArrayElement : Element {
         _items.AddRange(values);
     }
 
-    public void Add(Element element) {
+    public override void Add(Element element) {
         if (_elementType == null) {
             // Set the element type if this is the first element being added
             _elementType = element.GetType();

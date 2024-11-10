@@ -11,6 +11,9 @@ public class BooleanElement : TypedElement<bool> {
     public const char OpeningMarker = '~';
     public const char ClosingMarker = OpeningMarker;
 
+    public static readonly string TrueValue = "true";
+    public static readonly string FalseValue = "false";
+
     public BooleanElement(bool value)
         : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
     }
@@ -18,7 +21,7 @@ public class BooleanElement : TypedElement<bool> {
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        sb.Append(Value);
+        sb.Append(Value ? TrueValue : FalseValue);
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }

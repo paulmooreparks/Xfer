@@ -130,7 +130,7 @@ public class MetadataElement : Element {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
         foreach (var value in _values.Values) {
-            sb.Append($"{Parser.ElementOpeningMarker}{KeyValuePairElement.OpeningMarker}{value.Key}{value.Value.ToString()}{KeyValuePairElement.ClosingMarker}{Parser.ElementClosingMarker}");
+            sb.Append($"{Element.ElementOpeningMarker}{KeyValuePairElement.OpeningMarker}{value.Key}{value.Value.ToString()}{KeyValuePairElement.ClosingMarker}{Element.ElementClosingMarker}");
         }
         sb.Append(Delimiter.Closing);
         return sb.ToString();

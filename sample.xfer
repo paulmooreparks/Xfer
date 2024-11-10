@@ -20,7 +20,7 @@ elements of any type. />
 <"Hello, Xfer!">
 
 </ An evaluated element evaluates its embedded elements. The following will render as I ❤ Xfer. />
-<_ I <\$2764\> Xfer _>
+<_ I <\$2764\><\$fe0e\> Xfer _>
 
 </ An example of embedding a string element and a comment inside an Xfer string. />
 <""
@@ -32,8 +32,7 @@ elements of any type. />
 <"A string may contain character elements<\$20\>inside of it, which will not be parsed.">
 <_When character elements are inside an evaluated<\$20\>element, they are parsed_>
 <__An eval element may contain <_another eval_> if its markers are repeated__>
-<_Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) 
-may also be embedded in eval elements, and their evaluated results will become part of the rendered value._>
+<_Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) may also be embedded in eval elements, and their evaluated results will become part of the rendered value._>
 
 <{
     <: string <"value"> :> </ String marker is " />
@@ -48,21 +47,18 @@ may also be embedded in eval elements, and their evaluated results will become p
     <: date <@2019-01-01@> :> </ Date marker is @ />
     <: placeholder <_<|USERPROFILE|>_> :> </ Placeholder marker is | />
     <: evalString <_Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><__as<\$20\>is__>._> :> </ Evaluated element marker is _ />
-    <: 
-        array <[
+    <: array <[
             <#1#> 
             <#2#> 
             <#3#>
         ]> 
     :> </ Array markers are [ ] />
-    <: 
-        object <{ 
+    <: object <{ 
             <:key <"value">:> 
             <: boolean <~false~> :>
         }> </ Object markers are { } />
     :> 
-    <: 
-        propertyBag <(
+    <: propertyBag <(
             <"value">
             <#123#>
             <~true~>
