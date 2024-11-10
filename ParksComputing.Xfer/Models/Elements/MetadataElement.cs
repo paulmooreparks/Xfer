@@ -11,28 +11,28 @@ public class MetadataElement : Element {
     public const char ClosingMarker = OpeningMarker;
     public static readonly string DefaultVersion = "1.0.0";
 
-    private Dictionary<string, Tuple<Element, Element>> _values = new ();
-    public IReadOnlyDictionary<string, Tuple<Element, Element>> Values => _values;
+    private Dictionary<string, KeyValuePairElement> _values = new ();
+    public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
 
-    public Element this[string index] {
+    public KeyValuePairElement this[string index] {
         get {
-            return _values[index].Item2;
+            return _values[index];
         }
         set {
             switch (index) {
                 case "version":
-                    SetOrThrow<StringElement>(value, index);
-                    Version = ((StringElement)value).Value;
+                    SetOrThrow<TextElement>(value, index);
+                    Version = value.Value.ToString() ?? string.Empty;
                     break;
 
                 case "message_id":
-                    SetOrThrow<StringElement>(value, index);
-                    MessageId = ((StringElement)value).Value;
+                    SetOrThrow<TextElement>(value, index);
+                    MessageId = value.Value.ToString() ?? string.Empty;
                     break;
 
                 case "ttl":
                     SetOrThrow<IntegerElement>(value, index);
-                    Ttl = ((IntegerElement)value).TypedValue;
+                    Ttl = Convert.ToInt32(value.Value);
                     break;
 
                 default:
@@ -99,11 +99,11 @@ public class MetadataElement : Element {
     }
 
     private void SetOrUpdateValue<TElement>(string key, TElement element) where TElement : Element {
-        if (_values.TryGetValue(key, out Tuple<Element, Element>? tuple)) {
-            _values[key] = new Tuple<Element, Element>(tuple.Item1, element);
+        if (_values.TryGetValue(key, out KeyValuePairElement? kvp)) {
+            _values[key] = new KeyValuePairElement(kvp.KeyElement, element);
         }
         else {
-            Element keyElement;
+            TextElement keyElement;
 
             if (key.IsKeywordString()) {
                 keyElement = new KeywordElement(key);
@@ -112,39 +112,26 @@ public class MetadataElement : Element {
                 keyElement = new StringElement(key);
             }
 
-            _values.Add(key, new Tuple<Element, Element>(keyElement, element));
+            _values.Add(key, new KeyValuePairElement(keyElement, element));
         }
     }
 
-    private void SetOrThrow<TElement>(Element value, string key) where TElement : Element {
-        if (value is not TElement) {
+    private void SetOrThrow<TElement>(KeyValuePairElement value, string key) where TElement : Element {
+        if (value.Value is not TElement) {
             throw new ArgumentException($"Invalid element type for '{key}': {value.GetType()}");
         }
     }
 
     public void AddOrUpdate(KeyValuePairElement value) {
-        if (_values.TryGetValue(value.Key, out Tuple<Element, Element>? tuple)) {
-            _values[value.Key] = new Tuple<Element, Element>(value.KeyElement, value.TypedValue);
-        }
-        else {
-            _values.Add(value.Key, new Tuple<Element, Element>(value.KeyElement, value.TypedValue));
-        }
-    }
-
-    public override string Value {
-        get {
-            var sb = new StringBuilder();
-            foreach (var value in _values.Values) {
-                sb.Append($"{Parser.ElementOpeningMarker}{KeyValuePairElement.OpeningMarker}{value.Item1}{value.Item2}{KeyValuePairElement.ClosingMarker}{Parser.ElementClosingMarker}");
-            }
-            return sb.ToString();
-        }
+        this[value.Key] = value;
     }
 
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        sb.Append(Value);
+        foreach (var value in _values.Values) {
+            sb.Append($"{Parser.ElementOpeningMarker}{KeyValuePairElement.OpeningMarker}{value.Key}{value.Value.ToString()}{KeyValuePairElement.ClosingMarker}{Parser.ElementClosingMarker}");
+        }
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }

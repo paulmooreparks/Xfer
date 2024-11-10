@@ -156,6 +156,11 @@ public class Parser {
         return CurrentChar;
     }
 
+    internal bool ElementOpening(char openingMarker) {
+        int markerCount = 1;
+        return ElementOpening(openingMarker, ref markerCount);
+    }
+
     internal bool ElementOpening(char openingMarker, ref int markerCount) {
         if (CurrentChar == ElementOpeningMarker && Peek == openingMarker) {
             markerCount = 1;
@@ -383,7 +388,7 @@ public class Parser {
         return new EmptyElement();
     }
 
-    private void ParseCommentElement(int markerCount) {
+    private void ParseCommentElement(int markerCount = 1) {
         while (IsCharAvailable()) {
             if (ElementClosing(CommentElement.ClosingMarker, markerCount)) {
                 break;
@@ -393,7 +398,7 @@ public class Parser {
         }
     }
 
-    private ArrayElement ParseArrayElement(int markerCount) {
+    private ArrayElement ParseArrayElement(int markerCount = 1) {
         SkipWhitespace();
         var arrayElement = new ArrayElement();
 
@@ -409,7 +414,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {ArrayElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private ObjectElement ParseObjectElement(int markerCount) {
+    private ObjectElement ParseObjectElement(int markerCount = 1) {
         SkipWhitespace();
         var objectElement = new ObjectElement();
 
@@ -431,7 +436,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {ObjectElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private MetadataElement ParseMetadataElement(int markerCount) {
+    private MetadataElement ParseMetadataElement(int markerCount = 1) {
         SkipWhitespace();
         var metadataElement = new MetadataElement();
 
@@ -453,7 +458,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {MetadataElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private PropertyBagElement ParsePropertyBagElement(int markerCount) {
+    private PropertyBagElement ParsePropertyBagElement(int markerCount = 1) {
         SkipWhitespace();
         var propBagElement = new PropertyBagElement();
 
@@ -469,7 +474,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {PropertyBagElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private PlaceholderElement ParsePlaceholderElement(int markerCount) {
+    private PlaceholderElement ParsePlaceholderElement(int markerCount = 1) {
         SkipWhitespace();
         StringBuilder valueBuilder = new StringBuilder();
 
@@ -492,7 +497,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {EvaluatedElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private KeyValuePairElement ParseKeyValuePairElement(int markerCount) {
+    private KeyValuePairElement ParseKeyValuePairElement(int markerCount = 1) {
         SkipWhitespace();
         while (Peek.IsKeywordChar()) {
             Expand();
@@ -515,7 +520,7 @@ public class Parser {
 
             Element valueElement = ParseElement();
             SkipWhitespace();
-            keyValuePairElement.TypedValue = valueElement;
+            keyValuePairElement.Value = valueElement;
         }
 
         throw new InvalidOperationException($"Unexpected end of {KeywordElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
@@ -526,7 +531,7 @@ public class Parser {
     I'm just trying to get through the basic scenarios first.
     */
 
-    private CharacterElement ParseCharacterElement(int markerCount) {
+    private CharacterElement ParseCharacterElement(int markerCount = 1) {
         StringBuilder charContent = new();
 
         while (IsCharAvailable() && !ElementClosing(CharacterElement.ClosingMarker, markerCount)) {
@@ -566,7 +571,7 @@ public class Parser {
         return new CharacterElement(character);
     }
 
-    private EvaluatedElement ParseEvaluatedElement(int markerCount) {
+    private EvaluatedElement ParseEvaluatedElement(int markerCount = 1) {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
@@ -632,6 +637,11 @@ public class Parser {
                 continue;
             }
 
+            if (ElementOpening(CommentElement.OpeningMarker, ref markerCount)) {
+                ParseCommentElement(markerCount);
+                continue;
+            }
+
             if (ElementClosing(EvaluatedElement.ClosingMarker, markerCount)) {
                 return new EvaluatedElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount);
             }
@@ -643,7 +653,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {EvaluatedElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private StringElement ParseStringElement(int markerCount) {
+    private StringElement ParseStringElement(int markerCount = 1) {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
@@ -658,11 +668,17 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {StringElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private IntegerElement ParseIntegerElement(int markerCount) {
+    private IntegerElement ParseIntegerElement(int markerCount = 1) {
         SkipWhitespace();
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
+            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+                valueBuilder.Append(evaluatedElement.Value);
+                continue;
+            }
+
             if (ElementClosing(IntegerElement.ClosingMarker, markerCount)) {
                 var value = ParseNumericValue<int>(valueBuilder.ToString());
                 return new IntegerElement(value);
@@ -676,11 +692,17 @@ public class Parser {
     }
 
 
-    private DateElement ParseDateElement(int markerCount) {
+    private DateElement ParseDateElement(int markerCount = 1) {
         SkipWhitespace();
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
+            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+                valueBuilder.Append(evaluatedElement.Value);
+                continue;
+            }
+
             if (ElementClosing(DateElement.ClosingMarker, markerCount)) {
                 var value = valueBuilder.ToString();
                 return new DateElement(value);
@@ -693,11 +715,17 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {DateElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }        
     
-    private LongElement ParseLongIntegerElement(int markerCount) {
+    private LongElement ParseLongIntegerElement(int markerCount = 1) {
         SkipWhitespace();
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
+            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+                valueBuilder.Append(evaluatedElement.Value);
+                continue;
+            }
+
             if (ElementClosing(LongElement.ClosingMarker, markerCount)) {
                 var value = ParseNumericValue<long>(valueBuilder.ToString());
                 return new LongElement(value);
@@ -710,11 +738,17 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {LongElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private DecimalElement ParseDecimalElement(int markerCount) {
+    private DecimalElement ParseDecimalElement(int markerCount = 1) {
         SkipWhitespace();
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
+            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+                valueBuilder.Append(evaluatedElement.Value);
+                continue;
+            }
+
             if (ElementClosing(DecimalElement.ClosingMarker, markerCount)) {
                 var value = ParseNumericValue<decimal>(valueBuilder.ToString());
                 return new DecimalElement(value);
@@ -727,11 +761,17 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {DecimalElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private DoubleElement ParseDoubleElement(int markerCount) {
+    private DoubleElement ParseDoubleElement(int markerCount = 1) {
         SkipWhitespace();
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
+            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+                valueBuilder.Append(evaluatedElement.Value);
+                continue;
+            }
+
             if (ElementClosing(DoubleElement.ClosingMarker, markerCount)) {
                 var value = ParseNumericValue<double>(valueBuilder.ToString());
                 return new DoubleElement(value);
@@ -744,11 +784,17 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {DoubleElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private BooleanElement ParseBooleanElement(int markerCount) {
+    private BooleanElement ParseBooleanElement(int markerCount = 1) {
         SkipWhitespace();
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
+            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+                valueBuilder.Append(evaluatedElement.Value);
+                continue;
+            }
+
             if (ElementClosing(BooleanElement.ClosingMarker, markerCount)) {
                 string valueString = valueBuilder.ToString().ToLower();
                 bool value = valueString switch {

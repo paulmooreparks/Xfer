@@ -6,19 +6,11 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class StringElement : Element {
+public class StringElement : TextElement {
     public static readonly string ElementName = "string";
     public const char OpeningMarker = '"';
     public const char ClosingMarker = OpeningMarker;
 
-    public string TypedValue { get; set; } = string.Empty;
-    public override string Value => TypedValue;
-
-    public StringElement(string text, int markerCount = 1) : base(ElementName, new(OpeningMarker, ClosingMarker, markerCount)) { 
-        TypedValue = text;
-    }
-
-    public override string ToString() {
-        return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
+    public StringElement(string text, int markerCount = 1) : base(text, ElementName, new(OpeningMarker, ClosingMarker, markerCount)) { 
     }
 }

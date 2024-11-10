@@ -14,13 +14,9 @@ public class ArrayElement : Element {
     private List<Element> _items = new();
     private Type? _elementType;
 
-    public override string Value { 
+    public Element[] Value { 
         get {
-            var sb = new StringBuilder();
-            foreach (var item in _items) {
-                sb.Append(item.ToString());
-            }
-            return sb.ToString();
+            return _items.ToArray();
         }
     }
 
@@ -70,7 +66,9 @@ public class ArrayElement : Element {
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        sb.Append(Value);
+        foreach (var item in _items) {
+            sb.Append(item.ToString());
+        }
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }

@@ -6,17 +6,12 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class DecimalElement : Element {
+public class DecimalElement : TypedElement<decimal> {
     public static readonly string ElementName = "decimal";
     public const char OpeningMarker = '*';
     public const char ClosingMarker = OpeningMarker;
 
-    public decimal TypedValue { get; set; }
-    public override string Value => TypedValue.ToString();
-
-    public DecimalElement(decimal value)
-        : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
-        TypedValue = value;
+    public DecimalElement(decimal value) : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
     }
 
     public override string ToString() {

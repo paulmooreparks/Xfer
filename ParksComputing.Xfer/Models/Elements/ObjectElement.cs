@@ -15,7 +15,7 @@ public class ObjectElement : Element {
 
     public Element this[string index] {
         get {
-            return _values[index].TypedValue;
+            return _values[index].Value;
         }
         set {
             SetOrUpdateValue(index, value);
@@ -26,10 +26,10 @@ public class ObjectElement : Element {
 
     private void SetOrUpdateValue<TElement>(string key, TElement element) where TElement : Element {
         if (_values.TryGetValue(key, out KeyValuePairElement? kvp)) {
-            _values[key] = new KeyValuePairElement(kvp.TypedValue, element);
+            _values[key] = new KeyValuePairElement(kvp.KeyElement, element);
         }
         else {
-            Element keyElement;
+            TextElement keyElement;
 
             if (key.IsKeywordString()) {
                 keyElement = new KeywordElement(key);
@@ -51,20 +51,22 @@ public class ObjectElement : Element {
         }
     }
 
-    public override string Value {
+    public List<KeyValuePairElement> TypedValue {
         get {
-            var sb = new StringBuilder();
-            foreach (var value in _values.Values) {
-                sb.Append($"{value}");
+            List<KeyValuePairElement> values = new();
+            foreach (var value in _values) {
+                values.Append(value.Value);
             }
-            return sb.ToString();
+            return values;
         }
     }
 
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        sb.Append(Value);
+        foreach (var value in _values.Values) {
+            sb.Append($"{value}");
+        }
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }

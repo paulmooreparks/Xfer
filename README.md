@@ -57,7 +57,6 @@ may also be embedded in eval elements, and their evaluated results will become p
     <: date <@2019-01-01@> :> </ Date marker is @ />
     <: placeholder <_<|USERPROFILE|>_> :> </ Placeholder marker is | />
     <: evalString <_Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><__as<\$20\>is__>._> :> </ Evaluated element marker is _ />
-    <:: keyValuePair <:key <"value"> :> ::> </ Key-value pair marker is : />
     <: 
         array <[
             <#1#> 
@@ -81,6 +80,16 @@ may also be embedded in eval elements, and their evaluated results will become p
     :>
     
 }>
+
+<(
+    </ Most elements may pull their values from a placeholder. />
+    <: numProcs <#<|NUMBER_OF_PROCESSORS|>#> :>
+
+    </ A key-value pair element may have a key/value pair as a value. />
+    <:: keyValuePair <:key <"value"> :> ::> 
+
+    <_What if an eval element contains a comment?</ The comment is removed./>_>
+)>
 
 <"
 /* Now it's possible to embed code with less worry */

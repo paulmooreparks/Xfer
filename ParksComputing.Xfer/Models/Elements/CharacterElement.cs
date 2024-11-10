@@ -6,19 +6,17 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class CharacterElement : Element {
+public class CharacterElement : TypedElement<char> {
     public static readonly string ElementName = "character";
     public const char OpeningMarker = '\\';
     public const char ClosingMarker = OpeningMarker;
 
-    public char TypedValue { get; set; } = default;
-    public override string Value => TypedValue.ToString();
+    public int CharValue => Value;
 
-    public CharacterElement(char ch, int markerCount = 1) : base(ElementName, new(OpeningMarker, ClosingMarker, markerCount)) {
-        TypedValue = ch;
+    public CharacterElement(char ch, int markerCount = 1) : base(ch, ElementName, new(OpeningMarker, ClosingMarker, markerCount)) {
     }
 
     public override string ToString() {
-        return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
+        return $"{Delimiter.Opening}{CharValue}{Delimiter.Closing}";
     }
 }

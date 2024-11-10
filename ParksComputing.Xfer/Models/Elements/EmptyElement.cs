@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class EmptyElement : Element {
+public class EmptyElement : TypedElement<string> {
     public static readonly string ElementName = "empty";
     public override string Value => string.Empty;
-    public EmptyElement() : base(ElementName, new('\0', '\0')) { }
+    public EmptyElement() : base(string.Empty, ElementName, new('\0', '\0')) { }
 }

@@ -19,6 +19,22 @@ public class PropertyBagElement : Element {
         } 
     }
 
+    public List<object> TypedValue {
+        get {
+            List<object> values = new (_items.Count);
+            for (int i = 0; i < _items.Count; i++) {
+                values[i] = _items[i];
+            }
+            return values;
+        }
+    }
+
+    public string Value {
+        get {
+            return string.Join(", ", TypedValue);
+        }
+    }
+
     public PropertyBagElement() : base(ElementName, new(OpeningMarker, ClosingMarker)) { }
 
     public PropertyBagElement(IEnumerable<Element> values) : this() {
@@ -33,20 +49,12 @@ public class PropertyBagElement : Element {
         _items.Add(element);
     }
 
-    public override string Value {
-        get {
-            var sb = new StringBuilder();
-            foreach (var item in _items) {
-                sb.Append(item.ToString());
-            }
-            return sb.ToString();
-        }
-    }
-
     public override string ToString() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
-        sb.Append(Value);
+        foreach (var item in _items) {
+            sb.Append(item.ToString());
+        }
         sb.Append(Delimiter.Closing);
         return sb.ToString();
     }

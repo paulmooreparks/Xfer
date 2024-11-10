@@ -6,17 +6,13 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
-public class BooleanElement : Element {
+public class BooleanElement : TypedElement<bool> {
     public static readonly string ElementName = "boolean";
     public const char OpeningMarker = '~';
     public const char ClosingMarker = OpeningMarker;
 
-    public bool TypedValue { get; set; }
-    public override string Value => TypedValue.ToString();
-
     public BooleanElement(bool value)
-        : base(ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
-        TypedValue = value;
+        : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
     }
 
     public override string ToString() {

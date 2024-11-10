@@ -5,16 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
-public class KeywordElement : Element {
+public class KeywordElement : TextElement {
     public static readonly string ElementName = "keyword";
     public const char OpeningMarker = '<';
     public const char ClosingMarker = '>';
 
-    public string TypedValue { get; set; } = string.Empty;
-    public override string Value => TypedValue;
-
-    public KeywordElement(string text) : base(ElementName, new(OpeningMarker, ClosingMarker)) { 
-        TypedValue = text;
+    public KeywordElement(string text) : base(text, ElementName, new(OpeningMarker, ClosingMarker)) { 
     }
 
     public override string ToString() {

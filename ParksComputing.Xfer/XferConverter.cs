@@ -82,7 +82,7 @@ public class XferConverter {
         if (first is ObjectElement propertyBag) {
             foreach (var element in propertyBag.Values) {
                 if (propertyMap.TryGetValue(element.Key, out var property)) {
-                    object? value = DeserializeValue(element.Value.TypedValue, property.PropertyType);
+                    object? value = DeserializeValue(element.Value.Value, property.PropertyType);
                     property.SetValue(obj, value);
                 }
             }
