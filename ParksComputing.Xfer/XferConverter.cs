@@ -112,7 +112,7 @@ public class XferConverter {
                 return array;
             }
             else {
-                throw new InvalidOperationException($"Expected ArrayElement for array deserialization.");
+                throw new InvalidOperationException($"Expected {nameof(CollectionElement)} for array deserialization.");
             }
         }
 
@@ -125,7 +125,7 @@ public class XferConverter {
                 return values;
             }
             else {
-                throw new InvalidOperationException($"Expected PropertyBagElement for IEnumerable deserialization.");
+                throw new InvalidOperationException($"Expected {nameof(PropertyBagElement)} for IEnumerable deserialization.");
             }
         }
 
