@@ -9,5 +9,7 @@ public abstract class CollectionElement : Element {
     protected CollectionElement(string name, Delimiter delimiter) : base(name, delimiter) {
     }
 
+    public abstract IEnumerable<Element> Values { get; }
+
     public abstract void Add(Element element);
 }

@@ -20,7 +20,7 @@ public class ArrayElement : CollectionElement {
         }
     }
 
-    public IEnumerable<Element> Values {
+    public override IEnumerable<Element> Values {
         get {
             return _items;
         }

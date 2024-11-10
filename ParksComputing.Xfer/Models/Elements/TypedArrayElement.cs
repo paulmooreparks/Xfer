@@ -19,7 +19,7 @@ public class TypedArrayElement<T> : CollectionElement where T : Element {
         }
     }
 
-    public IEnumerable<T> Values {
+    public override IEnumerable<T> Values {
         get {
             return _items;
         }

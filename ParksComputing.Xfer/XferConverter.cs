@@ -93,7 +93,7 @@ public class XferConverter {
 
     private static object? DeserializeValue(Element element, Type targetType) {
         if (targetType.IsArray) {
-            if (element is ArrayElement arrayElement) {
+            if (element is CollectionElement arrayElement) {
                 var elementType = targetType.GetElementType();
                 if (elementType == null) {
                     throw new InvalidOperationException($"Unable to determine element type for array.");

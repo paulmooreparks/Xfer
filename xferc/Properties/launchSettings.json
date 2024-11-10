@@ -2,7 +2,7 @@
   "profiles": {
     "xferc": {
       "commandName": "Project",
-      "commandLineArgs": "parse ..\\..\\..\\..\\sample.xfer"
+      "commandLineArgs": "serialize"
     }
   }
 }
