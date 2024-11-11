@@ -111,14 +111,12 @@ element followed by a value element. />
 :> 
 
 </ Property bags are a collection of values of any type, so they are analogous to JSON arrays. />
-<: 
-    propertyBag <(
-        <"value">
-        <#123#>
-        <~true~>
-        <@2019-01-01@>
-    )> 
-:>
+<(
+    <"value">
+    <#123#>
+    <~true~>
+    <@2019-01-01@>
+)> 
 ```
 
 ### Metadata
