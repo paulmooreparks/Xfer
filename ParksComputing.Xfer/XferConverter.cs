@@ -33,21 +33,6 @@ public class XferConverter {
     }
 
     private static Element SerializeValue(object value) {
-        if (value is Array arrayValue) {
-            var arrayElement = new ArrayElement();
-            foreach (var item in arrayValue) {
-                if (item != null) {
-                    var element = SerializeValue(item);
-                    arrayElement.Add(element);
-                }
-                else {
-                    // Handle null items, if needed
-                    arrayElement.Add(new EmptyElement());
-                }
-            }
-            return arrayElement;
-        }
-
         return value switch {
             int intValue => new IntegerElement(intValue),
             long longValue => new LongElement(longValue),
@@ -56,10 +41,88 @@ public class XferConverter {
             decimal decimalValue => new DecimalElement(decimalValue),
             DateTime dateTimeValue => new DateElement(dateTimeValue.ToString("yyyy-MM-ddTHH:mm:ss")),
             string stringValue => new StringElement(stringValue),
+            int[] intArray => SerializeIntArray(intArray),
+            long[] longArray => SerializeLongArray(longArray),
+            bool[] boolArray => SerializeBooleanArray(boolArray),
+            double[] doubleArray => SerializeDoubleArray(doubleArray),
+            decimal[] decimalArray => SerializeDecimalArray(decimalArray),
+            DateTime[] dateArray => SerializeDateArray(dateArray),
+            string[] stringArray => SerializeStringArray(stringArray),
+            object[] objectArray => new PropertyBagElement(objectArray.Select(SerializeValue)),
             IEnumerable<object> list => new PropertyBagElement(list.Select(SerializeValue)),
             object objectValue => new EvaluatedElement(objectValue.ToString() ?? string.Empty),
             _ => throw new NotSupportedException($"Type '{value.GetType().Name}' is not supported")
         };
+    }
+
+    private static TypedArrayElement<IntegerElement> SerializeIntArray(int[] intArray) {
+        var arrayElement = new TypedArrayElement<IntegerElement>();
+
+        foreach (var item in intArray) {
+            arrayElement.Add(new IntegerElement(item));
+        }
+
+        return arrayElement;
+    }
+
+    private static TypedArrayElement<LongElement> SerializeLongArray(long[] longArray) {
+        var arrayElement = new TypedArrayElement<LongElement>();
+
+        foreach (var item in longArray) {
+            arrayElement.Add(new LongElement(item));
+        }
+
+        return arrayElement;
+    }
+
+    private static TypedArrayElement<BooleanElement> SerializeBooleanArray(bool[] boolArray) {
+        var arrayElement = new TypedArrayElement<BooleanElement>();
+
+        foreach (var item in boolArray) {
+            arrayElement.Add(new BooleanElement(item));
+        }
+
+        return arrayElement;
+    }
+
+    private static TypedArrayElement<DoubleElement> SerializeDoubleArray(double[] doubleArray) {
+        var arrayElement = new TypedArrayElement<DoubleElement>();
+
+        foreach (var item in doubleArray) {
+            arrayElement.Add(new DoubleElement(item));
+        }
+
+        return arrayElement;
+    }
+
+    private static TypedArrayElement<DecimalElement> SerializeDecimalArray(decimal[] decimalArray) {
+        var arrayElement = new TypedArrayElement<DecimalElement>();
+
+        foreach (var item in decimalArray) {
+            arrayElement.Add(new DecimalElement(item));
+        }
+
+        return arrayElement;
+    }
+
+    private static TypedArrayElement<DateElement> SerializeDateArray(DateTime[] dateArray) {
+        var arrayElement = new TypedArrayElement<DateElement>();
+
+        foreach (var item in dateArray) {
+            arrayElement.Add(new DateElement(item));
+        }
+
+        return arrayElement;
+    }
+
+    private static TypedArrayElement<StringElement> SerializeStringArray(string[] stringArray) {
+        var arrayElement = new TypedArrayElement<StringElement>();
+
+        foreach (var item in stringArray) {
+            arrayElement.Add(new StringElement(item));
+        }
+
+        return arrayElement;
     }
 
     public static T Deserialize<T>(string xfer) where T : new() {
@@ -93,7 +156,7 @@ public class XferConverter {
 
     private static object? DeserializeValue(Element element, Type targetType) {
         if (targetType.IsArray) {
-            if (element is CollectionElement arrayElement) {
+            if (element is ArrayElement arrayElement) {
                 var elementType = targetType.GetElementType();
                 if (elementType == null) {
                     throw new InvalidOperationException($"Unable to determine element type for array.");
@@ -112,7 +175,7 @@ public class XferConverter {
                 return array;
             }
             else {
-                throw new InvalidOperationException($"Expected {nameof(CollectionElement)} for array deserialization.");
+                throw new InvalidOperationException($"Expected {nameof(ArrayElement)} for array deserialization.");
             }
         }
 

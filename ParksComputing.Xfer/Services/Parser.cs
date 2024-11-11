@@ -395,7 +395,7 @@ public class Parser {
         }
     }
 
-    private CollectionElement ParseArrayElement(int markerCount = 1) {
+    private ArrayElement ParseArrayElement(int markerCount = 1) {
         SkipWhitespace();
 
         if (IsCharAvailable()) {
@@ -404,7 +404,7 @@ public class Parser {
             /* This looks and feels kind of dirty, for some reason, yet it does the job. Sure, I could put this in a 
             dictionary or make a factory, but that just moves the ugliness around. */
 
-            CollectionElement arrayElement = element switch {
+            ArrayElement arrayElement = element switch {
                 IntegerElement => new TypedArrayElement<IntegerElement>(),
                 LongElement => new TypedArrayElement<LongElement>(),
                 DecimalElement => new TypedArrayElement<DecimalElement>(),
@@ -417,7 +417,7 @@ public class Parser {
                 ObjectElement => new TypedArrayElement<ObjectElement>(),
                 MetadataElement => new TypedArrayElement<MetadataElement>(),
                 PropertyBagElement => new TypedArrayElement<PropertyBagElement>(),
-                _ => new ArrayElement() // Will this even happen?
+                _ => new TypedArrayElement<Element>() // Will this even happen?
             };
 
             arrayElement.Add(element);

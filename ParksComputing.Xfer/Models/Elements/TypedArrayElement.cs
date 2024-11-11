@@ -5,10 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
-public class TypedArrayElement<T> : CollectionElement where T : Element {
-    public static readonly string ElementName = "array";
-    public const char OpeningMarker = '[';
-    public const char ClosingMarker = ']';
+public class TypedArrayElement<T> : ArrayElement where T : Element {
     private Type _elementType = typeof(T);
 
     private List<T> _items = new();
