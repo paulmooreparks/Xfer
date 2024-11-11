@@ -92,7 +92,8 @@ or binary (preceded by %)./>
 <_<|USERPROFILE|>_>
 <#<|NUMBER_OF_PROCESSORS|>#>
 
-</ The <: :> element is a key/value pair, which consists of either an alphabetic keyword or a text element followed by a value element. />
+</ The <: :> element is a key/value pair, which consists of either an alphabetic keyword or a text 
+element followed by a value element. />
 <: name <"Paul"> :>
 <: age <#$36#> :>
 <: <"permanent location"> <"Singapore"> :>
@@ -122,8 +123,9 @@ or binary (preceded by %)./>
 
 ### Metadata
 
-Xfer documents can contain metadata that is not part of the data itself. This metadata can be used for a variety of purposes, 
-such as defining the version of Xfer that the document conforms to and other information that may be useful to the parser or 
+Xfer documents can contain metadata that is not part of the data itself. This metadata can be 
+used for a variety of purposes, such as defining the version of Xfer that the document conforms 
+to and other information that may be useful to the parser or 
 the consumer of the data.
 
 ```xfer
