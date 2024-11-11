@@ -55,8 +55,8 @@ While JSON builds on JavaScript's loose typing, Xfer is strictly typed.
 </ Boolean element />
 <~true~>
 
-</ Integer element (default is 32 bits). Numeric values may be decimal (default), hexadecimal (preceded by $), 
-or binary (preceded by %)./>
+</ Integer element (default is 32 bits). Numeric values may be decimal (default), 
+hexadecimal (preceded by $), or binary (preceded by %)./>
 <#42#>
 <#$2A#>
 <#%00101010#>
@@ -85,15 +85,16 @@ or binary (preceded by %)./>
 <@2019-01-01T00:00@>
 
 </ Evaluated (or eval) element />
-</ The element below will render as "Inner elements are evaluated 1 at a time and rendered as is." />
+</ The element below will render as "Inner elements are evaluated 1 at a time 
+and rendered as is." />
 <_Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><__as<\$20\>is__>._>
 
 </ Placeholder element (almost always embedded in another element). />
 <_<|USERPROFILE|>_>
 <#<|NUMBER_OF_PROCESSORS|>#>
 
-</ The <: :> element is a key/value pair, which consists of either an alphabetic keyword or a text 
-element followed by a value element. />
+</ The <: :> element is a key/value pair, which consists of either an alphabetic keyword 
+or a text element followed by a value element. />
 <: name <"Paul"> :>
 <: age <#$36#> :>
 <: <"permanent location"> <"Singapore"> :>
