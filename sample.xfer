@@ -58,6 +58,7 @@ elements of any type. />
             <: boolean <~false~> :>
         }> </ Object markers are { } />
     :> 
+    </ A property-bag element may hold any number of elements of any type. />
     <: propertyBag <(
             <"value">
             <#123#>
