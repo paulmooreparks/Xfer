@@ -1,35 +1,34 @@
-﻿# Xfer
+﻿# <"Hello, Xfer!">
 
 Xfer is a data-serialization language that is designed to be a more flexible and more strictly-typed alternative to JSON. 
 This project is still in its infancy and is quite experimental. As it becomes a bit more concrete I'll add more 
 details here. 
 
-The code you'll find in this repository is also experimental. So far, I've built an [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer/Models/Elements), 
-a [parser](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/Services/Parser.cs), and a 
-[serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/XferConverter.cs) as part of my 
-[.NET Xfer Library](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer), 
-but at the moment this code is completely not ready for prime time. It's not even thread safe yet! About once a week I'll completely 
-refactor everything, so don't get terribly attached to anything you see here. However, if you do like some of the ideas, please [let me know](mailto:paul@parkscomputing.com). 
-I'm always open to feedback.
+The code you'll find in this repository is also experimental. So far, I've built an [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer/Models/Elements), a [parser](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/Services/Parser.cs), and a [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/XferConverter.cs) as part of my [.NET Xfer Library](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer), but at the moment this code is completely not ready for prime time. It's not even thread safe yet! About once a week I'll completely refactor everything, so don't get terribly attached to anything you see here. However, if you do like some of the ideas, please [let me know](mailto:paul@parkscomputing.com). I'm always open to feedback.
 
-That said, I do plan to make the code professional-grade in the future, and I want to add implementations in other languages 
-(Rust, C++, JavaScript, and TypeScript are on my list). If you want to contribute, please [let me know](mailto:paul@parkscomputing.com). I'd love to have your help.
+That said, I do plan to make the code professional-grade in the future, and I want to add implementations in other languages (Rust, C++, JavaScript, and TypeScript are on my list). If you want to contribute, please [let me know](mailto:paul@parkscomputing.com). I'd love to have your help.
+
+## Basic Syntax
+
+Xfer is made up of elements. An element begins and ends with angle brackets (< and >). The first character inside the angle brackets is the marker character, which indicates the type of the element. The marker character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.
+
+```xfer
+</ Below is a string element />
+<"Hello, World!">
+```
 
 ## What Is the Purpose of Xfer?
 
-As alluded to at the top of this document, the purpose is to provide an alternative to JSON that offers the following features 
-(among others):
+As alluded to at the top of this document, the purpose is to provide an alternative to JSON that offers the following features (among others):
 
-* Nested elements
-* Comments
-* Strict typing
-* Metadata
-* Placeholder substitution
+* [Nested elements](#nested-elements)
+* [Comments](#comments)
+* [Strict typing](#strict-typing)
+* [Metadata](#metadata)
+* [Placeholder substitution](#placeholder-substitution)
 
 ### Nested Elements
-In Xfer, elements are delimited by angle brackets (< and >) and element-specific marker characters  (such as !, /, :, ", and so on). 
-Nesting of elements is accomplished by repeating the marker character in the outer element as many times as necessary 
-to disambiguate the inner elements.
+In Xfer, elements are delimited by angle brackets (< and >) and element-specific marker characters  (such as !, /, :, ", and so on). Nesting of elements is accomplished by repeating the marker character in the outer element as many times as necessary to disambiguate the inner elements.
 
 ```xfer
 <//This is how a comment </can contain another comment/>, //>
