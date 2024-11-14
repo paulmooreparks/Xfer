@@ -1,5 +1,7 @@
 ﻿# <"Hello, Xfer!">
 
+_Welcome to everyone who came here from [Hacker News](https://news.ycombinator.com/item?id=42114543). Thank you so much for all the great input and discussion!_
+
 Xfer is a data-serialization language that is designed to be a more flexible and more strictly-typed alternative to JSON. 
 This project is still in its infancy and is quite experimental. As it becomes a bit more concrete I'll add more 
 details here. 
