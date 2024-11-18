@@ -30,7 +30,7 @@ As alluded to at the top of this document, the purpose is to provide an alternat
 * [Placeholder substitution](#placeholder-substitution)
 
 ### Nested Elements
-In Xfer, elements are delimited by angle brackets (< and >) and element-specific marker characters  (such as !, /, :, ", and so on). Nesting of elements is accomplished by repeating the marker character in the outer element as many times as necessary to disambiguate the inner elements.
+In Xfer, elements are delimited by angle brackets (< and >) and element-specific marker characters  (such as !, /, #, ", and so on). Nesting of elements is accomplished by repeating the marker character in the outer element as many times as necessary to disambiguate the inner elements.
 
 ```xfer
 <//This is how a comment </can contain another comment/>, //>
@@ -49,7 +49,6 @@ Comments may also be embedded in other elements, including other comments.
 
 ```xfer
 <//This is how a comment </can contain another comment/>, //>
-<: key <"value"> </ and embedded comment /> :>
 ```
 
 ### Strict Typing
@@ -100,23 +99,20 @@ at a time and rendered as is." />
 <_<|USERPROFILE|>_>
 <#<|NUMBER_OF_PROCESSORS|>#>
 
-</ The <: :> element is a key/value pair, which consists of either an alphabetic keyword 
-or a text element followed by a value element. />
-<: name <"Paul"> :>
-<: age <#$36#> :>
-<: location <"Singapore"> :>
+</ A key/value pair consists of either an alphabetic keyword or a text element followed by a value element. />
+name <"Paul">
+age <#$36#>
+location <"Singapore">
 
 </ Arrays may only hold a single type of element. />
 <[ <#1#> <#2#> <#3#> ]> </ Integer array />
 <[ <&1&> <&2&> <&3&> ]> </ Long array />
 
 </ Objects consist of key/value pairs. />
-<: 
-    object <{ 
-        <:key <"value">:> 
-        <: boolean <~false~> :>
-    }>
-:> 
+object <{ 
+    key <"value">
+    boolean <~false~>
+}>
 
 </ Property bags are a collection of values of any type, so they are analogous to JSON arrays. />
 <(
@@ -136,10 +132,10 @@ the consumer of the data.
 
 ```xfer
 <@
-    <: version <"1.0"> :>
-    <: message_id <"5D3208CB-77EC-4BC4-A256-97AD296BBEF7"> :>
-    <: ttl <#3600#> :>
-    <: description <"This is a sample document."> :>
+    version <"1.0">
+    message_id <"5D3208CB-77EC-4BC4-A256-97AD296BBEF7">
+    ttl <#3600#>
+    description <"This is a sample document.">
 @>
 
 ```
@@ -149,7 +145,7 @@ the consumer of the data.
 Xfer documents may contain placeholders that are replaced with values at runtime.
 
 ```xfer
-<: message <"Hello, <|USER|>!"> :>
+message <"Hello, <|USER|>!">
 ```
 
 ## Xfer and JSON Compared
@@ -173,15 +169,14 @@ Following is the equivalent Xfer document. Notice the explicit, rather than impl
 
 ```xfer
 <{
-    <: name <"Alice"> :>
-    <: age <#30#> :>
-    <: isMember <~true~> :>
-    <: scores <[<*85*> <*90*> <*78.5*>]> :>
-    <: profile <{
-            <: email <"alice@example.com"> :>
-            <: joinedDate <@2023-01-15T12:00:00@> :>
-        }> 
-    :>
+    name <"Alice">
+    age <#30#>
+    isMember <~true~>
+    scores <[<*85*> <*90*> <*78.5*>]>
+    profile <{
+        email <"alice@example.com">
+        joinedDate <@2023-01-15T12:00:00@>
+    }> 
 }>
 ```
 

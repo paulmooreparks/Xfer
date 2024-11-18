@@ -31,6 +31,12 @@ public class KeyValuePairElement : TypedElement<Element> {
     }
 
     public override string ToString() {
-        return $"{Delimiter.Opening}{KeyElement.ToString()}{Value.ToString()}{Delimiter.Closing}";
+        var sb = new StringBuilder();
+        sb.Append(KeyElement.ToString());
+        if (Value is KeyValuePairElement) {
+            sb.Append(" ");
+        }
+        sb.Append(Value.ToString());
+        return sb.ToString();
     }
 }

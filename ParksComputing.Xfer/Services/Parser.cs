@@ -282,6 +282,12 @@ public class Parser {
         while (IsCharAvailable()) {
             int markerCount = 1;
 
+            if (CurrentChar.IsKeywordChar()) {
+                var keyValuePairElement = ParseKeyValuePairElement(markerCount);
+                SkipWhitespace();
+                return keyValuePairElement;
+            }
+
             if (ElementOpening(StringElement.OpeningMarker, ref markerCount)) {
                 var stringElement = ParseStringElement(markerCount);
                 SkipWhitespace();
@@ -298,12 +304,6 @@ public class Parser {
                 var characterElement = ParseCharacterElement(markerCount);
                 SkipWhitespace();
                 return characterElement;
-            }
-
-            if (ElementOpening(KeyValuePairElement.OpeningMarker, ref markerCount)) {
-                var keyValuePairElement = ParseKeyValuePairElement(markerCount);
-                SkipWhitespace();
-                return keyValuePairElement;
             }
 
             if (ElementOpening(PropertyBagElement.OpeningMarker, ref markerCount)) {
@@ -519,7 +519,6 @@ public class Parser {
     }
 
     private KeyValuePairElement ParseKeyValuePairElement(int markerCount = 1) {
-        SkipWhitespace();
         while (Peek.IsKeywordChar()) {
             Expand();
         }
@@ -534,14 +533,10 @@ public class Parser {
 
         var keyValuePairElement = new KeyValuePairElement(keyElement, markerCount);
 
-        while (IsCharAvailable()) {
-            if (ElementClosing(KeyValuePairElement.ClosingMarker, markerCount)) {
-                return keyValuePairElement;
-            }
-
+        if (IsCharAvailable()) {
             Element valueElement = ParseElement();
-            SkipWhitespace();
             keyValuePairElement.Value = valueElement;
+            return keyValuePairElement;
         }
 
         throw new InvalidOperationException($"Unexpected end of {KeywordElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");

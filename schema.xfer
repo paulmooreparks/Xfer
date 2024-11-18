@@ -1,0 +1,13 @@
+<! <: schema <"foo"> :> !>
+
+<: Person <{ 
+    <:Name <""> :>
+    <:Age <""> :>
+    <:IsMember <~~> :>
+    <:Scores <[ <**> ]> :>
+    <:Profile <{ 
+        <:Email <""> :>
+        <:JoinedDate <@@> :>
+    }>
+:> 
+

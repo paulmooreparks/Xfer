@@ -6,7 +6,7 @@ using ParksComputing.Xfer.Attributes;
 using ParksComputing.Xfer.Models.Elements;
 using ParksComputing.Xfer.Services;
 
-public class XferConverter {
+public class XferConvert {
     public static string Serialize(object o) {
         var type = o.GetType();
         var obj = new ObjectElement();
@@ -41,8 +41,8 @@ public class XferConverter {
             decimal decimalValue => new DecimalElement(decimalValue),
             DateTime dateTimeValue => new DateElement(dateTimeValue.ToString("yyyy-MM-ddTHH:mm:ss")),
             string stringValue => new StringElement(stringValue),
-            int[] intArray => SerializeIntArray(intArray),
-            long[] longArray => SerializeLongArray(longArray),
+            int[] intArray => SerializeArray(intArray),
+            long[] longArray => SerializeArray(longArray),
             bool[] boolArray => SerializeBooleanArray(boolArray),
             double[] doubleArray => SerializeDoubleArray(doubleArray),
             decimal[] decimalArray => SerializeDecimalArray(decimalArray),
@@ -55,7 +55,7 @@ public class XferConverter {
         };
     }
 
-    private static TypedArrayElement<IntegerElement> SerializeIntArray(int[] intArray) {
+    private static TypedArrayElement<IntegerElement> SerializeArray(int[] intArray) {
         var arrayElement = new TypedArrayElement<IntegerElement>();
 
         foreach (var item in intArray) {
@@ -65,7 +65,7 @@ public class XferConverter {
         return arrayElement;
     }
 
-    private static TypedArrayElement<LongElement> SerializeLongArray(long[] longArray) {
+    private static TypedArrayElement<LongElement> SerializeArray(long[] longArray) {
         var arrayElement = new TypedArrayElement<LongElement>();
 
         foreach (var item in longArray) {

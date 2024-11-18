@@ -4,6 +4,7 @@ using ParksComputing.Xfer;
 using ParksComputing.Xfer.Attributes;
 using ParksComputing.Xfer.Services;
 using ParksComputing.Xfer.Models.Elements;
+using ParksComputing.Xfer.Extensions;
 
 namespace ParksComputing.Xferc.Commands;
 
@@ -21,10 +22,13 @@ internal class SerializeCommand {
             bag_o_bits = new List<object> { "one", 2, 3.14 }
         };
 
-        string xferDocument = XferConverter.Serialize(data);
+        string xferDocument = XferConvert.Serialize(data);
         Console.WriteLine(xferDocument);
 
-        var deserializedData = XferConverter.Deserialize<SampleData>(xferDocument);
+        var xfer = data.ToXfer();
+        Console.WriteLine(xfer);
+
+        var deserializedData = XferConvert.Deserialize<SampleData>(xferDocument);
         Console.WriteLine(deserializedData.Name);
         Console.WriteLine(deserializedData.Age);
         Console.WriteLine(deserializedData.CreatedAt);
