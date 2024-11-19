@@ -21,18 +21,15 @@ public class MetadataElement : Element {
         set {
             switch (index) {
                 case "version":
-                    SetOrThrow<TextElement>(value, index);
-                    Version = value.Value.ToString() ?? string.Empty;
+                    Version = CastOrThrow<TextElement>(value, index).Value ?? string.Empty;
                     break;
 
                 case "message_id":
-                    SetOrThrow<TextElement>(value, index);
-                    MessageId = value.Value.ToString() ?? string.Empty;
+                    MessageId = CastOrThrow<TextElement>(value, index).Value ?? string.Empty;
                     break;
 
                 case "ttl":
-                    SetOrThrow<IntegerElement>(value, index);
-                    Ttl = Convert.ToInt32(value.Value);
+                    Ttl = CastOrThrow<IntegerElement>(value, index).Value;
                     break;
 
                 default:
@@ -40,6 +37,13 @@ public class MetadataElement : Element {
                     break;
             }
         }
+    }
+
+    private TElement CastOrThrow<TElement>(KeyValuePairElement value, string key) where TElement : Element {
+        if (value.Value is TElement t) {
+            return t;
+        }
+        throw new ArgumentException($"Invalid element type for '{key}': {value.GetType()}");
     }
 
     // We may do more with this in the future....
@@ -116,12 +120,6 @@ public class MetadataElement : Element {
         }
     }
 
-    private void SetOrThrow<TElement>(KeyValuePairElement value, string key) where TElement : Element {
-        if (value.Value is not TElement) {
-            throw new ArgumentException($"Invalid element type for '{key}': {value.GetType()}");
-        }
-    }
-
     public void AddOrUpdate(KeyValuePairElement value) {
         this[value.Key] = value;
     }
@@ -130,7 +128,7 @@ public class MetadataElement : Element {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
         foreach (var value in _values.Values) {
-            sb.Append(value.ToString());
+            sb.Append(value);
         }
         sb.Append(Delimiter.Closing);
         return sb.ToString();

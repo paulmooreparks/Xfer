@@ -14,7 +14,10 @@ public class Delimiter {
     public string Opening { get; }
     public string Closing { get; }
 
-    internal Delimiter() : this('\0', '\0') { }
+    public Delimiter() : this(default, default, 1) { }
+
+    public Delimiter(int markerCount) : this(default, default, markerCount) {
+    }
 
     public Delimiter(char openingMarker, char closingMarker) : this(openingMarker, closingMarker, 1) {
     }

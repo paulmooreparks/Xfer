@@ -7,8 +7,6 @@ using System.Threading.Tasks;
 namespace ParksComputing.Xfer.Models.Elements;
 public class KeyValuePairElement : TypedElement<Element> {
     public static readonly string ElementName = "keyValuePair";
-    public const char OpeningMarker = ':';
-    public const char ClosingMarker = OpeningMarker;
 
     public TextElement KeyElement { get; set; }
     public string Key { get; }
@@ -16,7 +14,7 @@ public class KeyValuePairElement : TypedElement<Element> {
     public KeyValuePairElement(TextElement keyElement, int markerCount = 1) : this(keyElement, new EmptyElement(), markerCount) {
     }
 
-    public KeyValuePairElement(TextElement keyElement, Element value, int markerCount = 1) : base(value, ElementName, new(OpeningMarker, ClosingMarker, markerCount)) {
+    public KeyValuePairElement(TextElement keyElement, Element value, int markerCount = 1) : base(value, ElementName, new(markerCount)) {
         KeyElement = keyElement;
 
         if (keyElement is StringElement se) {
@@ -36,7 +34,7 @@ public class KeyValuePairElement : TypedElement<Element> {
         if (Value is KeyValuePairElement) {
             sb.Append(" ");
         }
-        sb.Append(Value.ToString());
+        sb.Append(Value);
         return sb.ToString();
     }
 }

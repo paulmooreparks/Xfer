@@ -99,7 +99,7 @@ at a time and rendered as is." />
 <_<|USERPROFILE|>_>
 <#<|NUMBER_OF_PROCESSORS|>#>
 
-</ A key/value pair consists of either an alphabetic keyword or a text element followed by a value element. />
+</ A key/value pair consists of a keyword followed by a value element. />
 name <"Paul">
 age <#$36#>
 location <"Singapore">
