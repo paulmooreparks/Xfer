@@ -254,7 +254,7 @@ public class Parser {
 
     private void SkipBOM() {
         // If the current character is the BOM (0xFEFF), advance the position
-        if (Position == 0 && CurrentChar == '\uFEFF') {
+        if (Position == 0 && (CurrentChar == '\uFEFF' || CurrentChar == '\uFFFE')) {
             Advance();
         }
     }
