@@ -37,20 +37,28 @@ elements of any type. />
 <{
     string <"value">
     character <\65\>
+    characterMin \65
     boolean <~true~>
+    booleanMin ~true
     integer <#42#>
+    integerMin #42
     long <&5000000000&>
+    longMin &5000000000
     hexLongInteger <&$BAADF00D&>
+    hexLongIntegerMin &$BAADF00D
     binaryInteger <# %10101010 #>
+    binaryIntegerMin #%10101010
     double <^3.1415926535^>
+    doubleMin ^3.1415926535
     decimal <*123.45*>
+    decimalMin *123.45
     date <@2019-01-01@>
+    dateMin @2019-01-01
     placeholder <_<|USERPROFILE|>_>
     evalString <_Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><__as<\$20\>is__>._> :> </ Evaluated element marker is _ />
     array <[
-        <# 1 #> 
-        <# 2 #> 
-        <# 3 #>
+        #1 <#2#>
+        #3
     ]> 
     
     object <{ 
@@ -91,6 +99,21 @@ elements of any type. />
         joinedDate <@2023-01-15T12:00:00@>
     }> 
 }>
+
+{
+    name <"Alice">
+    age #30
+    isMember ~true
+    scores [
+        *85
+        *90
+        *78.5
+    ]
+    profile {
+        email <"alice@example.com">
+        joinedDate @2023-01-15T12:00:00
+    }
+}
 
 <"
 /* Now it's possible to embed code with less worry */

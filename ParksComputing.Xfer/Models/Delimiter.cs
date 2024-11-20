@@ -10,6 +10,7 @@ public class Delimiter {
     public char OpeningMarker { get; }
     public char ClosingMarker { get; }
     public int Count { get; set; }
+    public bool IsMinimized { get; } = false;
 
     public string Opening { get; }
     public string Closing { get; }
@@ -19,10 +20,10 @@ public class Delimiter {
     public Delimiter(int markerCount) : this(default, default, markerCount) {
     }
 
-    public Delimiter(char openingMarker, char closingMarker) : this(openingMarker, closingMarker, 1) {
+    public Delimiter(char openingMarker, char closingMarker, bool isMinimized = false) : this(openingMarker, closingMarker, 1, isMinimized) {
     }
 
-    public Delimiter(char openingMarker, char closingMarker, int count) {
+    public Delimiter(char openingMarker, char closingMarker, int count, bool isMinimized = false) {
         if (count < 1) {
             throw new ArgumentOutOfRangeException(nameof(count), "Count must be at least 1.");
         }
@@ -33,6 +34,7 @@ public class Delimiter {
         OpeningMarker = openingMarker;
         ClosingMarker = closingMarker;
         Count = count;
+        IsMinimized = isMinimized;
 
         var repeatedOpening = new string(openingMarker, count);
         var repeatedClosing = new string(closingMarker, count);

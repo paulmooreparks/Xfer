@@ -10,6 +10,7 @@ public class PropertyBagElement : Element {
     public static readonly string ElementName = "propertyBag";
     public const char OpeningMarker = '(';
     public const char ClosingMarker = ')';
+    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
 
     private List<Element> _items = new();
 

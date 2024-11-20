@@ -10,6 +10,7 @@ public class DecimalElement : TypedElement<decimal> {
     public static readonly string ElementName = "decimal";
     public const char OpeningMarker = '*';
     public const char ClosingMarker = OpeningMarker;
+    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
 
     public DecimalElement(decimal value) : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
     }

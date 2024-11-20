@@ -10,6 +10,33 @@ The code you'll find in this repository is also experimental. So far, I've built
 
 That said, I do plan to make the code professional-grade in the future, and I want to add implementations in other languages (Rust, C++, JavaScript, and TypeScript are on my list). If you want to contribute, please [let me know](mailto:paul@parkscomputing.com). I'd love to have your help.
 
+## Work in Progress
+
+### Minified Syntax
+
+I'm experimenting with a syntax that will cut down on the "noise" a bit. There are situations where an element may not need to be wrapped in a pair of digraphs but may instead be typed with a single character. For digraphs with symmetrical markers (<{ }>, <[ ]>), just the opening and closing marker characters may be sufficient. If the full digraphs are clearer or are required due to the nature of the data, then those are still supported.
+
+```xfer
+{
+    name <"Alice"> </ Text elements (and comments, for that matter) so far still require digraph pairs.
+    age #30 </ # instead of <#30#> />
+    isMember ~true </ ~ instead of <~true~> />
+
+    </ And so on... />
+    scores [
+        *85
+        *90
+        *78.5
+    ]
+
+    profile {
+        email <"alice@example.com">
+        joinedDate @2023-01-15T12:00:00 </ @ instead of <@ @> />
+    }
+}
+```
+
+
 ## Basic Syntax
 
 Xfer is made up of elements. An element begins and ends with angle brackets (< and >). The first character inside the angle brackets is the marker character, which indicates the type of the element. The marker character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.

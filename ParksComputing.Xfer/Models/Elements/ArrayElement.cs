@@ -10,6 +10,7 @@ public abstract class ArrayElement : Element {
     public static readonly string ElementName = "array";
     public const char OpeningMarker = '[';
     public const char ClosingMarker = ']';
+    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
 
     public abstract IEnumerable<Element> Values { get; }
 

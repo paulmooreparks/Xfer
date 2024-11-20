@@ -8,6 +8,7 @@ namespace ParksComputing.Xfer.Models.Elements {
         public static readonly string ElementName = "date";
         public const char OpeningMarker = '@';
         public const char ClosingMarker = OpeningMarker;
+        public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
 
         public DateElement(string input) : base(DateTime.Now, ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
             if (!DateTime.TryParseExact(input, new[] { "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-dd" }, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime dateValue)) {

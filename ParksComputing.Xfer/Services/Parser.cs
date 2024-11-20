@@ -155,10 +155,23 @@ public class Parser {
 
     internal bool ElementOpening(char openingMarker) {
         int markerCount = 1;
-        return ElementOpening(openingMarker, ref markerCount);
+        return ElementOpening(openingMarker, openingMarker, ref markerCount);
     }
 
-    internal bool ElementOpening(char openingMarker, ref int markerCount) {
+    internal bool ElementOpening(Delimiter delimiter) {
+        int markerCount = 1;
+        return ElementOpening(delimiter.OpeningMarker, delimiter.ClosingMarker, ref markerCount);
+    }
+
+    internal bool ElementOpening(Delimiter delimiter, ref int markerCount) {
+        return ElementOpening(delimiter.OpeningMarker, delimiter.ClosingMarker, ref markerCount);
+    }
+
+    private Stack<Delimiter> _delimStack = new();
+
+
+
+    internal bool ElementOpening(char openingMarker, char closingMarker, ref int markerCount) {
         if (CurrentChar == Element.ElementOpeningMarker && Peek == openingMarker) {
             markerCount = 1;
             Advance();
@@ -169,31 +182,68 @@ public class Parser {
                 Advance();
             }
 
+            _delimStack.Push(new Delimiter(openingMarker, closingMarker, markerCount));
             return true;
+        }
+
+        if (CurrentChar == openingMarker) {
+            int tmpPosition = Position;
+            Advance();
+
+            while (CurrentChar == openingMarker) {
+                ++markerCount;
+                Advance();
+            }
+
+            if (CurrentChar != Element.ElementClosingMarker) {
+                _delimStack.Push(new Delimiter(openingMarker, closingMarker, markerCount, isMinimized: true));
+                return true;
+            }
+
+            Position = tmpPosition;
         }
 
         return false;
     }
 
-    internal bool ElementClosing(char closingMarker, int markerCount) {
-        if (CurrentChar == closingMarker) {
+    internal bool ElementClosing() {
+        if (_delimStack.Count == 0) return false;
+
+        var delimiter = _delimStack.Peek();
+        int markerCount = delimiter.Count;
+
+        if (delimiter.IsMinimized && char.IsWhiteSpace(CurrentChar)) {
+            _delimStack.Pop();
+            return true;
+        }
+
+        if (CurrentChar == delimiter.ClosingMarker) {
             --markerCount;
 
             if (Peek == Element.ElementClosingMarker && markerCount == 0) {
                 Advance();
                 Advance();
+                _delimStack.Pop();
                 return true;
             }
 
             int tmpPosition = Position;
 
-            while (markerCount > 0 && Peek == closingMarker) {
+            while (markerCount > 0 && Peek == delimiter.ClosingMarker) {
                 Advance();
                 --markerCount;
 
-                if (Peek == Element.ElementClosingMarker && markerCount == 0) {
+                if (delimiter.IsMinimized) {
+                    if (markerCount == 0) {
+                        Advance();
+                        _delimStack.Pop();
+                        return true;
+                    }
+                }
+                else if (Peek == Element.ElementClosingMarker && markerCount == 0) {
                     Advance();
                     Advance();
+                    _delimStack.Pop();
                     return true;
                 }
             }
@@ -288,91 +338,91 @@ public class Parser {
                 return keyValuePairElement;
             }
 
-            if (ElementOpening(StringElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(StringElement.ElementDelimiter, ref markerCount)) {
                 var stringElement = ParseStringElement(markerCount);
                 SkipWhitespace();
                 return stringElement;
             }
 
-            if (ElementOpening(EvaluatedElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(EvaluatedElement.ElementDelimiter, ref markerCount)) {
                 var literalElement = ParseEvaluatedElement(markerCount);
                 SkipWhitespace();
                 return literalElement;
             }
 
-            if (ElementOpening(CharacterElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(CharacterElement.ElementDelimiter, ref markerCount)) {
                 var characterElement = ParseCharacterElement(markerCount);
                 SkipWhitespace();
                 return characterElement;
             }
 
-            if (ElementOpening(PropertyBagElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(PropertyBagElement.ElementDelimiter, ref markerCount)) {
                 var propertyBagElement = ParsePropertyBagElement(markerCount);
                 SkipWhitespace();
                 return propertyBagElement;
             }
 
-            if (ElementOpening(MetadataElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(MetadataElement.ElementDelimiter, ref markerCount)) {
                 var metadataElement = ParseMetadataElement(markerCount);
                 SkipWhitespace();
                 return metadataElement;
             }
 
-            if (ElementOpening(ObjectElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(ObjectElement.ElementDelimiter, ref markerCount)) {
                 var objectElement = ParseObjectElement(markerCount);
                 SkipWhitespace();
                 return objectElement;
             }
 
-            if (ElementOpening(ArrayElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(ArrayElement.ElementDelimiter, ref markerCount)) {
                 var arrayElement = ParseArrayElement(markerCount);
                 SkipWhitespace();
                 return arrayElement;
             }
 
-            if (ElementOpening(IntegerElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(IntegerElement.ElementDelimiter, ref markerCount)) {
                 var integerElement = ParseIntegerElement(markerCount);
                 SkipWhitespace();
                 return integerElement;
             }
 
-            if (ElementOpening(LongElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(LongElement.ElementDelimiter, ref markerCount)) {
                 var longIntegerElement = ParseLongIntegerElement(markerCount);
                 SkipWhitespace();
                 return longIntegerElement;
             }
 
-            if (ElementOpening(DecimalElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(DecimalElement.ElementDelimiter, ref markerCount)) {
                 var decimalElement = ParseDecimalElement(markerCount);
                 SkipWhitespace();
                 return decimalElement;
             }
 
-            if (ElementOpening(DoubleElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(DoubleElement.ElementDelimiter, ref markerCount)) {
                 var doubleElement = ParseDoubleElement(markerCount);
                 SkipWhitespace();
                 return doubleElement;
             }
 
-            if (ElementOpening(BooleanElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(BooleanElement.ElementDelimiter, ref markerCount)) {
                 var booleanElement = ParseBooleanElement(markerCount);
                 SkipWhitespace();
                 return booleanElement;
             }
 
-            if (ElementOpening(DateElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(DateElement.ElementDelimiter, ref markerCount)) {
                 var dateElement = ParseDateElement(markerCount);
                 SkipWhitespace();
                 return dateElement;
             }
 
-            if (ElementOpening(PlaceholderElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(PlaceholderElement.ElementDelimiter, ref markerCount)) {
                 var placeholderElement = ParsePlaceholderElement(markerCount);
                 SkipWhitespace();
                 return placeholderElement;
             }
 
-            if (ElementOpening(CommentElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(CommentElement.ElementDelimiter, ref markerCount)) {
                 // Parse comment but don't return it, as comments are not part of the logical output.
                 ParseCommentElement(markerCount);
                 SkipWhitespace();
@@ -387,7 +437,7 @@ public class Parser {
 
     private void ParseCommentElement(int markerCount = 1) {
         while (IsCharAvailable()) {
-            if (ElementClosing(CommentElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 break;
             }
 
@@ -423,7 +473,7 @@ public class Parser {
             arrayElement.Add(element);
 
             while (IsCharAvailable()) {
-                if (ElementClosing(ArrayElement.ClosingMarker, markerCount)) {
+                if (ElementClosing()) {
                     return arrayElement;
                 }
 
@@ -440,7 +490,7 @@ public class Parser {
         var objectElement = new ObjectElement();
 
         while (IsCharAvailable()) {
-            if (ElementClosing(ObjectElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 return objectElement;
             }
 
@@ -462,7 +512,7 @@ public class Parser {
         var metadataElement = new MetadataElement();
 
         while (IsCharAvailable()) {
-            if (ElementClosing(MetadataElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 return metadataElement;
             }
 
@@ -484,7 +534,7 @@ public class Parser {
         var propBagElement = new PropertyBagElement();
 
         while (IsCharAvailable()) {
-            if (ElementClosing(PropertyBagElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 return propBagElement;
             }
 
@@ -500,7 +550,7 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementClosing(PlaceholderElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 var variable = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
 
                 if (string.IsNullOrEmpty(variable)) {
@@ -515,7 +565,7 @@ public class Parser {
             Expand();
         }
 
-        throw new InvalidOperationException($"Unexpected end of {EvaluatedElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+        throw new InvalidOperationException($"Unexpected end of {PlaceholderElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
     private KeyValuePairElement ParseKeyValuePairElement(int markerCount = 1) {
@@ -550,7 +600,7 @@ public class Parser {
     private CharacterElement ParseCharacterElement(int markerCount = 1) {
         StringBuilder charContent = new();
 
-        while (IsCharAvailable() && !ElementClosing(CharacterElement.ClosingMarker, markerCount)) {
+        while (IsCharAvailable() && !ElementClosing()) {
             charContent.Append(CurrentChar);
             Advance();
         }
@@ -593,72 +643,72 @@ public class Parser {
         while (IsCharAvailable()) {
             int embeddedMarkerCount = 1;
 
-            if (ElementOpening(StringElement.OpeningMarker, ref embeddedMarkerCount)) {
+            if (ElementOpening(StringElement.ElementDelimiter, ref embeddedMarkerCount)) {
                 StringElement stringElement = ParseStringElement(embeddedMarkerCount);
                 valueBuilder.Append(stringElement.Value);
                 continue;
             }
 
-            if (ElementOpening(CharacterElement.OpeningMarker, ref embeddedMarkerCount)) {
+            if (ElementOpening(CharacterElement.ElementDelimiter, ref embeddedMarkerCount)) {
                 CharacterElement characterElement = ParseCharacterElement(embeddedMarkerCount);
                 valueBuilder.Append(characterElement.Value);
                 continue;
             }
 
-            if (ElementOpening(IntegerElement.OpeningMarker, ref embeddedMarkerCount)) {
+            if (ElementOpening(IntegerElement.ElementDelimiter, ref embeddedMarkerCount)) {
                 IntegerElement integerElement = ParseIntegerElement(embeddedMarkerCount);
                 valueBuilder.Append(integerElement.Value);
                 continue;
             }
 
-            if (ElementOpening(LongElement.OpeningMarker, ref embeddedMarkerCount)) {
+            if (ElementOpening(LongElement.ElementDelimiter, ref embeddedMarkerCount)) {
                 LongElement longElement = ParseLongIntegerElement(embeddedMarkerCount);
                 valueBuilder.Append(longElement.Value);
                 continue;
             }
 
-            if (ElementOpening(DecimalElement.OpeningMarker, ref embeddedMarkerCount)) {
+            if (ElementOpening(DecimalElement.ElementDelimiter, ref embeddedMarkerCount)) {
                 DecimalElement decimalElement = ParseDecimalElement(embeddedMarkerCount);
                 valueBuilder.Append(decimalElement.Value);
                 continue;
             }
 
-            if (ElementOpening(DoubleElement.OpeningMarker, ref embeddedMarkerCount)) {
+            if (ElementOpening(DoubleElement.ElementDelimiter, ref embeddedMarkerCount)) {
                 DoubleElement doubleElement = ParseDoubleElement(embeddedMarkerCount);
                 valueBuilder.Append(doubleElement.Value);
                 continue;
             }
 
-            if (ElementOpening(BooleanElement.OpeningMarker, ref embeddedMarkerCount)) {
+            if (ElementOpening(BooleanElement.ElementDelimiter, ref embeddedMarkerCount)) {
                 BooleanElement booleanElement = ParseBooleanElement(embeddedMarkerCount);
                 valueBuilder.Append(booleanElement.Value);
                 continue;
             }
 
-            if (ElementOpening(DateElement.OpeningMarker, ref embeddedMarkerCount)) {
+            if (ElementOpening(DateElement.ElementDelimiter, ref embeddedMarkerCount)) {
                 DateElement dateElement = ParseDateElement(embeddedMarkerCount);
                 valueBuilder.Append(dateElement.Value);
                 continue;
             }
 
-            if (ElementOpening(EvaluatedElement.OpeningMarker, ref embeddedMarkerCount)) {
+            if (ElementOpening(EvaluatedElement.ElementDelimiter, ref embeddedMarkerCount)) {
                 EvaluatedElement evaluatedElement = ParseEvaluatedElement(embeddedMarkerCount);
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementOpening(PlaceholderElement.OpeningMarker, ref embeddedMarkerCount)) {
+            if (ElementOpening(PlaceholderElement.ElementDelimiter, ref embeddedMarkerCount)) {
                 PlaceholderElement evaluatedElement = ParsePlaceholderElement(embeddedMarkerCount);
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementOpening(CommentElement.OpeningMarker, ref markerCount)) {
+            if (ElementOpening(CommentElement.ElementDelimiter, ref markerCount)) {
                 ParseCommentElement(markerCount);
                 continue;
             }
 
-            if (ElementClosing(EvaluatedElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 return new EvaluatedElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount);
             }
 
@@ -673,7 +723,7 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementClosing(StringElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 return new StringElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount);
             }
 
@@ -689,13 +739,13 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
                 PlaceholderElement evaluatedElement = ParsePlaceholderElement();
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementClosing(IntegerElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 var value = ParseNumericValue<int>(valueBuilder.ToString());
                 return new IntegerElement(value);
             }
@@ -713,13 +763,13 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
                 PlaceholderElement evaluatedElement = ParsePlaceholderElement();
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementClosing(DateElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 var value = valueBuilder.ToString();
                 return new DateElement(value);
             }
@@ -736,13 +786,13 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
                 PlaceholderElement evaluatedElement = ParsePlaceholderElement();
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementClosing(LongElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 var value = ParseNumericValue<long>(valueBuilder.ToString());
                 return new LongElement(value);
             }
@@ -759,13 +809,13 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
                 PlaceholderElement evaluatedElement = ParsePlaceholderElement();
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementClosing(DecimalElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 var value = ParseNumericValue<decimal>(valueBuilder.ToString());
                 return new DecimalElement(value);
             }
@@ -782,13 +832,13 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
                 PlaceholderElement evaluatedElement = ParsePlaceholderElement();
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementClosing(DoubleElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 var value = ParseNumericValue<double>(valueBuilder.ToString());
                 return new DoubleElement(value);
             }
@@ -805,13 +855,13 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.OpeningMarker)) {
+            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
                 PlaceholderElement evaluatedElement = ParsePlaceholderElement();
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementClosing(BooleanElement.ClosingMarker, markerCount)) {
+            if (ElementClosing()) {
                 string valueString = valueBuilder.ToString().ToLower();
                 bool value = valueString switch {
                     "true" => true,

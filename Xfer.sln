@@ -5,6 +5,7 @@ VisualStudioVersion = 17.10.35201.131
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{47A4F442-5258-4AC2-83D0-7D4063BB4A7D}"
 	ProjectSection(SolutionItems) = preProject
+		experiments.xfer = experiments.xfer
 		LICENSE.txt = LICENSE.txt
 		new.xfer = new.xfer
 		README.md = README.md

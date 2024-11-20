@@ -10,6 +10,7 @@ public class BooleanElement : TypedElement<bool> {
     public static readonly string ElementName = "boolean";
     public const char OpeningMarker = '~';
     public const char ClosingMarker = OpeningMarker;
+    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
 
     public static readonly string TrueValue = "true";
     public static readonly string FalseValue = "false";

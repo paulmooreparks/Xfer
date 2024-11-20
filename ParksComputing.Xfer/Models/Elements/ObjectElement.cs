@@ -9,6 +9,7 @@ public class ObjectElement : Element {
     public static readonly string ElementName = "object";
     public const char OpeningMarker = '{';
     public const char ClosingMarker = '}';
+    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
 
     private Dictionary<string, KeyValuePairElement> _values = new();
     public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;

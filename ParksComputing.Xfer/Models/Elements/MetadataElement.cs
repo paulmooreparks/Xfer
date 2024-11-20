@@ -9,6 +9,7 @@ public class MetadataElement : Element {
     public static readonly string ElementName = "metadata";
     public const char OpeningMarker = '!';
     public const char ClosingMarker = OpeningMarker;
+    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
     public static readonly string DefaultVersion = "1.0.0";
 
     private Dictionary<string, KeyValuePairElement> _values = new ();

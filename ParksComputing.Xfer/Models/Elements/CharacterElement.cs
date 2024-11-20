@@ -10,6 +10,7 @@ public class CharacterElement : TypedElement<char> {
     public static readonly string ElementName = "character";
     public const char OpeningMarker = '\\';
     public const char ClosingMarker = OpeningMarker;
+    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
 
     public int CharValue => Value;
 
