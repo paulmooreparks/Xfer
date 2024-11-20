@@ -10,7 +10,7 @@ namespace ParksComputing.Xfer.Models.Elements {
         public const char ClosingMarker = OpeningMarker;
         public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
 
-        public DateElement(string input) : base(DateTime.Now, ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
+        public DateElement(string input, int markerCount = 1) : base(DateTime.Now, ElementName, new Delimiter(OpeningMarker, ClosingMarker, markerCount)) {
             if (!DateTime.TryParseExact(input, new[] { "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-dd" }, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime dateValue)) {
                 throw new InvalidOperationException($"Invalid date format '{input}'. Expected ISO 8601 format: 'yyyy-MM-ddTHH:mm:ss' or 'yyyy-MM-dd'.");
             }

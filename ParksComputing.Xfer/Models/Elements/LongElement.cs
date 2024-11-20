@@ -12,8 +12,8 @@ public class LongElement : TypedElement<long> {
     public const char ClosingMarker = OpeningMarker;
     public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
 
-    public LongElement(long value)
-        : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
+    public LongElement(long value, int markerCount = 1)
+        : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker, markerCount)) {
     }
 
     public override string ToString() {

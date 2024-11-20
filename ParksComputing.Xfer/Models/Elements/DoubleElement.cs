@@ -12,7 +12,7 @@ public class DoubleElement : TypedElement<double> {
     public const char ClosingMarker = OpeningMarker;
     public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
 
-    public DoubleElement(double value) : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
+    public DoubleElement(double value, int markerCount = 1) : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker, markerCount)) {
     }
 
     public override string ToString() {

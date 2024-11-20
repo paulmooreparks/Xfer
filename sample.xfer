@@ -12,6 +12,7 @@ reserved keywords (version, message_id, and ttl). If a metadata element is provi
 the first non-comment element in an Xfer document. />
 
 <! version "1.0.0 message_id `|COMPUTERNAME !>
+<"""foobar""">
 </ The outermost element of an Xfer document is an implicit property-bag element. It may contain 
 elements of any type. />
 

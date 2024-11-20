@@ -12,8 +12,8 @@ public class IntegerElement : TypedElement<int> {
     public const char ClosingMarker = OpeningMarker;
     public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
 
-    public IntegerElement(int value)
-        : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
+    public IntegerElement(int value, int markerCount = 1)
+        : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker, markerCount)) {
     }
 
     public override string ToString() {

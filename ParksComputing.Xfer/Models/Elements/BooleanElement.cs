@@ -15,8 +15,8 @@ public class BooleanElement : TypedElement<bool> {
     public static readonly string TrueValue = "true";
     public static readonly string FalseValue = "false";
 
-    public BooleanElement(bool value)
-        : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
+    public BooleanElement(bool value, int markerCount = 1)
+        : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker, markerCount)) {
     }
 
     public override string ToString() {
