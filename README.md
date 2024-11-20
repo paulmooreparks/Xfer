@@ -14,26 +14,26 @@ That said, I do plan to make the code professional-grade in the future, and I wa
 
 ### Minified Syntax
 
-I'm experimenting with a syntax that will cut down on the "noise" a bit. There are situations where an element may not need to be wrapped in a pair of digraphs but may instead be typed with a single character. For digraphs with symmetrical markers (<{ }>, <[ ]>), just the opening and closing marker characters may be sufficient. If the full digraphs are clearer or are required due to the nature of the data, then those are still supported.
+I'm experimenting with a syntax that will cut down on the "noise" a bit. There are situations where an element may not need to be wrapped in a pair of digraphs but may instead be typed with a single character. If the full digraphs are clearer or are required due to the nature of the data they enclose, then those are still supported.
 
 ```xfer
-{
+<{
     name <"Alice"> </ Text elements (and comments, for that matter) so far still require digraph pairs.
     age #30 </ # instead of <#30#> />
     isMember ~true </ ~ instead of <~true~> />
 
     </ And so on... />
-    scores [
+    scores <[
         *85
         *90
         *78.5
-    ]
+    ]>
 
-    profile {
+    profile <{
         email <"alice@example.com">
         joinedDate @2023-01-15T12:00:00 </ @ instead of <@ @> />
-    }
-}
+    }>
+}>
 ```
 
 
