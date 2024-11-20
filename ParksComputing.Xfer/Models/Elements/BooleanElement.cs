@@ -20,10 +20,6 @@ public class BooleanElement : TypedElement<bool> {
     }
 
     public override string ToString() {
-        var sb = new StringBuilder();
-        sb.Append(Delimiter.Opening);
-        sb.Append(Value ? TrueValue : FalseValue);
-        sb.Append(Delimiter.Closing);
-        return sb.ToString();
+        return $"{Delimiter.MinOpening}{(Value ? TrueValue : FalseValue)} ";
     }
 }

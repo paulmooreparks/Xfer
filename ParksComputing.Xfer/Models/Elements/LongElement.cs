@@ -17,10 +17,6 @@ public class LongElement : TypedElement<long> {
     }
 
     public override string ToString() {
-        var sb = new StringBuilder();
-        sb.Append(Delimiter.Opening);
-        sb.Append(Value);
-        sb.Append(Delimiter.Closing);
-        return sb.ToString();
+        return $"{Delimiter.MinOpening}{Value} ";
     }
 }

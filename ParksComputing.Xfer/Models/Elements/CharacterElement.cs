@@ -18,6 +18,6 @@ public class CharacterElement : TypedElement<char> {
     }
 
     public override string ToString() {
-        return $"{Delimiter.Opening}{CharValue}{Delimiter.Closing}";
+        return $"{Delimiter.MinOpening}{CharValue} ";
     }
 }

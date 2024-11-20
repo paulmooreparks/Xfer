@@ -15,6 +15,8 @@ public class Delimiter {
     public string Opening { get; }
     public string Closing { get; }
 
+    public string MinOpening { get; }
+
     public Delimiter() : this(default, default, 1) { }
 
     public Delimiter(int markerCount) : this(default, default, markerCount) {
@@ -41,6 +43,7 @@ public class Delimiter {
 
         Opening = "<" + repeatedOpening;
         Closing = repeatedClosing + ">";
+        MinOpening = repeatedOpening;
     }
 
     private static void ValidateMarker(char marker, string paramName) {

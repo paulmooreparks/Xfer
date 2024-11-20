@@ -25,7 +25,7 @@ namespace ParksComputing.Xfer.Models.Elements {
             string dateValue = Value.TimeOfDay == TimeSpan.Zero
                     ? $"{Value:yyyy-MM-dd}"
                     : $"{Value:yyyy-MM-ddTHH:mm:ss}";
-            return $"{Delimiter.Opening}{Value:yyyy-MM-ddTHH:mm:ss}{Delimiter.Closing}";
+            return $"{Delimiter.MinOpening}{dateValue} ";
         }
     }
 }
