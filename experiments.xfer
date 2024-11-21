@@ -1,130 +1,21 @@
-﻿</ This is a sample Xfer document. It demonstrates the basic syntax and features of the Xfer language. />
-
-<// Elements are formed by enclosing them in angle brackets with another inner marker to designate
-the meaning of the element. For example the character pairs </ and /> are used to enclose comments. 
-When, as is the case here, the marker is repeated, it is so that the element can contain an embedded 
-element of the same type. In this case, the outer comment contains an embedded comment, so the marker 
-character, '/', is repeated as many times as necessary to allow embedded elements to be properly 
-distinguished. //>
-
-</ The following element is a metadata element. It consists of key/value pairs, some of which have 
-reserved keywords (version, message_id, and ttl). If a metadata element is provided, it must be 
-the first non-comment element in an Xfer document. />
-
-<! <: version <"1.0.0"> :> <: message_id <_<|COMPUTERNAME|>_> :> !>
-
-</ The outermost element of an Xfer document is an implicit property-bag element. It may contain 
-elements of any type. />
-
-</ A string element is a sequence of characters which are rendered literally, as they appear. />
-<"Hello, Xfer!">
-
-</ An evaluated element evaluates its embedded elements. The following will render as I ❤ Xfer. />
-<_ I <\$2764\><\$fe0e\> Xfer _>
-
-</ An example of embedding a string element and a comment inside an Xfer string. />
-<""
-<"Xfer"> is an Xfer string element </and this is an Xfer comment/>.
-"">
-
-</// A comment with <// a comment </ inside another comment /> //>. ///>
-
-<"A string may contain character elements<\$20\>inside of it, which will not be parsed.">
-<_When character elements are inside an evaluated<\$20\>element, they are parsed_>
-<__An eval element may contain <_another eval_> if its markers are repeated__>
-<_Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) may also be embedded in eval elements, and their evaluated results will become part of the rendered value._>
-
-<{
-    string <"value">
-    character <\65\>
-    characterMin \65
-    boolean <~true~>
-    booleanMin ~true
-    integer <#42#>
-    integerMin #42
-    long <&5000000000&>
-    longMin &5000000000
-    hexLongInteger <&$BAADF00D&>
-    hexLongIntegerMin &$BAADF00D
-    binaryInteger <# %10101010 #>
-    binaryIntegerMin #%10101010
-    double <^3.1415926535^>
-    doubleMin ^3.1415926535
-    decimal <*123.45*>
-    decimalMin *123.45
-    date <@2019-01-01@>
-    dateMin @2019-01-01
-    placeholder <_<|USERPROFILE|>_>
-    evalString <_Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><__as<\$20\>is__>._> :> </ Evaluated element marker is _ />
-    array <[
-        #1 <#2#>
-        #3
-    ]> 
-    
-    object <{ 
-        key <"value">
-        boolean <~false~>
-    }> </ Object markers are { } />
-
-    </ A property-bag element may hold any number of elements of any type. />
-    propertyBag <(
-        <"value">
-        <#123#>
-        <~true~>
-        <@2019-01-01@>
-    )> </ Property bag markers are ( ) />
-}>
-
-<(
-    </ Most elements may pull their values from a placeholder. />
-    numProcs <#<|NUMBER_OF_PROCESSORS|>#>
-
-    </ A key-value pair element may have a key/value pair as a value. />
-    keyValuePair key <"value">
-
-    <_What if an eval element contains a comment?</ The comment is removed./>_>
-)>
-
-<{
-    name <"Alice">
-    age <#30#>
-    isMember <~true~>
-    scores <[
-        <*85*> 
-        <*90*> 
-        <*78.5*>
-    ]>
-    profile <{
-        email <"alice@example.com">
-        joinedDate <@2023-01-15T12:00:00@>
-    }> 
-}>
-
-{
-    name <"Alice">
+﻿{
+    name "Alice"
     age #30
     isMember ~true
+
     scores [
         *85
         *90
         *78.5
     ]
+
     profile {
         email <"alice@example.com">
         joinedDate @2023-01-15T12:00:00
     }
 }
 
-<"
-/* Now it's possible to embed code with less worry */
-namespace HelloWorldApp;
-
-class Program {
-    static void Main(string[] args) {
-        Console.WriteLine("Hello, Xfer!");
-    }
-}
-">
-
-</ I parked this comment here so that I could remember how to replace the parse parameter for testing. />
-</ parse ..\..\..\..\sample.xfer />
+{name "Alice"age #30 isMember ~true scores [*85 *90 *78.5 ]profile{email <"alice@example.com"> joinedDate @2023-01-15T12:00:00 }}
+</
+{"name":"Alice","age":30,"isMember":true,"scores":[85,90,78.5],"profile":{"email":"alice@example.com","joinedDate":"2023-01-15T12:00:00"}}
+/>

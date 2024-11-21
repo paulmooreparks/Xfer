@@ -216,3 +216,13 @@ class Program {
 
 <{name "Alice age #30 isMember ~true scores<[ *85 *90 *78.5 ]>profile<{email"alice@example.com joinedDate @2023-05-05T12:00:00 }>settings<{theme "dark notifications <{email ~true sms ~false }>preferences<[<{key "timezone value "UTC+0 }><{key "language value "en }>]>}>items<[<{id #1 name <"Item 1">price *19.99 }><{id #2 name <"Item 2">price *5.49 }><{id #3 name <"Item 3">price *10.0 }>]>tags <[ "tag1 "tag2 "tag3 ]>metadata<{created @2024-11-10T08:00:00 modified @2024-11-11T12:30:00 }>}>
 
+</ Schema idea />
+
+<{
+    stringProperty "
+    decProperty *
+    doubleProperty ^
+    longProperty &
+    intProperty #
+    boolProperty ~
+}>

@@ -213,27 +213,29 @@ public class Parser {
         return false;
     }
 
-    internal bool ElementClosing() {
-        return ElementClosing(out int _);
-    }
+    internal bool ElementClosingOrWhitespace() {
+        if (_delimStack.Count == 0) {
+            return false;
+        }
 
-    internal bool ElementClosing(out int outMarkerCount) {
-        outMarkerCount = 1;
-        if (_delimStack.Count == 0) return false;
-
-        var delimiter = _delimStack.Peek();
-        int markerCount = delimiter.MarkerCount;
-        outMarkerCount = markerCount;
-
-        if (delimiter.IsMinimized && char.IsWhiteSpace(CurrentChar)) {
+        if (_delimStack.Peek().IsMinimized && char.IsWhiteSpace(CurrentChar)) {
             _delimStack.Pop();
             return true;
         }
 
-        if (CurrentChar == delimiter.ClosingMarker) {
-            --markerCount;
+        return ElementClosing();
+    }
 
-            if (Peek == Element.ElementClosingMarker && markerCount == 0) {
+    internal bool ElementClosing() {
+        if (_delimStack.Count == 0) {
+            return false;
+        }
+
+        var delimiter = _delimStack.Peek();
+        int markerCount = delimiter.MarkerCount;
+
+        if (CurrentChar == delimiter.ClosingMarker) {
+            if (Peek == Element.ElementClosingMarker && markerCount == 1) {
                 Advance();
                 Advance();
                 _delimStack.Pop();
@@ -242,19 +244,19 @@ public class Parser {
 
             int tmpPosition = Position;
 
-            while (markerCount > 0 && Peek == delimiter.ClosingMarker) {
+            while (markerCount > 0 && CurrentChar == delimiter.ClosingMarker) {
                 Advance();
                 --markerCount;
 
                 if (delimiter.IsMinimized) {
                     if (markerCount == 0) {
-                        Advance();
+                        // Advance();
                         _delimStack.Pop();
                         return true;
                     }
                 }
-                else if (Peek == Element.ElementClosingMarker && markerCount == 0) {
-                    Advance();
+                else if (CurrentChar == Element.ElementClosingMarker && markerCount == 0) {
+                    // Advance();
                     Advance();
                     _delimStack.Pop();
                     return true;
@@ -567,7 +569,7 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementClosing()) {
+            if (ElementClosingOrWhitespace()) {
                 var variable = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
 
                 if (string.IsNullOrEmpty(variable)) {
@@ -617,7 +619,7 @@ public class Parser {
     private CharacterElement ParseCharacterElement(int markerCount = 1) {
         StringBuilder charContent = new();
 
-        while (IsCharAvailable() && !ElementClosing()) {
+        while (IsCharAvailable() && !ElementClosingOrWhitespace()) {
             charContent.Append(CurrentChar);
             Advance();
         }
@@ -750,7 +752,10 @@ public class Parser {
     }
 
     private DateElement ParseDateElement(int markerCount = 1) {
-        SkipWhitespace();
+        if (!_delimStack.Peek().IsMinimized) {
+            SkipWhitespace();
+        }
+
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
@@ -760,7 +765,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementClosing()) {
+            if (ElementClosingOrWhitespace()) {
                 var value = valueBuilder.ToString();
                 return new DateElement(value, markerCount);
             }
@@ -773,7 +778,10 @@ public class Parser {
     }        
     
     private IntegerElement ParseIntegerElement(int markerCount = 1) {
-        SkipWhitespace();
+        if (!_delimStack.Peek().IsMinimized) {
+            SkipWhitespace();
+        }
+
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
@@ -783,7 +791,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementClosing()) {
+            if (ElementClosingOrWhitespace()) {
                 var value = ParseNumericValue<int>(valueBuilder.ToString());
                 return new IntegerElement(value, markerCount);
             }
@@ -797,7 +805,10 @@ public class Parser {
 
 
     private LongElement ParseLongIntegerElement(int markerCount = 1) {
-        SkipWhitespace();
+        if (!_delimStack.Peek().IsMinimized) {
+            SkipWhitespace();
+        }
+
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
@@ -807,7 +818,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementClosing()) {
+            if (ElementClosingOrWhitespace()) {
                 var value = ParseNumericValue<long>(valueBuilder.ToString());
                 return new LongElement(value, markerCount);
             }
@@ -820,7 +831,10 @@ public class Parser {
     }
 
     private DecimalElement ParseDecimalElement(int markerCount = 1) {
-        SkipWhitespace();
+        if (!_delimStack.Peek().IsMinimized) {
+            SkipWhitespace();
+        }
+
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
@@ -830,7 +844,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementClosing()) {
+            if (ElementClosingOrWhitespace()) {
                 var value = ParseNumericValue<decimal>(valueBuilder.ToString());
                 return new DecimalElement(value, markerCount);
             }
@@ -843,7 +857,10 @@ public class Parser {
     }
 
     private DoubleElement ParseDoubleElement(int markerCount = 1) {
-        SkipWhitespace();
+        if (!_delimStack.Peek().IsMinimized) {
+            SkipWhitespace();
+        }
+
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
@@ -853,7 +870,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementClosing()) {
+            if (ElementClosingOrWhitespace()) {
                 var value = ParseNumericValue<double>(valueBuilder.ToString());
                 return new DoubleElement(value, markerCount);
             }
@@ -866,21 +883,25 @@ public class Parser {
     }
 
     private BooleanElement ParseBooleanElement(int markerCount = 1) {
-        SkipWhitespace();
+        if (!_delimStack.Peek().IsMinimized) {
+            SkipWhitespace();
+        }
+
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.ElementDelimiter, out int phMarkerCount)) {
+            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
                 PlaceholderElement evaluatedElement = ParsePlaceholderElement();
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
             
-            if (ElementClosing() || !char.IsAsciiLetter(CurrentChar)) {
+            if (ElementClosingOrWhitespace() || !char.IsAsciiLetter(CurrentChar)) {
                 string valueString = valueBuilder.ToString().ToLower();
                 bool value = valueString switch {
                     "true" => true,
                     "false" => false,
+                    "" => false,
                     _ => throw new InvalidOperationException($"Invalid boolean value '{valueString}' at row {CurrentRow}, column {CurrentColumn}.")
                 };
 
@@ -896,7 +917,8 @@ public class Parser {
 
     private T ParseNumericValue<T>(string valueString) where T : struct, IConvertible {
         if (string.IsNullOrEmpty(valueString)) {
-            throw new ArgumentException("The numeric value string cannot be null or empty.", nameof(valueString));
+            // throw new ArgumentException("The numeric value string cannot be null or empty.", nameof(valueString));
+            return default;
         }
 
         char basePrefix = valueString[0];
@@ -911,42 +933,41 @@ public class Parser {
         }
 
         try {
-            if (numberBase == 10) {
-                // Handle decimal values
-                if (typeof(T) == typeof(float)) {
-                    return (T)Convert.ChangeType(float.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+            switch (numberBase) {
+                case 10: {
+                    if (typeof(T) == typeof(float)) {
+                        return (T)Convert.ChangeType(float.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                    }
+                    else if (typeof(T) == typeof(double)) {
+                        return (T)Convert.ChangeType(double.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                    }
+                    else if (typeof(T) == typeof(short)) {
+                        return (T)Convert.ChangeType(short.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                    }
+                    else if (typeof(T) == typeof(int)) {
+                        return (T)Convert.ChangeType(int.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                    }
+                    else if (typeof(T) == typeof(long)) {
+                        return (T)Convert.ChangeType(long.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                    }
+                    else if (typeof(T) == typeof(decimal)) {
+                        return (T)Convert.ChangeType(decimal.Parse(valueString, CultureInfo.InvariantCulture), typeof(T));
+                    }
+                    else {
+                        throw new InvalidOperationException($"Unsupported type '{typeof(T)}' for decimal value parsing at row {CurrentRow}, column {CurrentColumn}.");
+                    }
                 }
-                else if (typeof(T) == typeof(double)) {
-                    return (T)Convert.ChangeType(double.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                case 16: {
+                    long hexValue = long.Parse(numberString, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                    return (T)Convert.ChangeType(hexValue, typeof(T));
                 }
-                else if (typeof(T) == typeof(short)) {
-                    return (T)Convert.ChangeType(short.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                case 2: {
+                    long binaryValue = long.Parse(numberString, NumberStyles.BinaryNumber, CultureInfo.InvariantCulture);
+                    return (T)Convert.ChangeType(binaryValue, typeof(T));
                 }
-                else if (typeof(T) == typeof(int)) {
-                    return (T)Convert.ChangeType(int.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                default: {
+                    throw new InvalidOperationException($"Unsupported numeric base '{numberBase}' at row {CurrentRow}, column {CurrentColumn}.");
                 }
-                else if (typeof(T) == typeof(long)) {
-                    return (T)Convert.ChangeType(long.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
-                }
-                else if (typeof(T) == typeof(decimal)) {
-                    return (T)Convert.ChangeType(decimal.Parse(valueString, CultureInfo.InvariantCulture), typeof(T));
-                }
-                else {
-                    throw new InvalidOperationException($"Unsupported type '{typeof(T)}' for decimal value parsing at row {CurrentRow}, column {CurrentColumn}.");
-                }
-            }
-            else if (numberBase == 16) {
-                // Handle hexadecimal values
-                long hexValue = long.Parse(numberString, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-                return (T)Convert.ChangeType(hexValue, typeof(T));
-            }
-            else if (numberBase == 2) {
-                // Handle binary values
-                long binaryValue = long.Parse(numberString, NumberStyles.BinaryNumber, CultureInfo.InvariantCulture);
-                return (T)Convert.ChangeType(binaryValue, typeof(T));
-            }
-            else {
-                throw new InvalidOperationException($"Unsupported numeric base '{numberBase}' at row {CurrentRow}, column {CurrentColumn}.");
             }
         }
         catch (Exception ex) {

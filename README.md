@@ -34,9 +34,31 @@ I'm experimenting with a syntax that will cut down on the "noise" a bit. There a
 }>
 ```
 
+I'm considering simplifying that even more, but such a change would have other implications.
+
+```xfer
+{
+    name <"Alice"> </ Text elements (and comments, for that matter) so far still require digraph pairs.
+    age #30 </ # instead of <#30#> />
+    isMember ~true </ ~ instead of <~true~> />
+
+    </ And so on... />
+    scores [
+        *85
+        *90
+        *78.5
+    ]
+
+    profile {
+        email <"alice@example.com">
+        joinedDate @2023-01-15T12:00:00 </ @ instead of <@ @> />
+    }
+}
+```
+
 ## Basic Syntax
 
-Xfer is made up of elements. An element begins and ends with angle brackets (< and >). The first character inside the angle brackets is the marker character, which indicates the type of the element. The marker character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.
+An Xfer document is composed of keywords and elements. An element typically begins and ends with angle brackets (< and >) unless using minified syntax (discussed later). The first character inside the angle brackets is the marker character, which indicates the type of the element. The marker character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.
 
 ```xfer
 </ Below is a string element />
