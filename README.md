@@ -2,9 +2,7 @@
 
 _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.com/item?id=42114543). Thank you so much for all the great input and discussion!_
 
-Xfer is a data-serialization language that is designed to be a more flexible and more strictly-typed alternative to JSON. 
-This project is still in its infancy and is quite experimental. As it becomes a bit more concrete I'll add more 
-details here. 
+Xfer is a data-serialization language that is designed to be a more flexible and more strictly-typed alternative to JSON. This project is still in its infancy and is quite experimental, even exploratory. As it becomes a bit more concrete I'll add more details here. 
 
 The code you'll find in this repository is also experimental. So far, I've built an [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer/Models/Elements), a [parser](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/Services/Parser.cs), and a [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/XferConverter.cs) as part of my [.NET Xfer Library](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer), but at the moment this code is completely not ready for prime time. It's not even thread safe yet! About once a week I'll completely refactor everything, so don't get terribly attached to anything you see here. However, if you do like some of the ideas, please [let me know](mailto:paul@parkscomputing.com). I'm always open to feedback.
 
@@ -36,7 +34,6 @@ I'm experimenting with a syntax that will cut down on the "noise" a bit. There a
 }>
 ```
 
-
 ## Basic Syntax
 
 Xfer is made up of elements. An element begins and ends with angle brackets (< and >). The first character inside the angle brackets is the marker character, which indicates the type of the element. The marker character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.
@@ -46,11 +43,14 @@ Xfer is made up of elements. An element begins and ends with angle brackets (< a
 <"Hello, World!">
 ```
 
-## What Is the Purpose of Xfer?
+## Design Goals
+* **Explicit Types**: All values are explicitly typed.
+* **No Null Values**: Xfer supports empty values but not null values.
+* **No Escaping**: Xfer does not require escaping of special characters.
 
-As alluded to at the top of this document, the purpose is to provide an alternative to JSON that offers the following features (among others):
-
-* [Nested elements](#nested-elements)
+## Features of Xfer
+* [Nested Elements](#nested-elements)
+* [Safer Embedding](#safer-embedding)
 * [Comments](#comments)
 * [Strict typing](#strict-typing)
 * [Metadata](#metadata)
@@ -62,6 +62,15 @@ In Xfer, elements are delimited by angle brackets (< and >) and element-specific
 ```xfer
 <//This is how a comment </can contain another comment/>, //>
 <"""and a string can contain <""another string which <"contains another string">"">.""">
+```
+
+### Safer Embedding
+One of the design goals of Xfer is to eliminate escaping of special characters. Enclosing data with unique paired digraphs already reduces the chances of a collision with the enclosed data, but in the event that a collision does occur, the marker character can be repeated as many times as necessary to disambiguate the data.
+
+```xfer
+<"String elements may already contain "quotes" without any issues.">
+<""To contain <"Xfer string digraphs">, repeat the string markers in the enclosing digraphs."">
+<"""""Markers may be repeated as many times as necessary.""""">
 ```
 
 ### Comments
