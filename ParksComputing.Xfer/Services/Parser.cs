@@ -349,7 +349,7 @@ public class Parser {
         SkipWhitespace();
 
         while (IsCharAvailable()) {
-            if (CurrentChar.IsKeywordChar()) {
+            if (CurrentChar.IsKeywordLeadingChar()) {
                 var keyValuePairElement = ParseKeyValuePairElement();
                 SkipWhitespace();
                 return keyValuePairElement;
