@@ -206,7 +206,7 @@ public class Parser {
                 Advance();
             }
 
-            _delimStack.Push(new Delimiter(openingMarker, closingMarker, markerCount));
+            _delimStack.Push(new Delimiter(openingMarker, closingMarker, markerCount, isMinimized: false));
             return true;
         }
 
@@ -222,7 +222,7 @@ public class Parser {
         if (_delimStack.Count == 0) return false;
 
         var delimiter = _delimStack.Peek();
-        int markerCount = delimiter.Count;
+        int markerCount = delimiter.MarkerCount;
         outMarkerCount = markerCount;
 
         if (delimiter.IsMinimized && char.IsWhiteSpace(CurrentChar)) {
@@ -269,7 +269,7 @@ public class Parser {
 
     private void SkipBOM() {
         // If the current character is the BOM (0xFEFF), advance the position
-        if (Position == 0 && (CurrentChar == '\uFEFF' || CurrentChar == '\uFFFE')) {
+        if (Position == 0 && CurrentChar == '\uFEFF') {
             Advance();
         }
     }

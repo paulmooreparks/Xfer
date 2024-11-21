@@ -9,7 +9,7 @@ namespace ParksComputing.Xfer.Models;
 public class Delimiter {
     public char OpeningMarker { get; }
     public char ClosingMarker { get; }
-    public int Count { get; set; }
+    public int MarkerCount { get; set; }
     public bool IsMinimized { get; } = false;
 
     public string Opening { get; }
@@ -25,9 +25,9 @@ public class Delimiter {
     public Delimiter(char openingMarker, char closingMarker, bool isMinimized = false) : this(openingMarker, closingMarker, 1, isMinimized) {
     }
 
-    public Delimiter(char openingMarker, char closingMarker, int count, bool isMinimized = false) {
-        if (count < 1) {
-            throw new ArgumentOutOfRangeException(nameof(count), "Count must be at least 1.");
+    public Delimiter(char openingMarker, char closingMarker, int markerCount, bool isMinimized = false) {
+        if (markerCount < 1) {
+            throw new ArgumentOutOfRangeException(nameof(markerCount), "Count must be at least 1.");
         }
 
         ValidateMarker(openingMarker, nameof(openingMarker));
@@ -35,11 +35,11 @@ public class Delimiter {
 
         OpeningMarker = openingMarker;
         ClosingMarker = closingMarker;
-        Count = count;
+        MarkerCount = markerCount;
         IsMinimized = isMinimized;
 
-        var repeatedOpening = new string(openingMarker, count);
-        var repeatedClosing = new string(closingMarker, count);
+        var repeatedOpening = new string(openingMarker, markerCount);
+        var repeatedClosing = new string(closingMarker, markerCount);
 
         Opening = "<" + repeatedOpening;
         Closing = repeatedClosing + ">";
