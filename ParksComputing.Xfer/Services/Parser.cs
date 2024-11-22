@@ -215,12 +215,16 @@ public class Parser {
         return false;
     }
 
-    internal bool ElementClosingOrWhitespace() {
+    internal bool ElementMinClosing() {
         if (_delimStack.Count == 0) {
             return false;
         }
 
-        if (_delimStack.Peek().IsMinimized && char.IsWhiteSpace(CurrentChar)) {
+        if ((_delimStack.Peek().IsMinimized && char.IsWhiteSpace(CurrentChar)) || 
+            CurrentChar == ObjectElement.ClosingMarker || 
+            CurrentChar == ArrayElement.ClosingMarker || 
+            CurrentChar == PropertyBagElement.ClosingMarker) 
+        {
             _delimStack.Pop();
             return true;
         }
@@ -252,13 +256,11 @@ public class Parser {
 
                 if (delimiter.IsMinimized) {
                     if (markerCount == 0) {
-                        // Advance();
                         _delimStack.Pop();
                         return true;
                     }
                 }
                 else if (CurrentChar == Element.ElementClosingMarker && markerCount == 0) {
-                    // Advance();
                     Advance();
                     _delimStack.Pop();
                     return true;
@@ -272,7 +274,6 @@ public class Parser {
     }
 
     private void SkipBOM() {
-        // If the current character is the BOM (0xFEFF), advance the position
         if (Position == 0 && CurrentChar == '\uFEFF') {
             Advance();
         }
@@ -571,7 +572,7 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementClosingOrWhitespace()) {
+            if (ElementMinClosing()) {
                 var variable = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
 
                 if (string.IsNullOrEmpty(variable)) {
@@ -621,7 +622,7 @@ public class Parser {
     private CharacterElement ParseCharacterElement(int markerCount = 1) {
         StringBuilder charContent = new();
 
-        while (IsCharAvailable() && !ElementClosingOrWhitespace()) {
+        while (IsCharAvailable() && !ElementMinClosing()) {
             charContent.Append(CurrentChar);
             Advance();
         }
@@ -767,7 +768,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementClosingOrWhitespace()) {
+            if (ElementMinClosing()) {
                 var value = valueBuilder.ToString();
                 return new DateElement(value, markerCount);
             }
@@ -793,7 +794,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementClosingOrWhitespace()) {
+            if (ElementMinClosing()) {
                 var value = ParseNumericValue<int>(valueBuilder.ToString());
                 return new IntegerElement(value, markerCount);
             }
@@ -820,7 +821,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementClosingOrWhitespace()) {
+            if (ElementMinClosing()) {
                 var value = ParseNumericValue<long>(valueBuilder.ToString());
                 return new LongElement(value, markerCount);
             }
@@ -846,7 +847,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementClosingOrWhitespace()) {
+            if (ElementMinClosing()) {
                 var value = ParseNumericValue<decimal>(valueBuilder.ToString());
                 return new DecimalElement(value, markerCount);
             }
@@ -872,7 +873,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementClosingOrWhitespace()) {
+            if (ElementMinClosing()) {
                 var value = ParseNumericValue<double>(valueBuilder.ToString());
                 return new DoubleElement(value, markerCount);
             }
@@ -898,7 +899,7 @@ public class Parser {
                 continue;
             }
             
-            if (ElementClosingOrWhitespace() || !char.IsAsciiLetter(CurrentChar)) {
+            if (ElementMinClosing() || !char.IsAsciiLetter(CurrentChar)) {
                 string valueString = valueBuilder.ToString().ToLower();
                 bool value = valueString switch {
                     "true" => true,

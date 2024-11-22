@@ -71,7 +71,7 @@ elements of any type. />
 }>
 
 </ We are able to round-trip the minified output of the parser. />
-<{string<"value">character\65 boolean~true integer#42 long&5000000000 hexLongInteger&3131961357 binaryInteger#170 double^3.1415926535 decimal*123.45 date@2019-01-01T08:00:00 placeholder<`C:\Users\paul`>evalString<`Inner elements are evaluated 1 at a time and rendered as is.`>array<[#1 #2 #3 ]>object<{key<"value">boolean~false }>propertyBag<(<"value">#123 ~true @2019-02-02T08:00:00 )>}>
+{string"value"character\65 boolean~true integer#42 long&5000000000 hexLongInteger&3131961357 binaryInteger#170 double^3.1415926535 decimal*123.45 date@2019-01-01T08:00:00 placeholder`C:\Users\paul`evalString`Inner elements are evaluated 1 at a time and rendered as is.`array[#1 #2 #3]object{key"value"boolean~false}propertyBag("value"#123 ~true @2019-02-02T08:00:00)}
 
 <(
     </ Most elements may pull their values from a placeholder. />
@@ -98,7 +98,7 @@ class Program {
     name "Alice"
     age #30
     isMember ~true
-    scores [ *85 *90 *78.5 ]
+    scores [*85 *90 *78.5]
     profile {
         email "alice@example.com"
         joinedDate @2023-05-05T12:00:00
@@ -137,7 +137,7 @@ class Program {
             price *10.0
         }
     ]
-    tags [ "tag1" "tag2" "tag3" ]
+    tags ["tag1" "tag2" "tag3"]
     metadata{
         created @2024-11-10T08:00:00
         modified @2024-11-11T12:30:00
