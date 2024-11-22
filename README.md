@@ -16,7 +16,8 @@ I'm experimenting with a syntax that will cut down on the "noise" a bit. There a
 
 ```xfer
 {
-    name "Alice" </ Text elements must be start and end in quotes. />
+    name "Alice" </ Text elements must start and end in quotes. />
+    </ Other elements may simply begin with a marker character. />
     age #30 </ # instead of <#30#> />
     isMember ~true </ ~ instead of <~true~> />
 
