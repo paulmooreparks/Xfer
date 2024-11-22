@@ -34,14 +34,20 @@ I'm experimenting with a syntax that will cut down on the "noise" a bit. There a
 }
 ```
 
+String elements must still be enclosed in quotes, and strings may even contain quotes without escaping them.
+
 ```xfer
+</ No digraphs required for text elements that are straightforward to parse. />
 speaker "Alice"
-statement1 "" A quote is a " character.""
-statement2 <"Alice said, "Boo!"">
-name "Alice </ No digraphs required for a string without whitespace. />
-statement1 "Alice speaks." </ Single quotes may be used if the string contains whitespace. />
-statement2 <"Alice said, "What's up?""> </ Digraphs are required in this case. />
+
+</ If the string contains an embedded marker character, then the surrounding markers may be repeated as necessary. />
+statement1 ""A quote is a " character.""
+
+</ Digraphs are required when the closing marker would be ambiguous. />
+statement2 <"Alice said, "What's up?""> 
 ```
+
+The code is in a bit of a weird state where two styles of syntax are supported, and I think I like it that way for now. If I decide that the old syntax really isn't needed, I'll remove it. But for now, I'm going to keep it around.
 
 ## Basic Syntax
 
