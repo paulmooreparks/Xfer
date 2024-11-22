@@ -35,74 +35,38 @@ elements of any type. />
 <``An eval element may contain <`another eval`> if its markers are repeated``>
 <`Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) may also be embedded in eval elements, and their evaluated results will become part of the rendered value.`>
 
-<{
-    string <"value">  </ String marker is " />
-    character <\65\>  </ Character marker is \ />
-    boolean <~true~>  </ Boolean marker is ~ />
-    integer <#42#>  </ Integer marker is # />
-    long <&5000000000&>  </ Long marker is & />
-    hexLongInteger <&$BAADF00D&>  </ Hex numeric values are preceded by $ />
-    binaryInteger <# %10101010 #>  </ Binary numeric values are preceded by % />
-    double <^3.1415926535^>  </ Double marker is ^ />
-    decimal <*123.45*>  </ Decimal marker is * />
-    date <@2019-01-01@>  </ Date marker is @ />
-    placeholder <`<|USERPROFILE|>`>  </ Placeholder marker is | />
+{
+    string "value"  </ String marker is " />
+    character \65  </ Character marker is \ />
+    boolean ~true  </ Boolean marker is ~ />
+    integer #42  </ Integer marker is # />
+    long &5000000000  </ Long marker is & />
+    hexLongInteger &$BAADF00D  </ Hex numeric values are preceded by $ />
+    binaryInteger #%10101010  </ Binary numeric values are preceded by % />
+    double ^3.1415926535  </ Double marker is ^ />
+    decimal *123.45  </ Decimal marker is * />
+    date @2019-01-01  </ Date marker is @ />
+    placeholder `<|USERPROFILE|>`  </ Placeholder marker is | />
     evalString <`Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><``as<\$20\>is``>.`>  </ Evaluated element marker is ` />
-    array <[
-        <#1#> 
-        <#2#> 
-        <#3#>
-    ]> 
-    </ Array markers are [ ] />
-
-    object <{ 
-        key <"value"> 
-        boolean <~false~> 
-    }> </ Object markers are { } />
-     
-    </ A property-bag element may hold any number of elements of any type. />
-    propertyBag <(
-        <"value">
-        <#123#>
-        <~true~>
-        <@2019-02-02@>
-    )> </ Property bag markers are ( ) />
-    
-}>
-
-</ These may be minimised />
-
-<{
-    string "value"
-    character \65
-    boolean ~true
-    integer #42
-    long &5000000000
-    hexLongInteger &$BAADF00D
-    binaryInteger #%10101010
-    double ^3.1415926535
-    decimal *123.45
-    date @2019-03-03
-    placeholder `<|USERPROFILE|>`
-    evalString <`Inner elements "are evaluated #1 at a time and<\$20\>rendered<\$20\><``as<\$20\>is``>.`> 
-    
-    array <[
-        #1
+    array [
+        #1 
         #2 
         #3
-    ]> 
-    
-    object <{ 
+    ] 
+    </ Array markers are [ ] />
+
+    object { 
         key "value"
         boolean ~false
-    }> 
+    } </ Object markers are { } />
      
-    propertyBag <(
+    </ A property-bag element may hold any number of elements of any type. />
+    propertyBag (
         "value"
         #123
         ~true
-        @2019-04-04
-    )> 
+        @2019-02-02
+    ) </ Property bag markers are ( ) />
     
 }>
 
@@ -111,35 +75,13 @@ elements of any type. />
 
 <(
     </ Most elements may pull their values from a placeholder. />
-    numProcs <#<|NUMBER_OF_PROCESSORS|>#> 
+    numProcs #<|NUMBER_OF_PROCESSORS|>
 
     </ A key-value pair element may have a key/value pair as a value. />
-    keyValuePair key <"value">
+    keyValuePair key "value"
 
-    <`What if an eval element contains a comment?</ The comment is removed./>`>
+    `What if an eval element contains a comment?</ The comment is removed./>`
 )>
-
-<{
-    name <"Alice"> 
-    age <#30#> 
-    isMember <~true~> 
-    scores <[<*85*> <*90*> <*78.5*>]> 
-    profile <{
-        email <"alice@example.com"> 
-        joinedDate <@2023-05-05T12:00:00@> 
-    }> 
-}>
-
-<{
-    name <"Alice"> 
-    age #30 
-    isMember ~true 
-    scores <[*85 *90 *78.5 ]> 
-    profile <{
-        email <"alice@example.com"> 
-        joinedDate @2023-05-05T12:00:00
-    }> 
-}>
 
 <"
 /* Now it's possible to embed code with less worry */
