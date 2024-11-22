@@ -1,8 +1,14 @@
-﻿{
-    name "Alice"
-    age #30
-    isMember ~true
+﻿speaker "Alice"
+statement1 "" A quote is a " character.""
+statement2 <"Alice said, "Boo!"">
 
+`<|COMPUTERNAME|>`
+{
+    name "Alice" </ Text elements must be start and end in quotes. />
+    age #30 </ # instead of <#30#> />
+    isMember ~true </ ~ instead of <~true~> />
+
+    </ And so on... />
     scores [
         *85
         *90
@@ -10,8 +16,8 @@
     ]
 
     profile {
-        email <"alice@example.com">
-        joinedDate @2023-01-15T12:00:00
+        email "alice@example.com"
+        joinedDate @2023-01-15T12:00:00 </ @ instead of <@ @> />
     }
 }
 

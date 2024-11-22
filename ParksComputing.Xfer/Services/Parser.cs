@@ -167,6 +167,8 @@ public class Parser {
             return true;
         }
 
+        markerCount = 1;
+
         if (CurrentChar == openingMarker) {
             int tmpPosition = Position;
             Advance();

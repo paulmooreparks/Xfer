@@ -10,35 +10,13 @@ That said, I do plan to make the code professional-grade in the future, and I wa
 
 ## Work in Progress
 
-### Minified Syntax
+### Tighter Syntax
 
-I'm experimenting with a syntax that will cut down on the "noise" a bit. There are situations where an element may not need to be wrapped in a pair of digraphs but may instead be typed with a single character. If the full digraphs are clearer or are required due to the nature of the data they enclose, then those are still supported.
-
-```xfer
-<{
-    name <"Alice"> </ Text elements (and comments, for that matter) so far still require digraph pairs.
-    age #30 </ # instead of <#30#> />
-    isMember ~true </ ~ instead of <~true~> />
-
-    </ And so on... />
-    scores <[
-        *85
-        *90
-        *78.5
-    ]>
-
-    profile <{
-        email <"alice@example.com">
-        joinedDate @2023-01-15T12:00:00 </ @ instead of <@ @> />
-    }>
-}>
-```
-
-I'm considering simplifying that even more, but such a change would have other implications.
+I'm experimenting with a syntax that will cut down on the "noise" a bit. There are situations where an element may not need to be wrapped in a pair of digraphs but may instead be begun with a single character or wrapped in a pair of characters. If the full digraphs are clearer or are required due to the nature of the data they enclose, then those are still supported.
 
 ```xfer
 {
-    name <"Alice"> </ Text elements (and comments, for that matter) so far still require digraph pairs.
+    name "Alice" </ Text elements must be start and end in quotes. />
     age #30 </ # instead of <#30#> />
     isMember ~true </ ~ instead of <~true~> />
 
@@ -50,10 +28,19 @@ I'm considering simplifying that even more, but such a change would have other i
     ]
 
     profile {
-        email <"alice@example.com">
+        email "alice@example.com"
         joinedDate @2023-01-15T12:00:00 </ @ instead of <@ @> />
     }
 }
+```
+
+```xfer
+speaker "Alice"
+statement1 "" A quote is a " character.""
+statement2 <"Alice said, "Boo!"">
+name "Alice </ No digraphs required for a string without whitespace. />
+statement1 "Alice speaks." </ Single quotes may be used if the string contains whitespace. />
+statement2 <"Alice said, "What's up?""> </ Digraphs are required in this case. />
 ```
 
 ## Basic Syntax
