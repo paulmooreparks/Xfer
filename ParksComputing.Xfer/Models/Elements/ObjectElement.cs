@@ -43,6 +43,15 @@ public class ObjectElement : Element {
         }
     }
 
+    public bool Add(KeyValuePairElement value) {
+        if (_values.ContainsKey(value.Key)) {
+            return false;
+        }
+
+        _values.Add(value.Key, value);
+        return true;
+    }
+
     public void AddOrUpdate(KeyValuePairElement value) {
         if (_values.TryGetValue(value.Key, out KeyValuePairElement? tuple)) {
             _values[value.Key] = value;

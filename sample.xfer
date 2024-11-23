@@ -37,6 +37,7 @@ elements of any type. />
 
 {
     string "value"  </ String marker is " />
+    string "dupe"
     character \65  </ Character marker is \ />
     boolean ~true  </ Boolean marker is ~ />
     integer #42  </ Integer marker is # />

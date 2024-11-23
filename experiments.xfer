@@ -1,6 +1,6 @@
 ﻿a<"">b# c&
 speaker "Alice"
-statement1 "" A quote is a " character.""
+statement1 ""A quote is a " character.""
 statement2 <"Alice said, "Boo!"">
 
 `<|COMPUTERNAME|>`
@@ -22,7 +22,8 @@ statement2 <"Alice said, "Boo!"">
     }
 }
 
-{name "Alice"age #30 isMember ~true scores [*85 *90 *78.5 ]profile{email <"alice@example.com"> joinedDate @2023-01-15T12:00:00 }}
+</ This minimal Xfer sample is quite a bit shorter than the equivalent JSON farther below. />
+{name"Alice"age#30 isMember~true scores[*85 *90 *78.5]profile{email<"alice@example.com">joinedDate@2023-01-15T12:00:00}}
 </
 {"name":"Alice","age":30,"isMember":true,"scores":[85,90,78.5],"profile":{"email":"alice@example.com","joinedDate":"2023-01-15T12:00:00"}}
 />

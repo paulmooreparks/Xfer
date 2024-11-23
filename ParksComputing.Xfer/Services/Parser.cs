@@ -6,6 +6,9 @@ using ParksComputing.Xfer.Models.Elements;
 
 namespace ParksComputing.Xfer.Services;
 
+/* This parser is ROUGH. I'm trying out a lot of ideas, some of them supported in parallel. Once I 
+settle on a solid grammar, I'll redo the parser or use some kind of tool to rewrite it. */
+
 public class Parser {
     public Parser() : this(Encoding.UTF8) { }
 
@@ -564,7 +567,11 @@ public class Parser {
             var element = ParseElement();
 
             if (element is KeyValuePairElement kvp) {
-                objectElement.AddOrUpdate(kvp);
+                if (!objectElement.Add(kvp)) {
+                    /* TODO: The row and column are wrong here. The parser has already moved past the key/value pair. 
+                    Set up a stack of row/column positions to track recent elements. */
+                    throw new InvalidOperationException($"Duplicate key '{kvp.Key}' in object at row {CurrentRow}, column {CurrentColumn}.");
+                }
             }
             else {
                 throw new InvalidOperationException($"Unexpected element type at row {CurrentRow}, column {CurrentColumn}.");

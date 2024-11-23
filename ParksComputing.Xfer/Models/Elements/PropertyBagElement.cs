@@ -30,12 +30,6 @@ public class PropertyBagElement : Element {
         }
     }
 
-    public string Value {
-        get {
-            return string.Join(", ", TypedValue);
-        }
-    }
-
     public PropertyBagElement(ElementStyle style = ElementStyle.Normal) 
         : base(ElementName, new(OpeningMarker, ClosingMarker, style)) 
     { 
