@@ -10,13 +10,13 @@ public class BooleanElement : TypedElement<bool> {
     public static readonly string ElementName = "boolean";
     public const char OpeningMarker = '~';
     public const char ClosingMarker = OpeningMarker;
-    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
 
     public static readonly string TrueValue = "true";
     public static readonly string FalseValue = "false";
 
-    public BooleanElement(bool value, int markerCount = 1)
-        : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker, markerCount)) {
+    public BooleanElement(bool value, int markerCount = 1, ElementStyle style = ElementStyle.Normal)
+        : base(value, ElementName, new ElementDelimiter(OpeningMarker, ClosingMarker, markerCount, style)) {
     }
 
     public override string ToString() {

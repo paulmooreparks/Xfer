@@ -4,29 +4,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParksComputing.Xfer.Models;
+namespace ParksComputing.Xfer.Models.Elements;
 
-public class Delimiter {
+public class ElementDelimiter
+{
     public char OpeningMarker { get; }
     public char ClosingMarker { get; }
     public int MarkerCount { get; set; }
-    public bool IsMinimized { get; } = false;
+    public ElementStyle Style { get; } = ElementStyle.Normal;
 
     public string Opening { get; }
     public string Closing { get; }
 
     public string MinOpening { get; }
 
-    public Delimiter() : this(default, default, 1) { }
+    public ElementDelimiter() : this(default, default, 1) { }
 
-    public Delimiter(int markerCount) : this(default, default, markerCount) {
+    public ElementDelimiter(int markerCount) : this(default, default, markerCount)
+    {
     }
 
-    public Delimiter(char openingMarker, char closingMarker, bool isMinimized = false) : this(openingMarker, closingMarker, 1, isMinimized) {
+    public ElementDelimiter(char openingMarker, char closingMarker, ElementStyle elementStyle = ElementStyle.Normal) : this(openingMarker, closingMarker, 1, elementStyle)
+    {
     }
 
-    public Delimiter(char openingMarker, char closingMarker, int markerCount, bool isMinimized = false) {
-        if (markerCount < 1) {
+    public ElementDelimiter(char openingMarker, char closingMarker, int markerCount, ElementStyle style = ElementStyle.Normal)
+    {
+        if (markerCount < 1)
+        {
             throw new ArgumentOutOfRangeException(nameof(markerCount), "Count must be at least 1.");
         }
 
@@ -36,7 +41,7 @@ public class Delimiter {
         OpeningMarker = openingMarker;
         ClosingMarker = closingMarker;
         MarkerCount = markerCount;
-        IsMinimized = isMinimized;
+        Style = style;
 
         var repeatedOpening = new string(openingMarker, markerCount);
         var repeatedClosing = new string(closingMarker, markerCount);
@@ -46,13 +51,16 @@ public class Delimiter {
         MinOpening = repeatedOpening;
     }
 
-    private static void ValidateMarker(char marker, string paramName) {
-        if (char.IsWhiteSpace(marker) || char.IsLetterOrDigit(marker)) {
+    private static void ValidateMarker(char marker, string paramName)
+    {
+        if (char.IsWhiteSpace(marker) || char.IsLetterOrDigit(marker))
+        {
             throw new ArgumentException("Marker cannot be an alphanumeric or whitespace character.", paramName);
         }
     }
 
-    public override string ToString() {
+    public override string ToString()
+    {
         return $"{Opening}...{Closing}";
     }
 }

@@ -7,10 +7,16 @@ using System.Threading.Tasks;
 namespace ParksComputing.Xfer.Models.Elements;
 
 public abstract class TextElement : TypedElement<string> {
-    public TextElement(string text, string name, Delimiter delimiter) : base(text, name, delimiter) {
+    public TextElement(string text, string name, ElementDelimiter delimiter) : base(text, name, delimiter) {
     }
 
     public override string ToString() {
+        if (Delimiter.Style == ElementStyle.Bare) {
+            return $"{Value}";
+        }
+        if (Delimiter.Style == ElementStyle.Minimized) {
+            return $"{Delimiter.OpeningMarker}{Value}{Delimiter.OpeningMarker}";
+        }
         return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
     }
 }

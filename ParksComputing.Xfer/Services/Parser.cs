@@ -2,7 +2,6 @@
 using System.Text;
 
 using ParksComputing.Xfer.Extensions;
-using ParksComputing.Xfer.Models;
 using ParksComputing.Xfer.Models.Elements;
 
 namespace ParksComputing.Xfer.Services;
@@ -153,13 +152,13 @@ public class Parser {
         return CurrentChar;
     }
 
-    private Stack<Delimiter> _delimStack = new();
+    private Stack<ElementDelimiter> _delimStack = new();
 
-    internal bool ElementOpening(Delimiter delimiter) {
+    internal bool ElementOpening(ElementDelimiter delimiter) {
         return ElementOpening(delimiter, out int _);
     }
 
-    internal bool ElementOpening(Delimiter delimiter, out int markerCount) {
+    internal bool ElementOpening(ElementDelimiter delimiter, out int markerCount) {
         char openingMarker = delimiter.OpeningMarker;
         char closingMarker = delimiter.ClosingMarker;
 
@@ -179,7 +178,7 @@ public class Parser {
             }
 
             if (CurrentChar != Element.ElementClosingMarker) {
-                _delimStack.Push(new Delimiter(openingMarker, closingMarker, markerCount, isMinimized: true));
+                _delimStack.Push(new ElementDelimiter(openingMarker, closingMarker, markerCount, ElementStyle.Minimized));
                 return true;
             }
 
@@ -189,11 +188,11 @@ public class Parser {
         return false;
     }
 
-    internal bool ElementMaxOpening(Delimiter delimiter) {
+    internal bool ElementMaxOpening(ElementDelimiter delimiter) {
         return ElementOpening(delimiter, out int _);
     }
 
-    internal bool ElementMaxOpening(Delimiter delimiter, out int markerCount) {
+    internal bool ElementMaxOpening(ElementDelimiter delimiter, out int markerCount) {
         char openingMarker = delimiter.OpeningMarker;
         char closingMarker = delimiter.ClosingMarker;
 
@@ -208,7 +207,7 @@ public class Parser {
                 Advance();
             }
 
-            _delimStack.Push(new Delimiter(openingMarker, closingMarker, markerCount, isMinimized: false));
+            _delimStack.Push(new ElementDelimiter(openingMarker, closingMarker, markerCount, ElementStyle.Normal));
             return true;
         }
 
@@ -220,7 +219,7 @@ public class Parser {
             return false;
         }
 
-        if ((_delimStack.Peek().IsMinimized && char.IsWhiteSpace(CurrentChar)) || 
+        if ((_delimStack.Peek().Style == ElementStyle.Minimized && char.IsWhiteSpace(CurrentChar)) || 
             CurrentChar == ObjectElement.ClosingMarker || 
             CurrentChar == ArrayElement.ClosingMarker || 
             CurrentChar == PropertyBagElement.ClosingMarker) 
@@ -254,7 +253,7 @@ public class Parser {
                 Advance();
                 --markerCount;
 
-                if (delimiter.IsMinimized) {
+                if (delimiter.Style == ElementStyle.Minimized) {
                     if (markerCount == 0) {
                         _delimStack.Pop();
                         return true;
@@ -467,7 +466,30 @@ public class Parser {
         }
     }
 
+    private MetadataElement ParseMetadataElement(int markerCount = 1) {
+        SkipWhitespace();
+        var metadataElement = new MetadataElement();
+
+        while (IsCharAvailable()) {
+            if (ElementClosing()) {
+                return metadataElement;
+            }
+
+            var element = ParseElement();
+
+            if (element is KeyValuePairElement kvp) {
+                metadataElement.AddOrUpdate(kvp);
+            }
+            else {
+                throw new InvalidOperationException($"Unexpected element type at row {CurrentRow}, column {CurrentColumn}.");
+            }
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {MetadataElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
     private ArrayElement ParseArrayElement(int markerCount = 1) {
+        var style = _delimStack.Peek().Style;
         SkipWhitespace();
 
         if (IsCharAvailable()) {
@@ -477,19 +499,19 @@ public class Parser {
             dictionary or make a factory, but that just moves the ugliness around. */
 
             ArrayElement arrayElement = element switch {
-                IntegerElement => new TypedArrayElement<IntegerElement>(),
-                LongElement => new TypedArrayElement<LongElement>(),
-                DecimalElement => new TypedArrayElement<DecimalElement>(),
-                DoubleElement => new TypedArrayElement<DoubleElement>(),
-                BooleanElement => new TypedArrayElement<BooleanElement>(),
-                DateElement => new TypedArrayElement<DateElement>(),
-                TextElement => new TypedArrayElement<TextElement>(),
-                CharacterElement => new TypedArrayElement<CharacterElement>(),
-                KeyValuePairElement => new TypedArrayElement<KeyValuePairElement>(),
-                ObjectElement => new TypedArrayElement<ObjectElement>(),
-                MetadataElement => new TypedArrayElement<MetadataElement>(),
-                PropertyBagElement => new TypedArrayElement<PropertyBagElement>(),
-                _ => new TypedArrayElement<Element>() // Will this even happen?
+                IntegerElement => new TypedArrayElement<IntegerElement>(style: style),
+                LongElement => new TypedArrayElement<LongElement>(style: style),
+                DecimalElement => new TypedArrayElement<DecimalElement>(style: style),
+                DoubleElement => new TypedArrayElement<DoubleElement>(style: style),
+                BooleanElement => new TypedArrayElement<BooleanElement>(style: style),
+                DateElement => new TypedArrayElement<DateElement>(style: style),
+                TextElement => new TypedArrayElement<TextElement>(style: style),
+                CharacterElement => new TypedArrayElement<CharacterElement>(style: style),
+                KeyValuePairElement => new TypedArrayElement<KeyValuePairElement>(style: style),
+                ObjectElement => new TypedArrayElement<ObjectElement>(style: style),
+                MetadataElement => new TypedArrayElement<MetadataElement>(style: style),
+                PropertyBagElement => new TypedArrayElement<PropertyBagElement>(style: style),
+                _ => new TypedArrayElement<Element>(style: style) // Will this even happen?
             };
 
             arrayElement.Add(element);
@@ -522,38 +544,17 @@ public class Parser {
                 objectElement.AddOrUpdate(kvp);
             }
             else {
-                throw new InvalidOperationException("Unexpected element type");
+                throw new InvalidOperationException($"Unexpected element type at row {CurrentRow}, column {CurrentColumn}.");
             }
         }
 
         throw new InvalidOperationException($"Unexpected end of {ObjectElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private MetadataElement ParseMetadataElement(int markerCount = 1) {
-        SkipWhitespace();
-        var metadataElement = new MetadataElement();
-
-        while (IsCharAvailable()) {
-            if (ElementClosing()) {
-                return metadataElement;
-            }
-
-            var element = ParseElement();
-
-            if (element is KeyValuePairElement kvp) {
-                metadataElement.AddOrUpdate(kvp);
-            }
-            else {
-                throw new InvalidOperationException("Unexpected element type");
-            }
-        }
-
-        throw new InvalidOperationException($"Unexpected end of {MetadataElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
-    }
-
     private PropertyBagElement ParsePropertyBagElement(int markerCount = 1) {
+        var style = _delimStack.Peek().Style;
         SkipWhitespace();
-        var propBagElement = new PropertyBagElement();
+        var propBagElement = new PropertyBagElement(style);
 
         while (IsCharAvailable()) {
             if (ElementClosing()) {
@@ -568,7 +569,12 @@ public class Parser {
     }
 
     private PlaceholderElement ParsePlaceholderElement(int markerCount = 1) {
-        SkipWhitespace();
+        var style = _delimStack.Peek().Style;
+
+        if (style is not ElementStyle.Minimized) {
+            SkipWhitespace();
+        }
+
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
@@ -576,11 +582,11 @@ public class Parser {
                 var variable = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
 
                 if (string.IsNullOrEmpty(variable)) {
-                    throw new InvalidOperationException("Placeholder variable must be a non-empty string.");
+                    throw new InvalidOperationException($"Placeholder variable must be a non-empty string at row {CurrentRow}, column {CurrentColumn}..");
                 }
 
                 var value = Environment.GetEnvironmentVariable(variable);
-                return new PlaceholderElement(value ?? string.Empty);
+                return new PlaceholderElement(value ?? string.Empty, markerCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -599,7 +605,7 @@ public class Parser {
             throw new InvalidOperationException("Key must be a non-empty string.");
         }
 
-        var keyElement = new KeywordElement(CurrentString);
+        var keyElement = new KeywordElement(CurrentString, style: ElementStyle.Bare);
         Advance();
         SkipWhitespace();
 
@@ -620,6 +626,12 @@ public class Parser {
     */
 
     private CharacterElement ParseCharacterElement(int markerCount = 1) {
+        var style = _delimStack.Peek().Style;
+
+        if (style is not ElementStyle.Minimized) {
+            SkipWhitespace();
+        }
+
         StringBuilder charContent = new();
 
         while (IsCharAvailable() && !ElementMinClosing()) {
@@ -656,7 +668,7 @@ public class Parser {
 
         var codePoint = ParseNumericValue<int>(charString);
         char character = (char)codePoint;
-        return new CharacterElement(character);
+        return new CharacterElement(character, markerCount, style: style);
     }
 
     private EvaluatedElement ParseEvaluatedElement(int markerCount = 1) {
@@ -740,11 +752,12 @@ public class Parser {
     }
 
     private StringElement ParseStringElement(int markerCount = 1) {
+        var style = _delimStack.Peek().Style;
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
             if (ElementClosing()) {
-                return new StringElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount);
+                return new StringElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -755,7 +768,9 @@ public class Parser {
     }
 
     private DateElement ParseDateElement(int markerCount = 1) {
-        if (!_delimStack.Peek().IsMinimized) {
+        var style = _delimStack.Peek().Style;
+
+        if (style is not ElementStyle.Minimized) {
             SkipWhitespace();
         }
 
@@ -770,7 +785,7 @@ public class Parser {
 
             if (ElementMinClosing()) {
                 var value = valueBuilder.ToString();
-                return new DateElement(value, markerCount);
+                return new DateElement(value, markerCount, style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -781,7 +796,9 @@ public class Parser {
     }        
     
     private IntegerElement ParseIntegerElement(int markerCount = 1) {
-        if (!_delimStack.Peek().IsMinimized) {
+        var style = _delimStack.Peek().Style;
+
+        if (style is not ElementStyle.Minimized) {
             SkipWhitespace();
         }
 
@@ -796,7 +813,7 @@ public class Parser {
 
             if (ElementMinClosing()) {
                 var value = ParseNumericValue<int>(valueBuilder.ToString());
-                return new IntegerElement(value, markerCount);
+                return new IntegerElement(value, markerCount, style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -808,7 +825,9 @@ public class Parser {
 
 
     private LongElement ParseLongIntegerElement(int markerCount = 1) {
-        if (!_delimStack.Peek().IsMinimized) {
+        var style = _delimStack.Peek().Style;
+
+        if (style is not ElementStyle.Minimized) {
             SkipWhitespace();
         }
 
@@ -823,7 +842,7 @@ public class Parser {
 
             if (ElementMinClosing()) {
                 var value = ParseNumericValue<long>(valueBuilder.ToString());
-                return new LongElement(value, markerCount);
+                return new LongElement(value, markerCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -834,7 +853,9 @@ public class Parser {
     }
 
     private DecimalElement ParseDecimalElement(int markerCount = 1) {
-        if (!_delimStack.Peek().IsMinimized) {
+        var style = _delimStack.Peek().Style;
+
+        if (style is not ElementStyle.Minimized) {
             SkipWhitespace();
         }
 
@@ -849,7 +870,7 @@ public class Parser {
 
             if (ElementMinClosing()) {
                 var value = ParseNumericValue<decimal>(valueBuilder.ToString());
-                return new DecimalElement(value, markerCount);
+                return new DecimalElement(value, markerCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -860,7 +881,9 @@ public class Parser {
     }
 
     private DoubleElement ParseDoubleElement(int markerCount = 1) {
-        if (!_delimStack.Peek().IsMinimized) {
+        var style = _delimStack.Peek().Style;
+
+        if (style is not ElementStyle.Minimized) {
             SkipWhitespace();
         }
 
@@ -875,7 +898,7 @@ public class Parser {
 
             if (ElementMinClosing()) {
                 var value = ParseNumericValue<double>(valueBuilder.ToString());
-                return new DoubleElement(value, markerCount);
+                return new DoubleElement(value, markerCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -886,7 +909,9 @@ public class Parser {
     }
 
     private BooleanElement ParseBooleanElement(int markerCount = 1) {
-        if (!_delimStack.Peek().IsMinimized) {
+        var style = _delimStack.Peek().Style;
+
+        if (style is not ElementStyle.Minimized) {
             SkipWhitespace();
         }
 
@@ -908,7 +933,7 @@ public class Parser {
                     _ => throw new InvalidOperationException($"Invalid boolean value '{valueString}' at row {CurrentRow}, column {CurrentColumn}.")
                 };
 
-                return new BooleanElement(value, markerCount);
+                return new BooleanElement(value, markerCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);

@@ -9,7 +9,7 @@ public class ObjectElement : Element {
     public static readonly string ElementName = "object";
     public const char OpeningMarker = '{';
     public const char ClosingMarker = '}';
-    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
 
     private Dictionary<string, KeyValuePairElement> _values = new();
     public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
@@ -33,7 +33,7 @@ public class ObjectElement : Element {
             TextElement keyElement;
 
             if (key.IsKeywordString()) {
-                keyElement = new KeywordElement(key);
+                keyElement = new KeywordElement(key, style: ElementStyle.Bare);
             }
             else {
                 keyElement = new StringElement(key);

@@ -10,9 +10,10 @@ public class DoubleElement : TypedElement<double> {
     public static readonly string ElementName = "double";
     public const char OpeningMarker = '^';
     public const char ClosingMarker = OpeningMarker;
-    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
 
-    public DoubleElement(double value, int markerCount = 1) : base(value, ElementName, new Delimiter(OpeningMarker, ClosingMarker, markerCount)) {
+    public DoubleElement(double value, int markerCount = 1, ElementStyle style = ElementStyle.Normal) 
+        : base(value, ElementName, new ElementDelimiter(OpeningMarker, ClosingMarker, markerCount, style)) {
     }
 
     public override string ToString() {

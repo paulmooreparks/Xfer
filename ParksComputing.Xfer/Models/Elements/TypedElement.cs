@@ -10,7 +10,7 @@ public abstract class TypedElement<T> : Element
 {
     public virtual T Value { get; set; }
 
-    public TypedElement(T value, string name, Delimiter delimiter) : base(name, delimiter) {
+    public TypedElement(T value, string name, ElementDelimiter delimiter) : base(name, delimiter) {
         Value = value;
     }
 

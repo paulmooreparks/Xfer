@@ -10,7 +10,7 @@ public class PropertyBagElement : Element {
     public static readonly string ElementName = "propertyBag";
     public const char OpeningMarker = '(';
     public const char ClosingMarker = ')';
-    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
 
     private List<Element> _items = new();
 
@@ -36,7 +36,10 @@ public class PropertyBagElement : Element {
         }
     }
 
-    public PropertyBagElement() : base(ElementName, new(OpeningMarker, ClosingMarker)) { }
+    public PropertyBagElement(ElementStyle style = ElementStyle.Normal) 
+        : base(ElementName, new(OpeningMarker, ClosingMarker, style)) 
+    { 
+    }
 
     public PropertyBagElement(IEnumerable<Element> values) : this() {
         _items.AddRange(values);

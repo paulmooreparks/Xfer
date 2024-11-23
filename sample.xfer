@@ -11,9 +11,9 @@ distinguished. //>
 reserved keywords (version, message_id, and ttl). If a metadata element is provided, it must be 
 the first non-comment element in an Xfer document. />
 
-<! version <"0.2.1"> message_id <`<|COMPUTERNAME|>`> !>
+<! version "0.2.1" message_id `<|COMPUTERNAME|>` !>
 
-<{name<"Alice">age#30 isMember~true scores<[*85 *90 *78.5 ]>profile<{email<"alice@example.com">joinedDate@2023-05-05T20:00:00 }>}>
+<{name"Alice"age#30 isMember~true scores<[*85 *90 *78.5]>profile<{email<"alice@example.com">joinedDate@2023-05-05T20:00:00 }>}>
 </ The outermost element of an Xfer document is an implicit property-bag element. It may contain 
 elements of any type. />
 

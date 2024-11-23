@@ -10,8 +10,10 @@ public class PlaceholderElement : TextElement {
     public static readonly string ElementName = "placeholder";
     public const char OpeningMarker = '|';
     public const char ClosingMarker = OpeningMarker;
-    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
 
-    public PlaceholderElement(string text, int markerCount = 1) : base(text, ElementName, new(OpeningMarker, ClosingMarker, markerCount)) {
+    public PlaceholderElement(string text, int markerCount = 1, ElementStyle style = ElementStyle.Normal) 
+        : base(text, ElementName, new(OpeningMarker, ClosingMarker, markerCount, style)) 
+    {
     }
 }

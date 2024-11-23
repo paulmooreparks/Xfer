@@ -10,11 +10,12 @@ public class CharacterElement : TypedElement<char> {
     public static readonly string ElementName = "character";
     public const char OpeningMarker = '\\';
     public const char ClosingMarker = OpeningMarker;
-    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
 
     public int CharValue => Value;
 
-    public CharacterElement(char ch, int markerCount = 1) : base(ch, ElementName, new(OpeningMarker, ClosingMarker, markerCount)) {
+    public CharacterElement(char ch, int markerCount = 1, ElementStyle style = ElementStyle.Normal) : 
+        base(ch, ElementName, new(OpeningMarker, ClosingMarker, markerCount, style)) {
     }
 
     public override string ToString() {

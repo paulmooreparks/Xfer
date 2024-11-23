@@ -10,9 +10,9 @@ public abstract class Element {
     public const char ElementOpeningMarker = '<';
     public const char ElementClosingMarker = '>';
     public string Name { get; }
-    public Delimiter Delimiter { get; set; } = new Delimiter('\0', '\0');
+    public ElementDelimiter Delimiter { get; set; } = new ElementDelimiter('\0', '\0');
 
-    public Element(string name, Delimiter delimiter) {
+    public Element(string name, ElementDelimiter delimiter) {
         Name = name;
         Delimiter = delimiter;
     }

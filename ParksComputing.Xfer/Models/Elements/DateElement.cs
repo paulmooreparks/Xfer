@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Globalization;
 
-using ParksComputing.Xfer.Models.Elements;
-
-namespace ParksComputing.Xfer.Models.Elements {
+namespace ParksComputing.Xfer.Models.Elements
+{
     public class DateElement : TypedElement<DateTime> {
         public static readonly string ElementName = "date";
         public const char OpeningMarker = '@';
         public const char ClosingMarker = OpeningMarker;
-        public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
+        public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
 
-        public DateElement(string input, int markerCount = 1) : base(DateTime.Now, ElementName, new Delimiter(OpeningMarker, ClosingMarker, markerCount)) {
+        public DateElement(string input, int markerCount = 1, ElementStyle elementStyle = ElementStyle.Normal) 
+            : base(DateTime.Now, ElementName, new ElementDelimiter(OpeningMarker, ClosingMarker, markerCount, elementStyle)) 
+        {
             if (!DateTime.TryParseExact(input, new[] { "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-dd" }, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime dateValue)) {
                 throw new InvalidOperationException($"Invalid date format '{input}'. Expected ISO 8601 format: 'yyyy-MM-ddTHH:mm:ss' or 'yyyy-MM-dd'.");
             }
@@ -18,7 +19,7 @@ namespace ParksComputing.Xfer.Models.Elements {
             Value = dateValue;
         }
 
-        public DateElement(DateTime dateValue) : base(dateValue, ElementName, new Delimiter(OpeningMarker, ClosingMarker)) {
+        public DateElement(DateTime dateValue) : base(dateValue, ElementName, new ElementDelimiter(OpeningMarker, ClosingMarker)) {
         }
 
         public override string ToString() {

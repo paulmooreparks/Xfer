@@ -32,7 +32,9 @@ public class TypedArrayElement<T> : ArrayElement where T : Element {
     }
 
 
-    public TypedArrayElement() : base(ElementName, new(OpeningMarker, ClosingMarker)) {
+    public TypedArrayElement(ElementStyle style = ElementStyle.Normal) 
+        : base(ElementName, new(OpeningMarker, ClosingMarker, style)) 
+    {
     }
 
     public TypedArrayElement(IEnumerable<T> values) : this() {

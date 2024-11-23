@@ -9,7 +9,7 @@ public class MetadataElement : Element {
     public static readonly string ElementName = "metadata";
     public const char OpeningMarker = '!';
     public const char ClosingMarker = OpeningMarker;
-    public static readonly Delimiter ElementDelimiter = new Delimiter(OpeningMarker, ClosingMarker);
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
     public static readonly string DefaultVersion = "0.2.1";
 
     private Dictionary<string, KeyValuePairElement> _values = new ();
@@ -86,10 +86,12 @@ public class MetadataElement : Element {
         }
     }
 
-    public MetadataElement() : this(DefaultVersion) {
+    public MetadataElement(ElementStyle elementStyle = ElementStyle.Normal) : this(DefaultVersion, elementStyle) {
     }
 
-    public MetadataElement(string version) : base(ElementName, new(OpeningMarker, ClosingMarker)) {
+    public MetadataElement(string version, ElementStyle elementStyle = ElementStyle.Normal) 
+        : base(ElementName, new(OpeningMarker, ClosingMarker, elementStyle)) 
+    {
         Version = version;
     }
 
@@ -111,7 +113,7 @@ public class MetadataElement : Element {
             TextElement keyElement;
 
             if (key.IsKeywordString()) {
-                keyElement = new KeywordElement(key);
+                keyElement = new KeywordElement(key, style: ElementStyle.Bare);
             }
             else {
                 keyElement = new StringElement(key);
