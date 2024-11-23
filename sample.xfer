@@ -48,6 +48,8 @@ elements of any type. />
     date @2019-01-01  </ Date marker is @ />
     placeholder `<|USERPROFILE|>`  </ Placeholder marker is | />
     evalString <`Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><``as<\$20\>is``>.`>  </ Evaluated element marker is ` />
+    nullValue?
+
     array [
         #1 
         #2 
@@ -59,7 +61,7 @@ elements of any type. />
         key "value"
         boolean ~false
     } </ Object markers are { } />
-     
+
     </ A property-bag element may hold any number of elements of any type. />
     propertyBag (
         "value"
@@ -68,7 +70,7 @@ elements of any type. />
         @2019-02-02
     ) </ Property bag markers are ( ) />
     
-}>
+}
 
 </ We are able to round-trip the minified output of the parser. />
 {string"value"character\65 boolean~true integer#42 long&5000000000 hexLongInteger&3131961357 binaryInteger#170 double^3.1415926535 decimal*123.45 date@2019-01-01T08:00:00 placeholder`C:\Users\paul`evalString`Inner elements are evaluated 1 at a time and rendered as is.`array[#1 #2 #3]object{key"value"boolean~false}propertyBag("value"#123 ~true @2019-02-02T08:00:00)}

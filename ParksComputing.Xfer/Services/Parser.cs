@@ -443,6 +443,12 @@ public class Parser {
                 return placeholderElement;
             }
 
+            if (ElementOpening(NullElement.ElementDelimiter, out int nullMarkerCount)) {
+                var nullElement = ParseNullElement(nullMarkerCount);
+                SkipWhitespace();
+                return nullElement;
+            }
+
             if (ElementOpening(CommentElement.ElementDelimiter, out int commentMarkerCount)) {
                 // Parse comment but don't return it, as comments are not part of the logical output.
                 ParseCommentElement(commentMarkerCount);
@@ -527,6 +533,16 @@ public class Parser {
 
         }
         throw new InvalidOperationException($"Unexpected end of {ArrayElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+    }
+
+    private NullElement ParseNullElement(int markerCount) {
+        while (IsCharAvailable()) {
+            if (ElementMinClosing()) {
+                return new NullElement();
+            }
+        }
+
+        throw new InvalidOperationException($"Unexpected end of {NullElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
     private ObjectElement ParseObjectElement(int markerCount = 1) {
