@@ -202,6 +202,13 @@ public class Parser {
             Advance();
             Advance();
 
+            /* This is really ugly to me, and it seems I'm missing a more elegant way to parse this. What I'm 
+            doing here is handling empty elements, like <""> and <##>. */
+            if (CurrentChar == closingMarker && Peek == Element.ElementClosingMarker) {
+                _delimStack.Push(new ElementDelimiter(openingMarker, closingMarker, markerCount, ElementStyle.Normal));
+                return true;
+            }
+
             while (CurrentChar == openingMarker) {
                 ++markerCount;
                 Advance();
@@ -517,7 +524,7 @@ public class Parser {
                 ObjectElement => new TypedArrayElement<ObjectElement>(style: style),
                 MetadataElement => new TypedArrayElement<MetadataElement>(style: style),
                 PropertyBagElement => new TypedArrayElement<PropertyBagElement>(style: style),
-                _ => new TypedArrayElement<Element>(style: style) // Will this even happen?
+                _ => new TypedArrayElement<NullElement>(style: style)
             };
 
             arrayElement.Add(element);
