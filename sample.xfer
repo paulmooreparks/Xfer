@@ -20,25 +20,25 @@ elements of any type. />
 
 <"A string may contain character elements<\$20\>inside of it, which will not be parsed.">
 <`When character elements are inside an evaluated<\$20\>element, they are parsed`>
-<``An eval element may contain <`another eval`> if its markers are repeated``>
+<``An eval element may contain <`another eval`> if its specifiers are repeated``>
 <`Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) may also be embedded in eval elements, and their evaluated results will become part of the rendered value.`>
 
 {
-    string "value"  </ String marker is " />
-    character \65  </ Character marker is \ />
-    boolean ~true  </ Boolean marker is ~ />
-    integer #42  </ Integer marker is # />
+    string "value"  </ String specifier is " />
+    character \65  </ Character specifier is \ />
+    boolean ~true  </ Boolean specifier is ~ />
+    integer #42  </ Integer specifier is # />
     bareInteger 42  </ Bare integers are rendered as integers. />
     bareHexInteger $F00D  </ Bare hex integers are rendered as hex integers. />
     bareBinaryInteger %10101010  </ Bare binary integers are rendered as binary integers. />
-    long &5000000000  </ Long marker is & />
+    long &5000000000  </ Long specifier is & />
     hexLongInteger &$BAADF00D  </ Hex numeric values are preceded by $ />
     binaryInteger #%10101010  </ Binary numeric values are preceded by % />
-    double ^3.1415926535  </ Double marker is ^ />
-    decimal *123.45  </ Decimal marker is * />
-    date @2019-01-01  </ Date marker is @ />
-    placeholder `<|USERPROFILE|>`  </ Placeholder marker is | />
-    evalString <`Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><``as<\$20\>is``>.`>  </ Evaluated element marker is ` />
+    double ^3.1415926535  </ Double specifier is ^ />
+    decimal *123.45  </ Decimal specifier is * />
+    date @2019-01-01  </ Date specifier is @ />
+    placeholder `<|USERPROFILE|>`  </ Placeholder specifier is | />
+    evalString <`Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><``as<\$20\>is``>.`>  </ Evaluated element specifier is ` />
     nullValue?
 
     array [
@@ -46,12 +46,12 @@ elements of any type. />
         #2 
         #3
     ] 
-    </ Array markers are [ ] />
+    </ Array specifiers are [ ] />
 
     object { 
         key "value"
         boolean ~false
-    } </ Object markers are { } />
+    } </ Object specifiers are { } />
 
     </ A property-bag element may hold any number of elements of any type. />
     propertyBag (
@@ -59,11 +59,11 @@ elements of any type. />
         #123
         ~true
         @2019-02-02
-    ) </ Property bag markers are ( ) />
+    ) </ Property bag specifiers are ( ) />
     
     <:If a key in a key/value pair needs to contain more than a simple string, it can be wrapped in a pair of (that's 2) digraphs:>"value"
     <:A key may even contain <"other elements">:> "value"
-    <::A key may contain a <:key element:> as long as the outer markers are repeated.::> "value"
+    <::A key may contain a <:key element:> as long as the outer specifiers are repeated.::> "value"
     <:123:> #123
 }
 
