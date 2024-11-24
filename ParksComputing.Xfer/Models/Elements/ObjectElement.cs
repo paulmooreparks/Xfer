@@ -43,6 +43,10 @@ public class ObjectElement : Element {
         }
     }
 
+    public bool ContainsKey(string key) {
+        return _values.ContainsKey(key);
+    }
+
     public bool Add(KeyValuePairElement value) {
         if (_values.ContainsKey(value.Key)) {
             return false;

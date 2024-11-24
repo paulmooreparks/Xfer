@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Text;
 
 using ParksComputing.Xfer.Extensions;
@@ -7,7 +8,7 @@ using ParksComputing.Xfer.Models.Elements;
 namespace ParksComputing.Xfer.Services;
 
 /* This parser is ROUGH. I'm trying out a lot of ideas, some of them supported in parallel. Once I 
-settle on a solid grammar, I'll redo the parser or use some kind of tool to rewrite it. */
+settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
 
 public class Parser {
     public Parser() : this(Encoding.UTF8) { }
@@ -16,6 +17,7 @@ public class Parser {
         Encoding = encoding;
     }
 
+    /* Let's be honest: it's going to be UTF-8 for the foreseeable future, more than likely. */
     public Encoding Encoding { get; private set; } = Encoding.UTF8;
 
     private string _scanString = string.Empty;
@@ -73,6 +75,9 @@ public class Parser {
 
     private int CurrentRow { get; set; } = 1;
     private int CurrentColumn { get; set; } = 1;
+
+    private int LastElementRow { get; set; }
+    private int LastElementColumn { get; set; }
 
     private void UpdateRowColumn() {
         if (CurrentChar == '\n') {
@@ -157,6 +162,30 @@ public class Parser {
 
     private Stack<ElementDelimiter> _delimStack = new();
 
+    internal bool KeywordElementOpening(out int markerCount) {
+        if (CurrentChar.IsKeywordLeadingChar()) {
+            markerCount = 1;
+            LastElementRow = CurrentRow;
+            LastElementColumn = CurrentColumn;
+            _delimStack.Push(new ElementDelimiter(KeywordElement.OpeningMarker, KeywordElement.ClosingMarker, markerCount, ElementStyle.Bare));
+            return true;
+        }
+
+        return ElementOpening(KeywordElement.ElementDelimiter, out markerCount);
+    }
+
+    internal bool IntegerElementOpening(out int markerCount) {
+        if (CurrentChar.IsIntegerLeadingChar()) {
+            markerCount = 1;
+            LastElementRow = CurrentRow;
+            LastElementColumn = CurrentColumn;
+            _delimStack.Push(new ElementDelimiter(IntegerElement.OpeningMarker, IntegerElement.ClosingMarker, markerCount, ElementStyle.Bare));
+            return true;
+        }
+
+        return ElementOpening(IntegerElement.ElementDelimiter, out markerCount);
+    }
+
     internal bool ElementOpening(ElementDelimiter delimiter) {
         return ElementOpening(delimiter, out int _);
     }
@@ -172,6 +201,8 @@ public class Parser {
         markerCount = 1;
 
         if (CurrentChar == openingMarker) {
+            int saveCurrentRow = CurrentRow;
+            int saveCurrentColumn = CurrentColumn;
             int tmpPosition = Position;
             Advance();
 
@@ -182,6 +213,8 @@ public class Parser {
 
             if (CurrentChar != Element.ElementClosingMarker) {
                 _delimStack.Push(new ElementDelimiter(openingMarker, closingMarker, markerCount, ElementStyle.Minimized));
+                LastElementRow = saveCurrentRow;
+                LastElementColumn = saveCurrentColumn;
                 return true;
             }
 
@@ -192,7 +225,7 @@ public class Parser {
     }
 
     internal bool ElementMaxOpening(ElementDelimiter delimiter) {
-        return ElementOpening(delimiter, out int _);
+        return ElementMaxOpening(delimiter, out int _);
     }
 
     internal bool ElementMaxOpening(ElementDelimiter delimiter, out int markerCount) {
@@ -202,6 +235,8 @@ public class Parser {
         markerCount = 1;
 
         if (CurrentChar == Element.ElementOpeningMarker && Peek == openingMarker) {
+            int saveCurrentRow = CurrentRow;
+            int saveCurrentColumn = CurrentColumn;
             Advance();
             Advance();
 
@@ -209,6 +244,8 @@ public class Parser {
             doing here is handling empty elements, like <""> and <##>. */
             if (CurrentChar == closingMarker && Peek == Element.ElementClosingMarker) {
                 _delimStack.Push(new ElementDelimiter(openingMarker, closingMarker, markerCount, ElementStyle.Normal));
+                LastElementRow = saveCurrentRow;
+                LastElementColumn = saveCurrentColumn;
                 return true;
             }
 
@@ -218,6 +255,8 @@ public class Parser {
             }
 
             _delimStack.Push(new ElementDelimiter(openingMarker, closingMarker, markerCount, ElementStyle.Normal));
+            LastElementRow = saveCurrentRow;
+            LastElementColumn = saveCurrentColumn;
             return true;
         }
 
@@ -229,7 +268,9 @@ public class Parser {
             return false;
         }
 
-        if ((_delimStack.Peek().Style == ElementStyle.Minimized && char.IsWhiteSpace(CurrentChar)) || 
+        var style = _delimStack.Peek().Style;
+
+        if (((style == ElementStyle.Minimized || style == ElementStyle.Bare) && char.IsWhiteSpace(CurrentChar)) || 
             CurrentChar == ObjectElement.ClosingMarker || 
             CurrentChar == ArrayElement.ClosingMarker || 
             CurrentChar == PropertyBagElement.ClosingMarker) 
@@ -363,8 +404,8 @@ public class Parser {
         SkipWhitespace();
 
         while (IsCharAvailable()) {
-            if (CurrentChar.IsKeywordLeadingChar()) {
-                var keyValuePairElement = ParseKeyValuePairElement();
+            if (KeywordElementOpening(out int keywordMarkerCount)) {
+                var keyValuePairElement = ParseKeyValuePairElement(keywordMarkerCount);
                 SkipWhitespace();
                 return keyValuePairElement;
             }
@@ -411,7 +452,7 @@ public class Parser {
                 return arrayElement;
             }
 
-            if (ElementOpening(IntegerElement.ElementDelimiter, out int intMarkerCount)) {
+            if (IntegerElementOpening(out int intMarkerCount)) {
                 var integerElement = ParseIntegerElement(intMarkerCount);
                 SkipWhitespace();
                 return integerElement;
@@ -460,7 +501,7 @@ public class Parser {
             }
 
             if (ElementOpening(CommentElement.ElementDelimiter, out int commentMarkerCount)) {
-                // Parse comment but don't return it, as comments are not part of the logical output.
+                /* Parse comment but don't return it, as comments are not part of the logical output. */
                 ParseCommentElement(commentMarkerCount);
                 SkipWhitespace();
                 continue;
@@ -564,13 +605,13 @@ public class Parser {
                 return objectElement;
             }
 
+            var lastRow = CurrentRow;
+            var lastColumn = CurrentColumn;
             var element = ParseElement();
 
             if (element is KeyValuePairElement kvp) {
                 if (!objectElement.Add(kvp)) {
-                    /* TODO: The row and column are wrong here. The parser has already moved past the key/value pair. 
-                    Set up a stack of row/column positions to track recent elements. */
-                    throw new InvalidOperationException($"Duplicate key '{kvp.Key}' in object at row {CurrentRow}, column {CurrentColumn}.");
+                    throw new InvalidOperationException($"Duplicate key '{kvp.Key}' in object at row {lastRow}, column {lastColumn}.");
                 }
             }
             else {
@@ -612,7 +653,7 @@ public class Parser {
                 var variable = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
 
                 if (string.IsNullOrEmpty(variable)) {
-                    throw new InvalidOperationException($"Placeholder variable must be a non-empty string at row {CurrentRow}, column {CurrentColumn}..");
+                    throw new InvalidOperationException($"Placeholder variable must be a non-empty string at row {CurrentRow}, column {CurrentColumn}.");
                 }
 
                 var value = Environment.GetEnvironmentVariable(variable);
@@ -626,20 +667,30 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {PlaceholderElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private KeyValuePairElement ParseKeyValuePairElement() {
+    private KeyValuePairElement ParseKeyValuePairElement(int markerCount = 1) {
+        var lastRow = CurrentRow;
+        var lastColumn = CurrentColumn;
+
         while (Peek.IsKeywordChar()) {
             Expand();
         }
 
         if (string.IsNullOrEmpty(CurrentString)) {
-            throw new InvalidOperationException("Key must be a non-empty string.");
+            throw new InvalidOperationException($"Key must be a non-empty string at row {lastRow}, column {lastColumn}.");
         }
 
-        var keyElement = new KeywordElement(CurrentString, style: ElementStyle.Bare);
-        Advance();
-        SkipWhitespace();
-
+        var style = _delimStack.Peek().Style;
+        var keyElement = new KeywordElement(CurrentString, style: style);
         var keyValuePairElement = new KeyValuePairElement(keyElement);
+        Advance();
+
+        if (style == ElementStyle.Bare) {
+            SkipWhitespace();
+            _delimStack.Pop();
+        }
+        else if (!ElementMinClosing()) {
+            goto ParseKeyValuePairElementFail;
+        }
 
         if (IsCharAvailable()) {
             Element valueElement = ParseElement();
@@ -647,7 +698,8 @@ public class Parser {
             return keyValuePairElement;
         }
 
-        throw new InvalidOperationException($"Unexpected end of {KeywordElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+ParseKeyValuePairElementFail:
+        throw new InvalidOperationException($"Unexpected end of {KeyValuePairElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
     /* 
@@ -676,7 +728,7 @@ public class Parser {
         }
 
         if (char.IsLetter(charString[0])) {
-            // Keyword, e.g., <\nl\> for newline
+            /* Keyword, e.g., <\nl\> for newline */
             return charString.ToLower() switch {
                 "nul" => new CharacterElement('\0'),
                 "cr" => new CharacterElement('\r'),
@@ -828,7 +880,7 @@ public class Parser {
     private IntegerElement ParseIntegerElement(int markerCount = 1) {
         var style = _delimStack.Peek().Style;
 
-        if (style is not ElementStyle.Minimized) {
+        if (style is not ElementStyle.Minimized or ElementStyle.Bare) {
             SkipWhitespace();
         }
 
@@ -956,12 +1008,17 @@ public class Parser {
             
             if (ElementMinClosing() || !char.IsAsciiLetter(CurrentChar)) {
                 string valueString = valueBuilder.ToString().ToLower();
-                bool value = valueString switch {
-                    "true" => true,
-                    "false" => false,
-                    "" => false,
-                    _ => throw new InvalidOperationException($"Invalid boolean value '{valueString}' at row {CurrentRow}, column {CurrentColumn}.")
-                };
+                bool value = false;
+
+                if (string.Equals(valueString, BooleanElement.TrueValue)) {
+                    value = true;
+                }
+                else if (string.Equals(valueString, BooleanElement.FalseValue)) {
+                    value = false;
+                }
+                else {
+                    throw new InvalidOperationException($"Invalid boolean value '{valueString}' at row {CurrentRow}, column {CurrentColumn}.");
+                }
 
                 return new BooleanElement(value, markerCount, style: style);
             }
@@ -975,19 +1032,22 @@ public class Parser {
 
     private T ParseNumericValue<T>(string valueString) where T : struct, IConvertible {
         if (string.IsNullOrEmpty(valueString)) {
-            // throw new ArgumentException("The numeric value string cannot be null or empty.", nameof(valueString));
             return default;
         }
 
         char basePrefix = valueString[0];
         string numberString = valueString;
 
-        // Determine the base (Hexadecimal, Binary, Decimal).
-        int numberBase = 10; // Default to decimal
+        /* Determine the base (decimal, hexadecimal, or binary). */
 
-        if (basePrefix == '$' || basePrefix == '%') {
-            numberBase = basePrefix == '$' ? 16 : 2;
-            numberString = valueString.Substring(1); // Remove base prefix character
+        int numberBase = basePrefix switch {
+            NumericElement<T>.HexadecimalPrefix => 16,
+            NumericElement<T>.BinaryPrefix => 2,
+            _ => 10
+        };
+
+        if (numberBase != 10) {
+            numberString = valueString.Substring(1); /* Remove base prefix character */
         }
 
         try {

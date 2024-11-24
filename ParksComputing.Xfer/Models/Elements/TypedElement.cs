@@ -18,3 +18,4 @@ public abstract class TypedElement<T> : Element
         return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
     }
 }
+

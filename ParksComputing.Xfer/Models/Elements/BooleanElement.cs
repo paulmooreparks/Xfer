@@ -20,6 +20,14 @@ public class BooleanElement : TypedElement<bool> {
     }
 
     public override string ToString() {
-        return $"{Delimiter.MinOpening}{(Value ? TrueValue : FalseValue)} ";
+        var value = Value ? TrueValue : FalseValue;
+
+        if (Delimiter.Style == ElementStyle.Bare) {
+            return $"{value} ";
+        }
+        if (Delimiter.Style == ElementStyle.Minimized) {
+            return $"{Delimiter.OpeningMarker}{value} ";
+        }
+        return $"{Delimiter.Opening}{value}{Delimiter.Closing}";
     }
 }

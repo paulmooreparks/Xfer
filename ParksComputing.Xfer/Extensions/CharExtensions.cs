@@ -1,4 +1,6 @@
-﻿namespace ParksComputing.Xfer.Extensions;
+﻿using ParksComputing.Xfer.Models.Elements;
+
+namespace ParksComputing.Xfer.Extensions;
 
 public static class CharExtensions {
     // Extension method for checking if a character is a valid keyword character.
@@ -8,5 +10,9 @@ public static class CharExtensions {
 
     public static bool IsKeywordLeadingChar(this char c) {
         return char.IsLetter(c) || c == '_';
+    }
+
+    public static bool IsIntegerLeadingChar(this char c) {
+        return char.IsNumber(c) || c == Element.HexadecimalPrefix || c == Element.BinaryPrefix;
     }
 }
