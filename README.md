@@ -59,9 +59,41 @@ An Xfer document is composed of keywords and elements. An element typically begi
 <"Hello, World!">
 ```
 
+## Xfer and JSON Compared
+
+Here's a simple example of a JSON document:
+
+```json
+{
+    "name": "Alice",
+    "age": 30,
+    "isMember": true,
+    "scores": [85, 90, 78.5],
+    "profile": {
+        "email": "alice@example.com",
+        "joinedDate": "2023-01-15T12:00:00"
+    }
+}
+```
+
+Following is the equivalent Xfer document, using minimized syntax. Notice the explicit, rather than implicit, data types.
+
+```xfer
+{
+    name "Alice"
+    age #30
+    isMember ~true
+    scores [*85 *90 *78.5]
+    profile {
+        email "alice@example.com"
+        joinedDate @2023-01-15T12:00:00
+    } 
+}
+```
+
 ## Design Goals
 * **Explicit Types**: All values are explicitly typed.
-* **No Null Values**: Xfer supports empty values but not null values.
+* **Nullable Values**: Xfer supports null values only for types that are defined as nullable.
 * **No Escaping**: Xfer does not require escaping of special characters.
 
 ## Features of Xfer
@@ -198,37 +230,5 @@ Xfer documents may contain placeholders that are replaced with values at runtime
 
 ```xfer
 message <"Hello, <|USER|>!">
-```
-
-## Xfer and JSON Compared
-
-Here's a simple example of a JSON document:
-
-```json
-{
-    "name": "Alice",
-    "age": 30,
-    "isMember": true,
-    "scores": [85, 90, 78.5],
-    "profile": {
-        "email": "alice@example.com",
-        "joinedDate": "2023-01-15T12:00:00"
-    }
-}
-```
-
-Following is the equivalent Xfer document. Notice the explicit, rather than implicit, data types.
-
-```xfer
-<{
-    name <"Alice">
-    age <#30#>
-    isMember <~true~>
-    scores <[<*85*> <*90*> <*78.5*>]>
-    profile <{
-        email <"alice@example.com">
-        joinedDate <@2023-01-15T12:00:00@>
-    }> 
-}>
 ```
 
