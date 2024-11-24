@@ -8,6 +8,44 @@ The code you'll find in this repository is also experimental. So far, I've built
 
 That said, I do plan to make the code professional-grade in the future, and I want to add implementations in other languages (Rust, C++, JavaScript, and TypeScript are on my list). If you want to contribute, please [let me know](mailto:paul@parkscomputing.com). I'd love to have your help.
 
+## Xfer and JSON Compared
+
+Here's a simple example of a JSON document:
+
+```json
+{
+    "name": "Alice",
+    "age": 30,
+    "isMember": true,
+    "scores": [85, 90, 78.5],
+    "profile": {
+        "email": "alice@example.com",
+        "joinedDate": "2023-01-15T12:00:00"
+    }
+}
+```
+
+Following is the equivalent Xfer document, using minimized syntax. Notice the explicit, rather than implicit, data types.
+
+```xfer
+{
+    name "Alice"
+    age 30
+    isMember ~true
+    scores [*85 *90 *78.5]
+    profile {
+        email "alice@example.com"
+        joinedDate @2023-01-15T12:00:00
+    } 
+}
+```
+
+Here is the same Xfer document with all unnecessary whitespace removed.
+
+```xfer
+{name"Alice"age 30 isMember~true scores<[*85 *90 *78.5]>profile{email"alice@example.com"joinedDate@2023-01-15T20:00:00}}
+```
+
 ## Work in Progress
 
 ### Tighter Syntax
@@ -57,38 +95,6 @@ An Xfer document is composed of keywords and elements. An element typically begi
 ```xfer
 </ Below is a string element />
 <"Hello, World!">
-```
-
-## Xfer and JSON Compared
-
-Here's a simple example of a JSON document:
-
-```json
-{
-    "name": "Alice",
-    "age": 30,
-    "isMember": true,
-    "scores": [85, 90, 78.5],
-    "profile": {
-        "email": "alice@example.com",
-        "joinedDate": "2023-01-15T12:00:00"
-    }
-}
-```
-
-Following is the equivalent Xfer document, using minimized syntax. Notice the explicit, rather than implicit, data types.
-
-```xfer
-{
-    name "Alice"
-    age #30
-    isMember ~true
-    scores [*85 *90 *78.5]
-    profile {
-        email "alice@example.com"
-        joinedDate @2023-01-15T12:00:00
-    } 
-}
 ```
 
 ## Design Goals
