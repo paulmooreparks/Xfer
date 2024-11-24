@@ -762,8 +762,7 @@ public class Parser {
         }
 
         var codePoint = ParseNumericValue<int>(charString);
-        char character = (char)codePoint;
-        return new CharacterElement(character, specifierCount, style: style);
+        return new CharacterElement(codePoint, specifierCount, style: style);
     }
 
     private EvaluatedElement ParseEvaluatedElement(int specifierCount = 1) {
@@ -778,7 +777,7 @@ public class Parser {
 
             if (ElementMaxOpening(CharacterElement.ElementDelimiter, out int charSpecifierCount)) {
                 CharacterElement characterElement = ParseCharacterElement(charSpecifierCount);
-                valueBuilder.Append(characterElement.Value);
+                valueBuilder.Append(char.ConvertFromUtf32(characterElement.Value));
                 continue;
             }
 
