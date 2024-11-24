@@ -11,10 +11,10 @@ public class KeyValuePairElement : TypedElement<Element> {
     public TextElement KeyElement { get; set; }
     public string Key { get; }
 
-    public KeyValuePairElement(TextElement keyElement, int markerCount = 1) : this(keyElement, new EmptyElement(), markerCount) {
+    public KeyValuePairElement(TextElement keyElement, int specifierCount = 1) : this(keyElement, new EmptyElement(), specifierCount) {
     }
 
-    public KeyValuePairElement(TextElement keyElement, Element value, int markerCount = 1) : base(value, ElementName, new(markerCount)) {
+    public KeyValuePairElement(TextElement keyElement, Element value, int specifierCount = 1) : base(value, ElementName, new(specifierCount)) {
         KeyElement = keyElement;
 
         if (keyElement is TextElement se) {

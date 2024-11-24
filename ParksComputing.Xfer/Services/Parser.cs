@@ -11,6 +11,8 @@ namespace ParksComputing.Xfer.Services;
 settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
 
 public class Parser {
+    public static readonly string Version = "0.3.0";
+
     public Parser() : this(Encoding.UTF8) { }
 
     public Parser(Encoding encoding) {
@@ -100,25 +102,25 @@ public class Parser {
         ++Position;
         UpdateRowColumn();
 
-        if (CurrentChar == Element.ElementOpeningMarker && Peek == CommentElement.OpeningMarker) {
-            int markerCount = 1;
+        if (CurrentChar == Element.ElementOpeningSpecifier && Peek == CommentElement.OpeningSpecifier) {
+            int specifierCount = 1;
             ++Position;
             UpdateRowColumn();
             ++Position;
             UpdateRowColumn();
 
-            while (CurrentChar == CommentElement.OpeningMarker) {
-                ++markerCount;
+            while (CurrentChar == CommentElement.OpeningSpecifier) {
+                ++specifierCount;
                 ++Position;
                 UpdateRowColumn();
             }
 
             while (IsCharAvailable()) {
-                if (CurrentChar == CommentElement.ClosingMarker) {
-                    int tmpMarkerCount = markerCount;
-                    --markerCount;
+                if (CurrentChar == CommentElement.ClosingSpecifier) {
+                    int tmpSpecifierCount = specifierCount;
+                    --specifierCount;
 
-                    if (Peek == Element.ElementClosingMarker && markerCount == 0) {
+                    if (Peek == Element.ElementClosingSpecifier && specifierCount == 0) {
                         ++Position;
                         UpdateRowColumn();
                         ++Position;
@@ -128,12 +130,12 @@ public class Parser {
 
                     bool commentClosed = false;
 
-                    while (markerCount > 0 && Peek == CommentElement.ClosingMarker) {
+                    while (specifierCount > 0 && Peek == CommentElement.ClosingSpecifier) {
                         ++Position;
                         UpdateRowColumn();
-                        --markerCount;
+                        --specifierCount;
 
-                        if (Peek == Element.ElementClosingMarker && markerCount == 0) {
+                        if (Peek == Element.ElementClosingSpecifier && specifierCount == 0) {
                             ++Position;
                             UpdateRowColumn();
                             ++Position;
@@ -147,7 +149,7 @@ public class Parser {
                         break;
                     }
                     else {
-                        markerCount = tmpMarkerCount;
+                        specifierCount = tmpSpecifierCount;
                     }
                 }
 
@@ -162,57 +164,57 @@ public class Parser {
 
     private Stack<ElementDelimiter> _delimStack = new();
 
-    internal bool KeywordElementOpening(out int markerCount) {
+    internal bool KeywordElementOpening(out int specifierCount) {
         if (CurrentChar.IsKeywordLeadingChar()) {
-            markerCount = 1;
+            specifierCount = 1;
             LastElementRow = CurrentRow;
             LastElementColumn = CurrentColumn;
-            _delimStack.Push(new ElementDelimiter(KeywordElement.OpeningMarker, KeywordElement.ClosingMarker, markerCount, ElementStyle.Bare));
+            _delimStack.Push(new ElementDelimiter(KeywordElement.OpeningSpecifier, KeywordElement.ClosingSpecifier, specifierCount, ElementStyle.Bare));
             return true;
         }
 
-        return ElementOpening(KeywordElement.ElementDelimiter, out markerCount);
+        return ElementOpening(KeywordElement.ElementDelimiter, out specifierCount);
     }
 
-    internal bool IntegerElementOpening(out int markerCount) {
+    internal bool IntegerElementOpening(out int specifierCount) {
         if (CurrentChar.IsIntegerLeadingChar()) {
-            markerCount = 1;
+            specifierCount = 1;
             LastElementRow = CurrentRow;
             LastElementColumn = CurrentColumn;
-            _delimStack.Push(new ElementDelimiter(IntegerElement.OpeningMarker, IntegerElement.ClosingMarker, markerCount, ElementStyle.Bare));
+            _delimStack.Push(new ElementDelimiter(IntegerElement.OpeningSpecifier, IntegerElement.ClosingSpecifier, specifierCount, ElementStyle.Bare));
             return true;
         }
 
-        return ElementOpening(IntegerElement.ElementDelimiter, out markerCount);
+        return ElementOpening(IntegerElement.ElementDelimiter, out specifierCount);
     }
 
     internal bool ElementOpening(ElementDelimiter delimiter) {
         return ElementOpening(delimiter, out int _);
     }
 
-    internal bool ElementOpening(ElementDelimiter delimiter, out int markerCount) {
-        char openingMarker = delimiter.OpeningMarker;
-        char closingMarker = delimiter.ClosingMarker;
+    internal bool ElementOpening(ElementDelimiter delimiter, out int specifierCount) {
+        char openingSpecifier = delimiter.OpeningSpecifier;
+        char closingSpecifier = delimiter.ClosingSpecifier;
 
-        if (ElementMaxOpening(delimiter, out markerCount)) {
+        if (ElementMaxOpening(delimiter, out specifierCount)) {
             return true;
         }
 
-        markerCount = 1;
+        specifierCount = 1;
 
-        if (CurrentChar == openingMarker) {
+        if (CurrentChar == openingSpecifier) {
             int saveCurrentRow = CurrentRow;
             int saveCurrentColumn = CurrentColumn;
             int tmpPosition = Position;
             Advance();
 
-            while (CurrentChar == openingMarker) {
-                ++markerCount;
+            while (CurrentChar == openingSpecifier) {
+                ++specifierCount;
                 Advance();
             }
 
-            if (CurrentChar != Element.ElementClosingMarker) {
-                _delimStack.Push(new ElementDelimiter(openingMarker, closingMarker, markerCount, ElementStyle.Minimized));
+            if (CurrentChar != Element.ElementClosingSpecifier) {
+                _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Minimized));
                 LastElementRow = saveCurrentRow;
                 LastElementColumn = saveCurrentColumn;
                 return true;
@@ -228,13 +230,13 @@ public class Parser {
         return ElementMaxOpening(delimiter, out int _);
     }
 
-    internal bool ElementMaxOpening(ElementDelimiter delimiter, out int markerCount) {
-        char openingMarker = delimiter.OpeningMarker;
-        char closingMarker = delimiter.ClosingMarker;
+    internal bool ElementMaxOpening(ElementDelimiter delimiter, out int specifierCount) {
+        char openingSpecifier = delimiter.OpeningSpecifier;
+        char closingSpecifier = delimiter.ClosingSpecifier;
 
-        markerCount = 1;
+        specifierCount = 1;
 
-        if (CurrentChar == Element.ElementOpeningMarker && Peek == openingMarker) {
+        if (CurrentChar == Element.ElementOpeningSpecifier && Peek == openingSpecifier) {
             int saveCurrentRow = CurrentRow;
             int saveCurrentColumn = CurrentColumn;
             Advance();
@@ -242,19 +244,19 @@ public class Parser {
 
             /* This is really ugly to me, and it seems I'm missing a more elegant way to parse this. What I'm 
             doing here is handling empty elements, like <""> and <##>. */
-            if (CurrentChar == closingMarker && Peek == Element.ElementClosingMarker) {
-                _delimStack.Push(new ElementDelimiter(openingMarker, closingMarker, markerCount, ElementStyle.Normal));
+            if (CurrentChar == closingSpecifier && Peek == Element.ElementClosingSpecifier) {
+                _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Normal));
                 LastElementRow = saveCurrentRow;
                 LastElementColumn = saveCurrentColumn;
                 return true;
             }
 
-            while (CurrentChar == openingMarker) {
-                ++markerCount;
+            while (CurrentChar == openingSpecifier) {
+                ++specifierCount;
                 Advance();
             }
 
-            _delimStack.Push(new ElementDelimiter(openingMarker, closingMarker, markerCount, ElementStyle.Normal));
+            _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Normal));
             LastElementRow = saveCurrentRow;
             LastElementColumn = saveCurrentColumn;
             return true;
@@ -271,9 +273,9 @@ public class Parser {
         var style = _delimStack.Peek().Style;
 
         if (((style == ElementStyle.Minimized || style == ElementStyle.Bare) && char.IsWhiteSpace(CurrentChar)) || 
-            CurrentChar == ObjectElement.ClosingMarker || 
-            CurrentChar == ArrayElement.ClosingMarker || 
-            CurrentChar == PropertyBagElement.ClosingMarker) 
+            CurrentChar == ObjectElement.ClosingSpecifier || 
+            CurrentChar == ArrayElement.ClosingSpecifier || 
+            CurrentChar == PropertyBagElement.ClosingSpecifier) 
         {
             _delimStack.Pop();
             return true;
@@ -288,10 +290,10 @@ public class Parser {
         }
 
         var delimiter = _delimStack.Peek();
-        int markerCount = delimiter.MarkerCount;
+        int specifierCount = delimiter.SpecifierCount;
 
-        if (CurrentChar == delimiter.ClosingMarker) {
-            if (Peek == Element.ElementClosingMarker && markerCount == 1) {
+        if (CurrentChar == delimiter.ClosingSpecifier) {
+            if (Peek == Element.ElementClosingSpecifier && specifierCount == 1) {
                 Advance();
                 Advance();
                 _delimStack.Pop();
@@ -300,17 +302,17 @@ public class Parser {
 
             int tmpPosition = Position;
 
-            while (markerCount > 0 && CurrentChar == delimiter.ClosingMarker) {
+            while (specifierCount > 0 && CurrentChar == delimiter.ClosingSpecifier) {
                 Advance();
-                --markerCount;
+                --specifierCount;
 
                 if (delimiter.Style == ElementStyle.Minimized) {
-                    if (markerCount == 0) {
+                    if (specifierCount == 0) {
                         _delimStack.Pop();
                         return true;
                     }
                 }
-                else if (CurrentChar == Element.ElementClosingMarker && markerCount == 0) {
+                else if (CurrentChar == Element.ElementClosingSpecifier && specifierCount == 0) {
                     Advance();
                     _delimStack.Pop();
                     return true;
@@ -404,105 +406,105 @@ public class Parser {
         SkipWhitespace();
 
         while (IsCharAvailable()) {
-            if (KeywordElementOpening(out int keywordMarkerCount)) {
-                var keyValuePairElement = ParseKeyValuePairElement(keywordMarkerCount);
+            if (KeywordElementOpening(out int keywordSpecifierCount)) {
+                var keyValuePairElement = ParseKeyValuePairElement(keywordSpecifierCount);
                 SkipWhitespace();
                 return keyValuePairElement;
             }
 
-            if (ElementOpening(StringElement.ElementDelimiter, out int stringMarkerCount)) {
-                var stringElement = ParseStringElement(stringMarkerCount);
+            if (ElementOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
+                var stringElement = ParseStringElement(stringSpecifierCount);
                 SkipWhitespace();
                 return stringElement;
             }
 
-            if (ElementOpening(EvaluatedElement.ElementDelimiter, out int evalMarkerCount)) {
-                var literalElement = ParseEvaluatedElement(evalMarkerCount);
+            if (ElementOpening(EvaluatedElement.ElementDelimiter, out int evalSpecifierCount)) {
+                var literalElement = ParseEvaluatedElement(evalSpecifierCount);
                 SkipWhitespace();
                 return literalElement;
             }
 
-            if (ElementOpening(CharacterElement.ElementDelimiter, out int charMarkerCount)) {
+            if (ElementOpening(CharacterElement.ElementDelimiter, out int charSpecifierCount)) {
                 var characterElement = ParseCharacterElement();
                 SkipWhitespace();
                 return characterElement;
             }
 
-            if (ElementOpening(PropertyBagElement.ElementDelimiter, out int propMarkerCount)) {
-                var propertyBagElement = ParsePropertyBagElement(propMarkerCount);
+            if (ElementOpening(PropertyBagElement.ElementDelimiter, out int propSpecifierCount)) {
+                var propertyBagElement = ParsePropertyBagElement(propSpecifierCount);
                 SkipWhitespace();
                 return propertyBagElement;
             }
 
-            if (ElementOpening(MetadataElement.ElementDelimiter, out int metaMarkerCount)) {
-                var metadataElement = ParseMetadataElement(metaMarkerCount);
+            if (ElementOpening(MetadataElement.ElementDelimiter, out int metaSpecifierCount)) {
+                var metadataElement = ParseMetadataElement(metaSpecifierCount);
                 SkipWhitespace();
                 return metadataElement;
             }
 
-            if (ElementOpening(ObjectElement.ElementDelimiter, out int objMarkerCount)) {
-                var objectElement = ParseObjectElement(objMarkerCount);
+            if (ElementOpening(ObjectElement.ElementDelimiter, out int objSpecifierCount)) {
+                var objectElement = ParseObjectElement(objSpecifierCount);
                 SkipWhitespace();
                 return objectElement;
             }
 
-            if (ElementOpening(ArrayElement.ElementDelimiter, out int arrayMarkerCount)) {
-                var arrayElement = ParseArrayElement(arrayMarkerCount);
+            if (ElementOpening(ArrayElement.ElementDelimiter, out int arraySpecifierCount)) {
+                var arrayElement = ParseArrayElement(arraySpecifierCount);
                 SkipWhitespace();
                 return arrayElement;
             }
 
-            if (IntegerElementOpening(out int intMarkerCount)) {
-                var integerElement = ParseIntegerElement(intMarkerCount);
+            if (IntegerElementOpening(out int intSpecifierCount)) {
+                var integerElement = ParseIntegerElement(intSpecifierCount);
                 SkipWhitespace();
                 return integerElement;
             }
 
-            if (ElementOpening(LongElement.ElementDelimiter, out int longMarkerCount)) {
-                var longIntegerElement = ParseLongIntegerElement(longMarkerCount);
+            if (ElementOpening(LongElement.ElementDelimiter, out int longSpecifierCount)) {
+                var longIntegerElement = ParseLongIntegerElement(longSpecifierCount);
                 SkipWhitespace();
                 return longIntegerElement;
             }
 
-            if (ElementOpening(DecimalElement.ElementDelimiter, out int decMarkerCount)) {
-                var decimalElement = ParseDecimalElement(decMarkerCount);
+            if (ElementOpening(DecimalElement.ElementDelimiter, out int decSpecifierCount)) {
+                var decimalElement = ParseDecimalElement(decSpecifierCount);
                 SkipWhitespace();
                 return decimalElement;
             }
 
-            if (ElementOpening(DoubleElement.ElementDelimiter, out int doubleMarkerCount)) {
-                var doubleElement = ParseDoubleElement(doubleMarkerCount);
+            if (ElementOpening(DoubleElement.ElementDelimiter, out int doubleSpecifierCount)) {
+                var doubleElement = ParseDoubleElement(doubleSpecifierCount);
                 SkipWhitespace();
                 return doubleElement;
             }
 
-            if (ElementOpening(BooleanElement.ElementDelimiter, out int boolMarkerCount)) {
-                var booleanElement = ParseBooleanElement(boolMarkerCount);
+            if (ElementOpening(BooleanElement.ElementDelimiter, out int boolSpecifierCount)) {
+                var booleanElement = ParseBooleanElement(boolSpecifierCount);
                 SkipWhitespace();
                 return booleanElement;
             }
 
-            if (ElementOpening(DateElement.ElementDelimiter, out int dateMarkerCount)) {
-                var dateElement = ParseDateElement(dateMarkerCount);
+            if (ElementOpening(DateElement.ElementDelimiter, out int dateSpecifierCount)) {
+                var dateElement = ParseDateElement(dateSpecifierCount);
                 SkipWhitespace();
                 return dateElement;
             }
 
-            if (ElementOpening(PlaceholderElement.ElementDelimiter, out int phMarkerCount)) {
-                var placeholderElement = ParsePlaceholderElement(phMarkerCount);
+            if (ElementOpening(PlaceholderElement.ElementDelimiter, out int phSpecifierCount)) {
+                var placeholderElement = ParsePlaceholderElement(phSpecifierCount);
                 SkipWhitespace();
                 return placeholderElement;
             }
 
-            if (ElementOpening(NullElement.ElementDelimiter, out int nullMarkerCount)) {
-                var nullElement = ParseNullElement(nullMarkerCount);
+            if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
+                var nullElement = ParseNullElement(nullSpecifierCount);
                 SkipWhitespace();
                 return nullElement;
             }
 
-            if (ElementOpening(CommentElement.ElementDelimiter, out int commentMarkerCount)) {
+            if (ElementOpening(CommentElement.ElementDelimiter, out int commentSpecifierCount)) {
                 /* Parse comment but don't return it, as comments are not part of the logical output. */
-                ParseCommentElement(commentMarkerCount);
+                ParseCommentElement(commentSpecifierCount);
                 SkipWhitespace();
                 continue;
             }
@@ -513,7 +515,7 @@ public class Parser {
         return new EmptyElement();
     }
 
-    private void ParseCommentElement(int markerCount = 1) {
+    private void ParseCommentElement(int specifierCount = 1) {
         while (IsCharAvailable()) {
             if (ElementClosing()) {
                 break;
@@ -523,7 +525,7 @@ public class Parser {
         }
     }
 
-    private MetadataElement ParseMetadataElement(int markerCount = 1) {
+    private MetadataElement ParseMetadataElement(int specifierCount = 1) {
         SkipWhitespace();
         var metadataElement = new MetadataElement();
 
@@ -545,7 +547,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {MetadataElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private ArrayElement ParseArrayElement(int markerCount = 1) {
+    private ArrayElement ParseArrayElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
         SkipWhitespace();
 
@@ -586,7 +588,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {ArrayElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private NullElement ParseNullElement(int markerCount) {
+    private NullElement ParseNullElement(int specifierCount) {
         while (IsCharAvailable()) {
             if (ElementMinClosing()) {
                 return new NullElement();
@@ -596,7 +598,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {NullElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private ObjectElement ParseObjectElement(int markerCount = 1) {
+    private ObjectElement ParseObjectElement(int specifierCount = 1) {
         SkipWhitespace();
         var objectElement = new ObjectElement();
 
@@ -622,7 +624,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {ObjectElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private PropertyBagElement ParsePropertyBagElement(int markerCount = 1) {
+    private PropertyBagElement ParsePropertyBagElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
         SkipWhitespace();
         var propBagElement = new PropertyBagElement(style);
@@ -639,7 +641,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {PropertyBagElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private PlaceholderElement ParsePlaceholderElement(int markerCount = 1) {
+    private PlaceholderElement ParsePlaceholderElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Minimized) {
@@ -657,7 +659,7 @@ public class Parser {
                 }
 
                 var value = Environment.GetEnvironmentVariable(variable);
-                return new PlaceholderElement(value ?? string.Empty, markerCount, style: style);
+                return new PlaceholderElement(value ?? string.Empty, specifierCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -667,30 +669,42 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {PlaceholderElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private KeyValuePairElement ParseKeyValuePairElement(int markerCount = 1) {
+    private KeyValuePairElement ParseKeyValuePairElement(int specifierCount = 1) {
         var lastRow = CurrentRow;
         var lastColumn = CurrentColumn;
-
-        while (Peek.IsKeywordChar()) {
-            Expand();
-        }
-
-        if (string.IsNullOrEmpty(CurrentString)) {
-            throw new InvalidOperationException($"Key must be a non-empty string at row {lastRow}, column {lastColumn}.");
-        }
-
         var style = _delimStack.Peek().Style;
-        var keyElement = new KeywordElement(CurrentString, style: style);
-        var keyValuePairElement = new KeyValuePairElement(keyElement);
-        Advance();
+        var key = string.Empty;
 
         if (style == ElementStyle.Bare) {
+            while (Peek.IsKeywordChar()) {
+                Expand();
+            }
+
+            if (string.IsNullOrEmpty(CurrentString)) {
+                throw new InvalidOperationException($"Key must be a non-empty string at row {lastRow}, column {lastColumn}.");
+            }
+
+            key = CurrentString;
+            Advance();
             SkipWhitespace();
             _delimStack.Pop();
         }
-        else if (!ElementMinClosing()) {
-            goto ParseKeyValuePairElementFail;
+        else {
+            StringBuilder valueBuilder = new StringBuilder();
+
+            while (IsCharAvailable()) {
+                if (ElementClosing()) {
+                    key = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
+                    break;
+                }
+
+                valueBuilder.Append(CurrentChar);
+                Expand();
+            }
         }
+
+        var keyElement = new KeywordElement(key, specifierCount, style: style);
+        var keyValuePairElement = new KeyValuePairElement(keyElement);
 
         if (IsCharAvailable()) {
             Element valueElement = ParseElement();
@@ -698,7 +712,6 @@ public class Parser {
             return keyValuePairElement;
         }
 
-ParseKeyValuePairElementFail:
         throw new InvalidOperationException($"Unexpected end of {KeyValuePairElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
@@ -707,7 +720,7 @@ ParseKeyValuePairElementFail:
     I'm just trying to get through the basic scenarios first.
     */
 
-    private CharacterElement ParseCharacterElement(int markerCount = 1) {
+    private CharacterElement ParseCharacterElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Minimized) {
@@ -750,80 +763,80 @@ ParseKeyValuePairElementFail:
 
         var codePoint = ParseNumericValue<int>(charString);
         char character = (char)codePoint;
-        return new CharacterElement(character, markerCount, style: style);
+        return new CharacterElement(character, specifierCount, style: style);
     }
 
-    private EvaluatedElement ParseEvaluatedElement(int markerCount = 1) {
+    private EvaluatedElement ParseEvaluatedElement(int specifierCount = 1) {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementMaxOpening(StringElement.ElementDelimiter, out int stringMarkerCount)) {
-                StringElement stringElement = ParseStringElement(stringMarkerCount);
+            if (ElementMaxOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
+                StringElement stringElement = ParseStringElement(stringSpecifierCount);
                 valueBuilder.Append(stringElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(CharacterElement.ElementDelimiter, out int charMarkerCount)) {
-                CharacterElement characterElement = ParseCharacterElement(charMarkerCount);
+            if (ElementMaxOpening(CharacterElement.ElementDelimiter, out int charSpecifierCount)) {
+                CharacterElement characterElement = ParseCharacterElement(charSpecifierCount);
                 valueBuilder.Append(characterElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(IntegerElement.ElementDelimiter, out int intMarkerCount)) {
-                IntegerElement integerElement = ParseIntegerElement(intMarkerCount);
+            if (ElementMaxOpening(IntegerElement.ElementDelimiter, out int intSpecifierCount)) {
+                IntegerElement integerElement = ParseIntegerElement(intSpecifierCount);
                 valueBuilder.Append(integerElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(LongElement.ElementDelimiter, out int longMarkerCount)) {
-                LongElement longElement = ParseLongIntegerElement(longMarkerCount);
+            if (ElementMaxOpening(LongElement.ElementDelimiter, out int longSpecifierCount)) {
+                LongElement longElement = ParseLongIntegerElement(longSpecifierCount);
                 valueBuilder.Append(longElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(DecimalElement.ElementDelimiter, out int decMarkerCount)) {
-                DecimalElement decimalElement = ParseDecimalElement(decMarkerCount);
+            if (ElementMaxOpening(DecimalElement.ElementDelimiter, out int decSpecifierCount)) {
+                DecimalElement decimalElement = ParseDecimalElement(decSpecifierCount);
                 valueBuilder.Append(decimalElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(DoubleElement.ElementDelimiter, out int doubleMarkerCount)) {
-                DoubleElement doubleElement = ParseDoubleElement(doubleMarkerCount);
+            if (ElementMaxOpening(DoubleElement.ElementDelimiter, out int doubleSpecifierCount)) {
+                DoubleElement doubleElement = ParseDoubleElement(doubleSpecifierCount);
                 valueBuilder.Append(doubleElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(BooleanElement.ElementDelimiter, out int boolMarkerCount)) {
-                BooleanElement booleanElement = ParseBooleanElement(boolMarkerCount);
+            if (ElementMaxOpening(BooleanElement.ElementDelimiter, out int boolSpecifierCount)) {
+                BooleanElement booleanElement = ParseBooleanElement(boolSpecifierCount);
                 valueBuilder.Append(booleanElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(DateElement.ElementDelimiter, out int dateMarkerCount)) {
-                DateElement dateElement = ParseDateElement(dateMarkerCount);
+            if (ElementMaxOpening(DateElement.ElementDelimiter, out int dateSpecifierCount)) {
+                DateElement dateElement = ParseDateElement(dateSpecifierCount);
                 valueBuilder.Append(dateElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(EvaluatedElement.ElementDelimiter, out int evalMarkerCount)) {
-                EvaluatedElement evaluatedElement = ParseEvaluatedElement(evalMarkerCount);
+            if (ElementMaxOpening(EvaluatedElement.ElementDelimiter, out int evalSpecifierCount)) {
+                EvaluatedElement evaluatedElement = ParseEvaluatedElement(evalSpecifierCount);
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(PlaceholderElement.ElementDelimiter, out int phMarkerCount)) {
-                PlaceholderElement evaluatedElement = ParsePlaceholderElement(phMarkerCount);
+            if (ElementMaxOpening(PlaceholderElement.ElementDelimiter, out int phSpecifierCount)) {
+                PlaceholderElement evaluatedElement = ParsePlaceholderElement(phSpecifierCount);
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(CommentElement.ElementDelimiter, out int commentMarkerCount)) {
+            if (ElementMaxOpening(CommentElement.ElementDelimiter, out int commentSpecifierCount)) {
                 ParseCommentElement();
                 continue;
             }
 
             if (ElementClosing()) {
-                return new EvaluatedElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount);
+                return new EvaluatedElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -833,13 +846,13 @@ ParseKeyValuePairElementFail:
         throw new InvalidOperationException($"Unexpected end of {EvaluatedElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private StringElement ParseStringElement(int markerCount = 1) {
+    private StringElement ParseStringElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
             if (ElementClosing()) {
-                return new StringElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), markerCount, style: style);
+                return new StringElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -849,7 +862,7 @@ ParseKeyValuePairElementFail:
         throw new InvalidOperationException($"Unexpected end of {StringElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private DateElement ParseDateElement(int markerCount = 1) {
+    private DateElement ParseDateElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Minimized) {
@@ -867,7 +880,7 @@ ParseKeyValuePairElementFail:
 
             if (ElementMinClosing()) {
                 var value = valueBuilder.ToString();
-                return new DateElement(value, markerCount, style);
+                return new DateElement(value, specifierCount, style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -877,7 +890,7 @@ ParseKeyValuePairElementFail:
         throw new InvalidOperationException($"Unexpected end of {DateElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }        
     
-    private IntegerElement ParseIntegerElement(int markerCount = 1) {
+    private IntegerElement ParseIntegerElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Minimized or ElementStyle.Bare) {
@@ -895,7 +908,7 @@ ParseKeyValuePairElementFail:
 
             if (ElementMinClosing()) {
                 var value = ParseNumericValue<int>(valueBuilder.ToString());
-                return new IntegerElement(value, markerCount, style);
+                return new IntegerElement(value, specifierCount, style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -906,7 +919,7 @@ ParseKeyValuePairElementFail:
     }
 
 
-    private LongElement ParseLongIntegerElement(int markerCount = 1) {
+    private LongElement ParseLongIntegerElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Minimized) {
@@ -924,7 +937,7 @@ ParseKeyValuePairElementFail:
 
             if (ElementMinClosing()) {
                 var value = ParseNumericValue<long>(valueBuilder.ToString());
-                return new LongElement(value, markerCount, style: style);
+                return new LongElement(value, specifierCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -934,7 +947,7 @@ ParseKeyValuePairElementFail:
         throw new InvalidOperationException($"Unexpected end of {LongElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private DecimalElement ParseDecimalElement(int markerCount = 1) {
+    private DecimalElement ParseDecimalElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Minimized) {
@@ -952,7 +965,7 @@ ParseKeyValuePairElementFail:
 
             if (ElementMinClosing()) {
                 var value = ParseNumericValue<decimal>(valueBuilder.ToString());
-                return new DecimalElement(value, markerCount, style: style);
+                return new DecimalElement(value, specifierCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -962,7 +975,7 @@ ParseKeyValuePairElementFail:
         throw new InvalidOperationException($"Unexpected end of {DecimalElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private DoubleElement ParseDoubleElement(int markerCount = 1) {
+    private DoubleElement ParseDoubleElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Minimized) {
@@ -980,7 +993,7 @@ ParseKeyValuePairElementFail:
 
             if (ElementMinClosing()) {
                 var value = ParseNumericValue<double>(valueBuilder.ToString());
-                return new DoubleElement(value, markerCount, style: style);
+                return new DoubleElement(value, specifierCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -990,7 +1003,7 @@ ParseKeyValuePairElementFail:
         throw new InvalidOperationException($"Unexpected end of {DoubleElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private BooleanElement ParseBooleanElement(int markerCount = 1) {
+    private BooleanElement ParseBooleanElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Minimized) {
@@ -1020,7 +1033,7 @@ ParseKeyValuePairElementFail:
                     throw new InvalidOperationException($"Invalid boolean value '{valueString}' at row {CurrentRow}, column {CurrentColumn}.");
                 }
 
-                return new BooleanElement(value, markerCount, style: style);
+                return new BooleanElement(value, specifierCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);

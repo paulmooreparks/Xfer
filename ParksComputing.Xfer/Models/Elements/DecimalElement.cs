@@ -8,12 +8,12 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class DecimalElement : NumericElement<decimal> {
     public static readonly string ElementName = "decimal";
-    public const char OpeningMarker = '*';
-    public const char ClosingMarker = OpeningMarker;
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
+    public const char OpeningSpecifier = '*';
+    public const char ClosingSpecifier = OpeningSpecifier;
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public DecimalElement(decimal value, int markerCount = 1, ElementStyle style = ElementStyle.Normal) 
-        : base(value, ElementName, new ElementDelimiter(OpeningMarker, ClosingMarker, markerCount, style)) 
+    public DecimalElement(decimal value, int specifierCount = 1, ElementStyle style = ElementStyle.Normal) 
+        : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) 
     {
     }
 }

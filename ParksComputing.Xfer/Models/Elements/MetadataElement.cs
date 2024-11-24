@@ -7,10 +7,20 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class MetadataElement : Element {
     public static readonly string ElementName = "metadata";
-    public const char OpeningMarker = '!';
-    public const char ClosingMarker = OpeningMarker;
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
-    public static readonly string DefaultVersion = "0.2.1";
+    public const char OpeningSpecifier = '!';
+    public const char ClosingSpecifier = OpeningSpecifier;
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly string DefaultVersion = Parser.Version;
+
+    public static readonly string VersionKeyword = "version";
+    public static readonly string MessageIdKeyword = "message_id";
+    public static readonly string TtlKeyword = "ttl";
+
+    private static readonly SortedSet<string> Keywords = new () {
+        MessageIdKeyword,
+        VersionKeyword,
+        TtlKeyword
+    };
 
     private Dictionary<string, KeyValuePairElement> _values = new ();
     public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
@@ -20,23 +30,22 @@ public class MetadataElement : Element {
             return _values[index];
         }
         set {
-            switch (index) {
-                case "version":
-                    Version = CastOrThrow<TextElement>(value, index).Value ?? string.Empty;
-                    break;
-
-                case "message_id":
-                    MessageId = CastOrThrow<TextElement>(value, index).Value ?? string.Empty;
-                    break;
-
-                case "ttl":
-                    Ttl = CastOrThrow<IntegerElement>(value, index).Value;
-                    break;
-
-                default:
-                    SetOrUpdateValue(index, value);
-                    break;
+            if (string.Equals(index, VersionKeyword)) {
+                Version = CastOrThrow<TextElement>(value, index).Value ?? string.Empty;
+                return;
             }
+
+            if (string.Equals(index, MessageIdKeyword)) {
+                MessageId = CastOrThrow<TextElement>(value, index).Value ?? string.Empty;
+                return;
+            }
+
+            if (string.Equals(index, TtlKeyword)) {
+                Ttl = CastOrThrow<IntegerElement>(value, index).Value;
+                return;
+            }
+
+            SetOrUpdateValue(index, value);
         }
     }
 
@@ -58,7 +67,7 @@ public class MetadataElement : Element {
         }
         set {
             _version = value;
-            SetOrUpdateValue("version", new StringElement(value));
+            SetOrUpdateValue(VersionKeyword, new StringElement(value));
         }
     }
 
@@ -70,7 +79,7 @@ public class MetadataElement : Element {
         }
         set {
             _message_id = value;
-            SetOrUpdateValue("message_id", new StringElement(value));
+            SetOrUpdateValue(MessageIdKeyword, new StringElement(value));
         }
     }
 
@@ -82,7 +91,7 @@ public class MetadataElement : Element {
         }
         set {
             _ttl = value;
-            SetOrUpdateValue("ttl", new IntegerElement(value));
+            SetOrUpdateValue(TtlKeyword, new IntegerElement(value));
         }
     }
 
@@ -90,16 +99,10 @@ public class MetadataElement : Element {
     }
 
     public MetadataElement(string version, ElementStyle elementStyle = ElementStyle.Normal) 
-        : base(ElementName, new(OpeningMarker, ClosingMarker, elementStyle)) 
+        : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, elementStyle)) 
     {
         Version = version;
     }
-
-    private static readonly SortedSet<string> Keywords = new () {
-        "message_id",
-        "version",
-        "ttl"
-    };
 
     private bool IsKeyword(string compare, out string? keyword) {
         return Keywords.TryGetValue(compare, out keyword);

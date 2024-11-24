@@ -7,9 +7,9 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class ObjectElement : Element {
     public static readonly string ElementName = "object";
-    public const char OpeningMarker = '{';
-    public const char ClosingMarker = '}';
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
+    public const char OpeningSpecifier = '{';
+    public const char ClosingSpecifier = '}';
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     private Dictionary<string, KeyValuePairElement> _values = new();
     public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
@@ -23,7 +23,7 @@ public class ObjectElement : Element {
         }
     }
 
-    public ObjectElement() : base(ElementName, new(OpeningMarker, ClosingMarker)) { }
+    public ObjectElement() : base(ElementName, new(OpeningSpecifier, ClosingSpecifier)) { }
 
     private void SetOrUpdateValue<TElement>(string key, TElement element) where TElement : Element {
         if (_values.TryGetValue(key, out KeyValuePairElement? kvp)) {

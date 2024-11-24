@@ -1,8 +1,6 @@
 ﻿<!
-    version "0.2.1"
     message_id `<|COMPUTERNAME|>`
 !>
-
 <{name"Alice"age 30 isMember~true scores<[*85 *90 *78.5]>profile<{email<"alice@example.com">joinedDate@2023-05-05T20:00:00 }>}>
 </ The outermost element of an Xfer document is an implicit property-bag element. It may contain 
 elements of any type. />
@@ -26,7 +24,7 @@ elements of any type. />
 <`Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) may also be embedded in eval elements, and their evaluated results will become part of the rendered value.`>
 
 {
-    <:string:> "value"  </ String marker is " />
+    string "value"  </ String marker is " />
     character \65  </ Character marker is \ />
     boolean ~true  </ Boolean marker is ~ />
     integer #42  </ Integer marker is # />
@@ -63,6 +61,10 @@ elements of any type. />
         @2019-02-02
     ) </ Property bag markers are ( ) />
     
+    <:If a key in a key/value pair needs to contain more than a simple string, it can be wrapped in a pair of (that's 2) digraphs:>"value"
+    <:A key may even contain <"other elements">:> "value"
+    <::A key may contain a <:key element:> as long as the outer markers are repeated.::> "value"
+    <:123:> #123
 }
 
 </ We are able to round-trip the minified output of the parser. />

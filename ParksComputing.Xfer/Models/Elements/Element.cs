@@ -9,8 +9,8 @@ namespace ParksComputing.Xfer.Models.Elements;
 public abstract class Element {
     public const char HexadecimalPrefix = '$';
     public const char BinaryPrefix = '%';
-    public const char ElementOpeningMarker = '<';
-    public const char ElementClosingMarker = '>';
+    public const char ElementOpeningSpecifier = '<';
+    public const char ElementClosingSpecifier = '>';
     public string Name { get; }
     public ElementDelimiter Delimiter { get; set; } = new ElementDelimiter('\0', '\0');
 

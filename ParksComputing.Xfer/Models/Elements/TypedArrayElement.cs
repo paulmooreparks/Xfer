@@ -33,7 +33,7 @@ public class TypedArrayElement<T> : ArrayElement where T : Element {
 
 
     public TypedArrayElement(ElementStyle style = ElementStyle.Normal) 
-        : base(ElementName, new(OpeningMarker, ClosingMarker, style)) 
+        : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, style)) 
     {
     }
 

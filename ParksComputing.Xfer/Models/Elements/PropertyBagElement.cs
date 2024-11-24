@@ -8,9 +8,9 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class PropertyBagElement : Element {
     public static readonly string ElementName = "propertyBag";
-    public const char OpeningMarker = '(';
-    public const char ClosingMarker = ')';
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
+    public const char OpeningSpecifier = '(';
+    public const char ClosingSpecifier = ')';
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     private List<Element> _items = new();
 
@@ -31,7 +31,7 @@ public class PropertyBagElement : Element {
     }
 
     public PropertyBagElement(ElementStyle style = ElementStyle.Normal) 
-        : base(ElementName, new(OpeningMarker, ClosingMarker, style)) 
+        : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, style)) 
     { 
     }
 

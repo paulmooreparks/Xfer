@@ -8,9 +8,9 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class ElementDelimiter
 {
-    public char OpeningMarker { get; }
-    public char ClosingMarker { get; }
-    public int MarkerCount { get; set; }
+    public char OpeningSpecifier { get; }
+    public char ClosingSpecifier { get; }
+    public int SpecifierCount { get; set; }
     public ElementStyle Style { get; } = ElementStyle.Normal;
 
     public string Opening { get; }
@@ -20,42 +20,42 @@ public class ElementDelimiter
 
     public ElementDelimiter() : this(default, default, 1) { }
 
-    public ElementDelimiter(int markerCount) : this(default, default, markerCount)
+    public ElementDelimiter(int specifierCount) : this(default, default, specifierCount)
     {
     }
 
-    public ElementDelimiter(char openingMarker, char closingMarker, ElementStyle elementStyle = ElementStyle.Normal) : this(openingMarker, closingMarker, 1, elementStyle)
+    public ElementDelimiter(char openingSpecifier, char closingSpecifier, ElementStyle elementStyle = ElementStyle.Normal) : this(openingSpecifier, closingSpecifier, 1, elementStyle)
     {
     }
 
-    public ElementDelimiter(char openingMarker, char closingMarker, int markerCount, ElementStyle style = ElementStyle.Normal)
+    public ElementDelimiter(char openingSpecifier, char closingSpecifier, int specifierCount, ElementStyle style = ElementStyle.Normal)
     {
-        if (markerCount < 1)
+        if (specifierCount < 1)
         {
-            throw new ArgumentOutOfRangeException(nameof(markerCount), "Count must be at least 1.");
+            throw new ArgumentOutOfRangeException(nameof(specifierCount), "Count must be at least 1.");
         }
 
-        ValidateMarker(openingMarker, nameof(openingMarker));
-        ValidateMarker(closingMarker, nameof(closingMarker));
+        ValidateSpecifier(openingSpecifier, nameof(openingSpecifier));
+        ValidateSpecifier(closingSpecifier, nameof(closingSpecifier));
 
-        OpeningMarker = openingMarker;
-        ClosingMarker = closingMarker;
-        MarkerCount = markerCount;
+        OpeningSpecifier = openingSpecifier;
+        ClosingSpecifier = closingSpecifier;
+        SpecifierCount = specifierCount;
         Style = style;
 
-        var repeatedOpening = new string(openingMarker, markerCount);
-        var repeatedClosing = new string(closingMarker, markerCount);
+        var repeatedOpening = new string(openingSpecifier, specifierCount);
+        var repeatedClosing = new string(closingSpecifier, specifierCount);
 
         Opening = "<" + repeatedOpening;
         Closing = repeatedClosing + ">";
         MinOpening = repeatedOpening;
     }
 
-    private static void ValidateMarker(char marker, string paramName)
+    private static void ValidateSpecifier(char specifier, string paramName)
     {
-        if (char.IsWhiteSpace(marker) || char.IsLetterOrDigit(marker))
+        if (char.IsWhiteSpace(specifier) || char.IsLetterOrDigit(specifier))
         {
-            throw new ArgumentException("Marker cannot be an alphanumeric or whitespace character.", paramName);
+            throw new ArgumentException("Specifier cannot be an alphanumeric or whitespace character.", paramName);
         }
     }
 

@@ -8,12 +8,12 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class StringElement : TextElement {
     public static readonly string ElementName = "string";
-    public const char OpeningMarker = '"';
-    public const char ClosingMarker = OpeningMarker;
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
+    public const char OpeningSpecifier = '"';
+    public const char ClosingSpecifier = OpeningSpecifier;
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public StringElement(string text, int markerCount = 1, ElementStyle style = ElementStyle.Normal) : 
-        base(text, ElementName, new(OpeningMarker, ClosingMarker, markerCount, style)) 
+    public StringElement(string text, int specifierCount = 1, ElementStyle style = ElementStyle.Normal) : 
+        base(text, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) 
     { 
     }
 }

@@ -14,7 +14,7 @@ public abstract class NumericElement<T> : TypedElement<T> {
             return $"{Value} ";
         }
         if (Delimiter.Style == ElementStyle.Minimized) {
-            return $"{Delimiter.OpeningMarker}{Value} ";
+            return $"{Delimiter.OpeningSpecifier}{Value} ";
         }
         return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
     }

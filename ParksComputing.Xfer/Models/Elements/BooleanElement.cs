@@ -8,15 +8,15 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class BooleanElement : TypedElement<bool> {
     public static readonly string ElementName = "boolean";
-    public const char OpeningMarker = '~';
-    public const char ClosingMarker = OpeningMarker;
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
+    public const char OpeningSpecifier = '~';
+    public const char ClosingSpecifier = OpeningSpecifier;
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     public static readonly string TrueValue = "true";
     public static readonly string FalseValue = "false";
 
-    public BooleanElement(bool value, int markerCount = 1, ElementStyle style = ElementStyle.Normal)
-        : base(value, ElementName, new ElementDelimiter(OpeningMarker, ClosingMarker, markerCount, style)) {
+    public BooleanElement(bool value, int specifierCount = 1, ElementStyle style = ElementStyle.Normal)
+        : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
     }
 
     public override string ToString() {
@@ -26,7 +26,7 @@ public class BooleanElement : TypedElement<bool> {
             return $"{value} ";
         }
         if (Delimiter.Style == ElementStyle.Minimized) {
-            return $"{Delimiter.OpeningMarker}{value} ";
+            return $"{Delimiter.OpeningSpecifier}{value} ";
         }
         return $"{Delimiter.Opening}{value}{Delimiter.Closing}";
     }

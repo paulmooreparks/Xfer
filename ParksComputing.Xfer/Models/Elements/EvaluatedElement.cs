@@ -8,10 +8,10 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class EvaluatedElement : TextElement {
     public static readonly string ElementName = "eval";
-    public const char OpeningMarker = '`';
-    public const char ClosingMarker = OpeningMarker;
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
+    public const char OpeningSpecifier = '`';
+    public const char ClosingSpecifier = OpeningSpecifier;
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public EvaluatedElement(string text, int markerCount = 1) : base(text, ElementName, new(OpeningMarker, ClosingMarker, markerCount)) { 
+    public EvaluatedElement(string text, int specifierCount = 1) : base(text, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount)) { 
     }
 }

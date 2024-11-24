@@ -8,9 +8,9 @@ namespace ParksComputing.Xfer.Models.Elements;
 
 public class CommentElement : Element {
     public static readonly string ElementName = "comment";
-    public const char OpeningMarker = '/';
-    public const char ClosingMarker = OpeningMarker;
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
+    public const char OpeningSpecifier = '/';
+    public const char ClosingSpecifier = OpeningSpecifier;
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public CommentElement() : base(ElementName, new(OpeningMarker, ClosingMarker)) { }
+    public CommentElement() : base(ElementName, new(OpeningSpecifier, ClosingSpecifier)) { }
 }
