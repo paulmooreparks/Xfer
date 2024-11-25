@@ -1,6 +1,16 @@
 ﻿<!
     message_id `<|COMPUTERNAME|>`
 !>
+{
+    </ Why you would do this, I don't know, but I've been in software long enough to see similar things. />
+    <:first name::> "Alice"
+    <:last name::> "Smith"
+}
+:key:value
+123
+(456)
+[789 101112]
+{key 131415}
 $41
 #<|NUMBER_OF_PROCESSORS|>
 """An empty string is represented by an empty pair of quotes ("")."""
