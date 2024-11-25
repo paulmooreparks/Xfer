@@ -138,7 +138,62 @@ Comments may also be embedded in other elements, including other comments.
 
 ### Strict Typing
 
-While JSON builds on JavaScript's loose typing, Xfer is strictly typed.
+While JSON builds on JavaScript's loose typing, Xfer is strictly typed. The basic types are string, character, integer, long integer, double, decimal, boolean, and date/time. The type of an element is indicated by the specifier character in the opening delimter. The content of the element is then parsed according to the rules for that type.
+
+```xfer
+</ String element />
+"Hello, World!"
+
+</ Character element. All of the below examples render as 'A'. />
+\65
+\$1F600
+
+</ Integer element />
+42
+
+</ Long element (default is 64 bits) />
+&5000000000
+
+</ Double element />
+^3.1415926535
+
+</ Decimal element />
+*123.45
+
+</ Boolean element />
+~true
+~false
+
+</ Date/time element />
+@2019-01-01T00:00:00
+
+```
+
+### Metadata
+
+Xfer documents can contain metadata that is not part of the data itself. This metadata can be 
+used for a variety of purposes, such as defining the version of Xfer that the document conforms 
+to and other information that may be useful to the parser or 
+the consumer of the data.
+
+```xfer
+<!
+    version "1.0.0"
+    message_id "5D3208CB-77EC-4BC4-A256-97AD296BBEF7"
+    ttl 3600
+    description "This is a sample document."
+!>
+```
+
+### Placeholder Substitution
+
+Xfer documents may contain placeholders that are replaced with values at runtime.
+
+```xfer
+message <"Hello, <|USER|>!">
+```
+
+## Xfer Elements
 
 ```xfer
 </ String element />
@@ -190,7 +245,7 @@ at a time and rendered as is." />
 <`Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><``as<\$20\>is``>.`>
 
 </ Placeholder element (almost always embedded in another element). />
-<`<|USERPROFILE|>`>
+`<|USERPROFILE|>`
 #<|NUMBER_OF_PROCESSORS|>
 
 </ A key/value pair consists of a keyword followed by a value element. />
@@ -198,47 +253,22 @@ name <"Paul">
 age <#$36#>
 location <"Singapore">
 
-</ Arrays may only hold a single type of element. />
-<[ <#1#> <#2#> <#3#> ]> </ Integer array />
-<[ <&1&> <&2&> <&3&> ]> </ Long array />
-
 </ Objects consist of key/value pairs. />
-object <{ 
-    key <"value">
-    boolean <~false~>
-}>
+object { 
+    key "value"
+    boolean ~false
+}
 
-</ Property bags are a collection of values of any type, so they are analogous to JSON arrays. />
-<(
-    <"value">
-    <#123#>
-    <~true~>
-    <@2019-01-01@>
-)>
-```
+</ Arrays may only hold a single type of element. />
+[ 1 2 3 ]> </ Integer array />
+[ "1" "2" "3" ]> </ String array />
 
-### Metadata
-
-Xfer documents can contain metadata that is not part of the data itself. This metadata can be 
-used for a variety of purposes, such as defining the version of Xfer that the document conforms 
-to and other information that may be useful to the parser or 
-the consumer of the data.
-
-```xfer
-<@
-    version <"1.0">
-    message_id <"5D3208CB-77EC-4BC4-A256-97AD296BBEF7">
-    ttl <#3600#>
-    description <"This is a sample document.">
-@>
-
-```
-
-### Placeholder Substitution
-
-Xfer documents may contain placeholders that are replaced with values at runtime.
-
-```xfer
-message <"Hello, <|USER|>!">
+</ Property bags are a collection of values of any type, analogous to JSON arrays. />
+(
+    "value"
+    123
+    ~true
+    @2019-01-01
+)
 ```
 
