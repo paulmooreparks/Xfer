@@ -303,8 +303,7 @@ This section describes the various Xfer element types.
 
 The string element is used to contain text data. The contents of the element will be stored as entered, including any embedded elements, white space, line breaks, etc.
 
-* **Specifier:** " (Quotation Mark)
-* **Specifier Unicode Code Point:** U+0022
+* **Specifier:** " (Quotation Mark, U+0022)
 * **Maximal Delimiters:** <" and ">
 * **Minimal Syntax:** Enclose the string in opening and closing double quotes.
 * **Bare Syntax:** Not supported
@@ -319,24 +318,42 @@ The string element is used to contain text data. The contents of the element wil
 
 The Evaluated Text element is used to evaluate embedded elements and include their resulting values in the text value of the element.
 
-* **Specifier:** ` (Grave Accent, or less formally, back tick)
-* **Specifier Unicode Code Point:** U+0060
+* **Specifier:** ` (Grave Accent, or less formally, back tick, U+0060)
 * **Maximal Delimiters:** <` and `>
 * **Minimal Syntax:** Enclose the text in opening and closing back ticks.
 * **Bare Syntax:** Not supported
 
+Elements which may be embedded within an evaluated text element are as follows:
+
+* string
+* character
+* integer
+* long
+* double
+* decimal
+* boolean
+* date/time
+* placeholder
+* other evaluated text elements
+
+All elements embedded in an evaluated-text element must use [maximal syntax](#maximal-syntax).
+
 ```xfer
-</ Evaluated (or eval) element. The element below will render as "Inner elements are evaluated 1 
-at a time and rendered as is." />
+</ Evaluated (or eval) element. The element below will render as 
+"Inner elements are evaluated 1 at a time and rendered as is." />
+
 <`Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><``as<\$20\>is``>.`>
+
+</ The following will render as "I ❤︎ Xfer 😀". />
+` I <\$2764\><\$fe0e\> Xfer <\$1F600\> `
+
 ```
 
 ### Boolean Element
 
 The Boolean element is used to represent a true or false value.
 
-* **Specifier:** ~ (Tilde)
-* **Specifier Unicode Code Point:** U+007E
+* **Specifier:** ~ (Tilde, U+007E)
 * **Maximal Delimiters:** <~ and ~>
 * **Minimal Syntax:** Follow the specifier with the word 'true' or 'false'.
 * **Bare Syntax:** Not supported
@@ -351,8 +368,7 @@ The Boolean element is used to represent a true or false value.
 
 The Integer element is used to represent a 32-bit signed integer value.
 
-* **Specifier:** # (Number Sign)
-* **Specifier Unicode Code Point:** U+0023
+* **Specifier:** # (Number Sign, U+0023)
 * **Maximal Delimiters:** <# and #>
 * **Minimal Syntax:** Follow the specifier with the integer value.
 * **Bare Syntax:** The integer value may be used without any enclosing delimiters. The value must be followed by whitespace or the closing delimiter of an enclosing object, array, or property bag.
@@ -370,8 +386,7 @@ hexadecimal (preceded by $), or binary (preceded by %)./>
 
 The Long element is used to represent a 64-bit signed integer value.
 
-* **Specifier:** & (Ampersand)
-* **Specifier Unicode Code Point:** U+0026
+* **Specifier:** & (Ampersand, U+0026)
 * **Maximal Delimiters:** <& and &>
 * **Minimal Syntax:** Follow the specifier with the long integer value.
 * **Bare Syntax:** Not supported
@@ -388,8 +403,7 @@ The Long element is used to represent a 64-bit signed integer value.
 
 The Double element is used to represent a 64-bit floating-point value.
 
-* **Specifier:** ^ (Caret)
-* **Specifier Unicode Code Point:** U+005E
+* **Specifier:** ^ (Caret, U+005E)
 * **Maximal Delimiters:** <^ and ^>
 * **Minimal Syntax:** Follow the specifier with the double value.
 * **Bare Syntax:** Not supported
@@ -404,8 +418,7 @@ The Double element is used to represent a 64-bit floating-point value.
 
 The Decimal element is used to represent a 128-bit decimal value.
 
-* **Specifier:** * (Asterisk)
-* **Specifier Unicode Code Point:** U+002A
+* **Specifier:** * (Asterisk, U+002A)
 * **Maximal Delimiters:** <* and *>
 * **Minimal Syntax:** Follow the specifier with the decimal value.
 * **Bare Syntax:** Not supported
@@ -420,8 +433,7 @@ The Decimal element is used to represent a 128-bit decimal value.
 
 The Character element is used to represent a single character.
 
-* **Specifier:** \ (Reverse Solidus, or less formally, backslash)
-* **Specifier Unicode Code Point:** U+005C
+* **Specifier:** \ (Reverse Solidus, or less formally, backslash, U+005C)
 * **Maximal Delimiters:** <\ and \>
 * **Minimal Syntax:** Follow the specifier with the character code.
 * **Bare Syntax:** Not supported
@@ -445,8 +457,7 @@ The Character element is used to represent a single character.
 
 The Date/Time element is used to represent a date and time value.
 
-* **Specifier:** @ (Commercial At)
-* **Specifier Unicode Code Point:** U+0040
+* **Specifier:** @ (Commercial At, U+0040)
 * **Maximal Delimiters:** <@ and @>
 * **Minimal Syntax:** Follow the specifier with the date and time value in ISO 8601 format.
 * **Bare Syntax:** Not supported
@@ -461,8 +472,7 @@ The Date/Time element is used to represent a date and time value.
 
 The Placeholder element is used to represent a placeholder that will be replaced with a value at runtime.
 
-* **Specifier:** | (Vertical Line, or less formally, pipe)
-* **Specifier Unicode Code Point:** U+007C
+* **Specifier:** | (Vertical Line, or less formally, pipe, U+007C)
 * **Maximal Delimiters:** <| and |>
 * **Minimal Syntax:** Follow the specifier with the placeholder name.
 * **Bare Syntax:** Not supported
@@ -479,8 +489,7 @@ The Keyword element is used to represent a keyword that is part of a key/value p
 
 If a keyword needs to include whitespace or any other character besides [A-Z] or '_', it must be enclosed in keyword specifiers (':').
 
-* **Specifier:** : (Colon)
-* **Specifier Unicode Code Point:** U+003A
+* **Specifier:** : (Colon, U+003A)
 * **Maximal Delimiters:** <: and :>
 * **Minimal Syntax:** Enclose the keyword in opening and closing colons.
 * **Bare Syntax:** The keyword may be used without any enclosing delimiters. The keyword must be followed by whitespace or the opening delimiter of another element.
@@ -497,8 +506,7 @@ location <"Singapore">
 
 The Object element is used to represent a collection of key/value pairs.
 
-* **Specifiers:** { (Left Curly Bracket) and } (Right Curly Bracket)
-* **Specifier Unicode Code Point:** U+007B and U+007D
+* **Specifiers:** { (Left Curly Bracket, U+007B) and } (Right Curly Bracket, U+007D)
 * **Maximal Delimiters:** <{ and }>
 * **Minimal Syntax:** Enclose the object in opening and closing curly brackets.
 * **Bare Syntax:** Not supported
@@ -515,8 +523,7 @@ object {
 
 The Array element is used to represent a collection of elements of the same type.
 
-* **Specifiers:** [ (Left Square Bracket) and ] (Right Square Bracket)
-* **Specifier Unicode Code Points:** U+005B and U+005D
+* **Specifiers:** [ (Left Square Bracket, U+005B) and ] (Right Square Bracket, U+005D)
 * **Maximal Delimiters:** <[ and ]>
 * **Minimal Syntax:** Enclose the array in opening and closing square brackets.
 * **Bare Syntax:** Not supported
@@ -531,8 +538,7 @@ The Array element is used to represent a collection of elements of the same type
 
 The Property Bag element is used to represent a collection of values of any type.
 
-* **Specifiers:** ( (Left Parenthesis) and ) (Right Parenthesis)
-* **Specifier Unicode Code Points:** U+0028 and U+0029
+* **Specifiers:** ( (Left Parenthesis, U+0028) and ) (Right Parenthesis, U+0029)
 * **Maximal Delimiters:** <( and )>
 * **Minimal Syntax:** Enclose the property bag in opening and closing parentheses.
 * **Bare Syntax:** Not supported

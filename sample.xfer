@@ -85,7 +85,7 @@ elements of any type. />
 </ We are able to round-trip the minified output of the parser. />
 {string"value"character\65 boolean~true integer#42 long&5000000000 hexLongInteger&3131961357 binaryInteger#170 double^3.1415926535 decimal*123.45 date@2019-01-01T08:00:00 placeholder`C:\Users\paul`evalString`Inner elements are evaluated 1 at a time and rendered as is.`array[#1 #2 #3]object{key"value"boolean~false}propertyBag("value"#123 ~true @2019-02-02T08:00:00)}
 
-<(
+(
     </ Most elements may pull their values from a placeholder. />
     numProcs #<|NUMBER_OF_PROCESSORS|>
 
@@ -93,7 +93,9 @@ elements of any type. />
     keyValuePair key "value"
 
     `What if an eval element contains a comment?</ The comment is removed./>`
-)>
+
+    "What if an string element contains a comment?</ The comment is retained./>"
+)
 
 <"
 /* Now it's possible to embed code with less worry */
