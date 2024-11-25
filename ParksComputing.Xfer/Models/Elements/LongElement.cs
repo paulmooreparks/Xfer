@@ -12,7 +12,7 @@ public class LongElement : NumericElement<long> {
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public LongElement(long value, int specifierCount = 1, ElementStyle style = ElementStyle.Normal)
+    public LongElement(long value, int specifierCount = 1, ElementStyle style = ElementStyle.Minimized)
         : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
     }
 }

@@ -113,12 +113,26 @@ In Xfer, elements are delimited by angle brackets (< and >) and element-specific
 ```
 
 ### Safer Embedding
-One of the design goals of Xfer is to eliminate escaping of special characters. Enclosing data with unique paired digraphs already reduces the chances of a collision with the enclosed data, but in the event that a collision does occur, the specifier character can be repeated as many times as necessary to disambiguate the data.
+One of the design goals of Xfer is to eliminate the requirement to escape special characters. Enclosing data with unique paired digraphs already reduces the chances of a collision with the enclosed data, but in the event that a collision does occur, the specifier character can be repeated as many times as necessary to disambiguate the data.
 
 ```xfer
 <"String elements may already contain "quotes" without any issues.">
 <""To contain <"Xfer string digraphs">, repeat the string specifiers in the enclosing digraphs."">
 <"""""Specifiers may be repeated as many times as necessary.""""">
+```
+
+This does not mean that escaping is not supported. There is a text element, the Evaluated Element (or eval element), that will evaluate any embedded elements and include their resulting values in the text value of the element. Using this feature and embedding character elements, it is possible to escape any character sequence.
+
+```xfer
+</ The following evaluated-text element will render as " I ❤︎ Xfer 😀 ". />
+` I <\$2764\><\$fe0e\> Xfer <\$1F600\> `
+```
+
+Compare this to the standard string element, where the contents are not evaluated but rather rendered verbatim.
+
+```xfer
+</ The following string element will render as " I <\$2764\><\$fe0e\> Xfer <\$1F600\> ". />
+" I <\$2764\><\$fe0e\> Xfer <\$1F600\> "
 ```
 
 ### Comments

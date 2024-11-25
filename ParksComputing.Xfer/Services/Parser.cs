@@ -767,6 +767,7 @@ public class Parser {
 
     private EvaluatedElement ParseEvaluatedElement(int specifierCount = 1) {
         StringBuilder valueBuilder = new StringBuilder();
+        var style = _delimStack.Peek().Style;
 
         while (IsCharAvailable()) {
             if (ElementMaxOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
@@ -835,7 +836,7 @@ public class Parser {
             }
 
             if (ElementClosing()) {
-                return new EvaluatedElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount);
+                return new EvaluatedElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount, style);
             }
 
             valueBuilder.Append(CurrentChar);

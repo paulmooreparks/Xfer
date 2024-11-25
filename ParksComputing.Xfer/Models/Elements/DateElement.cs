@@ -9,7 +9,7 @@ namespace ParksComputing.Xfer.Models.Elements
         public const char ClosingSpecifier = OpeningSpecifier;
         public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-        public DateElement(string input, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Normal) 
+        public DateElement(string input, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Minimized) 
             : base(DateTime.Now, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, elementStyle)) 
         {
             if (!DateTime.TryParseExact(input, new[] { "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-dd" }, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime dateValue)) {

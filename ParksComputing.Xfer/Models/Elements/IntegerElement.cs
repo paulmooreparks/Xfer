@@ -12,7 +12,7 @@ public class IntegerElement : NumericElement<int> {
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public IntegerElement(int value, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Normal)
+    public IntegerElement(int value, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Minimized)
         : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, elementStyle)) {
     }
 }

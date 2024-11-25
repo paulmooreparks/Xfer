@@ -11,9 +11,10 @@ elements of any type. />
 </ A string element is a sequence of characters which are rendered literally, as they appear. />
 <"Hello, Xfer!">
 
-</ An evaluated element evaluates its embedded elements. The following will render as I ❤ Xfer. />
-<` I <\$2764\><\$fe0e\> Xfer <\$1F600\> `>
-<`<\$1F468\>`>
+</ An evaluated element evaluates its embedded elements. The following will render as "I ❤︎ Xfer 😀". />
+` I <\$2764\><\$fe0e\> Xfer <\$1F600\> `
+`<\$1F468\>`
+" I <\$2764\><\$fe0e\> Xfer <\$1F600\> "
 
 </ An example of embedding a string element and a comment inside an Xfer string. />
 <""

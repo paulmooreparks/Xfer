@@ -15,7 +15,7 @@ public class BooleanElement : TypedElement<bool> {
     public static readonly string TrueValue = "true";
     public static readonly string FalseValue = "false";
 
-    public BooleanElement(bool value, int specifierCount = 1, ElementStyle style = ElementStyle.Normal)
+    public BooleanElement(bool value, int specifierCount = 1, ElementStyle style = ElementStyle.Minimized)
         : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
     }
 

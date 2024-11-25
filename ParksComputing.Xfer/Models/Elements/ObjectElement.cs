@@ -9,7 +9,7 @@ public class ObjectElement : Element {
     public static readonly string ElementName = "object";
     public const char OpeningSpecifier = '{';
     public const char ClosingSpecifier = '}';
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Minimized);
 
     private Dictionary<string, KeyValuePairElement> _values = new();
     public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
@@ -23,7 +23,7 @@ public class ObjectElement : Element {
         }
     }
 
-    public ObjectElement() : base(ElementName, new(OpeningSpecifier, ClosingSpecifier)) { }
+    public ObjectElement() : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Minimized)) { }
 
     private void SetOrUpdateValue<TElement>(string key, TElement element) where TElement : Element {
         if (_values.TryGetValue(key, out KeyValuePairElement? kvp)) {
@@ -77,11 +77,25 @@ public class ObjectElement : Element {
 
     public override string ToXfer() {
         var sb = new StringBuilder();
-        sb.Append(Delimiter.Opening);
+        switch (Delimiter.Style) {
+            case ElementStyle.Normal:
+                sb.Append(Delimiter.Opening);
+                break;
+            case ElementStyle.Minimized:
+                sb.Append(Delimiter.MinOpening);
+                break;
+        }
         foreach (var value in _values.Values) {
             sb.Append($"{value.ToXfer()}");
         }
-        sb.Append(Delimiter.Closing);
+        switch (Delimiter.Style) {
+            case ElementStyle.Normal:
+                sb.Append(Delimiter.Closing);
+                break;
+            case ElementStyle.Minimized:
+                sb.Append(Delimiter.MinClosing);
+                break;
+        }
         return sb.ToString();
     }
 

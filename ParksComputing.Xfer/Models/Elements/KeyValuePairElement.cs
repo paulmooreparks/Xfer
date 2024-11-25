@@ -14,7 +14,9 @@ public class KeyValuePairElement : TypedElement<Element> {
     public KeyValuePairElement(TextElement keyElement, int specifierCount = 1) : this(keyElement, new EmptyElement(), specifierCount) {
     }
 
-    public KeyValuePairElement(TextElement keyElement, Element value, int specifierCount = 1) : base(value, ElementName, new(specifierCount)) {
+    public KeyValuePairElement(TextElement keyElement, Element value, int specifierCount = 1) 
+        : base(value, ElementName, new(specifierCount)) 
+    {
         KeyElement = keyElement;
 
         if (keyElement is TextElement se) {

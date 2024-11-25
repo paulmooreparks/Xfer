@@ -32,7 +32,7 @@ public class TypedArrayElement<T> : ArrayElement where T : Element {
     }
 
 
-    public TypedArrayElement(ElementStyle style = ElementStyle.Normal) 
+    public TypedArrayElement(ElementStyle style = ElementStyle.Minimized) 
         : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, style)) 
     {
     }
@@ -51,11 +51,25 @@ public class TypedArrayElement<T> : ArrayElement where T : Element {
 
     public override string ToXfer() {
         var sb = new StringBuilder();
-        sb.Append(Delimiter.Opening);
+        switch (Delimiter.Style) {
+            case ElementStyle.Normal:
+                sb.Append(Delimiter.Opening);
+                break;
+            case ElementStyle.Minimized:
+                sb.Append(Delimiter.MinOpening);
+                break;
+        }
         foreach (var item in _items) {
             sb.Append(item.ToXfer());
         }
-        sb.Append(Delimiter.Closing);
+        switch (Delimiter.Style) {
+            case ElementStyle.Normal:
+                sb.Append(Delimiter.Closing);
+                break;
+            case ElementStyle.Minimized:
+                sb.Append(Delimiter.MinClosing);
+                break;
+        }
         return sb.ToString();
     }
 

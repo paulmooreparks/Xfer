@@ -12,7 +12,7 @@ public class CharacterElement : TypedElement<int> {
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public CharacterElement(int codePoint, int specifierCount = 1, ElementStyle style = ElementStyle.Normal) : 
+    public CharacterElement(int codePoint, int specifierCount = 1, ElementStyle style = ElementStyle.Minimized) : 
         base(codePoint, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) 
     {
         if (codePoint < 0 || codePoint > 0x10FFFF) {

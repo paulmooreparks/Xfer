@@ -12,7 +12,7 @@ public class StringElement : TextElement {
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public StringElement(string text, int specifierCount = 1, ElementStyle style = ElementStyle.Normal) : 
+    public StringElement(string text, int specifierCount = 1, ElementStyle style = ElementStyle.Minimized) : 
         base(text, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) 
     { 
     }
