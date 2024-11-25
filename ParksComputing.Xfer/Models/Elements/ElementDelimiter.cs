@@ -17,6 +17,7 @@ public class ElementDelimiter
     public string Closing { get; }
 
     public string MinOpening { get; }
+    public string MinClosing { get; } 
 
     public ElementDelimiter() : this(default, default, 1) { }
 
@@ -49,6 +50,7 @@ public class ElementDelimiter
         Opening = "<" + repeatedOpening;
         Closing = repeatedClosing + ">";
         MinOpening = repeatedOpening;
+        MinClosing = repeatedClosing;
     }
 
     private static void ValidateSpecifier(char specifier, string paramName)

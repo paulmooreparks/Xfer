@@ -15,7 +15,7 @@ public abstract class TextElement : TypedElement<string> {
             return $"{Value}";
         }
         if (Delimiter.Style == ElementStyle.Minimized) {
-            return $"{Delimiter.OpeningSpecifier}{Value}{Delimiter.OpeningSpecifier}";
+            return $"{Delimiter.MinOpening}{Value}{Delimiter.MinClosing}";
         }
         return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
     }

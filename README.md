@@ -46,61 +46,55 @@ Here is the same Xfer document with all unnecessary whitespace removed.
 {name"Alice"age 30 isMember~true scores<[*85 *90 *78.5]>profile{email"alice@example.com"joinedDate@2023-01-15T20:00:00}}
 ```
 
-## Work in Progress
-
-### Tighter Syntax
-
-I'm experimenting with a syntax that will cut down on the "noise" a bit. There are situations where an element may not need to be wrapped in a pair of digraphs but may instead be begun with a single character or wrapped in a pair of characters. If the full digraphs are clearer or are required due to the nature of the data they enclose, then those are still supported.
-
-```xfer
-{
-    name "Alice" </ Text elements must start and end in quotes. />
-    </ Other elements may simply begin with a specifier character. />
-    age #30 </ # instead of <#30#> />
-    isMember ~true </ ~ instead of <~true~> />
-
-    </ And so on... />
-    scores [
-        *85
-        *90
-        *78.5
-    ]
-
-    profile {
-        email "alice@example.com"
-        joinedDate @2023-01-15T12:00:00 </ @ instead of <@ @> />
-    }
-}
-```
-
-String elements must still be enclosed in quotes, and strings may even contain quotes without escaping them.
-
-```xfer
-</ No digraphs required for text elements that are straightforward to parse. />
-speaker "Alice"
-
-</ If the string contains an embedded specifier character, then the surrounding specifiers may be repeated as necessary. />
-statement1 ""A quote is a " character.""
-
-</ Digraphs are required when the closing specifier would be ambiguous. />
-statement2 <"Alice said, "What's up?""> 
-```
-
-The code is in a bit of a weird state where two styles of syntax are supported, and I think I like it that way for now. If I decide that the old syntax really isn't needed, I'll remove it. But for now, I'm going to keep it around.
-
 ## Basic Syntax
 
-An Xfer document is composed of keywords and elements. An element typically begins and ends with angle brackets (< and >) unless using minified syntax (discussed later). The first character inside the angle brackets is the specifier character, which indicates the type of the element. The specifier character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.
+An Xfer document is composed of keywords and elements. An element typically begins and ends with angle brackets (< and >) unless using minimized syntax. The first character inside the angle brackets is the specifier character, which indicates the type of the element. The specifier character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.
 
 ```xfer
-</ Below is a string element />
+</ This is a comment, and below is a string element />
 <"Hello, World!">
 ```
 
+A string element may also be enclosed in just double quotes if there is no chance that the string will contain character sequences that make the closing of the element ambiguous. The enclosing quotes may be repeated as many times as necessary to disambiguate the string element.
+
+```xfer
+"Hello, World!"
+""A quote is a " character.""
+"""An empty string is represented by an empty pair of quotes ("")."""
+""A string may contain <"another string">.""
+```
+
+In cases where the string contains a sequence that makes the closing ambiguous, the string element must be enclosed in angle brackets.
+
+```xfer
+<"Alice said, "Boo!"">
+```
+
+For non-string element types, only the leading specifier is necessary for almost all cases. For integers, even this may be omitted if the value is positive.
+
+```xfer
+42 </ Integer element />
+#-42 </ Integer element />
+&9223372036854775807 </ Long element />
+~true </ Boolean element/>
+```
+
+The main exception to this rule is the comment element. Comments always require angle brackets and one or more slash ('/') characters.
+
+```xfer
+</ This is a comment. />
+<// Comments may enclose </other comments/> if the enclosing specifiers are repeated. //>
+```
+
+### Why Two Different Element Syntaxes?
+
+In the prototype design of Xfer, only digraph pairs were used to delimit elements. However, I received feedback that this syntax was difficult to read and write, especially for complex documents. The minimized syntax is more concise and easier to read and write, but it is less flexible than the digraph syntax. The digraph syntax allows for nested elements and comments, while the minimized syntax does not. In nearly all cases, though, the minimized syntax is sufficient, but the digraph syntax is always available for cases where it is needed.
+
 ## Design Goals
 * **Explicit Types**: All values are explicitly typed.
+* **No Commas**: Xfer allows for objects and arrays to be defined without any separator characters between elements.
+* **No Escaping**: Xfer does not require escaping of special characters in values. Instead, values are enclosed in unique paired digraphs that eliminate the need for escaping.
 * **Nullable Values**: Xfer supports null values only for types that are defined as nullable.
-* **No Escaping**: Xfer does not require escaping of special characters.
 
 ## Features of Xfer
 * [Nested Elements](#nested-elements)
@@ -111,11 +105,11 @@ An Xfer document is composed of keywords and elements. An element typically begi
 * [Placeholder substitution](#placeholder-substitution)
 
 ### Nested Elements
-In Xfer, elements are delimited by angle brackets (< and >) and element-specific specifier characters  (such as !, /, #, ", and so on). Nesting of elements is accomplished by repeating the specifier character in the outer element as many times as necessary to disambiguate the inner elements.
+In Xfer, elements are delimited by angle brackets (< and >) and element-specific specifier characters  (such as !, /, #, ", and so on). Nesting of elements is accomplished by repeating the specifier character in the enclosing delimiters as many times as necessary to disambiguate the inner elements.
 
 ```xfer
 <//This is how a comment </can contain another comment/>, //>
-<"""and a string can contain <""another string which <"contains another string">"">.""">
+"""and a string can contain <""another string which <"contains another string">"">."""
 ```
 
 ### Safer Embedding
@@ -139,6 +133,7 @@ Comments may also be embedded in other elements, including other comments.
 
 ```xfer
 <//This is how a comment </can contain another comment/>, //>
+</// This nesting can <// go on </ and on/> //> and on. ///>
 ```
 
 ### Strict Typing
@@ -147,32 +142,40 @@ While JSON builds on JavaScript's loose typing, Xfer is strictly typed.
 
 ```xfer
 </ String element />
-<"Hello, World!">  
+<"Hello, World!"> </ Digraph syntax />
+"Hello, World!" </ Minimized syntax />
 
 </ Boolean element />
-<~true~>
+<~true~> </ Digraph syntax />
+~false </ Minimized syntax />
 
 </ Integer element (default is 32 bits). Numeric values may be decimal (default), 
 hexadecimal (preceded by $), or binary (preceded by %)./>
 <#42#>
-<#$2A#>
-<#%00101010#>
+42
+#$2A
+#%00101010
 
 </ Long element (default is 64 bits) />
 <&5000000000&>
-<&$BAADF00D&>
-<# %10101010 #>
+&5000000000
+&$BAADF00D
+&%10101010
 
 </ Double element />
 <^3.1415926535^>
+^3.1415926535
 
 </ Decimal element />
 <*123.45*>
+*123.45
 
 </ Character element. All of the below examples render as 'A'. />
 <\65\>
-<\$41\>
-<\%01000001\>
+\65
+\$41
+\%01000001
+\$1F600
 
 </ Certain pre-defined keywords exist for characters as well. />
 <\nl\>
@@ -180,14 +183,15 @@ hexadecimal (preceded by $), or binary (preceded by %)./>
 
 </ Date/time element />
 <@2019-01-01T00:00:00@>
+@2019-01-01T00:00:00
 
 </ Evaluated (or eval) element. The element below will render as "Inner elements are evaluated 1 
 at a time and rendered as is." />
 <_Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><__as<\$20\>is__>._>
 
 </ Placeholder element (almost always embedded in another element). />
-<_<|USERPROFILE|>_>
-<#<|NUMBER_OF_PROCESSORS|>#>
+<`<|USERPROFILE|>`>
+#<|NUMBER_OF_PROCESSORS|>
 
 </ A key/value pair consists of a keyword followed by a value element. />
 name <"Paul">
