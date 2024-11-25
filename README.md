@@ -187,7 +187,7 @@ hexadecimal (preceded by $), or binary (preceded by %)./>
 
 </ Evaluated (or eval) element. The element below will render as "Inner elements are evaluated 1 
 at a time and rendered as is." />
-<_Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><__as<\$20\>is__>._>
+<`Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><``as<\$20\>is``>.`>
 
 </ Placeholder element (almost always embedded in another element). />
 <`<|USERPROFILE|>`>
