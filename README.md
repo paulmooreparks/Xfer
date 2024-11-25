@@ -25,7 +25,7 @@ Here's a simple example of a JSON document:
 }
 ```
 
-Following is the equivalent Xfer document, using minimized syntax. Notice the explicit, rather than implicit, data types.
+Following is the equivalent Xfer document, using [minimal syntax](#minimal-syntax) and [bare syntax](#bare-syntax). Notice the explicit, rather than implicit, data types.
 
 ```xfer
 {
@@ -43,7 +43,7 @@ Following is the equivalent Xfer document, using minimized syntax. Notice the ex
 Here is the same Xfer document with all unnecessary whitespace removed.
 
 ```xfer
-{name"Alice"age 30 isMember~true scores<[*85 *90 *78.5]>profile{email"alice@example.com"joinedDate@2023-01-15T20:00:00}}
+{name"Alice"age 30 isMember~true scores[*85 *90 *78.5]profile{email"alice@example.com"joinedDate@2023-01-15T20:00:00}}
 ```
 
 ## Basic Syntax
