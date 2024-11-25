@@ -18,4 +18,8 @@ public abstract class Element {
         Name = name;
         Delimiter = delimiter;
     }
+
+    public virtual string ToXfer() {
+        return $"{Delimiter.Opening} {Delimiter.Closing}";
+    }
 }

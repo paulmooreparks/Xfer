@@ -22,11 +22,15 @@ namespace ParksComputing.Xfer.Models.Elements
         public DateElement(DateTime dateValue) : base(dateValue, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier)) {
         }
 
+        public override string ToXfer() {
+            return $"{Delimiter.MinOpening}{ToString()} ";
+        }
+
         public override string ToString() {
             string dateValue = Value.TimeOfDay == TimeSpan.Zero
                     ? $"{Value:yyyy-MM-dd}"
                     : $"{Value:yyyy-MM-ddTHH:mm:ss}";
-            return $"{Delimiter.MinOpening}{dateValue} ";
+            return dateValue;
         }
     }
 }

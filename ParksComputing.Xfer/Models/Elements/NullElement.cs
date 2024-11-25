@@ -15,7 +15,11 @@ internal class NullElement : TypedElement<object?> {
         : base(null, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style)) {
     }
 
-    public override string ToString() {
+    public override string ToXfer() {
         return $"{Delimiter.MinOpening} ";
+    }
+
+    public override string ToString() {
+        return "null";
     }
 }

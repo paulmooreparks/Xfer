@@ -19,7 +19,7 @@ public class BooleanElement : TypedElement<bool> {
         : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
     }
 
-    public override string ToString() {
+    public override string ToXfer() {
         var value = Value ? TrueValue : FalseValue;
 
         if (Delimiter.Style == ElementStyle.Bare) {
@@ -29,5 +29,9 @@ public class BooleanElement : TypedElement<bool> {
             return $"{Delimiter.OpeningSpecifier}{value} ";
         }
         return $"{Delimiter.Opening}{value}{Delimiter.Closing}";
+    }
+
+    public override string ToString() {
+        return Value.ToString();
     }
 }

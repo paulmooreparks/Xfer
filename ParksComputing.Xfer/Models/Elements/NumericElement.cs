@@ -9,7 +9,7 @@ public abstract class NumericElement<T> : TypedElement<T> {
     public NumericElement(T value, string name, ElementDelimiter delimiter) : base(value, name, delimiter) {
     }
 
-    public override string ToString() {
+    public override string ToXfer() {
         if (Delimiter.Style == ElementStyle.Bare) {
             return $"{Value} ";
         }
@@ -17,5 +17,9 @@ public abstract class NumericElement<T> : TypedElement<T> {
             return $"{Delimiter.OpeningSpecifier}{Value} ";
         }
         return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
+    }
+
+    public override string ToString() {
+        return Value?.ToString() ?? string.Empty;
     }
 }

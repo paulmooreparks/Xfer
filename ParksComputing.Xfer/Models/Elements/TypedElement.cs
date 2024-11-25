@@ -14,8 +14,12 @@ public abstract class TypedElement<T> : Element
         Value = value;
     }
 
-    public override string ToString() {
+    public override string ToXfer() {
         return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
+    }
+
+    public override string ToString() {
+        return Value?.ToString() ?? string.Empty;
     }
 }
 

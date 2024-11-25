@@ -9,7 +9,8 @@ elements of any type. />
 <"Hello, Xfer!">
 
 </ An evaluated element evaluates its embedded elements. The following will render as I ❤ Xfer. />
-<` I <\$2764\><\$fe0e\> Xfer <\$1F600\>`>
+<` I <\$2764\><\$fe0e\> Xfer <\$1F600\> `>
+<`<\$1F468\>`>
 
 </ An example of embedding a string element and a comment inside an Xfer string. />
 <""

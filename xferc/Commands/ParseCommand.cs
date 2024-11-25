@@ -4,6 +4,7 @@ using System.CommandLine;
 using System.Text;
 using ParksComputing.Xfer;
 using ParksComputing.Xfer.Services;
+using ParksComputing.Xfer.Extensions;
 
 namespace ParksComputing.Xferc;
 
@@ -19,7 +20,7 @@ internal class ParseCommand {
         Console.WriteLine($"Message ID is {document.Metadata.MessageId}");
         Console.WriteLine();
 
-        Console.WriteLine(document);
+        Console.WriteLine(document.ToXfer());
 
         return Result.Success;
     }

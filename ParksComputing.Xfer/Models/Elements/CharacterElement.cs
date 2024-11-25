@@ -12,8 +12,6 @@ public class CharacterElement : TypedElement<int> {
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public int CodePoint => Value;
-
     public CharacterElement(int codePoint, int specifierCount = 1, ElementStyle style = ElementStyle.Normal) : 
         base(codePoint, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) 
     {
@@ -22,7 +20,11 @@ public class CharacterElement : TypedElement<int> {
         }
     }
 
+    public override string ToXfer() {
+        return $"{Delimiter.MinOpening}${Value:X} ";
+    }
+
     public override string ToString() {
-        return $"{Delimiter.MinOpening}${CodePoint:X} ";
+        return char.ConvertFromUtf32(Value);
     }
 }

@@ -10,7 +10,7 @@ public abstract class TextElement : TypedElement<string> {
     public TextElement(string text, string name, ElementDelimiter delimiter) : base(text, name, delimiter) {
     }
 
-    public override string ToString() {
+    public override string ToXfer() {
         if (Delimiter.Style == ElementStyle.Bare) {
             return $"{Value}";
         }
@@ -18,5 +18,9 @@ public abstract class TextElement : TypedElement<string> {
             return $"{Delimiter.OpeningSpecifier}{Value}{Delimiter.OpeningSpecifier}";
         }
         return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
+    }
+
+    public override string ToString() {
+        return Value;
     }
 }

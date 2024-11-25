@@ -29,7 +29,7 @@ public class XferConvert {
             }
         }
 
-        return obj.ToString();
+        return obj.ToXfer();
     }
 
     private static Element SerializeValue(object value) {

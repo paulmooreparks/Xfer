@@ -47,13 +47,17 @@ public class PropertyBagElement : Element {
         _items.Add(element);
     }
 
-    public override string ToString() {
+    public override string ToXfer() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
         foreach (var item in _items) {
-            sb.Append(item.ToString());
+            sb.Append(item.ToXfer());
         }
         sb.Append(Delimiter.Closing);
         return sb.ToString();
+    }
+
+    public override string ToString() {
+        return ToXfer();
     }
 }

@@ -29,11 +29,15 @@ namespace ParksComputing.Xfer
             Root.Add(value);
         }
 
-        public override string ToString() {
+        public virtual string ToXfer() {
             var sb = new StringBuilder();
-            sb.Append(Metadata);
-            sb.Append(Root);
+            sb.Append(Metadata.ToXfer());
+            sb.Append(Root.ToXfer());
             return sb.ToString();
+        }
+
+        public override string ToString() {
+            return ToXfer();
         }
 
         public byte[] ToByteArray() {

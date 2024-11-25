@@ -130,13 +130,17 @@ public class MetadataElement : Element {
         this[value.Key] = value;
     }
 
-    public override string ToString() {
+    public override string ToXfer() {
         var sb = new StringBuilder();
         sb.Append(Delimiter.Opening);
         foreach (var value in _values.Values) {
-            sb.Append(value);
+            sb.Append(value.ToXfer());
         }
         sb.Append(Delimiter.Closing);
         return sb.ToString();
+    }
+
+    public override string ToString() {
+        return ToXfer();
     }
 }
