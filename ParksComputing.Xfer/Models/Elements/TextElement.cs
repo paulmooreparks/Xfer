@@ -14,13 +14,13 @@ public abstract class TextElement : TypedElement<string> {
         }
     }
 
-    protected int GetMaxConsecutiveSpecifiers(string value, string specifier) {
+    protected int GetMaxConsecutiveSpecifiers(string value, char specifier) {
         // Find all sequences of the specifier in the Value
         int maxCount = 0;
         int currentCount = 0;
 
         foreach (char c in value) {
-            if (c == specifier[0]) {
+            if (c == specifier) {
                 currentCount++;
             }
             else {
@@ -34,7 +34,7 @@ public abstract class TextElement : TypedElement<string> {
     }
 
     protected virtual void CheckAndUpdateDelimiterStyle() {
-        int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.Closing);
+        int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.ClosingSpecifier);
         Delimiter.SpecifierCount = maxConsecutiveSpecifiers + 1;
 
         if (Value.Last() == Delimiter.ClosingSpecifier) {

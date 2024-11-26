@@ -16,8 +16,9 @@ public class KeywordElement : TextElement {
         return char.IsLetter(c) || c == '_';
     }
 
+    /* TODO: This can be more efficient */
     protected override void CheckAndUpdateDelimiterStyle() {
-        int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.Closing);
+        int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.ClosingSpecifier);
         Delimiter.SpecifierCount = maxConsecutiveSpecifiers + 1;
 
         if (!Regex.IsMatch(Value, @"^[A-Za-z_][A-Za-z0-9_]*$")) {
