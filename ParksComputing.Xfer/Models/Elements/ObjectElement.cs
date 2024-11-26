@@ -9,7 +9,7 @@ public class ObjectElement : Element {
     public static readonly string ElementName = "object";
     public const char OpeningSpecifier = '{';
     public const char ClosingSpecifier = '}';
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Minimized);
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact);
 
     private Dictionary<string, KeyValuePairElement> _values = new();
     public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
@@ -23,7 +23,7 @@ public class ObjectElement : Element {
         }
     }
 
-    public ObjectElement() : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Minimized)) { }
+    public ObjectElement() : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact)) { }
 
     private void SetOrUpdateValue<TElement>(string key, TElement element) where TElement : Element {
         if (_values.TryGetValue(key, out KeyValuePairElement? kvp)) {
@@ -33,7 +33,7 @@ public class ObjectElement : Element {
             TextElement keyElement;
 
             if (key.IsKeywordString()) {
-                keyElement = new KeywordElement(key, style: ElementStyle.Bare);
+                keyElement = new KeywordElement(key, style: ElementStyle.Implicit);
             }
             else {
                 keyElement = new StringElement(key);
@@ -78,10 +78,10 @@ public class ObjectElement : Element {
     public override string ToXfer() {
         var sb = new StringBuilder();
         switch (Delimiter.Style) {
-            case ElementStyle.Normal:
+            case ElementStyle.Explicit:
                 sb.Append(Delimiter.Opening);
                 break;
-            case ElementStyle.Minimized:
+            case ElementStyle.Compact:
                 sb.Append(Delimiter.MinOpening);
                 break;
         }
@@ -89,10 +89,10 @@ public class ObjectElement : Element {
             sb.Append($"{value.ToXfer()}");
         }
         switch (Delimiter.Style) {
-            case ElementStyle.Normal:
+            case ElementStyle.Explicit:
                 sb.Append(Delimiter.Closing);
                 break;
-            case ElementStyle.Minimized:
+            case ElementStyle.Compact:
                 sb.Append(Delimiter.MinClosing);
                 break;
         }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Models.Elements;
 public enum ElementStyle {
-    Normal = 0,
-    Minimized = 1,
-    Bare = 2,
+    Explicit = 0,
+    Compact = 1,
+    Implicit = 2,
 }

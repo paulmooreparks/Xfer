@@ -95,10 +95,10 @@ public class MetadataElement : Element {
         }
     }
 
-    public MetadataElement(ElementStyle elementStyle = ElementStyle.Normal) : this(DefaultVersion, elementStyle) {
+    public MetadataElement(ElementStyle elementStyle = ElementStyle.Explicit) : this(DefaultVersion, elementStyle) {
     }
 
-    public MetadataElement(string version, ElementStyle elementStyle = ElementStyle.Normal) 
+    public MetadataElement(string version, ElementStyle elementStyle = ElementStyle.Explicit) 
         : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, elementStyle)) 
     {
         Version = version;
@@ -116,7 +116,7 @@ public class MetadataElement : Element {
             TextElement keyElement;
 
             if (key.IsKeywordString()) {
-                keyElement = new KeywordElement(key, style: ElementStyle.Bare);
+                keyElement = new KeywordElement(key, style: ElementStyle.Implicit);
             }
             else {
                 keyElement = new StringElement(key);

@@ -169,7 +169,7 @@ public class Parser {
             specifierCount = 1;
             LastElementRow = CurrentRow;
             LastElementColumn = CurrentColumn;
-            _delimStack.Push(new ElementDelimiter(KeywordElement.OpeningSpecifier, KeywordElement.ClosingSpecifier, specifierCount, ElementStyle.Bare));
+            _delimStack.Push(new ElementDelimiter(KeywordElement.OpeningSpecifier, KeywordElement.ClosingSpecifier, specifierCount, ElementStyle.Implicit));
             return true;
         }
 
@@ -181,7 +181,7 @@ public class Parser {
             specifierCount = 1;
             LastElementRow = CurrentRow;
             LastElementColumn = CurrentColumn;
-            _delimStack.Push(new ElementDelimiter(IntegerElement.OpeningSpecifier, IntegerElement.ClosingSpecifier, specifierCount, ElementStyle.Bare));
+            _delimStack.Push(new ElementDelimiter(IntegerElement.OpeningSpecifier, IntegerElement.ClosingSpecifier, specifierCount, ElementStyle.Implicit));
             return true;
         }
 
@@ -214,7 +214,7 @@ public class Parser {
             }
 
             if (CurrentChar != Element.ElementClosingSpecifier) {
-                _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Minimized));
+                _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Compact));
                 LastElementRow = saveCurrentRow;
                 LastElementColumn = saveCurrentColumn;
                 return true;
@@ -245,7 +245,7 @@ public class Parser {
             /* This is really ugly to me, and it seems I'm missing a more elegant way to parse this. What I'm 
             doing here is handling empty elements, like <""> and <##>. */
             if (CurrentChar == closingSpecifier && Peek == Element.ElementClosingSpecifier) {
-                _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Normal));
+                _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Explicit));
                 LastElementRow = saveCurrentRow;
                 LastElementColumn = saveCurrentColumn;
                 return true;
@@ -256,7 +256,7 @@ public class Parser {
                 Advance();
             }
 
-            _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Normal));
+            _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Explicit));
             LastElementRow = saveCurrentRow;
             LastElementColumn = saveCurrentColumn;
             return true;
@@ -272,7 +272,7 @@ public class Parser {
 
         var style = _delimStack.Peek().Style;
 
-        if (((style == ElementStyle.Minimized || style == ElementStyle.Bare) && char.IsWhiteSpace(CurrentChar)) || 
+        if (((style == ElementStyle.Compact || style == ElementStyle.Implicit) && char.IsWhiteSpace(CurrentChar)) || 
             CurrentChar == ObjectElement.ClosingSpecifier || 
             CurrentChar == ArrayElement.ClosingSpecifier || 
             CurrentChar == PropertyBagElement.ClosingSpecifier) 
@@ -306,7 +306,7 @@ public class Parser {
                 Advance();
                 --specifierCount;
 
-                if (delimiter.Style == ElementStyle.Minimized) {
+                if (delimiter.Style == ElementStyle.Compact) {
                     if (specifierCount == 0) {
                         _delimStack.Pop();
                         return true;
@@ -644,7 +644,7 @@ public class Parser {
     private PlaceholderElement ParsePlaceholderElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
-        if (style is not ElementStyle.Minimized) {
+        if (style is not ElementStyle.Compact) {
             SkipWhitespace();
         }
 
@@ -675,7 +675,7 @@ public class Parser {
         var style = _delimStack.Peek().Style;
         var key = string.Empty;
 
-        if (style == ElementStyle.Bare) {
+        if (style == ElementStyle.Implicit) {
             while (Peek.IsKeywordChar()) {
                 Expand();
             }
@@ -723,7 +723,7 @@ public class Parser {
     private CharacterElement ParseCharacterElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
-        if (style is not ElementStyle.Minimized) {
+        if (style is not ElementStyle.Compact) {
             SkipWhitespace();
         }
 
@@ -865,7 +865,7 @@ public class Parser {
     private DateElement ParseDateElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
-        if (style is not ElementStyle.Minimized) {
+        if (style is not ElementStyle.Compact) {
             SkipWhitespace();
         }
 
@@ -893,7 +893,7 @@ public class Parser {
     private IntegerElement ParseIntegerElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
-        if (style is not ElementStyle.Minimized or ElementStyle.Bare) {
+        if (style is not ElementStyle.Compact or ElementStyle.Implicit) {
             SkipWhitespace();
         }
 
@@ -922,7 +922,7 @@ public class Parser {
     private LongElement ParseLongIntegerElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
-        if (style is not ElementStyle.Minimized) {
+        if (style is not ElementStyle.Compact) {
             SkipWhitespace();
         }
 
@@ -950,7 +950,7 @@ public class Parser {
     private DecimalElement ParseDecimalElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
-        if (style is not ElementStyle.Minimized) {
+        if (style is not ElementStyle.Compact) {
             SkipWhitespace();
         }
 
@@ -978,7 +978,7 @@ public class Parser {
     private DoubleElement ParseDoubleElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
-        if (style is not ElementStyle.Minimized) {
+        if (style is not ElementStyle.Compact) {
             SkipWhitespace();
         }
 
@@ -1006,7 +1006,7 @@ public class Parser {
     private BooleanElement ParseBooleanElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
-        if (style is not ElementStyle.Minimized) {
+        if (style is not ElementStyle.Compact) {
             SkipWhitespace();
         }
 

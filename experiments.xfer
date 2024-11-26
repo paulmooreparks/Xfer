@@ -3,7 +3,7 @@ speaker "Alice"
 statement1 ""A quote is a " character.""
 statement2 <"Alice said, "Boo!"">
 
-`<|COMPUTERNAME|>`
+'<|COMPUTERNAME|>'
 {
     name "Alice" </ Text elements must be start and end in quotes. />
     age #30 </ # instead of <#30#> />

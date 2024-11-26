@@ -10,7 +10,7 @@ public class PropertyBagElement : Element {
     public static readonly string ElementName = "propertyBag";
     public const char OpeningSpecifier = '(';
     public const char ClosingSpecifier = ')';
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Minimized);
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact);
 
     private List<Element> _items = new();
 
@@ -30,7 +30,7 @@ public class PropertyBagElement : Element {
         }
     }
 
-    public PropertyBagElement(ElementStyle style = ElementStyle.Minimized) 
+    public PropertyBagElement(ElementStyle style = ElementStyle.Compact) 
         : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, style)) 
     { 
     }
@@ -50,10 +50,10 @@ public class PropertyBagElement : Element {
     public override string ToXfer() {
         var sb = new StringBuilder();
         switch (Delimiter.Style) {
-            case ElementStyle.Normal:
+            case ElementStyle.Explicit:
                 sb.Append(Delimiter.Opening);
                 break;
-            case ElementStyle.Minimized:
+            case ElementStyle.Compact:
                 sb.Append(Delimiter.MinOpening);
                 break;
         }
@@ -61,10 +61,10 @@ public class PropertyBagElement : Element {
             sb.Append(item.ToXfer());
         }
         switch (Delimiter.Style) {
-            case ElementStyle.Normal:
+            case ElementStyle.Explicit:
                 sb.Append(Delimiter.Closing);
                 break;
-            case ElementStyle.Minimized:
+            case ElementStyle.Compact:
                 sb.Append(Delimiter.MinClosing);
                 break;
         }

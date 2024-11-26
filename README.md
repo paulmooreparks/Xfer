@@ -1,8 +1,8 @@
-﻿# <"Hello, Xfer!">
+﻿# The Xfer Data-Interchange Format
 
 _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.com/item?id=42114543). Thank you so much for all the great input and discussion!_
 
-Xfer is a data interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. 
+Xfer is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. 
 
 This project is still in its infancy and is quite experimental, even exploratory. The code you'll find in this repository is also experimental. So far, I've built an [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer/Models/Elements), a [parser](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/Services/Parser.cs), and a [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/XferConverter.cs) as part of my [.NET Xfer Library](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer), but at the moment this code is completely not ready for prime time. It's not even thread safe yet! About once a week I'll completely refactor everything, so don't get terribly attached to anything you see here. However, if you do like some of the ideas, please [let me know](mailto:paul@parkscomputing.com). I'm always open to feedback.
 
@@ -25,7 +25,7 @@ Here's a simple example of a JSON document:
 }
 ```
 
-Following is the equivalent Xfer document, using [minimal syntax](#minimal-syntax) and [bare syntax](#bare-syntax). Notice the explicit, rather than implicit, data types.
+Following is the equivalent Xfer document, using [compact syntax](#compact-syntax) and [implicit syntax](#implicit-syntax). Notice the explicit, rather than implicit, data types.
 
 ```xfer
 {
@@ -48,7 +48,7 @@ Here is the same Xfer document with all unnecessary whitespace removed.
 
 ## Basic Syntax
 
-An Xfer document is composed of keywords and elements. An element typically begins and ends with angle brackets (< and >) unless using minimized syntax. The first character inside the angle brackets is the specifier character, which indicates the type of the element. The specifier character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.
+An Xfer document is composed of keywords and elements. An element typically begins and ends with angle brackets (< and >) unless using [compact syntax](#compact-syntax). The first character inside the angle brackets is the specifier character, which indicates the type of the element. The specifier character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.
 
 ```xfer
 </ This is a comment, and below is a string element />
@@ -86,14 +86,10 @@ The main exception to this rule is the comment element. Comments always require 
 <// Comments may enclose </other comments/> if the enclosing specifiers are repeated. //>
 ```
 
-### Why Two Different Element Syntaxes?
-
-In the prototype design of Xfer, only digraph pairs were used to delimit elements. However, I received feedback that this syntax was difficult to read and write, especially for complex documents. The minimized syntax is more concise and easier to read and write, but it is less flexible than the digraph syntax. The digraph syntax allows for nested elements and comments, while the minimized syntax does not. In nearly all cases, though, the minimized syntax is sufficient, but the digraph syntax is always available for cases where it is needed.
-
 ## Design Goals
 * **Explicit Types**: All values are explicitly typed.
 * **No Commas**: Xfer allows for objects and arrays to be defined without any separator characters between elements.
-* **No Escaping**: Xfer does not require escaping of special characters in values. Instead, values are enclosed in unique paired digraphs that eliminate the need for escaping.
+* **No Escaping**: Xfer does not require escaping of special characters in values. Instead, values are enclosed in unique delimiters that eliminate the need for escaping.
 * **Nullable Values**: Xfer supports null values only for types that are defined as nullable.
 
 ## Features of Xfer
@@ -113,11 +109,11 @@ In Xfer, elements are delimited by angle brackets (< and >) and element-specific
 ```
 
 ### Safer Embedding
-One of the design goals of Xfer is to eliminate the requirement to escape special characters. Enclosing data with unique paired digraphs already reduces the chances of a collision with the enclosed data, but in the event that a collision does occur, the specifier character can be repeated as many times as necessary to disambiguate the data.
+One of the design goals of Xfer is to eliminate the requirement to escape special characters. Enclosing data with unique delimiters already reduces the chances of a collision with the enclosed data, but in the event that a collision does occur, the specifier character can be repeated as many times as necessary to disambiguate the data.
 
 ```xfer
 <"String elements may already contain "quotes" without any issues.">
-<""To contain <"Xfer string digraphs">, repeat the string specifiers in the enclosing digraphs."">
+<""To contain <"Xfer string delimiters">, repeat the string specifiers in the enclosing delimiters."">
 <"""""Specifiers may be repeated as many times as necessary.""""">
 ```
 
@@ -125,7 +121,7 @@ This does not mean that escaping is not supported. There is a text element, the 
 
 ```xfer
 </ The following evaluated-text element will render as " I ❤︎ Xfer 😀 ". />
-` I <\$2764\><\$fe0e\> Xfer <\$1F600\> `
+' I <\$2764\><\$fe0e\> Xfer <\$1F600\> '
 ```
 
 Compare this to the standard string element, where the contents are not evaluated but rather rendered verbatim.
@@ -208,32 +204,33 @@ message <"Hello, <|USER|>!">
 ```
 
 ## Xfer Element Syntax
-An Xfer element may support up to three syntax variations: maximal, minimal, and bare. All elements support maximal syntax, but the minimal or bare syntaxes are generally easier to read and more concise.
+An Xfer element may support up to three syntax variations: explicit syntax, compact syntax, and implicit syntax. All elements support explicit syntax, but the compact and implicit syntaxes are more concise.
 
-### Maximal Syntax
-The element is enclosed in opening and closing delimiters composed of outer angle brackets and an inner specifier character. The content of the element is enclosed in the opening and closing delimiters.
+### Explicit Syntax
+When using explicit syntax, the element is enclosed in opening and closing delimiters composed of outer angle brackets (less-than, '<', and greater-than, '>') and an inner specifier character. The content of the element is enclosed in the opening and closing delimiters.
 
 ```xfer
 <"Hello, World!">
 <#123#>
+<[ <#1#> <#2#> <#3#> ]>
+<{ <:key:> <#value> }>
 ```
 
 The specifier may be repeated if required by the contents of the element.
 
 ```xfer
-<""This string contains <"another string">."">
+<""This string element contains <"another string element">."">
 ```
 
-### Minimal Syntax
+### Compact Syntax
 
-Minimal syntax does away with the opening and closing angle brackets (less-than, '<', and greater-than, '>'). Instead, the specifier is followed by the content of the element. The content is terminated by the specifier, white space, or other special characters.
+Compact syntax does away with the opening and closing angle brackets (less-than, '<', and greater-than, '>'). Instead, the specifier is followed by the content of the element. The content is terminated by the specifier, white space, or other special characters.
 
-```xfer
-
-For text elements, the element is enclosed in opening and closing specifiers. 
+For text elements and collection elements, the element is enclosed in opening and closing specifiers. 
 
 ```xfer
 "Hello, World!"
+[ "one" "two" "three" ]
 ```
 
 The specifier may be repeated if required by the contents of the element.
@@ -250,19 +247,19 @@ For non-text elements, the element begins with the specifier and ends with white
 \$20
 ```
 
-### Bare Syntax
-Certain elements may be used without any enclosing delimiters if the type of the element can be inferred from the contents and the surrounding elements.
+### Implicit Syntax
+When using implicit syntax, certain elements may be used without any enclosing delimiters if the type of the element can be inferred from the contents and the surrounding elements.
 
 Integers may generally be used without any enclosing delimiters. They must be followed by whitespace or the closing delimiter of an enclosing object, array, or property bag.
 
 ```xfer
 123
-(456)
-[789 101112]
-{key 131415}
+(456 789)
+[101112 131415]
+{key 98765}
 ```
 
-As hinted above, keywords in a key/value pair may also be used without enclosing delimiters. They must be followed by whitespace or the opening delimiter of another element.
+As hinted above, keywords in a key/value pair may also be used without enclosing delimiters when they contain only upper-case or lower-case alphabetic characters (A-Z, a-z) or underscores ('_'). They must be followed by whitespace or the opening delimiter of another element.
 
 ```xfer
 {
@@ -272,28 +269,11 @@ As hinted above, keywords in a key/value pair may also be used without enclosing
 }
 ```
 
-If a keyword needs to include whitespace or any other character besides [A-Z] or '_', it must be enclosed in keyword specifiers (':').
+### Why Three Different Element Syntaxes?
 
-```xfer
-{
-    :first name: "Alice"
-    :last name: "Smith"
-}
-```
+In the prototype design of Xfer, digraph pairs (such as <" "> or <{ }>) were used to delimit elements. However, I received feedback that this syntax was difficult to read and write, especially for large or complex documents. The compact syntax is more concise and easier to read and write, however the explicit syntax allows for nested elements and comments. In nearly all cases, the compact syntax is sufficient, but the explicit syntax is always available for cases where it is needed.
 
-If, for some reason, a keyword needs to contain colon characters or maximal keyword delimiters, it must be enclosed in the maximal delimiters.
-
-```xfer
-{
-    </ Why you would do this, I don't know, but I've been in software long enough to see similar things. />
-    <:first name::> "Alice"
-    <:last name::> "Smith"
-}
-```
-
-### So What Does All That Mean In a Practical Sense?
-
-It means that you'll use a mixture of minimal and bare syntax almost all of the time, only stepping up the syntax ladder when you need to disambiguate the contents of an element from the elements delimiters.
+What this means, in a practical sense, is that you'll almost always use a mixture of compact and implicit syntax when you work with Xfer, only stepping up the syntax ladder when you need to disambiguate the contents of an element from the element's delimiters.
 
 ## Xfer Elements
 
@@ -304,24 +284,24 @@ This section describes the various Xfer element types.
 The string element is used to contain text data. The contents of the element will be stored as entered, including any embedded elements, white space, line breaks, etc.
 
 * **Specifier:** " (Quotation Mark, U+0022)
-* **Maximal Delimiters:** <" and ">
-* **Minimal Syntax:** Enclose the string in opening and closing double quotes.
-* **Bare Syntax:** Not supported
+* **Explicit Syntax:** Enclose the content in <" and "> delimiters.
+* **Compact Syntax:** Enclose the content in opening and closing quotation marks.
+* **Implicit Syntax:** Not supported
 
 ```xfer
 </ String element />
-<"Hello, World!"> </ Digraph syntax />
-"Hello, World!" </ Minimized syntax />
+<"Hello, World!"> </ Explicit syntax />
+"Hello, World!" </ Compact syntax />
 ```
 
 ### Evaluated Text Element
 
 The Evaluated Text element is used to evaluate embedded elements and include their resulting values in the text value of the element.
 
-* **Specifier:** ` (Grave Accent, or less formally, back tick, U+0060)
-* **Maximal Delimiters:** <` and `>
-* **Minimal Syntax:** Enclose the text in opening and closing back ticks.
-* **Bare Syntax:** Not supported
+* **Specifier:** ' (Apostrophe, U+0027)
+* **Explicit Syntax:** Enclose the content in <' and '> delimiters.
+* **Compact Syntax:** Enclose the content in opening and closing apostrophes.
+* **Implicit Syntax:** Not supported
 
 Elements which may be embedded within an evaluated text element are as follows:
 
@@ -336,16 +316,16 @@ Elements which may be embedded within an evaluated text element are as follows:
 * placeholder
 * other evaluated text elements
 
-All elements embedded in an evaluated-text element must use [maximal syntax](#maximal-syntax).
+All elements embedded in an evaluated-text element which are intended to be evaluated must use [explicit syntax](#explicit-syntax).
 
 ```xfer
 </ Evaluated (or eval) element. The element below will render as 
 "Inner elements are evaluated 1 at a time and rendered as is." />
 
-<`Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><``as<\$20\>is``>.`>
+<'Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><''as<\$20\>is''>.'>
 
-</ The following will render as "I ❤︎ Xfer 😀". />
-` I <\$2764\><\$fe0e\> Xfer <\$1F600\> `
+</ The following will render as " I ❤︎ Xfer 😀 ". />
+' I <\$2764\><\$fe0e\> Xfer <\$1F600\> '
 
 ```
 
@@ -354,14 +334,14 @@ All elements embedded in an evaluated-text element must use [maximal syntax](#ma
 The Boolean element is used to represent a true or false value.
 
 * **Specifier:** ~ (Tilde, U+007E)
-* **Maximal Delimiters:** <~ and ~>
-* **Minimal Syntax:** Follow the specifier with the word 'true' or 'false'.
-* **Bare Syntax:** Not supported
+* **Explicit Syntax:** Enclose the content in <~ and ~> delimiters.
+* **Compact Syntax:** Follow the tilde specifier with the word 'true' or 'false'.
+* **Implicit Syntax:** Not supported
 
 ```xfer
 </ Boolean element />
-<~true~> </ Digraph syntax />
-~false </ Minimized syntax />
+<~true~> </ Explicit syntax />
+~false </ Compact syntax />
 ```
 
 ### Integer Element
@@ -369,17 +349,20 @@ The Boolean element is used to represent a true or false value.
 The Integer element is used to represent a 32-bit signed integer value.
 
 * **Specifier:** # (Number Sign, U+0023)
-* **Maximal Delimiters:** <# and #>
-* **Minimal Syntax:** Follow the specifier with the integer value.
-* **Bare Syntax:** The integer value may be used without any enclosing delimiters. The value must be followed by whitespace or the closing delimiter of an enclosing object, array, or property bag.
+* **Explicit Syntax:** Enclose the content in <# and #> delimiters.
+* **Compact Syntax:** Follow the specifier with the integer value.
+* **Implicit Syntax:** The integer value may be used without any enclosing delimiters. The value must be followed by whitespace or the closing delimiter of an enclosing object, array, or property bag.
 
 ```xfer
 </ Integer element (default is 32 bits). Numeric values may be decimal (default), 
 hexadecimal (preceded by $), or binary (preceded by %)./>
-<#42#>
-42
+<#42#> </ Explicit syntax />
+#42 </ Compact syntax />
+42 </ Implicit syntax />
 #$2A
 #%00101010
+$2A
+%00101010
 ```
 
 ### Long Element
@@ -387,9 +370,9 @@ hexadecimal (preceded by $), or binary (preceded by %)./>
 The Long element is used to represent a 64-bit signed integer value.
 
 * **Specifier:** & (Ampersand, U+0026)
-* **Maximal Delimiters:** <& and &>
-* **Minimal Syntax:** Follow the specifier with the long integer value.
-* **Bare Syntax:** Not supported
+* **Explicit Syntax:** Enclose the content in <& and &> delimiters.
+* **Compact Syntax:** Follow the specifier with the long integer value.
+* **Implicit Syntax:** Not supported
 
 ```xfer
 </ Long element (default is 64 bits) />
@@ -404,9 +387,9 @@ The Long element is used to represent a 64-bit signed integer value.
 The Double element is used to represent a 64-bit floating-point value.
 
 * **Specifier:** ^ (Caret, U+005E)
-* **Maximal Delimiters:** <^ and ^>
-* **Minimal Syntax:** Follow the specifier with the double value.
-* **Bare Syntax:** Not supported
+* **Explicit Syntax:** Enclose the content in <^ and ^> delimiters.
+* **Compact Syntax:** Follow the specifier with the double value.
+* **Implicit Syntax:** Not supported
 
 ```xfer
 </ Double element />
@@ -419,9 +402,9 @@ The Double element is used to represent a 64-bit floating-point value.
 The Decimal element is used to represent a 128-bit decimal value.
 
 * **Specifier:** * (Asterisk, U+002A)
-* **Maximal Delimiters:** <* and *>
-* **Minimal Syntax:** Follow the specifier with the decimal value.
-* **Bare Syntax:** Not supported
+* **Explicit Syntax:** Enclose the content in <* and *> delimiters.
+* **Compact Syntax:** Follow the specifier with the decimal value.
+* **Implicit Syntax:** Not supported
 
 ```xfer
 </ Decimal element />
@@ -434,9 +417,9 @@ The Decimal element is used to represent a 128-bit decimal value.
 The Character element is used to represent a single character.
 
 * **Specifier:** \ (Reverse Solidus, or less formally, backslash, U+005C)
-* **Maximal Delimiters:** <\ and \>
-* **Minimal Syntax:** Follow the specifier with the character code.
-* **Bare Syntax:** Not supported
+* **Explicit Syntax:** Enclose the content in <\ and \> delimiters.
+* **Compact Syntax:** Follow the specifier with the character code.
+* **Implicit Syntax:** Not supported
 
 ```xfer
 </ Character element. All of the below examples render as 'A'. />
@@ -458,9 +441,9 @@ The Character element is used to represent a single character.
 The Date/Time element is used to represent a date and time value.
 
 * **Specifier:** @ (Commercial At, U+0040)
-* **Maximal Delimiters:** <@ and @>
-* **Minimal Syntax:** Follow the specifier with the date and time value in ISO 8601 format.
-* **Bare Syntax:** Not supported
+* **Explicit Syntax:** Enclose the content in <@ and @> delimiters.
+* **Compact Syntax:** Follow the specifier with the date and time value in ISO 8601 format.
+* **Implicit Syntax:** Not supported
 
 ```xfer
 </ Date/time element />
@@ -473,13 +456,13 @@ The Date/Time element is used to represent a date and time value.
 The Placeholder element is used to represent a placeholder that will be replaced with a value at runtime.
 
 * **Specifier:** | (Vertical Line, or less formally, pipe, U+007C)
-* **Maximal Delimiters:** <| and |>
-* **Minimal Syntax:** Follow the specifier with the placeholder name.
-* **Bare Syntax:** Not supported
+* **Explicit Syntax:** Enclose the content in <| and |> delimiters.
+* **Compact Syntax:** Follow the specifier with the placeholder name.
+* **Implicit Syntax:** Not supported
 
 ```xfer
 </ Placeholder element (almost always embedded in another element). />
-`<|USERPROFILE|>`
+'<|USERPROFILE|>'
 #<|NUMBER_OF_PROCESSORS|>
 ```
 
@@ -490,9 +473,9 @@ The Keyword element is used to represent a keyword that is part of a key/value p
 If a keyword needs to include whitespace or any other character besides [A-Z] or '_', it must be enclosed in keyword specifiers (':').
 
 * **Specifier:** : (Colon, U+003A)
-* **Maximal Delimiters:** <: and :>
-* **Minimal Syntax:** Enclose the keyword in opening and closing colons.
-* **Bare Syntax:** The keyword may be used without any enclosing delimiters. The keyword must be followed by whitespace or the opening delimiter of another element.
+* **Explicit Syntax:** Enclose the content in <: and :> delimiters.
+* **Compact Syntax:** Enclose the keyword in opening and closing colons.
+* **Implicit Syntax:** The keyword may be used without any enclosing delimiters. The keyword must be followed by whitespace or the opening delimiter of another element.
 
 ```xfer
 </ A key/value pair consists of a keyword followed by a value element. />
@@ -502,14 +485,33 @@ location <"Singapore">
 :full name: "Paul Moore Parks"
 ```
 
+If a keyword needs to include whitespace or any other character besides [A-Z] or '_', it must be enclosed in keyword specifiers (':').
+
+```xfer
+{
+    :first name: "Alice"
+    :last name: "Smith"
+}
+```
+
+If, for some reason, a keyword needs to contain colon characters or explicit-syntax keyword delimiters, it must be enclosed in explicit delimiters.
+
+```xfer
+{
+    </ Why you would do this, I don't know, but I've been in software long enough to see similar things. />
+    <:first name::> "Alice"
+    <:last name::> "Smith"
+}
+```
+
 ### Object Element
 
 The Object element is used to represent a collection of key/value pairs.
 
 * **Specifiers:** { (Left Curly Bracket, U+007B) and } (Right Curly Bracket, U+007D)
-* **Maximal Delimiters:** <{ and }>
-* **Minimal Syntax:** Enclose the object in opening and closing curly brackets.
-* **Bare Syntax:** Not supported
+* **Explicit Syntax:** Enclose the content in <{ and }> delimiters.
+* **Compact Syntax:** Enclose the object in opening and closing curly brackets.
+* **Implicit Syntax:** Not supported
 
 ```xfer
 </ Objects consist of key/value pairs. />
@@ -524,9 +526,9 @@ object {
 The Array element is used to represent a collection of elements of the same type.
 
 * **Specifiers:** [ (Left Square Bracket, U+005B) and ] (Right Square Bracket, U+005D)
-* **Maximal Delimiters:** <[ and ]>
-* **Minimal Syntax:** Enclose the array in opening and closing square brackets.
-* **Bare Syntax:** Not supported
+* **Explicit Syntax:** Enclose the content in <[ and ]> delimiters.
+* **Compact Syntax:** Enclose the array in opening and closing square brackets.
+* **Implicit Syntax:** Not supported
 
 ```xfer
 </ Arrays may only hold a single type of element. />
@@ -539,9 +541,9 @@ The Array element is used to represent a collection of elements of the same type
 The Property Bag element is used to represent a collection of values of any type.
 
 * **Specifiers:** ( (Left Parenthesis, U+0028) and ) (Right Parenthesis, U+0029)
-* **Maximal Delimiters:** <( and )>
-* **Minimal Syntax:** Enclose the property bag in opening and closing parentheses.
-* **Bare Syntax:** Not supported
+* **Explicit Syntax:** Enclose the content in <( and )> delimiters.
+* **Compact Syntax:** Enclose the property bag in opening and closing parentheses.
+* **Implicit Syntax:** Not supported
 
 ```xfer
 </ Property bags are a collection of values of any type, analogous to JSON arrays. />

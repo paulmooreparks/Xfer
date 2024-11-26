@@ -12,7 +12,7 @@ public class DoubleElement : NumericElement<double> {
     public const char ClosingMarker = OpeningMarker;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningMarker, ClosingMarker);
 
-    public DoubleElement(double value, int markerCount = 1, ElementStyle style = ElementStyle.Minimized) 
+    public DoubleElement(double value, int markerCount = 1, ElementStyle style = ElementStyle.Compact) 
         : base(value, ElementName, new ElementDelimiter(OpeningMarker, ClosingMarker, markerCount, style)) {
     }
 }

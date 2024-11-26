@@ -11,7 +11,7 @@ public class KeywordElement : TextElement {
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public KeywordElement(string text, int specifierCount = 1, ElementStyle style = ElementStyle.Bare) : 
+    public KeywordElement(string text, int specifierCount = 1, ElementStyle style = ElementStyle.Implicit) : 
         base(text, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
     }
 }

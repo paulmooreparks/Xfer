@@ -11,7 +11,7 @@ public class ElementDelimiter
     public char OpeningSpecifier { get; }
     public char ClosingSpecifier { get; }
     public int SpecifierCount { get; set; }
-    public ElementStyle Style { get; } = ElementStyle.Normal;
+    public ElementStyle Style { get; } = ElementStyle.Explicit;
 
     public string Opening { get; }
     public string Closing { get; }
@@ -25,11 +25,11 @@ public class ElementDelimiter
     {
     }
 
-    public ElementDelimiter(char openingSpecifier, char closingSpecifier, ElementStyle elementStyle = ElementStyle.Normal) : this(openingSpecifier, closingSpecifier, 1, elementStyle)
+    public ElementDelimiter(char openingSpecifier, char closingSpecifier, ElementStyle elementStyle = ElementStyle.Explicit) : this(openingSpecifier, closingSpecifier, 1, elementStyle)
     {
     }
 
-    public ElementDelimiter(char openingSpecifier, char closingSpecifier, int specifierCount, ElementStyle style = ElementStyle.Normal)
+    public ElementDelimiter(char openingSpecifier, char closingSpecifier, int specifierCount, ElementStyle style = ElementStyle.Explicit)
     {
         if (specifierCount < 1)
         {

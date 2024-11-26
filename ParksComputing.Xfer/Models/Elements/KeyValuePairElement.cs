@@ -33,7 +33,7 @@ public class KeyValuePairElement : TypedElement<Element> {
     public override string ToXfer() {
         var sb = new StringBuilder();
         sb.Append(KeyElement.ToXfer());
-        if (Value is KeyValuePairElement || Value.Delimiter.Style == ElementStyle.Bare) {
+        if (Value is KeyValuePairElement || Value.Delimiter.Style == ElementStyle.Implicit) {
             sb.Append(' ');
         }
         sb.Append(Value.ToXfer());

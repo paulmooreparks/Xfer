@@ -12,7 +12,7 @@ public class DecimalElement : NumericElement<decimal> {
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public DecimalElement(decimal value, int specifierCount = 1, ElementStyle style = ElementStyle.Minimized) 
+    public DecimalElement(decimal value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact) 
         : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) 
     {
     }

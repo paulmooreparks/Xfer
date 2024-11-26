@@ -15,17 +15,17 @@ public class BooleanElement : TypedElement<bool> {
     public static readonly string TrueValue = "true";
     public static readonly string FalseValue = "false";
 
-    public BooleanElement(bool value, int specifierCount = 1, ElementStyle style = ElementStyle.Minimized)
+    public BooleanElement(bool value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
         : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
     }
 
     public override string ToXfer() {
         var value = Value ? TrueValue : FalseValue;
 
-        if (Delimiter.Style == ElementStyle.Bare) {
+        if (Delimiter.Style == ElementStyle.Implicit) {
             return $"{value} ";
         }
-        if (Delimiter.Style == ElementStyle.Minimized) {
+        if (Delimiter.Style == ElementStyle.Compact) {
             return $"{Delimiter.OpeningSpecifier}{value} ";
         }
         return $"{Delimiter.Opening}{value}{Delimiter.Closing}";

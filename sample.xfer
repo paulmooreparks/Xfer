@@ -1,5 +1,5 @@
 ﻿<!
-    message_id `<|COMPUTERNAME|>`
+    message_id '<|COMPUTERNAME|>'
 !>
 {
     </ Why you would do this, I don't know, but I've been in software long enough to see similar things. />
@@ -22,8 +22,8 @@ elements of any type. />
 <"Hello, Xfer!">
 
 </ An evaluated element evaluates its embedded elements. The following will render as "I ❤︎ Xfer 😀". />
-` I <\$2764\><\$fe0e\> Xfer <\$1F600\> `
-`<\$1F468\>`
+' I <\$2764\><\$fe0e\> Xfer <\$1F600\> '
+'<\$1F468\>'
 " I <\$2764\><\$fe0e\> Xfer <\$1F600\> "
 
 </ An example of embedding a string element and a comment inside an Xfer string. />
@@ -34,26 +34,26 @@ elements of any type. />
 </// A comment with <// a comment </ inside another comment /> //>. ///>
 
 <"A string may contain character elements<\$20\>inside of it, which will not be parsed.">
-<`When character elements are inside an evaluated<\$20\>element, they are parsed`>
-<``An eval element may contain <`another eval`> if its specifiers are repeated``>
-<`Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) may also be embedded in eval elements, and their evaluated results will become part of the rendered value.`>
+<'When character elements are inside an evaluated<\$20\>element, they are parsed'>
+<''An eval element may contain <'another eval'> if its specifiers are repeated''>
+<'Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) may also be embedded in eval elements, and their evaluated results will become part of the rendered value.'>
 
 {
     string "value"  </ String specifier is " />
     character \65  </ Character specifier is \ />
     boolean ~true  </ Boolean specifier is ~ />
     integer #42  </ Integer specifier is # />
-    bareInteger 42  </ Bare integers are rendered as integers. />
-    bareHexInteger $F00D  </ Bare hex integers are rendered as hex integers. />
-    bareBinaryInteger %10101010  </ Bare binary integers are rendered as binary integers. />
+    implicitInteger 42  </ Implicit integers are rendered as integers. />
+    implicitHexInteger $F00D  </ Implicit hex integers are rendered as hex integers. />
+    implicitBinaryInteger %10101010  </ Implicit binary integers are rendered as binary integers. />
     long &5000000000  </ Long specifier is & />
     hexLongInteger &$BAADF00D  </ Hex numeric values are preceded by $ />
     binaryInteger #%10101010  </ Binary numeric values are preceded by % />
     double ^3.1415926535  </ Double specifier is ^ />
     decimal *123.45  </ Decimal specifier is * />
     date @2019-01-01  </ Date specifier is @ />
-    placeholder `<|USERPROFILE|>`  </ Placeholder specifier is | />
-    evalString <`Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><``as<\$20\>is``>.`>  </ Evaluated element specifier is ` />
+    placeholder '<|USERPROFILE|>'  </ Placeholder specifier is | />
+    evalString <'Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><''as<\$20\>is''>.'>  </ Evaluated element specifier is ' />
     nullValue?
 
     array [
@@ -83,7 +83,7 @@ elements of any type. />
 }
 
 </ We are able to round-trip the minified output of the parser. />
-{string"value"character\65 boolean~true integer#42 long&5000000000 hexLongInteger&3131961357 binaryInteger#170 double^3.1415926535 decimal*123.45 date@2019-01-01T08:00:00 placeholder`C:\Users\paul`evalString`Inner elements are evaluated 1 at a time and rendered as is.`array[#1 #2 #3]object{key"value"boolean~false}propertyBag("value"#123 ~true @2019-02-02T08:00:00)}
+{string"value"character\65 boolean~true integer#42 long&5000000000 hexLongInteger&3131961357 binaryInteger#170 double^3.1415926535 decimal*123.45 date@2019-01-01T08:00:00 placeholder'C:\Users\paul'evalString'Inner elements are evaluated 1 at a time and rendered as is.'array[#1 #2 #3]object{key"value"boolean~false}propertyBag("value"#123 ~true @2019-02-02T08:00:00)}
 
 (
     </ Most elements may pull their values from a placeholder. />
@@ -92,7 +92,7 @@ elements of any type. />
     </ A key-value pair element may have a key/value pair as a value. />
     keyValuePair key "value"
 
-    `What if an eval element contains a comment?</ The comment is removed./>`
+    'What if an eval element contains a comment?</ The comment is removed./>'
 
     "What if an string element contains a comment?</ The comment is retained./>"
 )

@@ -11,10 +11,10 @@ public abstract class TextElement : TypedElement<string> {
     }
 
     public override string ToXfer() {
-        if (Delimiter.Style == ElementStyle.Bare) {
+        if (Delimiter.Style == ElementStyle.Implicit) {
             return $"{Value}";
         }
-        if (Delimiter.Style == ElementStyle.Minimized) {
+        if (Delimiter.Style == ElementStyle.Compact) {
             return $"{Delimiter.MinOpening}{Value}{Delimiter.MinClosing}";
         }
         return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";

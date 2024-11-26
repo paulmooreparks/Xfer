@@ -11,7 +11,7 @@ internal class NullElement : TypedElement<object?> {
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public NullElement(ElementStyle style = ElementStyle.Minimized)
+    public NullElement(ElementStyle style = ElementStyle.Compact)
         : base(null, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style)) {
     }
 
