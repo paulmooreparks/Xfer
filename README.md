@@ -8,6 +8,12 @@ This project is still in its infancy and is quite experimental, even exploratory
 
 That said, I do plan to make the code professional-grade in the future, and I want to add implementations in other languages (Java, Rust, C++, JavaScript, and TypeScript are on my list). If you want to contribute, please [let me know](mailto:paul@parkscomputing.com). I'd love to have your help.
 
+## Design Goals
+* **Explicit Types**: All values are explicitly typed.
+* **No Commas**: Xfer allows for objects and arrays to be defined without any separator characters between elements.
+* **No Escaping**: Xfer does not require escaping of special characters in values. Instead, values are enclosed in unique delimiters that eliminate the need for escaping.
+* **Nullable Values**: Xfer supports null values only for types that are defined as nullable.
+
 ## Xfer and JSON Compared
 
 Here's a simple example of a JSON document:
@@ -85,12 +91,6 @@ The main exception to this rule is the comment element. Comments are always encl
 </ This is a comment. />
 <// Comments may enclose </other comments/> if the enclosing specifiers are repeated. //>
 ```
-
-## Design Goals
-* **Explicit Types**: All values are explicitly typed.
-* **No Commas**: Xfer allows for objects and arrays to be defined without any separator characters between elements.
-* **No Escaping**: Xfer does not require escaping of special characters in values. Instead, values are enclosed in unique delimiters that eliminate the need for escaping.
-* **Nullable Values**: Xfer supports null values only for types that are defined as nullable.
 
 ## Features of Xfer
 * [Nested Elements](#nested-elements)
