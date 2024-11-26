@@ -10,14 +10,29 @@ public class ElementDelimiter
 {
     public char OpeningSpecifier { get; }
     public char ClosingSpecifier { get; }
-    public int SpecifierCount { get; set; }
-    public ElementStyle Style { get; } = ElementStyle.Explicit;
 
-    public string Opening { get; }
-    public string Closing { get; }
+    private int _specifierCount;
+    public int SpecifierCount { 
+        get => _specifierCount;
+        set {
+            _specifierCount = value;
 
-    public string MinOpening { get; }
-    public string MinClosing { get; } 
+            var repeatedOpening = new string(OpeningSpecifier, _specifierCount);
+            var repeatedClosing = new string(ClosingSpecifier, _specifierCount);
+
+            Opening = "<" + repeatedOpening;
+            Closing = repeatedClosing + ">";
+            MinOpening = repeatedOpening;
+            MinClosing = repeatedClosing;
+        }
+    }
+    public ElementStyle Style { get; set;  } = ElementStyle.Explicit;
+
+    public string Opening { get; protected set; }
+    public string Closing { get; protected set; }
+
+    public string MinOpening { get; protected set; }
+    public string MinClosing { get; protected set; }
 
     public ElementDelimiter() : this(default, default, 1) { }
 
@@ -39,13 +54,13 @@ public class ElementDelimiter
         ValidateSpecifier(openingSpecifier, nameof(openingSpecifier));
         ValidateSpecifier(closingSpecifier, nameof(closingSpecifier));
 
+        Style = style;
         OpeningSpecifier = openingSpecifier;
         ClosingSpecifier = closingSpecifier;
         SpecifierCount = specifierCount;
-        Style = style;
 
-        var repeatedOpening = new string(openingSpecifier, specifierCount);
-        var repeatedClosing = new string(closingSpecifier, specifierCount);
+        var repeatedOpening = new string(openingSpecifier, SpecifierCount);
+        var repeatedClosing = new string(closingSpecifier, SpecifierCount);
 
         Opening = "<" + repeatedOpening;
         Closing = repeatedClosing + ">";

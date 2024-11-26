@@ -8,11 +8,7 @@ public static class CharExtensions {
         return char.IsLetterOrDigit(c) || c == '_';
     }
 
-    public static bool IsKeywordLeadingChar(this char c) {
-        return char.IsLetter(c) || c == '_';
-    }
-
     public static bool IsIntegerLeadingChar(this char c) {
-        return char.IsNumber(c) || c == Element.HexadecimalPrefix || c == Element.BinaryPrefix;
+        return char.IsNumber(c) || c == Element.HexadecimalPrefix || c == Element.BinaryPrefix || c == '+' || c == '-';
     }
 }

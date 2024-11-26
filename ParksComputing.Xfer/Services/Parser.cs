@@ -11,7 +11,7 @@ namespace ParksComputing.Xfer.Services;
 settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
 
 public class Parser {
-    public static readonly string Version = "0.3.0";
+    public static readonly string Version = "0.4.0";
 
     public Parser() : this(Encoding.UTF8) { }
 
@@ -165,7 +165,7 @@ public class Parser {
     private Stack<ElementDelimiter> _delimStack = new();
 
     internal bool KeywordElementOpening(out int specifierCount) {
-        if (CurrentChar.IsKeywordLeadingChar()) {
+        if (KeywordElement.IsKeywordLeadingChar(CurrentChar)) {
             specifierCount = 1;
             LastElementRow = CurrentRow;
             LastElementColumn = CurrentColumn;

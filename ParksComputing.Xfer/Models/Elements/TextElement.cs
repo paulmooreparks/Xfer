@@ -1,13 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace ParksComputing.Xfer.Models.Elements;
 
 public abstract class TextElement : TypedElement<string> {
     public TextElement(string text, string name, ElementDelimiter delimiter) : base(text, name, delimiter) {
+    }
+
+    public override string Value {
+        get => base.Value;
+        set {
+            base.Value = value;
+            CheckAndUpdateDelimiterStyle();
+        }
+    }
+
+    protected int GetMaxConsecutiveSpecifiers(string value, string specifier) {
+        // Find all sequences of the specifier in the Value
+        int maxCount = 0;
+        int currentCount = 0;
+
+        foreach (char c in value) {
+            if (c == specifier[0]) {
+                currentCount++;
+            }
+            else {
+                maxCount = Math.Max(maxCount, currentCount);
+                currentCount = 0;
+            }
+        }
+
+        // Final check in case the last sequence is the longest
+        return Math.Max(maxCount, currentCount);
+    }
+
+    protected virtual void CheckAndUpdateDelimiterStyle() {
+        int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.Closing);
+        Delimiter.SpecifierCount = maxConsecutiveSpecifiers + 1;
+
+        if (Value.Last() == Delimiter.ClosingSpecifier) {
+            Delimiter.Style = ElementStyle.Explicit;
+        }
+        else {
+            Delimiter.Style = ElementStyle.Compact;
+        }
     }
 
     public override string ToXfer() {

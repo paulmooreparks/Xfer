@@ -4,7 +4,7 @@ _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.c
 
 Xfer is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. 
 
-This project is still in its infancy and is quite experimental, even exploratory. The code you'll find in this repository is also experimental. So far, I've built an [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer/Models/Elements), a [parser](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/Services/Parser.cs), and a [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/XferConverter.cs) as part of my [.NET Xfer Library](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer), but at the moment this code is completely not ready for prime time. It's not even thread safe yet! About once a week I'll completely refactor everything, so don't get terribly attached to anything you see here. However, if you do like some of the ideas, please [let me know](mailto:paul@parkscomputing.com). I'm always open to feedback.
+This project is still in its infancy and is quite experimental, even exploratory. The code you'll find in this repository is also experimental. So far, I've built an [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer/Models/Elements), a [parser](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/Services/Parser.cs), and a [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/XferConverter.cs) as part of my [.NET Xfer Library](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer), but at the moment this code is completely not ready for prime time. It's not even thread safe yet! About once a week I'll completely refactor everything, so don't get terribly attached to code you see here. However, if you do like some of the ideas, please [let me know](mailto:paul@parkscomputing.com). I'm always open to feedback.
 
 That said, I do plan to make the code professional-grade in the future, and I want to add implementations in other languages (Java, Rust, C++, JavaScript, and TypeScript are on my list). If you want to contribute, please [let me know](mailto:paul@parkscomputing.com). I'd love to have your help.
 
@@ -25,7 +25,7 @@ Here's a simple example of a JSON document:
 }
 ```
 
-Following is the equivalent Xfer document, using [compact syntax](#compact-syntax) and [implicit syntax](#implicit-syntax). Notice the explicit, rather than implicit, data types.
+Following is the equivalent Xfer document, using [compact syntax](#compact-syntax) and [implicit syntax](#implicit-syntax).
 
 ```xfer
 {
@@ -46,7 +46,7 @@ Here is the same Xfer document with all unnecessary whitespace removed.
 {name"Alice"age 30 isMember~true scores[*85 *90 *78.5]profile{email"alice@example.com"joinedDate@2023-01-15T20:00:00}}
 ```
 
-## Basic Syntax
+## Xfer Syntax
 
 An Xfer document is composed of keywords and elements. An element typically begins and ends with angle brackets (< and >) unless using [compact syntax](#compact-syntax). The first character inside the angle brackets is the specifier character, which indicates the type of the element. The specifier character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.
 
@@ -70,16 +70,16 @@ In cases where the string contains a sequence that makes the closing ambiguous, 
 <"Alice said, "Boo!"">
 ```
 
-For non-string element types, only the leading specifier is necessary for almost all cases. For integers, even this may be omitted if the value is positive.
+For non-string element types, only the leading specifier is necessary for almost all cases. For integers, even this may be omitted.
 
 ```xfer
 42 </ Integer element />
-#-42 </ Integer element />
+-42 </ Integer element />
 &9223372036854775807 </ Long element />
 ~true </ Boolean element/>
 ```
 
-The main exception to this rule is the comment element. Comments always require angle brackets and one or more slash ('/') characters.
+The main exception to this rule is the comment element. Comments are always enclosed in angle brackets and one or more slash ('/') characters.
 
 ```xfer
 </ This is a comment. />
@@ -148,7 +148,7 @@ Comments may also be embedded in other elements, including other comments.
 
 ### Strict Typing
 
-While JSON builds on JavaScript's loose typing, Xfer is strictly typed. The basic types are string, character, integer, long integer, double, decimal, Boolean, and date/time. The type of an element is indicated by the specifier character in the opening delimter. The content of the element is then parsed according to the rules for that type.
+While JSON relies on JavaScript's type inference, Xfer requires explicit typing. The core types supported by Xfer are string, character, integer, long integer, double, decimal, Boolean, and date/time. Each element's type is indicated by a specifier character in its opening delimter, and its content is then parsed according to the rules for that type.
 
 ```xfer
 </ String element />
@@ -414,7 +414,7 @@ The Decimal element is used to represent a 128-bit decimal value.
 
 ### Character Element
 
-The Character element is used to represent a single character.
+The Character element is used to represent a character.
 
 * **Specifier:** \ (Reverse Solidus, or less formally, backslash, U+005C)
 * **Explicit Syntax:** Enclose the content in <\ and \> delimiters.
@@ -438,7 +438,7 @@ The Character element is used to represent a single character.
 
 ### Date/Time Element
 
-The Date/Time element is used to represent a date and time value.
+The Date/Time element is used to represent a date and time value. The value must be in ISO 8601 format.
 
 * **Specifier:** @ (Commercial At, U+0040)
 * **Explicit Syntax:** Enclose the content in <@ and @> delimiters.
@@ -453,7 +453,7 @@ The Date/Time element is used to represent a date and time value.
 
 ### Placeholder Element
 
-The Placeholder element is used to represent a placeholder that will be replaced with a value at runtime.
+The Placeholder element is used to represent a placeholder that will be replaced with a value at runtime. In the current implementation, this is always an environment variable, but future implementations may support other types of placeholders.
 
 * **Specifier:** | (Vertical Line, or less formally, pipe, U+007C)
 * **Explicit Syntax:** Enclose the content in <| and |> delimiters.
@@ -470,19 +470,18 @@ The Placeholder element is used to represent a placeholder that will be replaced
 
 The Keyword element is used to represent a keyword that is part of a key/value pair. The keyword may be used without any enclosing delimiters if it only consists of alphabetic characters in the ranges [a-z] or [A-Z] or the character '_'.
 
-If a keyword needs to include whitespace or any other character besides [A-Z] or '_', it must be enclosed in keyword specifiers (':').
+If a keyword needs to include whitespace or any other character besides [A-Z], [a-z], or '_', it must be enclosed in keyword specifiers (':').
 
 * **Specifier:** : (Colon, U+003A)
 * **Explicit Syntax:** Enclose the content in <: and :> delimiters.
 * **Compact Syntax:** Enclose the keyword in opening and closing colons.
-* **Implicit Syntax:** The keyword may be used without any enclosing delimiters. The keyword must be followed by whitespace or the opening delimiter of another element.
+* **Implicit Syntax:** The keyword may be used without any enclosing delimiters if it only contains [A-Z], [a-z], or '_'. The keyword must be followed by whitespace or the opening delimiter of another element.
 
 ```xfer
 </ A key/value pair consists of a keyword followed by a value element. />
 name <"Paul">
 age <#$36#>
 location <"Singapore">
-:full name: "Paul Moore Parks"
 ```
 
 If a keyword needs to include whitespace or any other character besides [A-Z] or '_', it must be enclosed in keyword specifiers (':').
@@ -494,11 +493,10 @@ If a keyword needs to include whitespace or any other character besides [A-Z] or
 }
 ```
 
-If, for some reason, a keyword needs to contain colon characters or explicit-syntax keyword delimiters, it must be enclosed in explicit delimiters.
+If, for some reason, a keyword needs to contain explicit-syntax keyword delimiters, it must be enclosed in explicit delimiters.
 
 ```xfer
 {
-    </ Why you would do this, I don't know, but I've been in software long enough to see similar things. />
     <:first name::> "Alice"
     <:last name::> "Smith"
 }
@@ -554,4 +552,8 @@ The Property Bag element is used to represent a collection of values of any type
     @2019-01-01
 )
 ```
+
+## Serialization
+
+The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/XferConverter.cs) makes use of the [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer/Models/Elements) to write object contents out to a stream or read object contents from a stream. The class is not yet thread safe, and it is not yet optimized for performance, but it's is already useful for demonstrating Xfer's capabilities.
 

@@ -13,20 +13,17 @@ namespace ParksComputing.Xferc.Commands;
 internal class SerializeCommand {
     public int Execute(string file) {
         var data = new SampleData {
-            Name = "John Doe",
+            Name = "John \"Mystery\" Doe",
             Age = 42,
             CreatedAt = DateTime.UtcNow,
-            Description = "This is a description.",
+            Description = "Serializing Xfer makes me <\\$1F600\\>",
             ints = new int[] { 1, 2, 3 },
             strings = new string[] { "one", "two", "three" },
-            bag_o_bits = new List<object> { "one", 2, 3.14 }
+            bag_o_bits1 = new List<object> { "one", 2, 3.14 }
         };
 
         string xferDocument = XferConvert.Serialize(data);
         Console.WriteLine(xferDocument);
-
-        var xfer = data.ToXfer();
-        Console.WriteLine(xfer);
 
         var deserializedData = XferConvert.Deserialize<SampleData>(xferDocument);
         Console.WriteLine(deserializedData.Name);
@@ -35,25 +32,24 @@ internal class SerializeCommand {
         Console.WriteLine(deserializedData.Description);
         Console.WriteLine(string.Join(", ", deserializedData.ints));
         Console.WriteLine(string.Join(", ", deserializedData.strings));
-        Console.WriteLine(string.Join(", ", deserializedData.bag_o_bits));
+        Console.WriteLine(string.Join(", ", deserializedData.bag_o_bits1));
 
         return Result.Success;
     }
 }
 
 public class SampleData {
+    [XferProperty("Full name:")]
     public string Name { get; set; } = string.Empty;
 
-    [XferProperty]
     public int Age { get; set; }
 
-    [XferProperty("created_at")]
     public DateTime CreatedAt { get; set; }
 
-    [XferLiteral]
+    [XferEvaluated]
     public string? Description { get; set; }
 
     public int[] ints { get; set; } = [];
     public string[] strings { get; set; } = [];
-    public List<object> bag_o_bits { get; set; } = new List<object>() { };
+    public List<object> bag_o_bits1 { get; set; } = new List<object>() { };
 }

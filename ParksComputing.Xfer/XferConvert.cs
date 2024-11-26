@@ -13,13 +13,13 @@ public class XferConvert {
 
         foreach (var property in type.GetProperties()) {
             var attribute = property.GetCustomAttribute<XferPropertyAttribute>();
-            var literalAttribute = property.GetCustomAttribute<XferLiteralAttribute>();
+            var evalAttribute = property.GetCustomAttribute<XferEvaluatedAttribute>();
 
             var name = attribute?.Name ?? property.Name;
             var value = property.GetValue(o);
 
             if (value != null) {
-                if (literalAttribute != null) {
+                if (evalAttribute != null) {
                     obj.AddOrUpdate(new KeyValuePairElement(new KeywordElement(name), new EvaluatedElement(value.ToString() ?? string.Empty)));
                 }
                 else {
