@@ -18,22 +18,30 @@ public class XferConvert {
             var name = attribute?.Name ?? property.Name;
             var value = property.GetValue(o);
 
-            if (value != null) {
-                if (evalAttribute != null) {
-                    obj.AddOrUpdate(new KeyValuePairElement(new KeywordElement(name), new EvaluatedElement(value.ToString() ?? string.Empty)));
+            if (evalAttribute != null) {
+                Element element;
+
+                if (value is null) {
+                    element = new NullElement();
                 }
                 else {
-                    Element element = SerializeValue(value);
-                    obj.AddOrUpdate(new KeyValuePairElement(new KeywordElement(name), element));
+                    element = new EvaluatedElement(value.ToString() ?? string.Empty);
                 }
+
+                obj.AddOrUpdate(new KeyValuePairElement(new KeywordElement(name), element));
+            }
+            else {
+                Element element = SerializeValue(value);
+                obj.AddOrUpdate(new KeyValuePairElement(new KeywordElement(name), element));
             }
         }
 
         return obj.ToXfer();
     }
 
-    private static Element SerializeValue(object value) {
+    private static Element SerializeValue(object? value) {
         return value switch {
+            null => new NullElement(),
             int intValue => new IntegerElement(intValue),
             long longValue => new LongElement(longValue),
             bool boolValue => new BooleanElement(boolValue),
@@ -50,9 +58,40 @@ public class XferConvert {
             string[] stringArray => SerializeStringArray(stringArray),
             object[] objectArray => new PropertyBagElement(objectArray.Select(SerializeValue)),
             IEnumerable<object> list => new PropertyBagElement(list.Select(SerializeValue)),
-            object objectValue => new EvaluatedElement(objectValue.ToString() ?? string.Empty),
-            _ => throw new NotSupportedException($"Type '{value.GetType().Name}' is not supported")
+            object objectValue => SerializeObject(objectValue)
         };
+    }
+
+    private static ObjectElement SerializeObject(object o) {
+        var type = o.GetType();
+        var objElement = new ObjectElement();
+
+        foreach (var property in type.GetProperties()) {
+            var attribute = property.GetCustomAttribute<XferPropertyAttribute>();
+            var evalAttribute = property.GetCustomAttribute<XferEvaluatedAttribute>();
+
+            var name = attribute?.Name ?? property.Name;
+            var value = property.GetValue(o);
+
+            if (evalAttribute != null) {
+                Element element;
+
+                if (value is null) {
+                    element = new NullElement();
+                }
+                else {
+                    element = new EvaluatedElement(value.ToString() ?? string.Empty);
+                }
+
+                objElement.AddOrUpdate(new KeyValuePairElement(new KeywordElement(name), element));
+            }
+            else {
+                Element element = SerializeValue(value);
+                objElement.AddOrUpdate(new KeyValuePairElement(new KeywordElement(name), element));
+            }
+        }
+
+        return objElement;
     }
 
     private static TypedArrayElement<IntegerElement> SerializeArray(int[] intArray) {
@@ -126,8 +165,13 @@ public class XferConvert {
     }
 
     public static T Deserialize<T>(string xfer) where T : new() {
-        var obj = new T();
+        var instance = new T();
         var type = typeof(T);
+
+        if (instance == null) {
+            throw new InvalidOperationException($"Could not create an instance of type {type.Name}.");
+        }
+
         var properties = type.GetProperties();
         var propertyMap = new Dictionary<string, PropertyInfo>();
 
@@ -142,56 +186,19 @@ public class XferConvert {
 
         var first = document.Root.Values.First();
 
-        if (first is ObjectElement propertyBag) {
-            foreach (var element in propertyBag.Values) {
+        if (first is ObjectElement objectElement) {
+            foreach (var element in objectElement.Values) {
                 if (propertyMap.TryGetValue(element.Key, out var property)) {
                     object? value = DeserializeValue(element.Value.Value, property.PropertyType);
-                    property.SetValue(obj, value);
+                    property.SetValue(instance, value);
                 }
             }
         }
 
-        return obj;
+        return instance;
     }
 
     private static object? DeserializeValue(Element element, Type targetType) {
-        if (targetType.IsArray) {
-            if (element is ArrayElement arrayElement) {
-                var elementType = targetType.GetElementType();
-                if (elementType == null) {
-                    throw new InvalidOperationException($"Unable to determine element type for array.");
-                }
-
-                var values = new List<object?>();
-                foreach (var item in arrayElement.Values) {
-                    values.Add(DeserializeValue(item, elementType));
-                }
-
-                var array = Array.CreateInstance(elementType, values.Count);
-                for (int i = 0; i < values.Count; i++) {
-                    array.SetValue(values[i], i);
-                }
-
-                return array;
-            }
-            else {
-                throw new InvalidOperationException($"Expected {nameof(ArrayElement)} for array deserialization.");
-            }
-        }
-
-        if (typeof(IEnumerable<object>).IsAssignableFrom(targetType)) {
-            if (element is PropertyBagElement propertyBagElement) {
-                var values = new List<object?>();
-                foreach (var item in propertyBagElement.Values) {
-                    values.Add(DeserializeValue(item, typeof(object)));
-                }
-                return values;
-            }
-            else {
-                throw new InvalidOperationException($"Expected {nameof(PropertyBagElement)} for IEnumerable deserialization.");
-            }
-        }
-
         return element switch {
             IntegerElement intElement when targetType == typeof(int) => intElement.Value,
             IntegerElement intElement when targetType == typeof(object) => intElement.Value,
@@ -207,9 +214,68 @@ public class XferConvert {
             DateElement dateElement when targetType == typeof(object) => dateElement.Value,
             StringElement stringElement when targetType == typeof(string) => stringElement.Value,
             StringElement stringElement when targetType == typeof(object) => stringElement.Value,
-            EvaluatedElement literalElement when targetType == typeof(string) => literalElement.Value,
-            EvaluatedElement literalElement when targetType == typeof(object) => literalElement.Value,
+            CharacterElement charElement when targetType == typeof(string) => charElement.Value,
+            CharacterElement charElement when targetType == typeof(object) => charElement.Value,
+            NullElement nullElement when targetType == typeof(string) => nullElement.Value,
+            NullElement nullElement when targetType == typeof(object) => nullElement.Value,
+            EvaluatedElement evalElement when targetType == typeof(string) => evalElement.Value,
+            EvaluatedElement evalElement when targetType == typeof(object) => evalElement.Value,
+            PlaceholderElement phElement when targetType == typeof(string) => phElement.Value,
+            PlaceholderElement phElement when targetType == typeof(object) => phElement.Value,
+            ArrayElement arrayElement => DeserializeArray(arrayElement, targetType),
+            PropertyBagElement propertyBagElement => DeserializePropertyBag(propertyBagElement, targetType),
+            ObjectElement objectElement => DeserializeObject(objectElement, targetType),
             _ => throw new NotSupportedException($"Type '{targetType.Name}' is not supported for deserialization")
         };
+    }
+
+    private static object DeserializeArray(ArrayElement arrayElement, Type targetType) {
+        var elementType = targetType.GetElementType();
+        if (elementType == null) {
+            throw new InvalidOperationException($"Unable to determine element type for array.");
+        }
+
+        var values = new List<object?>();
+        foreach (var item in arrayElement.Values) {
+            values.Add(DeserializeValue(item, elementType));
+        }
+
+        var array = Array.CreateInstance(elementType, values.Count);
+
+        for (int i = 0; i < values.Count; i++) {
+            array.SetValue(values[i], i);
+        }
+
+        return array;
+    }
+
+    private static object DeserializePropertyBag(PropertyBagElement propertyBagElement, Type targetType) {
+        var values = new List<object?>();
+        foreach (var item in propertyBagElement.Values) {
+            values.Add(DeserializeValue(item, typeof(object)));
+        }
+        return values;
+    }
+
+    private static object DeserializeObject(ObjectElement objectElement, Type targetType) {
+        var instance = Activator.CreateInstance(targetType);
+
+        if (instance == null) {
+            throw new InvalidOperationException($"Could not create an instance of type {targetType.Name}.");
+        }
+
+        var properties = targetType.GetProperties();
+
+        foreach (var prop in properties) {
+            var attribute = prop.GetCustomAttribute<XferPropertyAttribute>();
+            var propName = attribute?.Name ?? prop.Name;
+            var matchingElement = objectElement.Values.FirstOrDefault(kvp => kvp.Key == propName).Value;
+
+            if (matchingElement != null) {
+                var propValue = DeserializeValue(matchingElement.Value, prop.PropertyType);
+                prop.SetValue(instance, propValue);
+            }
+        }
+        return instance;
     }
 }

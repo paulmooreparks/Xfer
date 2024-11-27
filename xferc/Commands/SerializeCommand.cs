@@ -13,8 +13,7 @@ namespace ParksComputing.Xferc.Commands;
 internal class SerializeCommand {
     public int Execute(string file) {
         var data = new SampleData {
-            Name = "John \"Mystery\" Doe",
-            Age = 42,
+            Person = new Person { Name = null, Age = 42 },
             CreatedAt = DateTime.UtcNow,
             Description = "Serializing Xfer makes me <\\$1F600\\>",
             ints = new int[] { 1, 2, 3 },
@@ -26,8 +25,8 @@ internal class SerializeCommand {
         Console.WriteLine(xferDocument);
 
         var deserializedData = XferConvert.Deserialize<SampleData>(xferDocument);
-        Console.WriteLine(deserializedData.Name);
-        Console.WriteLine(deserializedData.Age);
+        Console.WriteLine(deserializedData.Person.Name);
+        Console.WriteLine(deserializedData.Person.Age);
         Console.WriteLine(deserializedData.CreatedAt);
         Console.WriteLine(deserializedData.Description);
         Console.WriteLine(string.Join(", ", deserializedData.ints));
@@ -38,11 +37,15 @@ internal class SerializeCommand {
     }
 }
 
-public class SampleData {
+public class Person {
     [XferProperty("Full name:")]
     public string Name { get; set; } = string.Empty;
 
     public int Age { get; set; }
+}
+
+public class SampleData {
+    public Person Person { get; set; } = new Person { Name = "Alice", Age = 30 };
 
     public DateTime CreatedAt { get; set; }
 

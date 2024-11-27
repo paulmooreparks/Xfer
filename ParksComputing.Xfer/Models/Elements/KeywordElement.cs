@@ -24,7 +24,7 @@ public class KeywordElement : TextElement {
         if (!Regex.IsMatch(Value, @"^[A-Za-z_][A-Za-z0-9_]*$")) {
             Delimiter.Style = ElementStyle.Compact;
 
-            if (Value.Last() == Delimiter.ClosingSpecifier) {
+            if (Value.Count() == 0 || Value.Last() == Delimiter.ClosingSpecifier) {
                 Delimiter.Style = ElementStyle.Explicit;
             }
         }

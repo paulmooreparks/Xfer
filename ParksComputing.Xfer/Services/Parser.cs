@@ -11,7 +11,7 @@ namespace ParksComputing.Xfer.Services;
 settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
 
 public class Parser {
-    public static readonly string Version = "0.4.0";
+    public static readonly string Version = "0.4.1";
 
     public Parser() : this(Encoding.UTF8) { }
 

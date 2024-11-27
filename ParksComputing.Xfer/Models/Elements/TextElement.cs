@@ -37,7 +37,7 @@ public abstract class TextElement : TypedElement<string> {
         int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.ClosingSpecifier);
         Delimiter.SpecifierCount = maxConsecutiveSpecifiers + 1;
 
-        if (Value.Last() == Delimiter.ClosingSpecifier) {
+        if (Value.Count() == 0 || Value.Last() == Delimiter.ClosingSpecifier) {
             Delimiter.Style = ElementStyle.Explicit;
         }
         else {
