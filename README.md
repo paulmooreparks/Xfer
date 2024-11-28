@@ -796,15 +796,17 @@ This grammar is also [in the repository](xfer.bnf).
 <property_bag_element_explicit> ::= <element_open> <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close> <element_close>
 <property_bag_element_compact> ::= <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close>
 
-<eval_text_element> ::= <eval_text_element_explicit> | <eval_text_element_compact>
-<eval_text_element_explicit> ::= <element_open> <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier> <element_close>
-<eval_text_element_compact> ::= <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier>
-
 <placeholder_element> ::= <placeholder_element_explicit> | <placeholder_element_compact>
 <placeholder_element_explicit> ::= <element_open> <placeholder_specifier> <opt_whitespace> <identifier> <opt_whitespace> <placeholder_specifier> <element_close>
 <placeholder_element_compact> ::= <placeholder_specifier> <opt_whitespace> <identifier> <opt_whitespace> <placeholder_specifier>
 
 <comment_element> ::= <element_open> <comment_specifier> <text> <comment_specifier> <element_close>
+
+<eval_text_element> ::= <eval_text_element_explicit> | <eval_text_element_compact>
+<eval_text_element_explicit> ::= <element_open> <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier> <element_close>
+<eval_text_element_compact> ::= <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier>
+
+<eval_content> ::= (<text> | <string_element_explicit> | <character_element_explicit> | <integer_element_explicit> | <long_element_explicit> | <double_element_explicit> | <decimal_element_explicit> | <boolean_element_explicit> | <datetime_element_explicit> | <placeholder_element_explicit> | <eval_text_element_explicit>)
 
 <element_open> ::= "<"
 <element_close> ::= ">"
@@ -855,8 +857,6 @@ This grammar is also [in the repository](xfer.bnf).
 <boolean> ::= "true" | "false"
 
 <datetime> ::= [0-9]+ "-" [0-9]+ "-" [0-9]+ (("T" | "t") [0-9]+ ":" [0-9]+ (":" [0-9]+)?)? | <placeholder_element>
-
-<eval_content> ::= (<body_element> | <text>)*
 
 <identifier> ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
 
