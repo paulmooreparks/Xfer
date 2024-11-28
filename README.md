@@ -804,6 +804,9 @@ This grammar is not 100% accurate, but it's close enough to give you an idea of 
 
 <comment_element> ::= <element_open> <comment_specifier> <text> <comment_specifier> <element_close>
 
+<element_open> ::= "<"
+<element_close> ::= ">"
+
 <metadata_specifier> ::= "!"+
 <string_specifier> ::= "\""+
 <keyword_specifier> ::= ":"+
@@ -844,17 +847,17 @@ This grammar is not 100% accurate, but it's close enough to give you an idea of 
 <hexadecimal> ::= "$" ([0-9] | [A-F] | [a-f])+
 <binary> ::= "%" [0-1]+
 
-<element_open> ::= "<"
-<element_close> ::= ">"
-
-<identifier> ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
-/* The following rule isn't correct, but it's the best I can do with the tool I'm using for BNF validation. Consult the documentation for more. */
-<text> ::= ([A-Z] | [a-z] | [0-9] | "_" | <whitespace> | "!" | "\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "\\" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "/" | "]" | "^" | "`" | "{" | "|" | "}" | "~")+
 <opt_whitespace> ::= <whitespace>*
 <whitespace> ::= (" " | "\t" | "\n" | "\r")
 
 <boolean> ::= "true" | "false"
+
 <datetime> ::= [0-9]+ "-" [0-9]+ "-" [0-9]+ (("T" | "t") [0-9]+ ":" [0-9]+ (":" [0-9]+)?)? | <placeholder_element>
 
 <eval_content> ::= (<body_element> | <text>)*
+
+<identifier> ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
+
+/* The following rule isn't correct, but it's the best I can do with the tool I'm using for BNF validation. Consult the documentation for more. */
+<text> ::= ([A-Z] | [a-z] | [0-9] | "_" | <whitespace> | "!" | "\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "\\" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "/" | "]" | "^" | "`" | "{" | "|" | "}" | "~")*
 ```
