@@ -3,7 +3,7 @@
 namespace ParksComputing.Xfer.Models.Elements;
 public class KeywordElement : TextElement {
     public static readonly string ElementName = "keyword";
-    public const char OpeningSpecifier = ':';
+    public const char OpeningSpecifier = '=';
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 

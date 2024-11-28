@@ -1,8 +1,6 @@
 ﻿# The Xfer Data-Interchange Format
 
-![Version](https://img.shields.io/badge/version-0.4.1-blue)
-
-**This document describes version 0.4.1 of Xfer.**
+![Version](https://img.shields.io/badge/version-0.5.0-blue)
 
 _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.com/item?id=42114543). Thank you so much for all the great input and discussion!_
 
@@ -53,7 +51,7 @@ Following is the equivalent Xfer document, using [compact syntax](#compact-synta
 Here is the same Xfer document with all unnecessary whitespace removed.
 
 ```xfer
-{name"Alice"age 30 isMember~true scores[*85 *90 *78.5]profile{email"alice@example.com"joinedDate@2023-01-15T20:00:00}}
+{name"Alice"age 30 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00}}
 ```
 
 ## Xfer Syntax
@@ -383,7 +381,7 @@ The Integer element is used to represent a 32-bit signed integer value.
 * **Specifier:** `#` (Number Sign, U+0023)
 * **Explicit Syntax:** Enclose the content in `<#` and `#>` delimiters.
 * **Compact Syntax:** Follow the specifier with the content.
-* **Implicit Syntax:** The integer value may be used without any enclosing delimiters. The value must be followed by whitespace or the closing delimiter of an enclosing object, array, or property bag.
+* **Implicit Syntax:** The integer value may be used without any enclosing delimiters. The value must be followed by whitespace, the opening delimiter of another element, or the closing delimiter of an enclosing object, array, or property bag.
 
 Integer values are decimal by default, but they may also be hexadecimal when the value is preceded by `$` or binary when the value is preceded by `%`.
 
@@ -547,9 +545,9 @@ The Keyword element is used to represent a keyword that is part of a key/value p
 
 If a keyword needs to include whitespace or any other character besides [A-Z], [a-z], [0-9], or '_', it must be enclosed in keyword specifiers (':').
 
-* **Specifier:** `:` (Colon, U+003A)
-* **Explicit Syntax:** Enclose the content in `<:` and `:>` delimiters.
-* **Compact Syntax:** Enclose the content in opening and closing colons.
+* **Specifier:** `=` (Equal Sign, U+003D)
+* **Explicit Syntax:** Enclose the content in `<=` and `=>` delimiters.
+* **Compact Syntax:** Enclose the content in opening and closing equal signs.
 * **Implicit Syntax:** The keyword may be used without any enclosing delimiters if it only contains [A-Z], [a-z], [0-9], or '_' and it does not begin with [0-9]. The keyword must be followed by whitespace or the opening delimiter of another element.
 
 ```xfer
@@ -753,32 +751,32 @@ This grammar is also [in the repository](xfer.bnf).
 
 <character_element> ::= <character_element_explicit> | <character_element_compact>
 <character_element_explicit> ::= <element_open> <character_specifier> <opt_whitespace> <character_value> <opt_whitespace> <character_specifier> <element_close>
-<character_element_compact> ::= <character_specifier> <opt_whitespace> <character_value> <opt_whitespace> <character_specifier>
+<character_element_compact> ::= <character_specifier> <opt_whitespace> <character_value> <opt_whitespace>  (<element_open_specifier> | <whitespace>)+
 
 <integer_element> ::= <integer_element_explicit> | <integer_element_compact> | <integer_element_implicit>
 <integer_element_explicit> ::= <element_open> <integer_specifier> <opt_whitespace> <integer_value> <opt_whitespace> <integer_specifier> <element_close>
-<integer_element_compact> ::= <integer_specifier> <integer_value> <integer_specifier>?
+<integer_element_compact> ::= <integer_specifier> <integer_value> (<element_open_specifier> | <whitespace>)+
 <integer_element_implicit> ::= <integer_value>
 
 <long_element> ::= <long_element_explicit> | <long_element_compact>
 <long_element_explicit> ::= <element_open> <long_specifier> <opt_whitespace> <integer_value> <opt_whitespace> <long_specifier> <element_close>
-<long_element_compact> ::= <long_specifier> <integer_value> <long_specifier>?
+<long_element_compact> ::= <long_specifier> <integer_value> (<element_open_specifier> | <whitespace>)+
 
 <double_element> ::= <double_element_explicit> | <double_element_compact>
 <double_element_explicit> ::= <element_open> <opt_whitespace> <double_specifier> <opt_whitespace> <decimal_value> <double_specifier> <element_close>
-<double_element_compact> ::= <double_specifier> <decimal_value> <double_specifier>?
+<double_element_compact> ::= <double_specifier> <decimal_value> (<element_open_specifier> | <whitespace>)+
 
 <decimal_element> ::= <decimal_element_explicit> | <decimal_element_compact>
 <decimal_element_explicit> ::= <element_open> <decimal_specifier> <opt_whitespace> <decimal_value> <opt_whitespace> <decimal_specifier> <element_close>
-<decimal_element_compact> ::= <decimal_specifier> <opt_whitespace> <decimal_value> <opt_whitespace> <decimal_specifier>?
+<decimal_element_compact> ::= <decimal_specifier> <decimal_value> (<element_open_specifier> | <whitespace>)+
 
 <boolean_element> ::= <boolean_element_explicit> | <boolean_element_compact>
 <boolean_element_explicit> ::= <element_open> <boolean_specifier> <opt_whitespace> <boolean> <opt_whitespace> <boolean_specifier> <element_close>
-<boolean_element_compact> ::= <boolean_specifier> <boolean> <boolean_specifier>?
+<boolean_element_compact> ::= <boolean_specifier> <boolean> (<element_open_specifier> | <whitespace>)+
 
 <datetime_element> ::= <datetime_element_explicit> | <datetime_element_compact>
 <datetime_element_explicit> ::= <element_open> <datetime_specifier> <opt_whitespace> <datetime> <opt_whitespace> <datetime_specifier> <element_close>
-<datetime_element_compact> ::= <datetime_specifier> <datetime> <datetime_specifier>?
+<datetime_element_compact> ::= <datetime_specifier> <datetime> (<element_open_specifier> | <whitespace>)+
 
 <null_element> ::= <null_element_explicit> | <null_element_compact>
 <null_element_explicit> ::= <element_open> <null_specifier> <null_specifier> <element_close>
@@ -811,9 +809,11 @@ This grammar is also [in the repository](xfer.bnf).
 <element_open> ::= "<"
 <element_close> ::= ">"
 
+<element_open_specifier> ::= <element_open> | <metadata_specifier> | <string_specifier> | <keyword_specifier> | <character_specifier> | <integer_specifier> | <long_specifier> | <double_specifier> | <decimal_specifier> | <boolean_specifier> | <datetime_specifier> | <null_specifier> | <object_specifier_open> | <array_specifier_open> | <property_bag_specifier_open> | <comment_specifier> | <placeholder_specifier> | <eval_text_specifier>
+
 <metadata_specifier> ::= "!"+
 <string_specifier> ::= "\""+
-<keyword_specifier> ::= ":"+
+<keyword_specifier> ::= "="+
 <character_specifier> ::= "\\"+
 <integer_specifier> ::= "#"+
 <long_specifier> ::= "&"+
@@ -831,6 +831,9 @@ This grammar is also [in the repository](xfer.bnf).
 <comment_specifier> ::= "/"+
 <placeholder_specifier> ::= "|"+
 <eval_text_specifier> ::= "'"+
+
+<collection_open> ::= <object_specifier_open> | <array_specifier_open> | <property_bag_specifier_open>
+<collection_close> ::= <object_specifier_close> | <array_specifier_close> | <property_bag_specifier_close>
 
 <character_value> ::= <positive_integer>
     | <hexadecimal> | <binary>

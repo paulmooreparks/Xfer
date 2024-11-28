@@ -1,8 +1,8 @@
 ﻿EmptyString <"">
 NullProperty <??>
 
-{:full name:""John "Mystery" Doe""Age#42 :99:@2024-11-26T15:36:23 Description'Serializing Xfer makes me <\$1F600\>'ints[#1 #2 #3 ]strings["one""two""three"]bag_o_bits1("one"#2 ^3.14 )}
-:key:value
+{=full name=""John "Mystery" Doe""Age#42=99=@2024-11-26T15:36:23 Description'Serializing Xfer makes me <\$1F600\>'ints[#1#2#3]strings["one""two""three"]bag_o_bits1("one"#2^3.14)}
+=key=value
 123
 -123
 (456)
@@ -11,7 +11,7 @@ NullProperty <??>
 $41
 #<|NUMBER_OF_PROCESSORS|>
 """An empty string is represented by an empty pair of quotes ("")."""
-<{name"Alice"age 30 isMember~true scores<[*85 *90 *78.5]>profile<{email<"alice@example.com">joinedDate@2023-05-05T20:00:00 }>}>
+{name"Alice"age 30 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00}}
 </ The outermost element of an Xfer document is an implicit property-bag element. It may contain 
 elements of any type. />
 
@@ -73,10 +73,10 @@ elements of any type. />
         @2019-02-02
     ) </ Property bag specifiers are ( ) />
     
-    <:If a key in a key/value pair needs to contain more than a simple string, it can be wrapped in a pair of (that's 2) digraphs:>"value"
-    <:A key may even contain <"other elements">:> "value"
-    <::A key may contain a <:key element:> as long as the outer specifiers are repeated.::> "value"
-    <:123:> #123
+    <=If a key in a key/value pair needs to contain more than a simple string, it can be wrapped in a pair of (that's 2) digraphs=>"value"
+    <=A key may even contain <"other elements">=> "value"
+    <==A key may contain a <=key element=> as long as the outer specifiers are repeated.==> "value"
+    <=123=> #123
 }
 
 </ We are able to round-trip the minified output of the parser. />

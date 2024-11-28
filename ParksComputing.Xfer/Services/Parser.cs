@@ -11,7 +11,7 @@ namespace ParksComputing.Xfer.Services;
 settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
 
 public class Parser {
-    public static readonly string Version = "0.4.1";
+    public static readonly string Version = "0.5.0";
 
     public Parser() : this(Encoding.UTF8) { }
 
@@ -271,11 +271,32 @@ public class Parser {
         }
 
         var style = _delimStack.Peek().Style;
+        var closingSpecifier = _delimStack.Peek().ClosingSpecifier;
 
-        if (((style == ElementStyle.Compact || style == ElementStyle.Implicit) && char.IsWhiteSpace(CurrentChar)) || 
-            CurrentChar == ObjectElement.ClosingSpecifier || 
-            CurrentChar == ArrayElement.ClosingSpecifier || 
-            CurrentChar == PropertyBagElement.ClosingSpecifier) 
+        if ((style == ElementStyle.Compact || style == ElementStyle.Implicit) && 
+               (char.IsWhiteSpace(CurrentChar)
+            || CurrentChar == closingSpecifier
+            || CurrentChar == Element.ElementClosingSpecifier
+            || CurrentChar == KeywordElement.OpeningSpecifier
+            || CurrentChar == IntegerElement.OpeningSpecifier
+            || CurrentChar == LongElement.OpeningSpecifier
+            || CurrentChar == DecimalElement.OpeningSpecifier
+            || CurrentChar == DoubleElement.OpeningSpecifier
+            || CurrentChar == BooleanElement.OpeningSpecifier
+            || CurrentChar == DateElement.OpeningSpecifier
+            || CurrentChar == CharacterElement.OpeningSpecifier
+            || CurrentChar == EvaluatedElement.OpeningSpecifier
+            || CurrentChar == PlaceholderElement.OpeningSpecifier
+            || CurrentChar == NullElement.OpeningSpecifier
+            || CurrentChar == CommentElement.OpeningSpecifier
+            || CurrentChar == StringElement.OpeningSpecifier
+            || CurrentChar == ArrayElement.OpeningSpecifier
+            || CurrentChar == ObjectElement.OpeningSpecifier
+            || CurrentChar == PropertyBagElement.OpeningSpecifier
+            || CurrentChar == ObjectElement.ClosingSpecifier
+            || CurrentChar == ArrayElement.ClosingSpecifier
+            || CurrentChar == PropertyBagElement.ClosingSpecifier)
+            ) 
         {
             _delimStack.Pop();
             return true;
