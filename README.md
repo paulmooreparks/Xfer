@@ -863,5 +863,3 @@ This grammar is also [in the repository](xfer.bnf).
 /* The following rule isn't correct, but it's the best I can do with the tool I'm using for BNF validation. Consult the documentation for more. */
 <text> ::= ([A-Z] | [a-z] | [0-9] | "_" | <whitespace> | "!" | "\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "\\" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "/" | "]" | "^" | "`" | "{" | "|" | "}" | "~")*
 ```
-
-https://github.com/paulmooreparks/Xfer/blob/8e815398bc5b586354c26d46bf849c7af455f5c9/xfer.bnf
