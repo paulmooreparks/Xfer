@@ -295,7 +295,7 @@ This section describes the various Xfer element types.
 
 ### String Element
 
-The string element is used to contain text data. The contents of the element will be stored as entered, including any embedded elements, white space, line breaks, etc.
+The String element is used to contain text data. The contents of the element will be stored as entered, including any embedded elements, white space, line breaks, etc.
 
 * **Specifier:** `"` (Quotation Mark, U+0022)
 * **Explicit Syntax:** Enclose the content in `<"` and `">` delimiters.
@@ -306,6 +306,22 @@ The string element is used to contain text data. The contents of the element wil
 </ String element />
 <"Hello, World!"> </ Explicit syntax />
 "Hello, World!" </ Compact syntax />
+```
+
+A String element may contain any UTF-8 character, including whitespace, line breaks, and special characters. If the string contains a sequence that would make the closing of the element ambiguous, the specifiers in the outer delimiter must be repeated as many times as necessary to disambiguate the delimiters and explicit syntax may be required. 
+
+```xfer
+</ The specifiers below are repeated to allow for the embedded quotes. />
+""This string element contains "quoted" content.""
+
+</ Explicit syntax is required to disambiguate the closing delimiter from the ending quote character. />
+<"Alice said, "Boo!"">
+```
+A String element may also contain embedded elements, which will be rendered as entered.
+
+```xfer
+</ The following will render as " I <\$2764\><\$fe0e\> Xfer <\$1F600\> ". />
+' I <\$2764\><\$fe0e\> Xfer <\$1F600\> '
 ```
 
 ### Evaluated Text Element
@@ -329,6 +345,8 @@ Elements which may be embedded within an evaluated text element are as follows:
 * date/time
 * placeholder
 * other evaluated text elements
+
+An Evaluated Text element may contain the same text content as a String element, but it may also contain embedded elements.
 
 All elements embedded in an evaluated-text element which are intended to be evaluated must use [explicit syntax](#explicit-syntax).
 
@@ -437,7 +455,7 @@ The Decimal element is used to represent a 128-bit decimal value.
 
 ### Character Element
 
-The Character element is used to represent a character.
+The Character element is used to represent a character. These may be stand-alone elements, or they may be embedded in an [evaluated text element](#evaluated-text-element).
 
 * **Specifier:** `\` (Reverse Solidus, or less formally, backslash, U+005C)
 * **Explicit Syntax:** Enclose the content in `<\` and `\>` delimiters.
@@ -455,10 +473,28 @@ Character values are decimal by default, but they may also be hexadecimal when t
 
 </ Unicode codepoints may be used as well. The below example renders as '😀'. />
 \$1F600
+```
 
-</ Certain pre-defined keywords exist for characters as well. />
-<\nl\>
-<\tab\>
+Certain pre-defined keywords exist for characters as well.
+
+* `nul` - NUL (U+0000)
+* `cr` - Carriage return (U+000D)
+* `lf` - Line feed (U+000A)
+* `nl` - New line (platform-specific)
+* `tab` - Tab (U+0009)
+* `vtab` - Vertical tab (U+000B)
+* `bksp` - Backspace (U+0008)
+* `ff` - Form feed (U+000C)
+* `bel` - Bell (U+0007)
+* `quote` - `"` Quote (U+0022)
+* `apos` - `'` Apostrophe (U+0027)
+* `backslash` - `\` Backslash (U+005C)
+* `lt` - `<` Less than (U+003C)
+* `gt` - `>` Greater than (U+003E)
+
+```xfer
+<\gt\> </ Renders as '>' />
+<\tab\> </ Inserts a tab character />
 ```
 
 ### Date/Time Element
@@ -685,7 +721,7 @@ This grammar is not 100% accurate, but it's close enough to give you an idea of 
 
 <body_element> ::= <opt_whitespace> (
       <key_value_pair> 
-    | <string_element> 
+	| <string_element> 
     | <character_element> 
     | <integer_element>
     | <long_element>
@@ -700,7 +736,7 @@ This grammar is not 100% accurate, but it's close enough to give you an idea of 
     | <comment_element>
     | <placeholder_element>
     | <eval_text_element>
-    ) <opt_whitespace>
+	) <opt_whitespace>
 
 <string_element> ::= <string_element_explicit> | <string_element_compact> 
 <string_element_explicit> ::= <element_open> <string_specifier> <text> <string_specifier> <element_close>
@@ -727,12 +763,12 @@ This grammar is not 100% accurate, but it's close enough to give you an idea of 
 <long_element_compact> ::= <long_specifier> <integer_value> <long_specifier>?
 
 <double_element> ::= <double_element_explicit> | <double_element_compact>
-<double_element_explicit> ::= <element_open> <opt_whitespace> <double_specifier> <opt_whitespace> <signed_decimal> <double_specifier> <element_close>
-<double_element_compact> ::= <double_specifier> <signed_decimal> <double_specifier>?
+<double_element_explicit> ::= <element_open> <opt_whitespace> <double_specifier> <opt_whitespace> <decimal_value> <double_specifier> <element_close>
+<double_element_compact> ::= <double_specifier> <decimal_value> <double_specifier>?
 
 <decimal_element> ::= <decimal_element_explicit> | <decimal_element_compact>
-<decimal_element_explicit> ::= <element_open> <decimal_specifier> <opt_whitespace> <signed_decimal> <opt_whitespace> <decimal_specifier> <element_close>
-<decimal_element_compact> ::= <decimal_specifier> <opt_whitespace> <signed_decimal> <opt_whitespace> <decimal_specifier>?
+<decimal_element_explicit> ::= <element_open> <decimal_specifier> <opt_whitespace> <decimal_value> <opt_whitespace> <decimal_specifier> <element_close>
+<decimal_element_compact> ::= <decimal_specifier> <opt_whitespace> <decimal_value> <opt_whitespace> <decimal_specifier>?
 
 <boolean_element> ::= <boolean_element_explicit> | <boolean_element_compact>
 <boolean_element_explicit> ::= <element_open> <boolean_specifier> <opt_whitespace> <boolean> <opt_whitespace> <boolean_specifier> <element_close>
@@ -790,15 +826,17 @@ This grammar is not 100% accurate, but it's close enough to give you an idea of 
 <eval_text_specifier> ::= "'"+
 
 <character_value> ::= <positive_integer>
-                     | <hexadecimal>
-                     | <binary>
-                     | "nul" | "cr" | "lf" | "nl" | "tab" | "vtab"
-                     | "bksp" | "ff" | "bel" | "quote" | "apos"
-                     | "backslash" | "lt" | "gt"
+    | <hexadecimal> | <binary>
+    | "nul" | "cr" | "lf" | "nl" | "tab" | "vtab"
+    | "bksp" | "ff" | "bel" | "quote" | "apos"
+    | "backslash" | "lt" | "gt"
 
 <integer_value> ::= <signed_integer>
-                  | <hexadecimal>
-                  | <binary>
+    | <hexadecimal>
+    | <binary> 
+    | <placeholder_element>
+
+<decimal_value> ::= <signed_decimal> | <placeholder_element>
 
 <signed_integer> ::= ("+" | "-")? [0-9]+
 <signed_decimal> ::= ("+" | "-")? [0-9]+ "."+ [0-9]+
@@ -816,7 +854,7 @@ This grammar is not 100% accurate, but it's close enough to give you an idea of 
 <whitespace> ::= (" " | "\t" | "\n" | "\r")
 
 <boolean> ::= "true" | "false"
-<datetime> ::= [0-9]+ "-" [0-9]+ "-" [0-9]+ (("T" | "t") [0-9]+ ":" [0-9]+ (":" [0-9]+)?)?
+<datetime> ::= [0-9]+ "-" [0-9]+ "-" [0-9]+ (("T" | "t") [0-9]+ ":" [0-9]+ (":" [0-9]+)?)? | <placeholder_element>
 
 <eval_content> ::= (<body_element> | <text>)*
 ```
