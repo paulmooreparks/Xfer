@@ -712,6 +712,8 @@ The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer
 
 This grammar is not 100% accurate, but it's close enough to give you an idea of how Xfer is structured. It doesn't capture that the counts of opening and closing specifiers should be balanced, and it doesn't capture all the characters that are legal for `<text>` (bascially, ".*").
 
+This grammar is also [in the repository](xfer.bnf).
+
 ```bnf
 <document> ::= <opt_whitespace> <metadata_element>? <opt_whitespace> <body_element>* <opt_whitespace>
 
