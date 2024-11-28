@@ -2,7 +2,7 @@
 
 ![Version](https://img.shields.io/badge/version-0.4.1-blue)
 
-**This document describes version 0.4.0 of Xfer.**
+**This document describes version 0.4.1 of Xfer.**
 
 _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.com/item?id=42114543). Thank you so much for all the great input and discussion!_
 
@@ -672,7 +672,9 @@ _Coming soon..._
 
 The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/XferConverter.cs) makes use of the [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer/Models/Elements) to write object contents out to a stream or read object contents from a stream. The class is not yet thread safe, and it is not yet optimized for performance, but it's is already useful for demonstrating Xfer's capabilities.
 
-## Grammar
+## Xfer Grammar
+
+This grammar is not 100% accurate, but it's close enough to give you an idea of how Xfer is structured. It doesn't capture that the counts of opening and closing specifiers should be balanced, and it doesn't capture all the characters that are legal for `<text>` (bascially, ".*").
 
 ```bnf
 <document> ::= <opt_whitespace> <metadata_element>? <opt_whitespace> <body_element>* <opt_whitespace>
@@ -682,8 +684,8 @@ The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer
 <metadata_element_compact> ::= <metadata_specifier> <key_value_pair> <metadata_specifier>
 
 <body_element> ::= <opt_whitespace> (
-      <string_element> 
-    | <key_value_pair> 
+      <key_value_pair> 
+    | <string_element> 
     | <character_element> 
     | <integer_element>
     | <long_element>
@@ -757,7 +759,7 @@ The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer
 <property_bag_element_compact> ::= <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close>
 
 <eval_text_element> ::= <eval_text_element_explicit> | <eval_text_element_compact>
-<eval_text_element_explicit> ::= <element_open> <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier>
+<eval_text_element_explicit> ::= <element_open> <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier> <element_close>
 <eval_text_element_compact> ::= <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier>
 
 <placeholder_element> ::= <placeholder_element_explicit> | <placeholder_element_compact>
@@ -804,16 +806,17 @@ The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer
 <hexadecimal> ::= "$" ([0-9] | [A-F] | [a-f])+
 <binary> ::= "%" [0-1]+
 
-<eval_content> ::= <body_element>* | <text>
-
 <element_open> ::= "<"
 <element_close> ::= ">"
 
 <identifier> ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
-<text> ::= .*
+/* The following rule isn't correct, but it's the best I can do with the tool I'm using for BNF validation. Consult the documentation for more. */
+<text> ::= ([A-Z] | [a-z] | [0-9] | "_" | <whitespace> | "!" | "\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "\\" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "/" | "]" | "^" | "`" | "{" | "|" | "}" | "~")+
 <opt_whitespace> ::= <whitespace>*
 <whitespace> ::= (" " | "\t" | "\n" | "\r")
 
 <boolean> ::= "true" | "false"
 <datetime> ::= [0-9]+ "-" [0-9]+ "-" [0-9]+ (("T" | "t") [0-9]+ ":" [0-9]+ (":" [0-9]+)?)?
+
+<eval_content> ::= (<body_element> | <text>)*
 ```

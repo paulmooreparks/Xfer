@@ -1,12 +1,12 @@
-<document> ::= <opt_whitespace> <metadata_element>? <opt_whitespace> <body_element>* <opt_whitespace>
+﻿<document> ::= <opt_whitespace> <metadata_element>? <opt_whitespace> <body_element>* <opt_whitespace>
 
 <metadata_element> ::= <metadata_element_explicit> | <metadata_element_compact> 
 <metadata_element_explicit> ::= <element_open> <metadata_specifier> <key_value_pair>+ <metadata_specifier> <element_close>
 <metadata_element_compact> ::= <metadata_specifier> <key_value_pair> <metadata_specifier>
 
 <body_element> ::= <opt_whitespace> (
-	  <string_element> 
-    | <key_value_pair> 
+      <key_value_pair> 
+	| <string_element> 
     | <character_element> 
     | <integer_element>
     | <long_element>
@@ -80,7 +80,7 @@
 <property_bag_element_compact> ::= <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close>
 
 <eval_text_element> ::= <eval_text_element_explicit> | <eval_text_element_compact>
-<eval_text_element_explicit> ::= <element_open> <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier>
+<eval_text_element_explicit> ::= <element_open> <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier> <element_close>
 <eval_text_element_compact> ::= <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier>
 
 <placeholder_element> ::= <placeholder_element_explicit> | <placeholder_element_compact>
@@ -131,11 +131,12 @@
 <element_close> ::= ">"
 
 <identifier> ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
-<text> ::= .*
+/* The following rule isn't correct, but it's the best I can do with the tool I'm using for BNF validation. Consult the documentation for more. */
+<text> ::= ([A-Z] | [a-z] | [0-9] | "_" | <whitespace> | "!" | "\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "\\" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "/" | "]" | "^" | "`" | "{" | "|" | "}" | "~")+
 <opt_whitespace> ::= <whitespace>*
 <whitespace> ::= (" " | "\t" | "\n" | "\r")
 
 <boolean> ::= "true" | "false"
 <datetime> ::= [0-9]+ "-" [0-9]+ "-" [0-9]+ (("T" | "t") [0-9]+ ":" [0-9]+ (":" [0-9]+)?)?
 
-<eval_content> ::= <body_element>* | <text>
+<eval_content> ::= (<body_element> | <text>)*
