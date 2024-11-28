@@ -196,7 +196,7 @@ public class Parser {
         char openingSpecifier = delimiter.OpeningSpecifier;
         char closingSpecifier = delimiter.ClosingSpecifier;
 
-        if (ElementMaxOpening(delimiter, out specifierCount)) {
+        if (ElementExplicitOpening(delimiter, out specifierCount)) {
             return true;
         }
 
@@ -226,11 +226,7 @@ public class Parser {
         return false;
     }
 
-    internal bool ElementMaxOpening(ElementDelimiter delimiter) {
-        return ElementMaxOpening(delimiter, out int _);
-    }
-
-    internal bool ElementMaxOpening(ElementDelimiter delimiter, out int specifierCount) {
+    internal bool ElementExplicitOpening(ElementDelimiter delimiter, out int specifierCount) {
         char openingSpecifier = delimiter.OpeningSpecifier;
         char closingSpecifier = delimiter.ClosingSpecifier;
 
@@ -265,7 +261,7 @@ public class Parser {
         return false;
     }
 
-    internal bool ElementMinClosing() {
+    internal bool ElementCompactClosing() {
         if (_delimStack.Count == 0) {
             return false;
         }
@@ -611,7 +607,7 @@ public class Parser {
 
     private Element ParseNullElement(int specifierCount) {
         while (IsCharAvailable()) {
-            if (ElementMinClosing()) {
+            if (ElementCompactClosing()) {
                 return new NullElement();
             }
         }
@@ -672,7 +668,7 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementMinClosing()) {
+            if (ElementCompactClosing()) {
                 var variable = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
 
                 if (string.IsNullOrEmpty(variable)) {
@@ -750,7 +746,7 @@ public class Parser {
 
         StringBuilder charContent = new();
 
-        while (IsCharAvailable() && !ElementMinClosing()) {
+        while (IsCharAvailable() && !ElementCompactClosing()) {
             charContent.Append(CurrentChar);
             Advance();
         }
@@ -791,67 +787,67 @@ public class Parser {
         var style = _delimStack.Peek().Style;
 
         while (IsCharAvailable()) {
-            if (ElementMaxOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
+            if (ElementExplicitOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
                 StringElement stringElement = ParseStringElement(stringSpecifierCount);
                 valueBuilder.Append(stringElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(CharacterElement.ElementDelimiter, out int charSpecifierCount)) {
+            if (ElementExplicitOpening(CharacterElement.ElementDelimiter, out int charSpecifierCount)) {
                 CharacterElement characterElement = ParseCharacterElement(charSpecifierCount);
                 valueBuilder.Append(char.ConvertFromUtf32(characterElement.Value));
                 continue;
             }
 
-            if (ElementMaxOpening(IntegerElement.ElementDelimiter, out int intSpecifierCount)) {
+            if (ElementExplicitOpening(IntegerElement.ElementDelimiter, out int intSpecifierCount)) {
                 IntegerElement integerElement = ParseIntegerElement(intSpecifierCount);
                 valueBuilder.Append(integerElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(LongElement.ElementDelimiter, out int longSpecifierCount)) {
+            if (ElementExplicitOpening(LongElement.ElementDelimiter, out int longSpecifierCount)) {
                 LongElement longElement = ParseLongIntegerElement(longSpecifierCount);
                 valueBuilder.Append(longElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(DecimalElement.ElementDelimiter, out int decSpecifierCount)) {
+            if (ElementExplicitOpening(DecimalElement.ElementDelimiter, out int decSpecifierCount)) {
                 DecimalElement decimalElement = ParseDecimalElement(decSpecifierCount);
                 valueBuilder.Append(decimalElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(DoubleElement.ElementDelimiter, out int doubleSpecifierCount)) {
+            if (ElementExplicitOpening(DoubleElement.ElementDelimiter, out int doubleSpecifierCount)) {
                 DoubleElement doubleElement = ParseDoubleElement(doubleSpecifierCount);
                 valueBuilder.Append(doubleElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(BooleanElement.ElementDelimiter, out int boolSpecifierCount)) {
+            if (ElementExplicitOpening(BooleanElement.ElementDelimiter, out int boolSpecifierCount)) {
                 BooleanElement booleanElement = ParseBooleanElement(boolSpecifierCount);
                 valueBuilder.Append(booleanElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(DateElement.ElementDelimiter, out int dateSpecifierCount)) {
+            if (ElementExplicitOpening(DateElement.ElementDelimiter, out int dateSpecifierCount)) {
                 DateElement dateElement = ParseDateElement(dateSpecifierCount);
                 valueBuilder.Append(dateElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(EvaluatedElement.ElementDelimiter, out int evalSpecifierCount)) {
+            if (ElementExplicitOpening(EvaluatedElement.ElementDelimiter, out int evalSpecifierCount)) {
                 EvaluatedElement evaluatedElement = ParseEvaluatedElement(evalSpecifierCount);
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(PlaceholderElement.ElementDelimiter, out int phSpecifierCount)) {
+            if (ElementExplicitOpening(PlaceholderElement.ElementDelimiter, out int phSpecifierCount)) {
                 PlaceholderElement evaluatedElement = ParsePlaceholderElement(phSpecifierCount);
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
 
-            if (ElementMaxOpening(CommentElement.ElementDelimiter, out int commentSpecifierCount)) {
+            if (ElementExplicitOpening(CommentElement.ElementDelimiter, out int commentSpecifierCount)) {
                 ParseCommentElement();
                 continue;
             }
@@ -899,7 +895,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementMinClosing()) {
+            if (ElementCompactClosing()) {
                 var value = valueBuilder.ToString();
                 return new DateElement(value, specifierCount, style);
             }
@@ -927,7 +923,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementMinClosing()) {
+            if (ElementCompactClosing()) {
                 var value = ParseNumericValue<int>(valueBuilder.ToString());
                 return new IntegerElement(value, specifierCount, style);
             }
@@ -956,7 +952,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementMinClosing()) {
+            if (ElementCompactClosing()) {
                 var value = ParseNumericValue<long>(valueBuilder.ToString());
                 return new LongElement(value, specifierCount, style: style);
             }
@@ -984,7 +980,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementMinClosing()) {
+            if (ElementCompactClosing()) {
                 var value = ParseNumericValue<decimal>(valueBuilder.ToString());
                 return new DecimalElement(value, specifierCount, style: style);
             }
@@ -1012,7 +1008,7 @@ public class Parser {
                 continue;
             }
 
-            if (ElementMinClosing()) {
+            if (ElementCompactClosing()) {
                 var value = ParseNumericValue<double>(valueBuilder.ToString());
                 return new DoubleElement(value, specifierCount, style: style);
             }
@@ -1040,7 +1036,7 @@ public class Parser {
                 continue;
             }
             
-            if (ElementMinClosing() || !char.IsAsciiLetter(CurrentChar)) {
+            if (ElementCompactClosing() || !char.IsAsciiLetter(CurrentChar)) {
                 string valueString = valueBuilder.ToString().ToLower();
                 bool value = false;
 
