@@ -49,6 +49,7 @@ public class XferConvert {
             decimal decimalValue => new DecimalElement(decimalValue),
             DateTime dateTimeValue => new DateElement(dateTimeValue.ToString("yyyy-MM-ddTHH:mm:ss")),
             string stringValue => new StringElement(stringValue),
+            char charValue => new CharacterElement(charValue),
             int[] intArray => SerializeArray(intArray),
             long[] longArray => SerializeArray(longArray),
             bool[] boolArray => SerializeBooleanArray(boolArray),

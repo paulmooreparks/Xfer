@@ -1,6 +1,6 @@
 ﻿# The Xfer Data-Interchange Format
 
-![Version](https://img.shields.io/badge/version-0.4.0-blue)
+![Version](https://img.shields.io/badge/version-0.4.1-blue)
 
 **This document describes version 0.4.0 of Xfer.**
 
@@ -16,7 +16,7 @@ That said, I do plan to make the code professional-grade in the future, and I wa
 * **Explicit Types**: All values are explicitly typed.
 * **No Commas**: Xfer allows for objects and arrays to be defined without any separator characters between elements.
 * **No Escaping**: Xfer does not require escaping of special characters in values. Instead, values are enclosed in unique delimiters that eliminate the need for escaping.
-* **Nullable Values**: Xfer supports null values only for types that are defined as nullable.
+* **Nullable Values**: ~~Xfer supports null values only for types that are defined as nullable.~~ This idea is on hold for now. Stay tuned for updates.
 
 ## Xfer and JSON Compared
 
@@ -95,6 +95,19 @@ Comments are always enclosed in angle brackets and one or more slash (`/`) chara
 ```xfer
 </ This is a comment. />
 <// Comments may enclose </other comments/> if the enclosing specifiers are repeated. //>
+```
+
+Due to the nature of the Xfer syntax, representing empty values requires explicit delimiters.
+
+```xfer
+emptyString <""> 
+```
+
+A null value is represented by the `?` specifier.
+
+```xfer
+nullValue ?
+alsoNull <??>
 ```
 
 ## Features of Xfer
@@ -632,6 +645,23 @@ The Comment element is used to represent a comment that is not part of the data 
 
 ## Xfer Document Structure
 
+Comment elements may appear anywhere in an Xfer document and are ignored by the parser. No comments will appear in the parsed structure.
+
+An Xfer document begins with a metadata element. If the element is not provided explicitly, an implicit metadata element is added to the document with a default version number assigned. A metadata element may not appear after any non-comment elements.
+
+The root content element of an Xfer document is an implicit [property bag](#property-bag-element) element. This element may contain any number of other elements.
+
+In the document below, the string value with the content `Hello, World!` is the first element in the root property bag, the integer with the value `42` is the second element in the root property bag, and the array element containing three string values is the third element in the root property bag.
+
+```xfer
+!version "1.0.0"!
+"Hello, World!"
+42
+["abc""def""ghi"]
+```
+
+## Xfer Object Model
+
 _Coming soon..._
 
 ## Xfer Parser
@@ -642,3 +672,148 @@ _Coming soon..._
 
 The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer/XferConverter.cs) makes use of the [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer/Models/Elements) to write object contents out to a stream or read object contents from a stream. The class is not yet thread safe, and it is not yet optimized for performance, but it's is already useful for demonstrating Xfer's capabilities.
 
+## Grammar
+
+```bnf
+<document> ::= <opt_whitespace> <metadata_element>? <opt_whitespace> <body_element>* <opt_whitespace>
+
+<metadata_element> ::= <metadata_element_explicit> | <metadata_element_compact> 
+<metadata_element_explicit> ::= <element_open> <metadata_specifier> <key_value_pair>+ <metadata_specifier> <element_close>
+<metadata_element_compact> ::= <metadata_specifier> <key_value_pair> <metadata_specifier>
+
+<body_element> ::= <opt_whitespace> (
+      <string_element> 
+    | <key_value_pair> 
+    | <character_element> 
+    | <integer_element>
+    | <long_element>
+    | <double_element>
+    | <decimal_element>
+    | <boolean_element>
+    | <datetime_element>
+    | <null_element>
+    | <object_element>
+    | <array_element>
+    | <property_bag_element>
+    | <comment_element>
+    | <placeholder_element>
+    | <eval_text_element>
+    ) <opt_whitespace>
+
+<string_element> ::= <string_element_explicit> | <string_element_compact> 
+<string_element_explicit> ::= <element_open> <string_specifier> <text> <string_specifier> <element_close>
+<string_element_compact> ::= <string_specifier> <text> <string_specifier>
+
+<key_value_pair> ::= <keyword_element> <opt_whitespace> <body_element>
+
+<keyword_element> ::= <keyword_element_explicit> | <keyword_element_compact> | <keyword_element_implicit>
+<keyword_element_explicit> ::= <element_open> <keyword_specifier> <identifier> <keyword_specifier> <element_close>
+<keyword_element_compact> ::= <keyword_specifier> <identifier> <keyword_specifier>
+<keyword_element_implicit> ::= <identifier>
+
+<character_element> ::= <character_element_explicit> | <character_element_compact>
+<character_element_explicit> ::= <element_open> <character_specifier> <opt_whitespace> <character_value> <opt_whitespace> <character_specifier> <element_close>
+<character_element_compact> ::= <character_specifier> <opt_whitespace> <character_value> <opt_whitespace> <character_specifier>
+
+<integer_element> ::= <integer_element_explicit> | <integer_element_compact> | <integer_element_implicit>
+<integer_element_explicit> ::= <element_open> <integer_specifier> <opt_whitespace> <integer_value> <opt_whitespace> <integer_specifier> <element_close>
+<integer_element_compact> ::= <integer_specifier> <integer_value> <integer_specifier>?
+<integer_element_implicit> ::= <integer_value>
+
+<long_element> ::= <long_element_explicit> | <long_element_compact>
+<long_element_explicit> ::= <element_open> <long_specifier> <opt_whitespace> <integer_value> <opt_whitespace> <long_specifier> <element_close>
+<long_element_compact> ::= <long_specifier> <integer_value> <long_specifier>?
+
+<double_element> ::= <double_element_explicit> | <double_element_compact>
+<double_element_explicit> ::= <element_open> <opt_whitespace> <double_specifier> <opt_whitespace> <signed_decimal> <double_specifier> <element_close>
+<double_element_compact> ::= <double_specifier> <signed_decimal> <double_specifier>?
+
+<decimal_element> ::= <decimal_element_explicit> | <decimal_element_compact>
+<decimal_element_explicit> ::= <element_open> <decimal_specifier> <opt_whitespace> <signed_decimal> <opt_whitespace> <decimal_specifier> <element_close>
+<decimal_element_compact> ::= <decimal_specifier> <opt_whitespace> <signed_decimal> <opt_whitespace> <decimal_specifier>?
+
+<boolean_element> ::= <boolean_element_explicit> | <boolean_element_compact>
+<boolean_element_explicit> ::= <element_open> <boolean_specifier> <opt_whitespace> <boolean> <opt_whitespace> <boolean_specifier> <element_close>
+<boolean_element_compact> ::= <boolean_specifier> <boolean> <boolean_specifier>?
+
+<datetime_element> ::= <datetime_element_explicit> | <datetime_element_compact>
+<datetime_element_explicit> ::= <element_open> <datetime_specifier> <opt_whitespace> <datetime> <opt_whitespace> <datetime_specifier> <element_close>
+<datetime_element_compact> ::= <datetime_specifier> <datetime> <datetime_specifier>?
+
+<null_element> ::= <null_element_explicit> | <null_element_compact>
+<null_element_explicit> ::= <element_open> <null_specifier> <null_specifier> <element_close>
+<null_element_compact> ::= <null_specifier>
+
+<object_element> ::= <object_element_explicit> | <object_element_compact>
+<object_element_explicit> ::= <element_open> <object_specifier_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_specifier_close> <element_close>
+<object_element_compact> ::= <object_specifier_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_specifier_close>
+
+<array_element> ::= <array_element_explicit> | <array_element_compact>
+<array_element_explicit> ::= <element_open> <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close> <element_close>
+<array_element_compact> ::= <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close>
+
+<property_bag_element> ::= <property_bag_element_explicit> | <property_bag_element_compact>
+<property_bag_element_explicit> ::= <element_open> <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close> <element_close>
+<property_bag_element_compact> ::= <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close>
+
+<eval_text_element> ::= <eval_text_element_explicit> | <eval_text_element_compact>
+<eval_text_element_explicit> ::= <element_open> <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier>
+<eval_text_element_compact> ::= <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier>
+
+<placeholder_element> ::= <placeholder_element_explicit> | <placeholder_element_compact>
+<placeholder_element_explicit> ::= <element_open> <placeholder_specifier> <opt_whitespace> <identifier> <opt_whitespace> <placeholder_specifier> <element_close>
+<placeholder_element_compact> ::= <placeholder_specifier> <opt_whitespace> <identifier> <opt_whitespace> <placeholder_specifier>
+
+<comment_element> ::= <element_open> <comment_specifier> <text> <comment_specifier> <element_close>
+
+<metadata_specifier> ::= "!"+
+<string_specifier> ::= "\""+
+<keyword_specifier> ::= ":"+
+<character_specifier> ::= "\\"+
+<integer_specifier> ::= "#"+
+<long_specifier> ::= "&"+
+<double_specifier> ::= "^"+
+<decimal_specifier> ::= "*"+
+<boolean_specifier> ::= "~"+
+<datetime_specifier> ::= "@"+
+<null_specifier> ::= "?"+
+<object_specifier_open> ::= "{"+
+<object_specifier_close> ::= "}"+
+<array_specifier_open> ::= "["+
+<array_specifier_close> ::= "]"+
+<property_bag_specifier_open> ::= "("+
+<property_bag_specifier_close> ::= ")"+
+<comment_specifier> ::= "/"+
+<placeholder_specifier> ::= "|"+
+<eval_text_specifier> ::= "'"+
+
+<character_value> ::= <positive_integer>
+                     | <hexadecimal>
+                     | <binary>
+                     | "nul" | "cr" | "lf" | "nl" | "tab" | "vtab"
+                     | "bksp" | "ff" | "bel" | "quote" | "apos"
+                     | "backslash" | "lt" | "gt"
+
+<integer_value> ::= <signed_integer>
+                  | <hexadecimal>
+                  | <binary>
+
+<signed_integer> ::= ("+" | "-")? [0-9]+
+<signed_decimal> ::= ("+" | "-")? [0-9]+ "."+ [0-9]+
+<positive_integer> ::= [0-9]+
+<hexadecimal> ::= "$" ([0-9] | [A-F] | [a-f])+
+<binary> ::= "%" [0-1]+
+
+<eval_content> ::= <body_element>* | <text>
+
+<element_open> ::= "<"
+<element_close> ::= ">"
+
+<identifier> ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
+<text> ::= .*
+<opt_whitespace> ::= <whitespace>*
+<whitespace> ::= (" " | "\t" | "\n" | "\r")
+
+<boolean> ::= "true" | "false"
+<datetime> ::= [0-9]+ "-" [0-9]+ "-" [0-9]+ (("T" | "t") [0-9]+ ":" [0-9]+ (":" [0-9]+)?)?
+```

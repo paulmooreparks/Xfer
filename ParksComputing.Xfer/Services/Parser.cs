@@ -588,7 +588,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {ArrayElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private NullElement ParseNullElement(int specifierCount) {
+    private Element ParseNullElement(int specifierCount) {
         while (IsCharAvailable()) {
             if (ElementMinClosing()) {
                 return new NullElement();
