@@ -745,54 +745,42 @@ This grammar is also [in the repository](xfer.bnf).
 <key_value_pair> ::= <keyword_element> <opt_whitespace> <body_element>
 
 <keyword_element> ::= <keyword_element_explicit> | <keyword_element_compact> | <keyword_element_implicit>
-<keyword_element_explicit> ::= <element_open> <keyword_specifier> <identifier> <keyword_specifier> <element_close>
-<keyword_element_compact> ::= <keyword_specifier> <identifier> <keyword_specifier>
+<keyword_element_explicit> ::= <element_open> <keyword_specifier> <text> <keyword_specifier> <element_close>
+<keyword_element_compact> ::= <keyword_specifier> <text> <keyword_specifier>
 <keyword_element_implicit> ::= <identifier>
 
 <character_element> ::= <character_element_explicit> | <character_element_compact>
 <character_element_explicit> ::= <element_open> <character_specifier> <opt_whitespace> <character_value> <opt_whitespace> <character_specifier> <element_close>
-<character_element_compact> ::= <character_specifier> <opt_whitespace> <character_value> <opt_whitespace>  (<element_open_specifier> | <whitespace>)+
+<character_element_compact> ::= <character_specifier> <character_value> (<body_element> | <whitespace>?)
 
 <integer_element> ::= <integer_element_explicit> | <integer_element_compact> | <integer_element_implicit>
 <integer_element_explicit> ::= <element_open> <integer_specifier> <opt_whitespace> <integer_value> <opt_whitespace> <integer_specifier> <element_close>
-<integer_element_compact> ::= <integer_specifier> <integer_value> (<element_open_specifier> | <whitespace>)+
+<integer_element_compact> ::= <integer_specifier> <integer_value> (<body_element> | <whitespace>?)
 <integer_element_implicit> ::= <integer_value>
 
 <long_element> ::= <long_element_explicit> | <long_element_compact>
 <long_element_explicit> ::= <element_open> <long_specifier> <opt_whitespace> <integer_value> <opt_whitespace> <long_specifier> <element_close>
-<long_element_compact> ::= <long_specifier> <integer_value> (<element_open_specifier> | <whitespace>)+
+<long_element_compact> ::= <long_specifier> <integer_value> (<body_element> | <whitespace>?)
 
 <double_element> ::= <double_element_explicit> | <double_element_compact>
 <double_element_explicit> ::= <element_open> <opt_whitespace> <double_specifier> <opt_whitespace> <decimal_value> <double_specifier> <element_close>
-<double_element_compact> ::= <double_specifier> <decimal_value> (<element_open_specifier> | <whitespace>)+
+<double_element_compact> ::= <double_specifier> <decimal_value> (<body_element> | <whitespace>?)
 
 <decimal_element> ::= <decimal_element_explicit> | <decimal_element_compact>
 <decimal_element_explicit> ::= <element_open> <decimal_specifier> <opt_whitespace> <decimal_value> <opt_whitespace> <decimal_specifier> <element_close>
-<decimal_element_compact> ::= <decimal_specifier> <decimal_value> (<element_open_specifier> | <whitespace>)+
+<decimal_element_compact> ::= <decimal_specifier> <decimal_value> (<body_element> | <whitespace>?)
 
 <boolean_element> ::= <boolean_element_explicit> | <boolean_element_compact>
 <boolean_element_explicit> ::= <element_open> <boolean_specifier> <opt_whitespace> <boolean> <opt_whitespace> <boolean_specifier> <element_close>
-<boolean_element_compact> ::= <boolean_specifier> <boolean> (<element_open_specifier> | <whitespace>)+
+<boolean_element_compact> ::= <boolean_specifier> <boolean> (<body_element> | <whitespace>?)
 
 <datetime_element> ::= <datetime_element_explicit> | <datetime_element_compact>
 <datetime_element_explicit> ::= <element_open> <datetime_specifier> <opt_whitespace> <datetime> <opt_whitespace> <datetime_specifier> <element_close>
-<datetime_element_compact> ::= <datetime_specifier> <datetime> (<element_open_specifier> | <whitespace>)+
+<datetime_element_compact> ::= <datetime_specifier> <datetime> (<body_element> | <whitespace>?)
 
 <null_element> ::= <null_element_explicit> | <null_element_compact>
 <null_element_explicit> ::= <element_open> <null_specifier> <null_specifier> <element_close>
 <null_element_compact> ::= <null_specifier>
-
-<object_element> ::= <object_element_explicit> | <object_element_compact>
-<object_element_explicit> ::= <element_open> <object_specifier_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_specifier_close> <element_close>
-<object_element_compact> ::= <object_specifier_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_specifier_close>
-
-<array_element> ::= <array_element_explicit> | <array_element_compact>
-<array_element_explicit> ::= <element_open> <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close> <element_close>
-<array_element_compact> ::= <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close>
-
-<property_bag_element> ::= <property_bag_element_explicit> | <property_bag_element_compact>
-<property_bag_element_explicit> ::= <element_open> <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close> <element_close>
-<property_bag_element_compact> ::= <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close>
 
 <placeholder_element> ::= <placeholder_element_explicit> | <placeholder_element_compact>
 <placeholder_element_explicit> ::= <element_open> <placeholder_specifier> <opt_whitespace> <identifier> <opt_whitespace> <placeholder_specifier> <element_close>
@@ -806,10 +794,20 @@ This grammar is also [in the repository](xfer.bnf).
 
 <eval_content> ::= (<text> | <string_element_explicit> | <character_element_explicit> | <integer_element_explicit> | <long_element_explicit> | <double_element_explicit> | <decimal_element_explicit> | <boolean_element_explicit> | <datetime_element_explicit> | <placeholder_element_explicit> | <eval_text_element_explicit>)
 
+<object_element> ::= <object_element_explicit> | <object_element_compact>
+<object_element_explicit> ::= <element_open> <object_specifier_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_specifier_close> <element_close>
+<object_element_compact> ::= <object_specifier_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_specifier_close>
+
+<array_element> ::= <array_element_explicit> | <array_element_compact>
+<array_element_explicit> ::= <element_open> <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close> <element_close>
+<array_element_compact> ::= <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close>
+
+<property_bag_element> ::= <property_bag_element_explicit> | <property_bag_element_compact>
+<property_bag_element_explicit> ::= <element_open> <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close> <element_close>
+<property_bag_element_compact> ::= <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close>
+
 <element_open> ::= "<"
 <element_close> ::= ">"
-
-<element_open_specifier> ::= <element_open> | <metadata_specifier> | <string_specifier> | <keyword_specifier> | <character_specifier> | <integer_specifier> | <long_specifier> | <double_specifier> | <decimal_specifier> | <boolean_specifier> | <datetime_specifier> | <null_specifier> | <object_specifier_open> | <array_specifier_open> | <property_bag_specifier_open> | <comment_specifier> | <placeholder_specifier> | <eval_text_specifier>
 
 <metadata_specifier> ::= "!"+
 <string_specifier> ::= "\""+
@@ -849,7 +847,7 @@ This grammar is also [in the repository](xfer.bnf).
 <decimal_value> ::= <signed_decimal> | <placeholder_element>
 
 <signed_integer> ::= ("+" | "-")? [0-9]+
-<signed_decimal> ::= ("+" | "-")? [0-9]+ "."+ [0-9]+
+<signed_decimal> ::= ("+" | "-")? [0-9]+ "."* [0-9]*
 <positive_integer> ::= [0-9]+
 <hexadecimal> ::= "$" ([0-9] | [A-F] | [a-f])+
 <binary> ::= "%" [0-1]+
