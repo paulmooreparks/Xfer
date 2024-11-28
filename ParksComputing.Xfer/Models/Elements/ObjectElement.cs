@@ -85,9 +85,18 @@ public class ObjectElement : Element {
                 sb.Append(Delimiter.MinOpening);
                 break;
         }
+
+
+        /* TODO: Whitespace between elements can be removed in a few situations by examining the delimiter style of the surrounding elements. */
+        int i = 0;
         foreach (var value in _values.Values) {
+            ++i;
             sb.Append($"{value.ToXfer()}");
+            if (value.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i < _values.Values.Count()) {
+                sb.Append(' ');
+            }
         }
+
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Closing);

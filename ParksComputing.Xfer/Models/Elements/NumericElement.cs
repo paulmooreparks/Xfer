@@ -11,10 +11,10 @@ public abstract class NumericElement<T> : TypedElement<T> {
 
     public override string ToXfer() {
         if (Delimiter.Style == ElementStyle.Implicit) {
-            return $"{Value} ";
+            return $"{Value}";
         }
         if (Delimiter.Style == ElementStyle.Compact) {
-            return $"{Delimiter.OpeningSpecifier}{Value} ";
+            return $"{Delimiter.OpeningSpecifier}{Value}";
         }
         return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
     }

@@ -59,9 +59,16 @@ public class TypedArrayElement<T> : ArrayElement where T : Element {
                 sb.Append(Delimiter.MinOpening);
                 break;
         }
-        foreach (var item in _items) {
+
+        /* TODO: Whitespace between elements can be removed in a few situations by examining the delimiter style of the surrounding elements. */
+        for (var i = 0; i < _items.Count(); ++i) {
+            var item = _items[i];
             sb.Append(item.ToXfer());
+            if (item.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i+1 < _items.Count()) {
+                sb.Append(' ');
+            }
         }
+
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Closing);
