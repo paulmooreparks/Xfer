@@ -13,4 +13,8 @@ public class CommentElement : Element {
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     public CommentElement() : base(ElementName, new(OpeningSpecifier, ClosingSpecifier)) { }
+
+    public override string ToXfer() {
+        return string.Empty;
+    }
 }

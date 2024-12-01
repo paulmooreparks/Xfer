@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Text;
+using System.Diagnostics;
 
 using ParksComputing.Xfer.Extensions;
 using ParksComputing.Xfer.Models.Elements;
@@ -11,7 +12,7 @@ namespace ParksComputing.Xfer.Services;
 settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
 
 public class Parser {
-    public static readonly string Version = "0.5.1";
+    public static readonly string Version = "0.6.0";
 
     public Parser() : this(Encoding.UTF8) { }
 
@@ -102,7 +103,7 @@ public class Parser {
         ++Position;
         UpdateRowColumn();
 
-        if (CurrentChar == Element.ElementOpeningSpecifier && Peek == CommentElement.OpeningSpecifier) {
+        if (CurrentChar == Element.ElementOpeningCharacter && Peek == CommentElement.OpeningSpecifier) {
             int specifierCount = 1;
             ++Position;
             UpdateRowColumn();
@@ -120,7 +121,7 @@ public class Parser {
                     int tmpSpecifierCount = specifierCount;
                     --specifierCount;
 
-                    if (Peek == Element.ElementClosingSpecifier && specifierCount == 0) {
+                    if (Peek == Element.ElementClosingCharacter && specifierCount == 0) {
                         ++Position;
                         UpdateRowColumn();
                         ++Position;
@@ -135,7 +136,7 @@ public class Parser {
                         UpdateRowColumn();
                         --specifierCount;
 
-                        if (Peek == Element.ElementClosingSpecifier && specifierCount == 0) {
+                        if (Peek == Element.ElementClosingCharacter && specifierCount == 0) {
                             ++Position;
                             UpdateRowColumn();
                             ++Position;
@@ -213,7 +214,7 @@ public class Parser {
                 Advance();
             }
 
-            if (CurrentChar != Element.ElementClosingSpecifier) {
+            if (CurrentChar != Element.ElementClosingCharacter) {
                 _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Compact));
                 LastElementRow = saveCurrentRow;
                 LastElementColumn = saveCurrentColumn;
@@ -232,7 +233,7 @@ public class Parser {
 
         specifierCount = 1;
 
-        if (CurrentChar == Element.ElementOpeningSpecifier && Peek == openingSpecifier) {
+        if (CurrentChar == Element.ElementOpeningCharacter && Peek == openingSpecifier) {
             int saveCurrentRow = CurrentRow;
             int saveCurrentColumn = CurrentColumn;
             Advance();
@@ -240,7 +241,7 @@ public class Parser {
 
             /* This is really ugly to me, and it seems I'm missing a more elegant way to parse this. What I'm 
             doing here is handling empty elements, like <""> and <##>. */
-            if (CurrentChar == closingSpecifier && Peek == Element.ElementClosingSpecifier) {
+            if (CurrentChar == closingSpecifier && Peek == Element.ElementClosingCharacter) {
                 _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Explicit));
                 LastElementRow = saveCurrentRow;
                 LastElementColumn = saveCurrentColumn;
@@ -261,6 +262,154 @@ public class Parser {
         return false;
     }
 
+    internal bool MetadataElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == MetadataElement.ClosingSpecifier);
+        return ElementClosing();
+    }
+
+    internal bool StringElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == StringElement.ClosingSpecifier);
+        return ElementClosing();
+    }
+
+    internal bool KeywordElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == KeywordElement.ClosingSpecifier);
+        return ElementClosing();
+    }
+
+    internal bool CharacterElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == CharacterElement.ClosingSpecifier);
+        return ElementCompactClosing();
+    }
+
+    internal bool EvaluatedElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == EvaluatedElement.ClosingSpecifier);
+        return ElementCompactClosing();
+    }
+
+    internal bool PlaceholderElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == PlaceholderElement.ClosingSpecifier);
+        return ElementCompactClosing();
+    }
+
+    internal bool ArrayElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == ArrayElement.ClosingSpecifier);
+        return ElementClosing();
+    }
+
+    internal bool ObjectElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == ObjectElement.ClosingSpecifier);
+        return ElementClosing();
+    }
+
+    internal bool PropertyBagElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == PropertyBagElement.ClosingSpecifier);
+        return ElementClosing();
+    }
+
+    internal bool NullElementClosing() {
+        if (_delimStack.Count == 0) {
+            return false;
+        }
+
+        var delimiter = _delimStack.Peek();
+        var style = delimiter.Style;
+        var closingSpecifier = delimiter.ClosingSpecifier;
+
+        Debug.Assert(closingSpecifier == NullElement.ClosingSpecifier);
+
+        if (style == ElementStyle.Compact && (
+               CurrentChar.IsWhiteSpace()
+            || CurrentChar.IsKeywordChar()
+            || CurrentChar.IsIntegerLeadingChar() 
+            || CurrentChar.IsElementOpeningCharacter()
+            || CurrentChar.IsElementOpeningSpecifier()
+            || CurrentChar.IsCollectionClosingSpecifier()
+            )) {
+            _delimStack.Pop();
+            return true;
+        }
+
+        return ElementClosing();
+    }
+
+    internal bool DateElementClosing() {
+        if (_delimStack.Count == 0) {
+            return false;
+        }
+
+        var delimiter = _delimStack.Peek();
+        var style = delimiter.Style;
+        var closingSpecifier = delimiter.ClosingSpecifier;
+
+        Debug.Assert(closingSpecifier == DateElement.ClosingSpecifier);
+
+        if (style == ElementStyle.Compact) {
+            if (CurrentChar == closingSpecifier) {
+                Advance();
+                _delimStack.Pop();
+                return true;
+            }
+        }
+
+        return ElementClosing();
+    }
+
+    internal bool IntegerElementClosing() {
+        if (_delimStack.Count == 0) {
+            return false;
+        }
+
+        var delimiter = _delimStack.Peek();
+        var style = delimiter.Style;
+        var closingSpecifier = delimiter.ClosingSpecifier;
+
+        Debug.Assert(closingSpecifier == IntegerElement.ClosingSpecifier);
+
+        if (style is ElementStyle.Compact or ElementStyle.Implicit) {
+            if (CurrentChar.IsWhiteSpace()) {
+                Advance();
+                _delimStack.Pop();
+                return true;
+            }
+
+            if (   CurrentChar.IsElementOpeningCharacter()
+                || CurrentChar.IsElementOpeningSpecifier()
+                || CurrentChar.IsCollectionClosingSpecifier()
+                ) {
+                _delimStack.Pop();
+                return true;
+            }
+        }
+
+        return ElementClosing();
+    }
+
+    internal bool LongElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == LongElement.ClosingSpecifier);
+        return ElementCompactClosing();
+    }
+
+    internal bool DecimalElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == DecimalElement.ClosingSpecifier);
+        return ElementCompactClosing();
+    }
+
+    internal bool DoubleElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == DoubleElement.ClosingSpecifier);
+        return ElementCompactClosing();
+    }
+
+    internal bool BooleanElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == BooleanElement.ClosingSpecifier);
+        return ElementCompactClosing() || !char.IsAsciiLetter(CurrentChar);
+    }
+
+    internal bool CommentElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == CommentElement.ClosingSpecifier);
+        return ElementClosing();
+    }
+
     internal bool ElementCompactClosing() {
         if (_delimStack.Count == 0) {
             return false;
@@ -269,29 +418,12 @@ public class Parser {
         var style = _delimStack.Peek().Style;
         var closingSpecifier = _delimStack.Peek().ClosingSpecifier;
 
-        if ((style == ElementStyle.Compact || style == ElementStyle.Implicit) && 
-               (char.IsWhiteSpace(CurrentChar)
+        if ((style == ElementStyle.Compact || style == ElementStyle.Implicit) && (
+               CurrentChar.IsWhiteSpace()
             || CurrentChar == closingSpecifier
-            || CurrentChar == Element.ElementClosingSpecifier
-            || CurrentChar == KeywordElement.OpeningSpecifier
-            || CurrentChar == IntegerElement.OpeningSpecifier
-            || CurrentChar == LongElement.OpeningSpecifier
-            || CurrentChar == DecimalElement.OpeningSpecifier
-            || CurrentChar == DoubleElement.OpeningSpecifier
-            || CurrentChar == BooleanElement.OpeningSpecifier
-            || CurrentChar == DateElement.OpeningSpecifier
-            || CurrentChar == CharacterElement.OpeningSpecifier
-            || CurrentChar == EvaluatedElement.OpeningSpecifier
-            || CurrentChar == PlaceholderElement.OpeningSpecifier
-            || CurrentChar == NullElement.OpeningSpecifier
-            || CurrentChar == CommentElement.OpeningSpecifier
-            || CurrentChar == StringElement.OpeningSpecifier
-            || CurrentChar == ArrayElement.OpeningSpecifier
-            || CurrentChar == ObjectElement.OpeningSpecifier
-            || CurrentChar == PropertyBagElement.OpeningSpecifier
-            || CurrentChar == ObjectElement.ClosingSpecifier
-            || CurrentChar == ArrayElement.ClosingSpecifier
-            || CurrentChar == PropertyBagElement.ClosingSpecifier
+            || CurrentChar.IsElementOpeningCharacter()
+            || CurrentChar.IsElementOpeningSpecifier()
+            || CurrentChar.IsCollectionClosingSpecifier()
             ))
         {
             _delimStack.Pop();
@@ -310,7 +442,7 @@ public class Parser {
         int specifierCount = delimiter.SpecifierCount;
 
         if (CurrentChar == delimiter.ClosingSpecifier) {
-            if (Peek == Element.ElementClosingSpecifier && specifierCount == 1) {
+            if (Peek == Element.ElementClosingCharacter && specifierCount == 1) {
                 Advance();
                 Advance();
                 _delimStack.Pop();
@@ -323,16 +455,16 @@ public class Parser {
                 Advance();
                 --specifierCount;
 
-                if (delimiter.Style == ElementStyle.Compact) {
-                    if (specifierCount == 0) {
+                if (specifierCount == 0) {
+                    if (delimiter.Style == ElementStyle.Compact) {
                         _delimStack.Pop();
                         return true;
                     }
-                }
-                else if (CurrentChar == Element.ElementClosingSpecifier && specifierCount == 0) {
-                    Advance();
-                    _delimStack.Pop();
-                    return true;
+                    else if (CurrentChar == Element.ElementClosingCharacter) {
+                        Advance();
+                        _delimStack.Pop();
+                        return true;
+                    }
                 }
             }
 
@@ -534,7 +666,7 @@ public class Parser {
 
     private void ParseCommentElement(int specifierCount = 1) {
         while (IsCharAvailable()) {
-            if (ElementClosing()) {
+            if (CommentElementClosing()) {
                 break;
             }
 
@@ -547,7 +679,7 @@ public class Parser {
         var metadataElement = new MetadataElement();
 
         while (IsCharAvailable()) {
-            if (ElementClosing()) {
+            if (MetadataElementClosing()) {
                 return metadataElement;
             }
 
@@ -593,7 +725,7 @@ public class Parser {
             arrayElement.Add(element);
 
             while (IsCharAvailable()) {
-                if (ElementClosing()) {
+                if (ArrayElementClosing()) {
                     return arrayElement;
                 }
 
@@ -607,7 +739,7 @@ public class Parser {
 
     private Element ParseNullElement(int specifierCount) {
         while (IsCharAvailable()) {
-            if (ElementCompactClosing()) {
+            if (NullElementClosing()) {
                 return new NullElement();
             }
         }
@@ -620,7 +752,7 @@ public class Parser {
         var objectElement = new ObjectElement();
 
         while (IsCharAvailable()) {
-            if (ElementClosing()) {
+            if (ObjectElementClosing()) {
                 return objectElement;
             }
 
@@ -647,7 +779,7 @@ public class Parser {
         var propBagElement = new PropertyBagElement(style);
 
         while (IsCharAvailable()) {
-            if (ElementClosing()) {
+            if (PropertyBagElementClosing()) {
                 return propBagElement;
             }
 
@@ -668,7 +800,7 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementCompactClosing()) {
+            if (PlaceholderElementClosing()) {
                 var variable = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
 
                 if (string.IsNullOrEmpty(variable)) {
@@ -710,7 +842,7 @@ public class Parser {
             StringBuilder valueBuilder = new StringBuilder();
 
             while (IsCharAvailable()) {
-                if (ElementClosing()) {
+                if (KeywordElementClosing()) {
                     key = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
                     break;
                 }
@@ -746,7 +878,7 @@ public class Parser {
 
         StringBuilder charContent = new();
 
-        while (IsCharAvailable() && !ElementCompactClosing()) {
+        while (IsCharAvailable() && !CharacterElementClosing()) {
             charContent.Append(CurrentChar);
             Advance();
         }
@@ -868,7 +1000,7 @@ public class Parser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (ElementClosing()) {
+            if (StringElementClosing()) {
                 return new StringElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount, style: style);
             }
 
@@ -888,25 +1020,28 @@ public class Parser {
 
         StringBuilder valueBuilder = new StringBuilder();
 
-        while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
-                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
-                valueBuilder.Append(evaluatedElement.Value);
-                continue;
-            }
+        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
+            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+            valueBuilder.Append(evaluatedElement.Value);
+            _delimStack.Pop();
+            var value = valueBuilder.ToString();
+            return new DateElement(value, specifierCount, style);
+        }
+        else {
+            while (IsCharAvailable()) {
+                if (DateElementClosing()) {
+                    var value = valueBuilder.ToString();
+                    return new DateElement(value, specifierCount, style);
+                }
 
-            if (ElementCompactClosing()) {
-                var value = valueBuilder.ToString();
-                return new DateElement(value, specifierCount, style);
+                valueBuilder.Append(CurrentChar);
+                Expand();
             }
-
-            valueBuilder.Append(CurrentChar);
-            Expand();
         }
 
         throw new InvalidOperationException($"Unexpected end of {DateElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
-    }        
-    
+    }
+
     private IntegerElement ParseIntegerElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
@@ -916,14 +1051,16 @@ public class Parser {
 
         StringBuilder valueBuilder = new StringBuilder();
 
-        while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
-                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
-                valueBuilder.Append(evaluatedElement.Value);
-                continue;
-            }
+        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
+            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+            valueBuilder.Append(evaluatedElement.Value);
+            _delimStack.Pop();
+            var value = ParseNumericValue<int>(valueBuilder.ToString());
+            return new IntegerElement(value, specifierCount, style);
+        }
 
-            if (ElementCompactClosing()) {
+        while (IsCharAvailable()) {
+            if (IntegerElementClosing()) {
                 var value = ParseNumericValue<int>(valueBuilder.ToString());
                 return new IntegerElement(value, specifierCount, style);
             }
@@ -945,14 +1082,16 @@ public class Parser {
 
         StringBuilder valueBuilder = new StringBuilder();
 
-        while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
-                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
-                valueBuilder.Append(evaluatedElement.Value);
-                continue;
-            }
+        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
+            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+            valueBuilder.Append(evaluatedElement.Value);
+            _delimStack.Pop();
+            var value = ParseNumericValue<long>(valueBuilder.ToString());
+            return new LongElement(value, specifierCount, style: style);
+        }
 
-            if (ElementCompactClosing()) {
+        while (IsCharAvailable()) {
+            if (LongElementClosing()) {
                 var value = ParseNumericValue<long>(valueBuilder.ToString());
                 return new LongElement(value, specifierCount, style: style);
             }
@@ -973,14 +1112,16 @@ public class Parser {
 
         StringBuilder valueBuilder = new StringBuilder();
 
-        while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
-                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
-                valueBuilder.Append(evaluatedElement.Value);
-                continue;
-            }
+        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
+            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+            valueBuilder.Append(evaluatedElement.Value);
+            _delimStack.Pop();
+            var value = ParseNumericValue<decimal>(valueBuilder.ToString());
+            return new DecimalElement(value, specifierCount, style: style);
+        }
 
-            if (ElementCompactClosing()) {
+        while (IsCharAvailable()) {
+            if (DecimalElementClosing()) {
                 var value = ParseNumericValue<decimal>(valueBuilder.ToString());
                 return new DecimalElement(value, specifierCount, style: style);
             }
@@ -1001,14 +1142,16 @@ public class Parser {
 
         StringBuilder valueBuilder = new StringBuilder();
 
-        while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
-                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
-                valueBuilder.Append(evaluatedElement.Value);
-                continue;
-            }
+        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
+            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+            valueBuilder.Append(evaluatedElement.Value);
+            _delimStack.Pop();
+            var value = ParseNumericValue<double>(valueBuilder.ToString());
+            return new DoubleElement(value, specifierCount, style: style);
+        }
 
-            if (ElementCompactClosing()) {
+        while (IsCharAvailable()) {
+            if (DoubleElementClosing()) {
                 var value = ParseNumericValue<double>(valueBuilder.ToString());
                 return new DoubleElement(value, specifierCount, style: style);
             }
@@ -1028,29 +1171,19 @@ public class Parser {
         }
 
         StringBuilder valueBuilder = new StringBuilder();
+        string valueString = valueBuilder.ToString().ToLower();
+        bool value = false;
+
+        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
+            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+            valueBuilder.Append(evaluatedElement.Value);
+            _delimStack.Pop();
+            goto ReturnElement;
+        }
 
         while (IsCharAvailable()) {
-            if (ElementOpening(PlaceholderElement.ElementDelimiter)) {
-                PlaceholderElement evaluatedElement = ParsePlaceholderElement();
-                valueBuilder.Append(evaluatedElement.Value);
-                continue;
-            }
-            
-            if (ElementCompactClosing() || !char.IsAsciiLetter(CurrentChar)) {
-                string valueString = valueBuilder.ToString().ToLower();
-                bool value = false;
-
-                if (string.Equals(valueString, BooleanElement.TrueValue)) {
-                    value = true;
-                }
-                else if (string.Equals(valueString, BooleanElement.FalseValue)) {
-                    value = false;
-                }
-                else {
-                    throw new InvalidOperationException($"Invalid boolean value '{valueString}' at row {CurrentRow}, column {CurrentColumn}.");
-                }
-
-                return new BooleanElement(value, specifierCount, style: style);
+            if (BooleanElementClosing()) {
+                goto ReturnElement;
             }
 
             valueBuilder.Append(CurrentChar);
@@ -1058,6 +1191,23 @@ public class Parser {
         }
 
         throw new InvalidOperationException($"Unexpected end of {BooleanElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+
+    /* "Goto Considered Harmful" considered harmful. */
+    ReturnElement:
+        valueString = valueBuilder.ToString().ToLower();
+        value = false;
+
+        if (string.Equals(valueString, BooleanElement.TrueValue)) {
+            value = true;
+        }
+        else if (string.Equals(valueString, BooleanElement.FalseValue)) {
+            value = false;
+        }
+        else {
+            throw new InvalidOperationException($"Invalid boolean value '{valueString}' at row {CurrentRow}, column {CurrentColumn}.");
+        }
+
+        return new BooleanElement(value, specifierCount, style: style);
     }
 
     private T ParseNumericValue<T>(string valueString) where T : struct, IConvertible {
@@ -1069,10 +1219,9 @@ public class Parser {
         string numberString = valueString;
 
         /* Determine the base (decimal, hexadecimal, or binary). */
-
         int numberBase = basePrefix switch {
-            NumericElement<T>.HexadecimalPrefix => 16,
-            NumericElement<T>.BinaryPrefix => 2,
+            Element.HexadecimalPrefix => 16,
+            Element.BinaryPrefix => 2,
             _ => 10
         };
 

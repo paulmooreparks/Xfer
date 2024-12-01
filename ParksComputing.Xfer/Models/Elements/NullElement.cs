@@ -16,7 +16,7 @@ internal class NullElement : TypedElement<object?> {
     }
 
     public override string ToXfer() {
-        return $"{Delimiter.MinOpening} ";
+        return $"{Delimiter.MinOpening}";
     }
 
     public override string ToString() {

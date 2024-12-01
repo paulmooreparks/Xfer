@@ -9,9 +9,11 @@ using ParksComputing.Xfer.Extensions;
 namespace ParksComputing.Xferc;
 
 [Command("parse", "Parse and display an Xfer document.")]
-[Argument(typeof(string), "file", "The path to the Xfer document")]
+[Argument(typeof(string), "file", "The path to the Xfer document", Cliffer.ArgumentArity.ZeroOrOne)]
 internal class ParseCommand {
     public int Execute(string file) {
+        /* TODO: Temporary... */
+        file = "..\\..\\..\\..\\sample.xfer";
         var inputBytes = File.ReadAllBytes(file);
         var parser = new Parser();
         var document = parser.Parse(inputBytes);

@@ -1,6 +1,6 @@
 ﻿# The Xfer Data-Interchange Format
 
-![Version](https://img.shields.io/badge/version-0.5.1-blue)
+![Version](https://img.shields.io/badge/version-0.6.0-blue)
 
 _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.com/item?id=42114543). Thank you so much for all the great input and discussion!_
 
@@ -43,7 +43,7 @@ Following is the equivalent Xfer document, using [compact syntax](#compact-synta
     scores [*85 *90 *78.5]
     profile {
         email "alice@example.com"
-        joinedDate @2023-01-15T12:00:00
+        joinedDate @2023-01-15T12:00:00@
     } 
 }
 ```
@@ -51,7 +51,7 @@ Following is the equivalent Xfer document, using [compact syntax](#compact-synta
 Here is the same Xfer document with all unnecessary whitespace removed.
 
 ```xfer
-{name"Alice"age 30 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00}}
+{name"Alice"age 30 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00@}}
 ```
 
 ## Xfer Syntax
@@ -191,7 +191,7 @@ While JSON relies on JavaScript's type inference, Xfer requires explicit typing.
 ~false
 
 </ Date/time element />
-@2019-01-01T00:00:00
+@2019-01-01T00:00:00@
 
 ```
 
@@ -501,13 +501,13 @@ The Date/Time element is used to represent a date and time value. The value must
 
 * **Specifier:** `@` (Commercial At, U+0040)
 * **Explicit Syntax:** Enclose the content in `<@` and `@>` delimiters.
-* **Compact Syntax:** Follow the specifier with the content.
+* **Compact Syntax:** Enclose the content in opening and closing `@` characters.
 * **Implicit Syntax:** Not supported
 
 ```xfer
 </ Date/time element />
 <@2019-01-01T00:00:00@>
-@2019-01-01T00:00:00
+@2019-01-01T00:00:00@
 ```
 
 ### Null Element
@@ -622,7 +622,7 @@ The Property Bag element is used to represent a collection of values of any type
     "value"
     123
     ~true
-    @2019-01-01
+    @2019-01-01@
 )
 ```
 
@@ -776,7 +776,7 @@ This grammar is also [in the repository](xfer.bnf).
 
 <datetime_element> ::= <datetime_element_explicit> | <datetime_element_compact>
 <datetime_element_explicit> ::= <element_open> <datetime_specifier> <opt_whitespace> <datetime> <opt_whitespace> <datetime_specifier> <element_close>
-<datetime_element_compact> ::= <datetime_specifier> <datetime> (<body_element> | <whitespace>?)
+<datetime_element_compact> ::= <datetime_specifier> <datetime> <datetime_specifier>
 
 <null_element> ::= <null_element_explicit> | <null_element_compact>
 <null_element_explicit> ::= <element_open> <null_specifier> <null_specifier> <element_close>

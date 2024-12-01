@@ -23,7 +23,7 @@ namespace ParksComputing.Xfer.Models.Elements
         }
 
         public override string ToXfer() {
-            return $"{Delimiter.MinOpening}{ToString()} ";
+            return $"{Delimiter.MinOpening}{ToString()}{Delimiter.MinClosing}";
         }
 
         public override string ToString() {

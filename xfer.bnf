@@ -61,7 +61,7 @@
 
 <datetime_element> ::= <datetime_element_explicit> | <datetime_element_compact>
 <datetime_element_explicit> ::= <element_open> <datetime_specifier> <opt_whitespace> <datetime> <opt_whitespace> <datetime_specifier> <element_close>
-<datetime_element_compact> ::= <datetime_specifier> <datetime> (<body_element> | <whitespace>?)
+<datetime_element_compact> ::= <datetime_specifier> <datetime> <datetime_specifier>
 
 <null_element> ::= <null_element_explicit> | <null_element_compact>
 <null_element_explicit> ::= <element_open> <null_specifier> <null_specifier> <element_close>
