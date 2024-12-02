@@ -1,18 +1,10 @@
 ﻿!version"0.6.0"!
-{Person{=Full name:=?Age#42}CreatedAt@2024-11-28T20:27:07@Description'Serializing Xfer makes me <\$1F600\>'ints[#1 #2 #3]strings["one" "two" "three"]bag_o_bits1("one" #2 ^3.14)}
-(
-    numProcs #<|NUMBER_OF_PROCESSORS|>
-
-    </ A key-value pair element may have a key/value pair as a value. />
+{foo"bar"}(numProcs #<|NUMBER_OF_PROCESSORS|></ A key-value pair element may have a key/value pair as a value. />
     keyValuePair key "value"
-
-    'What if an eval element contains a comment?</ The comment is removed./>'
-)
+    'What if an eval element contains a comment?</ The comment is removed./>' )
 EmptyString <"">
 NullProperty <??>
-
-{=full name=""John "Mystery" Doe""Age#42=99=@2024-11-26T15:36:23@Description'Serializing Xfer makes me <\$1F600\>'ints[#1#2#3]strings["one""two""three"]bag_o_bits1("one"#2^3.14)}
-=key=value
+{=full name=""John "Mystery" Doe""Age#42=99=@2024-11-26T15:36:23@Description'Serializing Xfer makes me <\$1F600\>'ints[#1#2#3]strings["one""two""three"]bag_o_bits1("one"#2^3.14)}=key=value
 123
 -123
 (456)
@@ -43,9 +35,7 @@ elements of any type. />
 <"A string may contain character elements<\$20\>inside of it, which will not be parsed.">
 <'When character elements are inside an evaluated<\$20\>element, they are parsed'>
 <''An eval element may contain <'another eval'> if its specifiers are repeated''>
-<'Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) may also be embedded in eval elements, and their evaluated results will become part of the rendered value.'>
-
-{
+<'Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) may also be embedded in eval elements, and their evaluated results will become part of the rendered value.'> {
     string "value"  </ String specifier is " />
     character \65  </ Character specifier is \ />
     boolean ~true  </ Boolean specifier is ~ />

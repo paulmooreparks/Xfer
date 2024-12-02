@@ -20,15 +20,28 @@ public class BooleanElement : TypedElement<bool> {
     }
 
     public override string ToXfer() {
+        return ToXfer(Formatting.None);
+    }
+
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
+        bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
+        bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
+        string indent = string.Empty;
+
         var value = Value ? TrueValue : FalseValue;
+        var sb = new StringBuilder();
 
         if (Delimiter.Style == ElementStyle.Implicit) {
-            return $"{value} ";
+            sb.Append(value);
         }
-        if (Delimiter.Style == ElementStyle.Compact) {
-            return $"{Delimiter.OpeningSpecifier}{value} ";
+        else if (Delimiter.Style == ElementStyle.Compact) {
+            sb.Append($"{Delimiter.OpeningSpecifier}{value} ");
         }
-        return $"{Delimiter.Opening}{value}{Delimiter.Closing}";
+        else {
+            sb.Append($"{Delimiter.Opening}{value}{Delimiter.Closing}");
+        }
+
+        return sb.ToString();
     }
 
     public override string ToString() {

@@ -108,6 +108,64 @@ public class ObjectElement : Element {
         return sb.ToString();
     }
 
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
+        bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
+        bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
+        string rootIndent = string.Empty;
+        string nestIndent = string.Empty;
+
+        var sb = new StringBuilder();
+
+        if (isIndented) {
+            rootIndent = new string(indentChar, indentation * depth);
+            nestIndent = new string(indentChar, indentation * (depth + 1));
+        }
+
+        switch (Delimiter.Style) {
+            case ElementStyle.Explicit:
+                sb.Append(Delimiter.Opening);
+                break;
+            case ElementStyle.Compact:
+                sb.Append(Delimiter.MinOpening);
+                break;
+        }
+
+        if (isIndented) {
+            sb.Append(Environment.NewLine);
+        }
+
+        /* TODO: Whitespace between elements can be removed in a few situations by examining the delimiter style of the surrounding elements. */
+        int i = 0;
+        foreach (var value in _values.Values) {
+            ++i;
+            if (isIndented) {
+                sb.Append(nestIndent);
+            }
+            sb.Append(value.ToXfer(formatting, indentChar, indentation, depth + 1));
+            if ((value.Delimiter.Style == ElementStyle.Implicit || value.Delimiter.Style == ElementStyle.Compact) && i < _values.Values.Count()) {
+                sb.Append(' ');
+            }
+            if (isIndented) {
+                sb.Append(Environment.NewLine);
+            }
+        }
+
+        if (isIndented) {
+            sb.Append(rootIndent);
+        }
+
+        switch (Delimiter.Style) {
+            case ElementStyle.Explicit:
+                sb.Append(Delimiter.Closing);
+                break;
+            case ElementStyle.Compact:
+                sb.Append(Delimiter.MinClosing);
+                break;
+        }
+
+        return sb.ToString();
+    }
+
     public override string ToString() {
         return ToXfer();
     }

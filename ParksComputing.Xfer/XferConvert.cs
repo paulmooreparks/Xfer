@@ -5,9 +5,10 @@ using System.Reflection;
 using ParksComputing.Xfer.Attributes;
 using ParksComputing.Xfer.Models.Elements;
 using ParksComputing.Xfer.Services;
+using ParksComputing.Xfer;
 
 public class XferConvert {
-    public static string Serialize(object o) {
+    public static string Serialize(object o, Formatting formatting = Formatting.None, char indentChar = ' ', int indentation = 2, int depth = 0) {
         var type = o.GetType();
         var obj = new ObjectElement();
 
@@ -36,7 +37,7 @@ public class XferConvert {
             }
         }
 
-        return obj.ToXfer();
+        return obj.ToXfer(formatting, indentChar, indentation, depth);
     }
 
     private static Element SerializeValue(object? value) {

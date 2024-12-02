@@ -131,12 +131,50 @@ public class MetadataElement : Element {
     }
 
     public override string ToXfer() {
+        return ToXfer(Formatting.None);
+    }
+
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
+        bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
+        bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
+        string rootIndent = string.Empty;
+        string nestIndent = string.Empty;
+
         var sb = new StringBuilder();
-        sb.Append(Delimiter.Opening);
-        foreach (var value in _values.Values) {
-            sb.Append(value.ToXfer());
+
+        if (isIndented) {
+            rootIndent = new string(indentChar, indentation * depth);
+            nestIndent = new string(indentChar, indentation * (depth + 1));
         }
+
+        sb.Append(Delimiter.Opening);
+
+        if (isIndented) {
+            sb.Append(Environment.NewLine);
+        }
+
+        int i = 0;
+        foreach (var value in _values.Values) {
+            ++i;
+            if (isIndented) {
+                sb.Append(nestIndent);
+            }
+            sb.Append(value.ToXfer(formatting, indentChar, indentation, depth + 1));
+            if (isIndented && i + 1 < _values.Values.Count()) {
+                sb.Append(Environment.NewLine);
+            }
+        }
+
+        if (isIndented) {
+            sb.Append(Environment.NewLine);
+        }
+
         sb.Append(Delimiter.Closing);
+
+        if (isIndented) {
+            sb.Append(Environment.NewLine);
+        }
+
         return sb.ToString();
     }
 

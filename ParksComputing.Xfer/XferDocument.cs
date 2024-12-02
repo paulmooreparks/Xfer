@@ -30,9 +30,13 @@ namespace ParksComputing.Xfer
         }
 
         public virtual string ToXfer() {
+            return ToXfer(Formatting.None);
+        }
+
+        public virtual string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 1) {
             var sb = new StringBuilder();
-            sb.Append(Metadata.ToXfer());
-            sb.Append(Root.ToXfer());
+            sb.Append(Metadata.ToXfer(formatting, indentChar, indentation, depth));
+            sb.Append(Root.ToXfer(formatting, indentChar, indentation, depth));
             return sb.ToString();
         }
 

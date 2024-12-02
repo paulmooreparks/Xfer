@@ -21,7 +21,7 @@ internal class SerializeCommand {
             bag_o_bits1 = new List<object> { "one", 2, 3.14 }
         };
 
-        string xferDocument = XferConvert.Serialize(data);
+        string xferDocument = XferConvert.Serialize(data, Formatting.Indented | Formatting.Spaced);
         Console.WriteLine(xferDocument);
 
         var deserializedData = XferConvert.Deserialize<SampleData>(xferDocument);

@@ -14,7 +14,7 @@ public class CommentElement : Element {
 
     public CommentElement() : base(ElementName, new(OpeningSpecifier, ClosingSpecifier)) { }
 
-    public override string ToXfer() {
-        return string.Empty;
-    }
+    public override string ToXfer() => string.Empty;
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) => string.Empty;
+    public override string ToString() => string.Empty;
 }

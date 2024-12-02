@@ -22,7 +22,15 @@ internal class ParseCommand {
         Console.WriteLine($"Message ID is {document.Metadata.MessageId}");
         Console.WriteLine();
 
-        Console.WriteLine(document.ToXfer());
+        Console.WriteLine(document.ToXfer(Formatting.Indented | Formatting.Spaced));
+
+#if false
+        using (var stringWriter = new StringWriter())
+        using (var xferWriter = new XferTextWriter(stringWriter) { Formatting = Formatting.Indented }) {
+            xferWriter.Write(document);
+            Console.WriteLine(stringWriter.ToString());
+        }
+#endif
 
         return Result.Success;
     }

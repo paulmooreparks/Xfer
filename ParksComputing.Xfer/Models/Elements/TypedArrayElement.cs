@@ -50,7 +50,22 @@ public class TypedArrayElement<T> : ArrayElement where T : Element {
     }
 
     public override string ToXfer() {
+        return ToXfer(Formatting.None);
+    }
+
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
+        bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
+        bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
+        string rootIndent = string.Empty;
+        string nestIndent = string.Empty;
+
         var sb = new StringBuilder();
+
+        if (isIndented) {
+            rootIndent = new string(indentChar, indentation * depth);
+            nestIndent = new string(indentChar, indentation * (depth + 1));
+        }
+
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Opening);
@@ -60,13 +75,27 @@ public class TypedArrayElement<T> : ArrayElement where T : Element {
                 break;
         }
 
+        if (isIndented) {
+            sb.Append(Environment.NewLine);
+        }
+
         /* TODO: Whitespace between elements can be removed in a few situations by examining the delimiter style of the surrounding elements. */
         for (var i = 0; i < _items.Count(); ++i) {
             var item = _items[i];
-            sb.Append(item.ToXfer());
-            if (item.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i+1 < _items.Count()) {
+            if (isIndented) {
+                sb.Append(nestIndent);
+            }
+            sb.Append(item.ToXfer(formatting, indentChar, indentation, depth + 1));
+            if (item.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i + 1 < _items.Count()) {
                 sb.Append(' ');
             }
+            if (isIndented) {
+                sb.Append(Environment.NewLine);
+            }
+        }
+
+        if (isIndented) {
+            sb.Append(rootIndent);
         }
 
         switch (Delimiter.Style) {
@@ -77,6 +106,7 @@ public class TypedArrayElement<T> : ArrayElement where T : Element {
                 sb.Append(Delimiter.MinClosing);
                 break;
         }
+
         return sb.ToString();
     }
 

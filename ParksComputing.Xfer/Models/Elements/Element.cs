@@ -20,4 +20,6 @@ public abstract class Element {
     }
 
     public abstract string ToXfer();
+
+    public abstract string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0);
 }

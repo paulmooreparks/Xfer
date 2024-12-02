@@ -31,12 +31,27 @@ public class KeyValuePairElement : TypedElement<Element> {
     }
 
     public override string ToXfer() {
+        return ToXfer(Formatting.None);
+    }
+
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
+        bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
+        bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
+        string indent = string.Empty;
+
         var sb = new StringBuilder();
-        sb.Append(KeyElement.ToXfer());
-        if (Value is KeyValuePairElement || Value.Delimiter.Style == ElementStyle.Implicit) {
+
+        if (isIndented) {
+            indent = new string(indentChar, indentation * depth);
+        }
+
+        sb.Append(KeyElement.ToXfer(formatting, indentChar, indentation, depth));
+
+        if (isSpaced || Value is KeyValuePairElement || Value.Delimiter.Style == ElementStyle.Implicit) {
             sb.Append(' ');
         }
-        sb.Append(Value.ToXfer());
+
+        sb.Append(Value.ToXfer(formatting, indentChar, indentation, depth));
         return sb.ToString();
     }
 
