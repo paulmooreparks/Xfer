@@ -24,10 +24,6 @@ public class BooleanElement : TypedElement<bool> {
     }
 
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
-        bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
-        bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
-        string indent = string.Empty;
-
         var value = Value ? TrueValue : FalseValue;
         var sb = new StringBuilder();
 

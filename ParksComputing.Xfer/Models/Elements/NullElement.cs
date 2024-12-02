@@ -20,11 +20,7 @@ internal class NullElement : TypedElement<object?> {
     }
 
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
-        bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
-        bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
-
         var sb = new StringBuilder();
-
         sb.Append($"{Delimiter.MinOpening}");
         return sb.ToString();
     }

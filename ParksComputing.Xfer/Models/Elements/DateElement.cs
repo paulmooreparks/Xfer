@@ -28,12 +28,7 @@ namespace ParksComputing.Xfer.Models.Elements
         }
 
         public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
-            bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
-            bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
-            string indent = string.Empty;
-
             var sb = new StringBuilder();
-
             sb.Append($"{Delimiter.MinOpening}{ToString()}{Delimiter.MinClosing}");
             return sb.ToString();
         }

@@ -51,9 +51,6 @@ public abstract class TextElement : TypedElement<string> {
     }
 
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
-        bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
-        bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
-
         StringBuilder sb = new ();
 
         if (Delimiter.Style == ElementStyle.Implicit) {
