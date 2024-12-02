@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using ParksComputing.Xfer.Models.Elements;
+using ParksComputing.Xfer.Elements;
 
 namespace ParksComputing.Xfer;
 internal class XferTextWriter : IDisposable {
     private bool _isClosed = false;
     private readonly Formatting _formatting;
     private readonly TextWriter _writer;
-    private int _indentLevel = 0;
     private int _indentation = 4;
     private char _indentChar = ' ';
 

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Reflection;
 
 using ParksComputing.Xfer.Attributes;
-using ParksComputing.Xfer.Models.Elements;
 using ParksComputing.Xfer.Services;
 using ParksComputing.Xfer;
+using ParksComputing.Xfer.Elements;
 
 public class XferConvert {
     public static string Serialize(object o, Formatting formatting = Formatting.None, char indentChar = ' ', int indentation = 2, int depth = 0) {

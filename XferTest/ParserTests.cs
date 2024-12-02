@@ -1,27 +1,43 @@
-﻿using Cliffer;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using ParksComputing.Xfer;
 using ParksComputing.Xfer.Attributes;
-using ParksComputing.Xfer.Services;
-using ParksComputing.Xfer.Extensions;
 using ParksComputing.Xfer.Elements;
+using ParksComputing.Xfer.Services;
 
-namespace ParksComputing.Xferc.Commands;
+namespace Xfer.Tests;
 
-[Command("serialize", "Serialize an object to an Xfer document and display the result.")]
-// [Argument(typeof(string), "file", "The path to the class file for which to serialize to Xfer")]
-internal class SerializeCommand {
-    public int Execute(string file) {
+[TestClass]
+public class ParserTests {
+    public TestContext? TestContext { get; set; }
+
+    private static TestContext? _testContext;
+
+    [ClassInitialize]
+    public static void SetupTests(TestContext testContext) {
+        _testContext = testContext;
+    }
+
+    [TestMethod]
+    [DeploymentItem("Valid/sample.xfer")]
+    public void BigParse() {
+        var filePath = Path.Combine(TestContext?.DeploymentDirectory, "sample.xfer");
+        var parser = new Parser();
+        var result = parser.Parse(File.ReadAllText(filePath));
+    }
+
+    [TestMethod]
+    public void Serialize() {
         var data = new SampleData {
             Person = new Person { Name = null, Age = 42 },
             CreatedAt = DateTime.UtcNow,
             Description = "Serializing Xfer makes me <\\$1F600\\>",
-            ints = new int[] { 1, 2, 3 },
-            strings = new string[] { "one", "two", "three" },
-            bag_o_bits1 = new List<object> { "one", 2, 3.14 }
+            ints = [1, 2, 3],
+            strings = [ "one", "two", "three" ],
+            bag_o_bits1 = ["one", 2, 3.14]
         };
 
-        string xferContent = XferConvert.Serialize(data, Formatting.Indented | Formatting.Spaced);
+        string xferContent = XferConvert.Serialize(data, Formatting.Pretty);
         Console.WriteLine(xferContent);
 
         var deserializedData = XferConvert.Deserialize<SampleData>(xferContent);
@@ -44,8 +60,6 @@ internal class SerializeCommand {
                 Console.WriteLine(person?.ToXfer(Formatting.Pretty));
             }
         }
-
-        return Result.Success;
     }
 }
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParksComputing.Xfer.Models.Elements;
+namespace ParksComputing.Xfer.Elements;
 
 public class ElementDelimiter
 {
@@ -12,9 +12,11 @@ public class ElementDelimiter
     public char ClosingSpecifier { get; }
 
     private int _specifierCount;
-    public int SpecifierCount { 
+    public int SpecifierCount
+    {
         get => _specifierCount;
-        set {
+        set
+        {
             _specifierCount = value;
 
             var repeatedOpening = new string(OpeningSpecifier, _specifierCount);
@@ -26,7 +28,7 @@ public class ElementDelimiter
             MinClosing = repeatedClosing;
         }
     }
-    public ElementStyle Style { get; set;  } = ElementStyle.Explicit;
+    public ElementStyle Style { get; set; } = ElementStyle.Explicit;
 
     public string Opening { get; protected set; }
     public string Closing { get; protected set; }

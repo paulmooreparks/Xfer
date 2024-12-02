@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParksComputing.Xfer.Models.Elements;
+namespace ParksComputing.Xfer.Elements;
 
-public abstract class ArrayElement : Element {
+public abstract class ArrayElement : Element
+{
     public static readonly string ElementName = "array";
     public const char OpeningSpecifier = '[';
     public const char ClosingSpecifier = ']';
@@ -16,7 +17,7 @@ public abstract class ArrayElement : Element {
 
     public abstract void Add(Element element);
 
-    public ArrayElement(string name, ElementDelimiter delimiter) 
-        : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact)) 
+    public ArrayElement(string name, ElementDelimiter delimiter)
+        : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact))
     { }
 }

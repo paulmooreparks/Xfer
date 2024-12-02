@@ -1,11 +1,11 @@
 ﻿using System.Text;
-
 using ParksComputing.Xfer.Extensions;
 using ParksComputing.Xfer.Services;
 
-namespace ParksComputing.Xfer.Models.Elements;
+namespace ParksComputing.Xfer.Elements;
 
-public class ObjectElement : Element {
+public class ObjectElement : Element
+{
     public static readonly string ElementName = "object";
     public const char OpeningSpecifier = '{';
     public const char ClosingSpecifier = '}';
@@ -14,28 +14,36 @@ public class ObjectElement : Element {
     private Dictionary<string, KeyValuePairElement> _values = new();
     public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
 
-    public Element this[string index] {
-        get {
+    public Element this[string index]
+    {
+        get
+        {
             return _values[index].Value;
         }
-        set {
-            SetOrUpdateValue(index, value);
+        set
+        {
+            SetElement(index, value);
         }
     }
 
     public ObjectElement() : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact)) { }
 
-    private void SetOrUpdateValue<TElement>(string key, TElement element) where TElement : Element {
-        if (_values.TryGetValue(key, out KeyValuePairElement? kvp)) {
+    private void SetElement<TElement>(string key, TElement element) where TElement : Element
+    {
+        if (_values.TryGetValue(key, out KeyValuePairElement? kvp))
+        {
             _values[key] = new KeyValuePairElement(kvp.KeyElement, element);
         }
-        else {
+        else
+        {
             TextElement keyElement;
 
-            if (key.IsKeywordString()) {
+            if (key.IsKeywordString())
+            {
                 keyElement = new KeywordElement(key, style: ElementStyle.Implicit);
             }
-            else {
+            else
+            {
                 keyElement = new StringElement(key);
             }
 
@@ -43,12 +51,45 @@ public class ObjectElement : Element {
         }
     }
 
-    public bool ContainsKey(string key) {
+    public bool ContainsKey(string key)
+    {
         return _values.ContainsKey(key);
     }
 
-    public bool Add(KeyValuePairElement value) {
-        if (_values.ContainsKey(value.Key)) {
+    public bool TryGetElement<TElement>(string key, out TElement? result) where TElement : Element
+    {
+        if (_values.TryGetValue(key, out KeyValuePairElement? kvp))
+        {
+            if (kvp.Value is TElement element)
+            {
+                result = element;
+                return true;
+            }
+            else if (kvp.Value is IConvertible convertible && typeof(TElement).IsAssignableFrom(convertible.GetType()))
+            {
+                result = (TElement)Convert.ChangeType(convertible, typeof(TElement));
+                return true;
+            }
+        }
+
+        result = default;
+        return false;
+    }
+
+    public Element GetElement(string key)
+    {
+        return _values[key].Value;
+    }
+
+    public bool Remove(string key)
+    {
+        return _values.Remove(key);
+    }
+
+    public bool Add(KeyValuePairElement value)
+    {
+        if (_values.ContainsKey(value.Key))
+        {
             return false;
         }
 
@@ -56,28 +97,36 @@ public class ObjectElement : Element {
         return true;
     }
 
-    public void AddOrUpdate(KeyValuePairElement value) {
-        if (_values.TryGetValue(value.Key, out KeyValuePairElement? tuple)) {
+    public void AddOrUpdate(KeyValuePairElement value)
+    {
+        if (_values.TryGetValue(value.Key, out KeyValuePairElement? tuple))
+        {
             _values[value.Key] = value;
         }
-        else {
+        else
+        {
             _values.Add(value.Key, value);
         }
     }
 
-    public List<KeyValuePairElement> TypedValue {
-        get {
+    public List<KeyValuePairElement> TypedValue
+    {
+        get
+        {
             List<KeyValuePairElement> values = new();
-            foreach (var value in _values) {
+            foreach (var value in _values)
+            {
                 values.Append(value.Value);
             }
             return values;
         }
     }
 
-    public override string ToXfer() {
+    public override string ToXfer()
+    {
         var sb = new StringBuilder();
-        switch (Delimiter.Style) {
+        switch (Delimiter.Style)
+        {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Opening);
                 break;
@@ -89,15 +138,18 @@ public class ObjectElement : Element {
 
         /* TODO: Whitespace between elements can be removed in a few situations by examining the delimiter style of the surrounding elements. */
         int i = 0;
-        foreach (var value in _values.Values) {
+        foreach (var value in _values.Values)
+        {
             ++i;
             sb.Append($"{value.ToXfer()}");
-            if (value.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i < _values.Values.Count()) {
+            if (value.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i < _values.Values.Count())
+            {
                 sb.Append(' ');
             }
         }
 
-        switch (Delimiter.Style) {
+        switch (Delimiter.Style)
+        {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Closing);
                 break;
@@ -108,7 +160,8 @@ public class ObjectElement : Element {
         return sb.ToString();
     }
 
-    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
+    {
         bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
         bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
         string rootIndent = string.Empty;
@@ -116,12 +169,14 @@ public class ObjectElement : Element {
 
         var sb = new StringBuilder();
 
-        if (isIndented) {
+        if (isIndented)
+        {
             rootIndent = new string(indentChar, indentation * depth);
             nestIndent = new string(indentChar, indentation * (depth + 1));
         }
 
-        switch (Delimiter.Style) {
+        switch (Delimiter.Style)
+        {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Opening);
                 break;
@@ -130,31 +185,38 @@ public class ObjectElement : Element {
                 break;
         }
 
-        if (isIndented) {
+        if (isIndented)
+        {
             sb.Append(Environment.NewLine);
         }
 
         /* TODO: Whitespace between elements can be removed in a few situations by examining the delimiter style of the surrounding elements. */
         int i = 0;
-        foreach (var value in _values.Values) {
+        foreach (var value in _values.Values)
+        {
             ++i;
-            if (isIndented) {
+            if (isIndented)
+            {
                 sb.Append(nestIndent);
             }
             sb.Append(value.ToXfer(formatting, indentChar, indentation, depth + 1));
-            if ((value.Delimiter.Style == ElementStyle.Implicit || value.Delimiter.Style == ElementStyle.Compact) && i < _values.Values.Count()) {
+            if ((value.Delimiter.Style == ElementStyle.Implicit || value.Delimiter.Style == ElementStyle.Compact) && i < _values.Values.Count())
+            {
                 sb.Append(' ');
             }
-            if (isIndented) {
+            if (isIndented)
+            {
                 sb.Append(Environment.NewLine);
             }
         }
 
-        if (isIndented) {
+        if (isIndented)
+        {
             sb.Append(rootIndent);
         }
 
-        switch (Delimiter.Style) {
+        switch (Delimiter.Style)
+        {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Closing);
                 break;
@@ -166,7 +228,8 @@ public class ObjectElement : Element {
         return sb.ToString();
     }
 
-    public override string ToString() {
+    public override string ToString()
+    {
         return ToXfer();
     }
 }

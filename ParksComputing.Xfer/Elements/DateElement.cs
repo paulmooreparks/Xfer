@@ -2,38 +2,44 @@
 using System.Globalization;
 using System.Text;
 
-namespace ParksComputing.Xfer.Models.Elements
+namespace ParksComputing.Xfer.Elements
 {
-    public class DateElement : TypedElement<DateTime> {
+    public class DateElement : TypedElement<DateTime>
+    {
         public static readonly string ElementName = "date";
         public const char OpeningSpecifier = '@';
         public const char ClosingSpecifier = OpeningSpecifier;
         public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-        public DateElement(string input, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact) 
-            : base(DateTime.Now, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, elementStyle)) 
+        public DateElement(string input, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact)
+            : base(DateTime.Now, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, elementStyle))
         {
-            if (!DateTime.TryParseExact(input, new[] { "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-dd" }, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime dateValue)) {
+            if (!DateTime.TryParseExact(input, new[] { "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-dd" }, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime dateValue))
+            {
                 throw new InvalidOperationException($"Invalid date format '{input}'. Expected ISO 8601 format: 'yyyy-MM-ddTHH:mm:ss' or 'yyyy-MM-dd'.");
             }
 
             Value = dateValue;
         }
 
-        public DateElement(DateTime dateValue) : base(dateValue, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier)) {
+        public DateElement(DateTime dateValue) : base(dateValue, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier))
+        {
         }
 
-        public override string ToXfer() {
+        public override string ToXfer()
+        {
             return ToXfer(Formatting.None);
         }
 
-        public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
+        public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
+        {
             var sb = new StringBuilder();
             sb.Append($"{Delimiter.MinOpening}{ToString()}{Delimiter.MinClosing}");
             return sb.ToString();
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             string dateValue = Value.TimeOfDay == TimeSpan.Zero
                     ? $"{Value:yyyy-MM-dd}"
                     : $"{Value:yyyy-MM-ddTHH:mm:ss}";

@@ -9,4 +9,5 @@ public enum Formatting {
     None = 0x00,
     Indented = 0x01,
     Spaced = 0x10,
+    Pretty = Indented | Spaced
 }

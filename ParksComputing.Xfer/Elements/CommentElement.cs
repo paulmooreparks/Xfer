@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParksComputing.Xfer.Models.Elements;
+namespace ParksComputing.Xfer.Elements;
 
-public class CommentElement : Element {
+public class CommentElement : Element
+{
     public static readonly string ElementName = "comment";
     public const char OpeningSpecifier = '/';
     public const char ClosingSpecifier = OpeningSpecifier;

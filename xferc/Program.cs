@@ -4,8 +4,6 @@ using Cliffer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using ParksComputing.Xfer.Services;
-using ParksComputing.Xfer.Models;
 using ParksComputing.Xferc.Services;
 
 
