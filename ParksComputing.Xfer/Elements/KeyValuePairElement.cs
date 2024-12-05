@@ -51,7 +51,7 @@ public class KeyValuePairElement : TypedElement<Element>
             sb.Append(' ');
         }
 
-        sb.Append(Value.ToXfer(formatting, indentChar, indentation, depth));
+        sb.Append(Value?.ToXfer(formatting, indentChar, indentation, depth) ?? new NullElement().ToXfer(formatting, indentChar, indentation, depth));
         return sb.ToString();
     }
 

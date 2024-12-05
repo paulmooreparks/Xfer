@@ -21,7 +21,7 @@ public class ParserTests {
     [TestMethod]
     [DeploymentItem("Valid/sample.xfer")]
     public void BigParse() {
-        var filePath = Path.Combine(TestContext?.DeploymentDirectory, "sample.xfer");
+        var filePath = Path.Combine(TestContext?.DeploymentDirectory!, "sample.xfer");
         var parser = new Parser();
         var result = parser.Parse(File.ReadAllText(filePath));
     }

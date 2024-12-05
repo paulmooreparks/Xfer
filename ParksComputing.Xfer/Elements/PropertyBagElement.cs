@@ -6,22 +6,11 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Elements;
 
-public class PropertyBagElement : Element
-{
+public class PropertyBagElement : ListElement {
     public static readonly string ElementName = "propertyBag";
     public const char OpeningSpecifier = '(';
     public const char ClosingSpecifier = ')';
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact);
-
-    private List<Element> _items = new();
-
-    public IEnumerable<Element> Values
-    {
-        get
-        {
-            return _items;
-        }
-    }
 
     public List<object> TypedValue
     {
@@ -33,26 +22,6 @@ public class PropertyBagElement : Element
                 values[i] = _items[i];
             }
             return values;
-        }
-    }
-
-    public Element[] Value
-    {
-        get
-        {
-            return _items.ToArray();
-        }
-    }
-
-    public Element this[int index]
-    {
-        get
-        {
-            return _items[index];
-        }
-        set
-        {
-            _items[index] = value;
         }
     }
 
@@ -69,11 +38,6 @@ public class PropertyBagElement : Element
     public PropertyBagElement(params Element[] values) : this()
     {
         _items.AddRange(values);
-    }
-
-    public void Add(Element element)
-    {
-        _items.Add(element);
     }
 
     public override string ToXfer()

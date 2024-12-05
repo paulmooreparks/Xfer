@@ -6,60 +6,57 @@ using ParksComputing.Xfer.Attributes;
 using ParksComputing.Xfer.Services;
 using ParksComputing.Xfer;
 using ParksComputing.Xfer.Elements;
+using System.Collections;
 
 public class XferConvert {
-    public static string Serialize(object o, Formatting formatting = Formatting.None, char indentChar = ' ', int indentation = 2, int depth = 0) {
-        var type = o.GetType();
-        var obj = new ObjectElement();
-
-        foreach (var property in type.GetProperties()) {
-            var attribute = property.GetCustomAttribute<XferPropertyAttribute>();
-            var evalAttribute = property.GetCustomAttribute<XferEvaluatedAttribute>();
-
-            var name = attribute?.Name ?? property.Name;
-            var value = property.GetValue(o);
-
-            if (evalAttribute != null) {
-                Element element;
-
-                if (value is null) {
-                    element = new NullElement();
-                }
-                else {
-                    element = new EvaluatedElement(value.ToString() ?? string.Empty);
-                }
-
-                obj.AddOrUpdate(new KeyValuePairElement(new KeywordElement(name), element));
-            }
-            else {
-                Element element = SerializeValue(value);
-                obj.AddOrUpdate(new KeyValuePairElement(new KeywordElement(name), element));
-            }
-        }
-
-        return obj.ToXfer(formatting, indentChar, indentation, depth);
+    public static string Serialize(object? o, Formatting formatting = Formatting.None, char indentChar = ' ', int indentation = 2, int depth = 0) {
+        Element element = SerializeValue(o);
+        return element.ToXfer(formatting, indentChar, indentation, depth);
     }
 
-    private static Element SerializeValue(object? value) {
+    public static Element SerializeValue(object? value) {
         return value switch {
             null => new NullElement(),
+            DBNull => new NullElement(),
             int intValue => new IntegerElement(intValue),
             long longValue => new LongElement(longValue),
             bool boolValue => new BooleanElement(boolValue),
             double doubleValue => new DoubleElement(doubleValue),
             decimal decimalValue => new DecimalElement(decimalValue),
-            DateTime dateTimeValue => new DateElement(dateTimeValue.ToString("yyyy-MM-ddTHH:mm:ss")),
+            DateTime dateTimeValue => new DateElement(dateTimeValue),
+            DateOnly dateValue => new DateElement(dateValue.ToString("yyyy-MM-dd")),
+            TimeOnly timeOnlyValue => new DateElement(timeOnlyValue.ToString("HH:mm:ss")),
+            TimeSpan timeSpanValue => new DateElement(timeSpanValue.ToString("c")), // ISO 8601 duration format
+            DateTimeOffset dateTimeOffsetValue => new DateElement(dateTimeOffsetValue.ToString("o")), // ISO 8601 format
             string stringValue => new StringElement(stringValue),
             char charValue => new CharacterElement(charValue),
-            int[] intArray => SerializeArray(intArray),
-            long[] longArray => SerializeArray(longArray),
+            int[] intArray => SerializeIntArray(intArray),
+            long[] longArray => SerializeLongArray(longArray),
             bool[] boolArray => SerializeBooleanArray(boolArray),
             double[] doubleArray => SerializeDoubleArray(doubleArray),
             decimal[] decimalArray => SerializeDecimalArray(decimalArray),
             DateTime[] dateArray => SerializeDateArray(dateArray),
+            DateOnly[] dateOnlyArray => SerializeDateOnlyArray(dateOnlyArray),
+            Guid guidValue => new StringElement(guidValue.ToString()),
+            Enum enumValue => SerializeEnumValue(enumValue),
+            Uri uriValue => new StringElement(uriValue.ToString()),
             string[] stringArray => SerializeStringArray(stringArray),
+            byte[] byteArray => new StringElement(Convert.ToBase64String(byteArray)),
             object[] objectArray => new PropertyBagElement(objectArray.Select(SerializeValue)),
+#if false
+            IDictionary dictionary => new ObjectElement(
+                dictionary.Cast<dynamic>().Select(kvp =>
+                    new KeyValuePairElement(SerializeValue(kvp.Key), SerializeValue(kvp.Value)))
+            ),
+            System.Dynamic.ExpandoObject expando => new ObjectElement(
+                expando.Select(kvp =>
+                    new KeyValuePairElement(SerializeValue(kvp.Key), SerializeValue(kvp.Value)))
+            ),
+#endif
             IEnumerable<object> list => new PropertyBagElement(list.Select(SerializeValue)),
+            IEnumerable enumerable => new PropertyBagElement(
+                enumerable.Cast<object>().Select(SerializeValue)
+            ),
             object objectValue => SerializeObject(objectValue)
         };
     }
@@ -96,7 +93,7 @@ public class XferConvert {
         return objElement;
     }
 
-    private static TypedArrayElement<IntegerElement> SerializeArray(int[] intArray) {
+    private static TypedArrayElement<IntegerElement> SerializeIntArray(int[] intArray) {
         var arrayElement = new TypedArrayElement<IntegerElement>();
 
         foreach (var item in intArray) {
@@ -106,7 +103,7 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<LongElement> SerializeArray(long[] longArray) {
+    private static TypedArrayElement<LongElement> SerializeLongArray(long[] longArray) {
         var arrayElement = new TypedArrayElement<LongElement>();
 
         foreach (var item in longArray) {
@@ -156,6 +153,16 @@ public class XferConvert {
         return arrayElement;
     }
 
+    private static TypedArrayElement<DateElement> SerializeDateOnlyArray(DateOnly[] dateArray) {
+        var arrayElement = new TypedArrayElement<DateElement>();
+
+        foreach (var item in dateArray) {
+            arrayElement.Add(new DateElement(item.ToString("yyyy-MM-dd")));
+        }
+
+        return arrayElement;
+    }
+
     private static TypedArrayElement<StringElement> SerializeStringArray(string[] stringArray) {
         var arrayElement = new TypedArrayElement<StringElement>();
 
@@ -165,6 +172,17 @@ public class XferConvert {
 
         return arrayElement;
     }
+
+    private static StringElement SerializeEnumValue<TEnum>(TEnum enumValue) where TEnum : Enum {
+        var key = typeof(TEnum).Name;
+        var value = enumValue.ToString();
+        return new StringElement(value);
+    }
+
+    private static TEnum DeserializeEnumValue<TEnum>(TextElement textElement) where TEnum : struct, Enum {
+        return Enum.Parse<TEnum>(textElement.Value);
+    }
+
 
     public static T Deserialize<T>(string xfer) where T : new() {
         var instance = new T();
@@ -200,7 +218,26 @@ public class XferConvert {
         return instance;
     }
 
+    public static object Deserialize(string xfer, Type targetType) {
+        // Use reflection to create an instance of the generic method
+        var method = typeof(XferConvert).GetMethod(nameof(Deserialize), new[] { typeof(string) });
+        if (method == null) {
+            throw new InvalidOperationException("Could not find the generic Deserialize method.");
+        }
+
+        var genericMethod = method.MakeGenericMethod(targetType);
+        return genericMethod.Invoke(null, new object[] { xfer }) ?? throw new InvalidOperationException($"Failed to deserialize content into type {targetType.Name}.");
+    }
+
     private static object? DeserializeValue(Element element, Type targetType) {
+        if (targetType.IsEnum && element is TextElement textElement) {
+            var deserializeEnumMethod = typeof(XferConvert)
+                .GetMethod(nameof(DeserializeEnumValue), BindingFlags.Static | BindingFlags.NonPublic)!
+                .MakeGenericMethod(targetType);
+
+            return deserializeEnumMethod.Invoke(null, new object[] { textElement });
+        }
+
         return element switch {
             IntegerElement intElement when targetType == typeof(int) => intElement.Value,
             IntegerElement intElement when targetType == typeof(object) => intElement.Value,
@@ -212,6 +249,10 @@ public class XferConvert {
             DoubleElement doubleElement when targetType == typeof(object) => doubleElement.Value,
             DecimalElement decimalElement when targetType == typeof(decimal) => decimalElement.Value,
             DecimalElement decimalElement when targetType == typeof(object) => decimalElement.Value,
+            DateElement dateElement when targetType == typeof(DateTimeOffset) => new DateTimeOffset(dateElement.Value),
+            DateElement dateElement when targetType == typeof(TimeSpan) => dateElement.Value.TimeOfDay,
+            DateElement dateElement when targetType == typeof(TimeOnly) => TimeOnly.FromDateTime(dateElement.Value),
+            DateElement dateElement when targetType == typeof(DateOnly) => DateOnly.FromDateTime(dateElement.Value),
             DateElement dateElement when targetType == typeof(DateTime) => dateElement.Value,
             DateElement dateElement when targetType == typeof(object) => dateElement.Value,
             StringElement stringElement when targetType == typeof(string) => stringElement.Value,

@@ -18,8 +18,8 @@ internal class ParseCommand {
         var parser = new Parser();
         var document = parser.Parse(inputBytes);
 
-        Console.WriteLine($"Document uses Xfer version {document.Metadata.Version}");
-        Console.WriteLine($"Message ID is {document.Metadata.MessageId}");
+        Console.WriteLine($"Document uses Xfer version {document.Metadata.Xfer}");
+        // Console.WriteLine($"Message ID is {document.Metadata.MessageId}");
         Console.WriteLine();
 
         Console.WriteLine(document.ToXfer(Formatting.Indented | Formatting.Spaced));

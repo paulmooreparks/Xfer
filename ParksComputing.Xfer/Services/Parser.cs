@@ -12,7 +12,7 @@ namespace ParksComputing.Xfer.Services;
 settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
 
 public class Parser {
-    public static readonly string Version = "0.6.1";
+    public static readonly string Version = "0.7.0";
 
     public Parser() : this(Encoding.UTF8) { }
 
@@ -1025,13 +1025,13 @@ public class Parser {
             valueBuilder.Append(evaluatedElement.Value);
             _delimStack.Pop();
             var value = valueBuilder.ToString();
-            return new DateElement(value, specifierCount, style);
+            return new DateElement(value, DateTimeHandling.RoundTrip, specifierCount, style);
         }
         else {
             while (IsCharAvailable()) {
                 if (DateElementClosing()) {
                     var value = valueBuilder.ToString();
-                    return new DateElement(value, specifierCount, style);
+                    return new DateElement(value, DateTimeHandling.RoundTrip, specifierCount, style);
                 }
 
                 valueBuilder.Append(CurrentChar);

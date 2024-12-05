@@ -22,11 +22,11 @@ public abstract class NumericElement<T> : TypedElement<T>
 
         if (Delimiter.Style == ElementStyle.Implicit)
         {
-            sb.Append($"{Value}");
+            sb.Append($"{Value} ");
         }
         else if (Delimiter.Style == ElementStyle.Compact)
         {
-            sb.Append($"{Delimiter.OpeningSpecifier}{Value}");
+            sb.Append($"{Delimiter.OpeningSpecifier}{Value} ");
         }
         else
         {
