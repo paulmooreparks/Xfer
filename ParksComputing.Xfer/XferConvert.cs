@@ -23,11 +23,11 @@ public class XferConvert {
             bool boolValue => new BooleanElement(boolValue),
             double doubleValue => new DoubleElement(doubleValue),
             decimal decimalValue => new DecimalElement(decimalValue),
-            DateTime dateTimeValue => new DateElement(dateTimeValue),
-            DateOnly dateValue => new DateElement(dateValue.ToString("yyyy-MM-dd")),
-            TimeOnly timeOnlyValue => new DateElement(timeOnlyValue.ToString("HH:mm:ss")),
-            TimeSpan timeSpanValue => new DateElement(timeSpanValue.ToString("c")), // ISO 8601 duration format
-            DateTimeOffset dateTimeOffsetValue => new DateElement(dateTimeOffsetValue.ToString("o")), // ISO 8601 format
+            DateTime dateTimeValue => new DateTimeElement(dateTimeValue),
+            DateOnly dateOnlyValue => new DateElement(dateOnlyValue),
+            TimeOnly timeOnlyValue => new TimeElement(timeOnlyValue),
+            TimeSpan timeSpanValue => new DateTimeElement(timeSpanValue.ToString("c")), // ISO 8601 duration format
+            DateTimeOffset dateTimeOffsetValue => new DateTimeElement(dateTimeOffsetValue.ToString("o")), // ISO 8601 format
             string stringValue => new StringElement(stringValue),
             char charValue => new CharacterElement(charValue),
             int[] intArray => SerializeIntArray(intArray),
@@ -143,21 +143,21 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<DateElement> SerializeDateArray(DateTime[] dateArray) {
-        var arrayElement = new TypedArrayElement<DateElement>();
+    private static TypedArrayElement<DateTimeElement> SerializeDateArray(DateTime[] dateArray) {
+        var arrayElement = new TypedArrayElement<DateTimeElement>();
 
         foreach (var item in dateArray) {
-            arrayElement.Add(new DateElement(item));
+            arrayElement.Add(new DateTimeElement(item));
         }
 
         return arrayElement;
     }
 
-    private static TypedArrayElement<DateElement> SerializeDateOnlyArray(DateOnly[] dateArray) {
-        var arrayElement = new TypedArrayElement<DateElement>();
+    private static TypedArrayElement<DateTimeElement> SerializeDateOnlyArray(DateOnly[] dateArray) {
+        var arrayElement = new TypedArrayElement<DateTimeElement>();
 
         foreach (var item in dateArray) {
-            arrayElement.Add(new DateElement(item.ToString("yyyy-MM-dd")));
+            arrayElement.Add(new DateTimeElement(item.ToString("yyyy-MM-dd")));
         }
 
         return arrayElement;
@@ -249,12 +249,14 @@ public class XferConvert {
             DoubleElement doubleElement when targetType == typeof(object) => doubleElement.Value,
             DecimalElement decimalElement when targetType == typeof(decimal) => decimalElement.Value,
             DecimalElement decimalElement when targetType == typeof(object) => decimalElement.Value,
-            DateElement dateElement when targetType == typeof(DateTimeOffset) => new DateTimeOffset(dateElement.Value),
-            DateElement dateElement when targetType == typeof(TimeSpan) => dateElement.Value.TimeOfDay,
-            DateElement dateElement when targetType == typeof(TimeOnly) => TimeOnly.FromDateTime(dateElement.Value),
-            DateElement dateElement when targetType == typeof(DateOnly) => DateOnly.FromDateTime(dateElement.Value),
-            DateElement dateElement when targetType == typeof(DateTime) => dateElement.Value,
+            DateTimeElement dateElement when targetType == typeof(DateTimeOffset) => new DateTimeOffset(dateElement.Value),
+            DateTimeElement dateElement when targetType == typeof(TimeSpan) => dateElement.Value.TimeOfDay,
+            TimeElement timeElement when targetType == typeof(TimeOnly) => timeElement.Value,
+            TimeElement timeElement when targetType == typeof(object) => timeElement.Value,
+            DateElement dateElement when targetType == typeof(DateOnly) => dateElement.Value,
             DateElement dateElement when targetType == typeof(object) => dateElement.Value,
+            DateTimeElement dateElement when targetType == typeof(DateTime) => dateElement.Value,
+            DateTimeElement dateElement when targetType == typeof(object) => dateElement.Value,
             StringElement stringElement when targetType == typeof(string) => stringElement.Value,
             StringElement stringElement when targetType == typeof(object) => stringElement.Value,
             CharacterElement charElement when targetType == typeof(string) => charElement.Value,

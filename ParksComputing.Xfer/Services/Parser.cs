@@ -342,7 +342,7 @@ public class Parser {
         var style = delimiter.Style;
         var closingSpecifier = delimiter.ClosingSpecifier;
 
-        Debug.Assert(closingSpecifier == DateElement.ClosingSpecifier);
+        Debug.Assert(closingSpecifier == DateTimeElement.ClosingSpecifier);
 
         if (style == ElementStyle.Compact) {
             if (CurrentChar == closingSpecifier) {
@@ -633,7 +633,7 @@ public class Parser {
                 return booleanElement;
             }
 
-            if (ElementOpening(DateElement.ElementDelimiter, out int dateSpecifierCount)) {
+            if (ElementOpening(DateTimeElement.ElementDelimiter, out int dateSpecifierCount)) {
                 var dateElement = ParseDateElement(dateSpecifierCount);
                 SkipWhitespace();
                 return dateElement;
@@ -712,7 +712,7 @@ public class Parser {
                 DecimalElement => new TypedArrayElement<DecimalElement>(style: style),
                 DoubleElement => new TypedArrayElement<DoubleElement>(style: style),
                 BooleanElement => new TypedArrayElement<BooleanElement>(style: style),
-                DateElement => new TypedArrayElement<DateElement>(style: style),
+                DateTimeElement => new TypedArrayElement<DateTimeElement>(style: style),
                 TextElement => new TypedArrayElement<TextElement>(style: style),
                 CharacterElement => new TypedArrayElement<CharacterElement>(style: style),
                 KeyValuePairElement => new TypedArrayElement<KeyValuePairElement>(style: style),
@@ -961,9 +961,16 @@ public class Parser {
                 continue;
             }
 
-            if (ElementExplicitOpening(DateElement.ElementDelimiter, out int dateSpecifierCount)) {
-                DateElement dateElement = ParseDateElement(dateSpecifierCount);
-                valueBuilder.Append(dateElement.Value);
+            if (ElementExplicitOpening(DateTimeElement.ElementDelimiter, out int dateSpecifierCount)) {
+                Element dateElement = ParseDateElement(dateSpecifierCount);
+
+                valueBuilder.Append(
+                    dateElement switch {
+                        DateTimeElement dateTimeElement => dateTimeElement.Value,
+                        TimeElement timeElement => timeElement.Value,
+                        _ => throw new InvalidOperationException($"Unexpected element type at row {CurrentRow}, column {CurrentColumn}.")
+                    }
+                    );
                 continue;
             }
 
@@ -1011,7 +1018,7 @@ public class Parser {
         throw new InvalidOperationException($"Unexpected end of {StringElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private DateElement ParseDateElement(int specifierCount = 1) {
+    private Element ParseDateElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Compact) {
@@ -1025,13 +1032,26 @@ public class Parser {
             valueBuilder.Append(evaluatedElement.Value);
             _delimStack.Pop();
             var value = valueBuilder.ToString();
-            return new DateElement(value, DateTimeHandling.RoundTrip, specifierCount, style);
+            return new DateTimeElement(value, DateTimeHandling.RoundTrip, specifierCount, style);
         }
         else {
             while (IsCharAvailable()) {
                 if (DateElementClosing()) {
-                    var value = valueBuilder.ToString();
-                    return new DateElement(value, DateTimeHandling.RoundTrip, specifierCount, style);
+                    var stringValue = valueBuilder.ToString();
+
+                    if (DateOnly.TryParse(stringValue, out var dateOnly)) {
+                        return new DateElement(dateOnly, DateTimeHandling.RoundTrip, specifierCount, style);
+                    }
+
+                    if (TimeOnly.TryParse(stringValue, out var timeOnly)) {
+                        return new TimeElement(timeOnly, DateTimeHandling.RoundTrip, specifierCount, style);
+                    }
+
+                    if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime)) {
+                        return new DateTimeElement(stringValue, DateTimeHandling.RoundTrip, specifierCount, style);
+                    }
+
+                    throw new InvalidOperationException($"Invalid time string '{stringValue}'. Expected ISO 8601 format.");
                 }
 
                 valueBuilder.Append(CurrentChar);
@@ -1039,7 +1059,7 @@ public class Parser {
             }
         }
 
-        throw new InvalidOperationException($"Unexpected end of {DateElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+        throw new InvalidOperationException($"Unexpected end of {DateTimeElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
     private IntegerElement ParseIntegerElement(int specifierCount = 1) {

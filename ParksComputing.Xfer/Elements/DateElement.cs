@@ -1,71 +1,72 @@
 ﻿using System;
-using System.Globalization;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using System.Globalization;
+using System.Threading.Tasks;
 
-namespace ParksComputing.Xfer.Elements
-{
-    public class DateElement : TypedElement<DateTime>
-    {
-        public static readonly string ElementName = "date";
-        public const char OpeningSpecifier = '@';
-        public const char ClosingSpecifier = OpeningSpecifier;
-        public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+namespace ParksComputing.Xfer.Elements;
 
-        public DateTimeHandling DateTimeHandling { get; set; } = DateTimeHandling.RoundTrip;
+public class DateElement : TypedElement<DateOnly> {
+    public static readonly string ElementName = DateTimeElement.ElementName;
+    public const char OpeningSpecifier = DateTimeElement.OpeningSpecifier;
+    public const char ClosingSpecifier = DateTimeElement.ClosingSpecifier;
+    public static readonly ElementDelimiter ElementDelimiter = DateTimeElement.ElementDelimiter;
 
-        public DateElement(string input, DateTimeHandling dateTimeHandling = DateTimeHandling.RoundTrip, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact)
-            : this(DateTime.Now, dateTimeHandling, specifierCount, elementStyle)
-        {
-            if (!DateTime.TryParse(input, out DateTime dateValue)) {
-                if (!DateTime.TryParseExact(input, new[] { GetFormatString(DateTimeHandling), "yyyy-MM-dd", "HH:mm:ss" }, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out dateValue)) {
-                    throw new InvalidOperationException($"Invalid date format '{input}'. Expected ISO 8601 format.");
-                }
-            }
+    public DateTimeHandling DateTimeHandling { get; set; } = DateTimeHandling.RoundTrip;
 
-            Value = dateValue;
+    public DateElement(DateTimeHandling dateTimeHandling = DateTimeHandling.RoundTrip, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact)
+        : this(DateOnly.FromDateTime(DateTime.Now), dateTimeHandling, specifierCount, elementStyle) {
+    }
+
+    public DateElement(string stringValue, DateTimeHandling dateTimeHandling = DateTimeHandling.RoundTrip, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact)
+        : this(DateOnly.FromDateTime(DateTime.Now), dateTimeHandling, specifierCount, elementStyle) {
+        if (!DateOnly.TryParse(stringValue, out var dateOnly)) {
+            throw new InvalidOperationException($"Invalid date string '{stringValue}'. Expected ISO 8601 format.");
         }
 
-        public DateElement(DateTime dateValue, DateTimeHandling dateTimeHandling = DateTimeHandling.RoundTrip, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact) : base(dateValue, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier))
-        {
-            DateTimeHandling = dateTimeHandling;
-        }
+        Value = dateOnly;
+        DateTimeHandling = dateTimeHandling;
+    }
 
-        public override string ToXfer()
-        {
-            return ToXfer(Formatting.None);
-        }
+    public DateElement(DateOnly dateOnly, DateTimeHandling dateTimeHandling = DateTimeHandling.RoundTrip, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact)
+        : base(dateOnly, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier)) {
+        DateTimeHandling = dateTimeHandling;
+    }
 
-        public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
-        {
-            var sb = new StringBuilder();
-            sb.Append($"{Delimiter.MinOpening}{ToString()}{Delimiter.MinClosing}");
-            return sb.ToString();
-        }
+    public override string ToXfer() {
+        return ToXfer(Formatting.None);
+    }
 
-        public override string ToString()
-        {
-            string dateValue = Value.TimeOfDay == TimeSpan.Zero
-                    ? $"{Value:yyyy-MM-dd}"
-                    : FormatDate(Value, DateTimeHandling);
-            return dateValue;
-        }
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
+        var sb = new StringBuilder();
+        sb.Append($"{Delimiter.MinOpening}{ToString()}{Delimiter.MinClosing}");
+        return sb.ToString();
+    }
 
-        public static string FormatDate(DateTime dateValue, DateTimeHandling dateTimeHandling) {
-            return dateTimeHandling switch {
-                DateTimeHandling.Utc => dateValue.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                DateTimeHandling.Local => dateValue.ToLocalTime().ToString("yyyy-MM-ddTHH:mm:sszzz"),
-                DateTimeHandling.Unspecified => dateValue.ToString("yyyy-MM-ddTHH:mm:ss"),
-                _ => dateValue.ToString("yyyy-MM-ddTHH:mm:sszzz"),
-            };
-        }
+    public override string ToString() {
+        string dateValue = FormatDate(Value, DateTimeHandling);
+        return dateValue;
+    }
 
-        public static string GetFormatString(DateTimeHandling dateTimeHandling) {
-            return dateTimeHandling switch {
-                DateTimeHandling.Utc => "yyyy-MM-ddTHH:mm:ssZ",
-                DateTimeHandling.Local => "yyyy-MM-ddTHH:mm:sszzz",
-                DateTimeHandling.Unspecified => "yyyy-MM-ddTHH:mm:ss",
-                _ => "yyyy-MM-ddTHH:mm:sszzz",
-            };
-        }
+    public static string FormatDate(DateOnly dateValue, DateTimeHandling dateTimeHandling) {
+        var formatString = GetFormatString(dateTimeHandling);
+
+        return dateTimeHandling switch {
+            DateTimeHandling.Utc => dateValue.ToString(formatString),
+            DateTimeHandling.Local => dateValue.ToString(formatString),
+            DateTimeHandling.Unspecified => dateValue.ToString("O"),
+            _ => dateValue.ToString(formatString), // Round-trip format
+        };
+    }
+
+    public static string GetFormatString(DateTimeHandling dateTimeHandling) {
+        return dateTimeHandling switch {
+            DateTimeHandling.Utc => "O",
+            DateTimeHandling.Local => "O",
+            DateTimeHandling.Unspecified => "O",
+            _ => "O", // Round-trip format
+        };
     }
 }
