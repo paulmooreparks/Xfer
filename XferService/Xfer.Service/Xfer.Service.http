@@ -1,0 +1,6 @@
+@Xfer.Service_HostAddress = http://localhost:5171
+
+GET {{Xfer.Service_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
