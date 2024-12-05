@@ -30,6 +30,9 @@ public class XferConvert {
             DateTimeOffset dateTimeOffsetValue => new DateTimeElement(dateTimeOffsetValue.ToString("o")),
             string stringValue => new StringElement(stringValue),
             char charValue => new CharacterElement(charValue),
+            Guid guidValue => new StringElement(guidValue.ToString()),
+            Enum enumValue => SerializeEnumValue(enumValue),
+            Uri uriValue => new StringElement(uriValue.ToString()),
             int[] intArray => SerializeIntArray(intArray),
             long[] longArray => SerializeLongArray(longArray),
             bool[] boolArray => SerializeBooleanArray(boolArray),
@@ -37,9 +40,8 @@ public class XferConvert {
             decimal[] decimalArray => SerializeDecimalArray(decimalArray),
             DateTime[] dateArray => SerializeDateArray(dateArray),
             DateOnly[] dateOnlyArray => SerializeDateOnlyArray(dateOnlyArray),
-            Guid guidValue => new StringElement(guidValue.ToString()),
-            Enum enumValue => SerializeEnumValue(enumValue),
-            Uri uriValue => new StringElement(uriValue.ToString()),
+            TimeOnly[] timeOnlyArray => SerializeTimeOnlyArray(timeOnlyArray),
+            TimeSpan[] timeSpanArray => SerializeTimeSpanArray(timeSpanArray),
             string[] stringArray => SerializeStringArray(stringArray),
             byte[] byteArray => new StringElement(Convert.ToBase64String(byteArray)),
             object[] objectArray => new PropertyBagElement(objectArray.Select(SerializeValue)),
@@ -214,11 +216,31 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<DateTimeElement> SerializeDateOnlyArray(DateOnly[] dateArray) {
-        var arrayElement = new TypedArrayElement<DateTimeElement>();
+    private static TypedArrayElement<DateElement> SerializeDateOnlyArray(DateOnly[] dateArray) {
+        var arrayElement = new TypedArrayElement<DateElement>();
 
         foreach (var item in dateArray) {
-            arrayElement.Add(new DateTimeElement(item.ToString("yyyy-MM-dd")));
+            arrayElement.Add(new DateElement(item));
+        }
+
+        return arrayElement;
+    }
+
+    private static TypedArrayElement<TimeElement> SerializeTimeOnlyArray(TimeOnly[] timeArray) {
+        var arrayElement = new TypedArrayElement<TimeElement>();
+
+        foreach (var item in timeArray) {
+            arrayElement.Add(new TimeElement(item));
+        }
+
+        return arrayElement;
+    }
+
+    private static TypedArrayElement<TimeSpanElement> SerializeTimeSpanArray(TimeSpan[] timeArray) {
+        var arrayElement = new TypedArrayElement<TimeSpanElement>();
+
+        foreach (var item in timeArray) {
+            arrayElement.Add(new TimeSpanElement(item));
         }
 
         return arrayElement;
