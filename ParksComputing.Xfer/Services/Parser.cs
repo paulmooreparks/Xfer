@@ -1041,20 +1041,26 @@ public class Parser {
                 if (DateElementClosing()) {
                     var stringValue = valueBuilder.ToString();
 
+                    if (DateTime.TryParseExact(
+                        stringValue,
+                        ["O", "s"],
+                        CultureInfo.InvariantCulture,
+                        DateTimeStyles.AdjustToUniversal,
+                        out var dateTime)) 
+                    {
+                        return new DateTimeElement(dateTime, DateTimeHandling.RoundTrip, specifierCount, style);
+                    }
+
+                    if (TimeOnly.TryParseExact(stringValue, ["O", "s"], out var timeOnly)) {
+                        return new TimeElement(timeOnly, DateTimeHandling.RoundTrip, specifierCount, style);
+                    }
+
                     if (DateOnly.TryParse(stringValue, out var dateOnly)) {
                         return new DateElement(dateOnly, DateTimeHandling.RoundTrip, specifierCount, style);
                     }
 
-                    if (TimeOnly.TryParse(stringValue, out var timeOnly)) {
-                        return new TimeElement(timeOnly, DateTimeHandling.RoundTrip, specifierCount, style);
-                    }
-
                     if (TimeSpan.TryParse(stringValue, out var timeSpan)) {
                         return new TimeSpanElement(timeSpan, DateTimeHandling.RoundTrip, specifierCount, style);
-                    }
-
-                    if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime)) {
-                        return new DateTimeElement(stringValue, DateTimeHandling.RoundTrip, specifierCount, style);
                     }
 
                     throw new InvalidOperationException($"Invalid time string '{stringValue}'. Expected ISO 8601 format.");
