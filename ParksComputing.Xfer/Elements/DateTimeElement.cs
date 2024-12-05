@@ -60,7 +60,7 @@ namespace ParksComputing.Xfer.Elements
             return dateTimeHandling switch {
                 DateTimeHandling.Utc => dateValue.ToUniversalTime().ToString(formatString),
                 DateTimeHandling.Local => dateValue.ToLocalTime().ToString(formatString),
-                DateTimeHandling.Unspecified => dateValue.ToString("s"),
+                DateTimeHandling.Unspecified => dateValue.ToString(formatString),
                 _ => dateValue.ToString(formatString), // Round-trip format
             };
         }
@@ -69,7 +69,7 @@ namespace ParksComputing.Xfer.Elements
             return dateTimeHandling switch {
                 DateTimeHandling.Utc => "s",
                 DateTimeHandling.Local => "s",
-                DateTimeHandling.Unspecified => "s",
+                DateTimeHandling.Unspecified => "O",
                 _ => "O", // Round-trip format
             };
         }

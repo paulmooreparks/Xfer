@@ -184,7 +184,7 @@ public class MetadataElement : Element
                 sb.Append(nestIndent);
             }
             sb.Append(value.ToXfer(formatting, indentChar, indentation, depth + 1));
-            if (isIndented && i + 1 < _values.Values.Count())
+            if (isIndented && i < _values.Values.Count())
             {
                 sb.Append(Environment.NewLine);
             }

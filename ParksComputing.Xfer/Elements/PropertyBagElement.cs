@@ -84,7 +84,7 @@ public class PropertyBagElement : ListElement {
                 sb.Append(nestIndent);
             }
             sb.Append(item.ToXfer(formatting, indentChar, indentation, depth + 1));
-            if (!isIndented && item.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i + 1 < _items.Count())
+            if (!isIndented && item.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i < _items.Count())
             {
                 sb.Append(' ');
             }

@@ -32,7 +32,7 @@ namespace ParksComputing.Xfer
             return ToXfer(Formatting.None);
         }
 
-        public virtual string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 1) {
+        public virtual string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
             var sb = new StringBuilder();
             sb.Append(Metadata.ToXfer(formatting, indentChar, indentation, depth));
             sb.Append(Root.ToXfer(formatting, indentChar, indentation, depth));

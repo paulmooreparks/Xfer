@@ -967,7 +967,8 @@ public class Parser {
                 valueBuilder.Append(
                     dateElement switch {
                         DateTimeElement dateTimeElement => dateTimeElement.Value,
-                        TimeElement timeElement => timeElement.Value,
+                        DateElement dateOnlyElement => dateOnlyElement.Value,
+                        TimeElement timeOnlyElement => timeOnlyElement.Value,
                         _ => throw new InvalidOperationException($"Unexpected element type at row {CurrentRow}, column {CurrentColumn}.")
                     }
                     );
