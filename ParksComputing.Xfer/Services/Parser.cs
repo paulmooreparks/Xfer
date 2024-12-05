@@ -969,6 +969,7 @@ public class Parser {
                         DateTimeElement dateTimeElement => dateTimeElement.Value,
                         DateElement dateOnlyElement => dateOnlyElement.Value,
                         TimeElement timeOnlyElement => timeOnlyElement.Value,
+                        TimeSpanElement timeSpanElement => timeSpanElement.Value,
                         _ => throw new InvalidOperationException($"Unexpected element type at row {CurrentRow}, column {CurrentColumn}.")
                     }
                     );
