@@ -33,9 +33,33 @@ namespace ParksComputing.Xfer
         }
 
         public virtual string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
+            bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
+            bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
+            string rootIndent = string.Empty;
+            string nestIndent = string.Empty;
+
             var sb = new StringBuilder();
             sb.Append(Metadata.ToXfer(formatting, indentChar, indentation, depth));
-            sb.Append(Root.ToXfer(formatting, indentChar, indentation, depth));
+
+            if (isIndented) {
+                sb.Append(Environment.NewLine);
+            }
+
+            int i = 0;
+            foreach (var value in Root.Values) {
+                ++i;
+                if (isIndented) {
+                    sb.Append(nestIndent);
+                }
+                sb.Append(value.ToXfer(formatting, indentChar, indentation, depth));
+                if ((value.Delimiter.Style == ElementStyle.Implicit || value.Delimiter.Style == ElementStyle.Compact) && i < Root.Values.Count()) {
+                    sb.Append(' ');
+                }
+                if (isIndented) {
+                    sb.Append(Environment.NewLine);
+                }
+            }
+
             return sb.ToString();
         }
 

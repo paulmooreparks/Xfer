@@ -26,7 +26,7 @@ public class XferConvert {
             DateTime dateTimeValue => new DateTimeElement(dateTimeValue),
             DateOnly dateOnlyValue => new DateElement(dateOnlyValue),
             TimeOnly timeOnlyValue => new TimeElement(timeOnlyValue),
-            TimeSpan timeSpanValue => new DateTimeElement(timeSpanValue.ToString("c")), // ISO 8601 duration format
+            TimeSpan timeSpanValue => new TimeSpanElement(timeSpanValue), // ISO 8601 duration format
             DateTimeOffset dateTimeOffsetValue => new DateTimeElement(dateTimeOffsetValue.ToString("o")), // ISO 8601 format
             string stringValue => new StringElement(stringValue),
             char charValue => new CharacterElement(charValue),
@@ -58,6 +58,64 @@ public class XferConvert {
                 enumerable.Cast<object>().Select(SerializeValue)
             ),
             object objectValue => SerializeObject(objectValue)
+        };
+    }
+
+    public static object Deserialize(string xfer, Type targetType) {
+        // Use reflection to create an instance of the generic method
+        var method = typeof(XferConvert).GetMethod(nameof(Deserialize), new[] { typeof(string) });
+        if (method == null) {
+            throw new InvalidOperationException("Could not find the generic Deserialize method.");
+        }
+
+        var genericMethod = method.MakeGenericMethod(targetType);
+        return genericMethod.Invoke(null, new object[] { xfer }) ?? throw new InvalidOperationException($"Failed to deserialize content into type {targetType.Name}.");
+    }
+
+    private static object? DeserializeValue(Element element, Type targetType) {
+        if (targetType.IsEnum && element is TextElement textElement) {
+            var deserializeEnumMethod = typeof(XferConvert)
+                .GetMethod(nameof(DeserializeEnumValue), BindingFlags.Static | BindingFlags.NonPublic)!
+                .MakeGenericMethod(targetType);
+
+            return deserializeEnumMethod.Invoke(null, new object[] { textElement });
+        }
+
+        return element switch {
+            IntegerElement intElement when targetType == typeof(int) => intElement.Value,
+            IntegerElement intElement when targetType == typeof(object) => intElement.Value,
+            LongElement longElement when targetType == typeof(long) => longElement.Value,
+            LongElement longElement when targetType == typeof(object) => longElement.Value,
+            BooleanElement boolElement when targetType == typeof(bool) => boolElement.Value,
+            BooleanElement boolElement when targetType == typeof(object) => boolElement.Value,
+            DoubleElement doubleElement when targetType == typeof(double) => doubleElement.Value,
+            DoubleElement doubleElement when targetType == typeof(object) => doubleElement.Value,
+            DecimalElement decimalElement when targetType == typeof(decimal) => decimalElement.Value,
+            DecimalElement decimalElement when targetType == typeof(object) => decimalElement.Value,
+            DateTimeElement dateElement when targetType == typeof(DateTimeOffset) => new DateTimeOffset(dateElement.Value),
+            DateTimeElement dateElement when targetType == typeof(TimeSpan) => dateElement.Value.TimeOfDay,
+            TimeElement timeElement when targetType == typeof(TimeOnly) => timeElement.Value,
+            TimeElement timeElement when targetType == typeof(TimeSpan) => timeElement.Value.ToTimeSpan(),
+            TimeElement timeElement when targetType == typeof(object) => timeElement.Value,
+            TimeSpanElement timeSpanElement when targetType == typeof(TimeSpan) => timeSpanElement.Value,
+            DateElement dateElement when targetType == typeof(DateOnly) => dateElement.Value,
+            DateElement dateElement when targetType == typeof(object) => dateElement.Value,
+            DateTimeElement dateElement when targetType == typeof(DateTime) => dateElement.Value,
+            DateTimeElement dateElement when targetType == typeof(object) => dateElement.Value,
+            StringElement stringElement when targetType == typeof(string) => stringElement.Value,
+            StringElement stringElement when targetType == typeof(object) => stringElement.Value,
+            CharacterElement charElement when targetType == typeof(string) => charElement.Value,
+            CharacterElement charElement when targetType == typeof(object) => charElement.Value,
+            NullElement nullElement when targetType == typeof(string) => nullElement.Value,
+            NullElement nullElement when targetType == typeof(object) => nullElement.Value,
+            EvaluatedElement evalElement when targetType == typeof(string) => evalElement.Value,
+            EvaluatedElement evalElement when targetType == typeof(object) => evalElement.Value,
+            PlaceholderElement phElement when targetType == typeof(string) => phElement.Value,
+            PlaceholderElement phElement when targetType == typeof(object) => phElement.Value,
+            ArrayElement arrayElement => DeserializeArray(arrayElement, targetType),
+            PropertyBagElement propertyBagElement => DeserializePropertyBag(propertyBagElement, targetType),
+            ObjectElement objectElement => DeserializeObject(objectElement, targetType),
+            _ => throw new NotSupportedException($"Type '{targetType.Name}' is not supported for deserialization")
         };
     }
 
@@ -216,62 +274,6 @@ public class XferConvert {
         }
 
         return instance;
-    }
-
-    public static object Deserialize(string xfer, Type targetType) {
-        // Use reflection to create an instance of the generic method
-        var method = typeof(XferConvert).GetMethod(nameof(Deserialize), new[] { typeof(string) });
-        if (method == null) {
-            throw new InvalidOperationException("Could not find the generic Deserialize method.");
-        }
-
-        var genericMethod = method.MakeGenericMethod(targetType);
-        return genericMethod.Invoke(null, new object[] { xfer }) ?? throw new InvalidOperationException($"Failed to deserialize content into type {targetType.Name}.");
-    }
-
-    private static object? DeserializeValue(Element element, Type targetType) {
-        if (targetType.IsEnum && element is TextElement textElement) {
-            var deserializeEnumMethod = typeof(XferConvert)
-                .GetMethod(nameof(DeserializeEnumValue), BindingFlags.Static | BindingFlags.NonPublic)!
-                .MakeGenericMethod(targetType);
-
-            return deserializeEnumMethod.Invoke(null, new object[] { textElement });
-        }
-
-        return element switch {
-            IntegerElement intElement when targetType == typeof(int) => intElement.Value,
-            IntegerElement intElement when targetType == typeof(object) => intElement.Value,
-            LongElement longElement when targetType == typeof(long) => longElement.Value,
-            LongElement longElement when targetType == typeof(object) => longElement.Value,
-            BooleanElement boolElement when targetType == typeof(bool) => boolElement.Value,
-            BooleanElement boolElement when targetType == typeof(object) => boolElement.Value,
-            DoubleElement doubleElement when targetType == typeof(double) => doubleElement.Value,
-            DoubleElement doubleElement when targetType == typeof(object) => doubleElement.Value,
-            DecimalElement decimalElement when targetType == typeof(decimal) => decimalElement.Value,
-            DecimalElement decimalElement when targetType == typeof(object) => decimalElement.Value,
-            DateTimeElement dateElement when targetType == typeof(DateTimeOffset) => new DateTimeOffset(dateElement.Value),
-            DateTimeElement dateElement when targetType == typeof(TimeSpan) => dateElement.Value.TimeOfDay,
-            TimeElement timeElement when targetType == typeof(TimeOnly) => timeElement.Value,
-            TimeElement timeElement when targetType == typeof(object) => timeElement.Value,
-            DateElement dateElement when targetType == typeof(DateOnly) => dateElement.Value,
-            DateElement dateElement when targetType == typeof(object) => dateElement.Value,
-            DateTimeElement dateElement when targetType == typeof(DateTime) => dateElement.Value,
-            DateTimeElement dateElement when targetType == typeof(object) => dateElement.Value,
-            StringElement stringElement when targetType == typeof(string) => stringElement.Value,
-            StringElement stringElement when targetType == typeof(object) => stringElement.Value,
-            CharacterElement charElement when targetType == typeof(string) => charElement.Value,
-            CharacterElement charElement when targetType == typeof(object) => charElement.Value,
-            NullElement nullElement when targetType == typeof(string) => nullElement.Value,
-            NullElement nullElement when targetType == typeof(object) => nullElement.Value,
-            EvaluatedElement evalElement when targetType == typeof(string) => evalElement.Value,
-            EvaluatedElement evalElement when targetType == typeof(object) => evalElement.Value,
-            PlaceholderElement phElement when targetType == typeof(string) => phElement.Value,
-            PlaceholderElement phElement when targetType == typeof(object) => phElement.Value,
-            ArrayElement arrayElement => DeserializeArray(arrayElement, targetType),
-            PropertyBagElement propertyBagElement => DeserializePropertyBag(propertyBagElement, targetType),
-            ObjectElement objectElement => DeserializeObject(objectElement, targetType),
-            _ => throw new NotSupportedException($"Type '{targetType.Name}' is not supported for deserialization")
-        };
     }
 
     private static object DeserializeArray(ArrayElement arrayElement, Type targetType) {

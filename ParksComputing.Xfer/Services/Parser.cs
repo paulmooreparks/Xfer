@@ -1048,6 +1048,10 @@ public class Parser {
                         return new TimeElement(timeOnly, DateTimeHandling.RoundTrip, specifierCount, style);
                     }
 
+                    if (TimeSpan.TryParse(stringValue, out var timeSpan)) {
+                        return new TimeSpanElement(timeSpan, DateTimeHandling.RoundTrip, specifierCount, style);
+                    }
+
                     if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime)) {
                         return new DateTimeElement(stringValue, DateTimeHandling.RoundTrip, specifierCount, style);
                     }

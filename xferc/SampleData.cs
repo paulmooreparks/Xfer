@@ -10,4 +10,5 @@ public class SampleData {
     public DateTimeOffset DateTimeOffset { get; set; }
     public TimeOnly TimeOnly { get; set; } = new TimeOnly(11, 39, 44);
     public DateOnly DateOnly { get; set; } = new DateOnly(2024, 12, 5);
+    public TimeSpan TimeSpan { get; set; } = new TimeSpan(48, 39, 44);
 }

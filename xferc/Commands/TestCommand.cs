@@ -15,13 +15,8 @@ internal class TestCommand {
         var data = new SampleData {
         };
 
-        string dateOnlyString = "2024-12-05";
-        if (DateOnly.TryParse(dateOnlyString, out DateOnly dateOnly)) {
-            Console.WriteLine(dateOnly.ToString("O"));
-        }
-        else {
-            Console.WriteLine("Can't parse dateOnlyString");
-        }
+        var timeSpanString = TimeSpan.FromHours(1).ToString();
+        Console.WriteLine(timeSpanString);
 
         string xferContent = XferConvert.Serialize(data, Formatting.Pretty);
         Console.WriteLine(xferContent);
@@ -36,7 +31,7 @@ internal class TestCommand {
         var x = document.Root[0];
 
         if (x is ObjectElement o) {
-            if (o.TryGetElement("Dto", out DateTimeElement? element)) {
+            if (o.TryGetElement("DateTimeOffset", out DateTimeElement? element)) {
                 Console.WriteLine(element?.ToXfer(Formatting.Pretty));
             }
         }
