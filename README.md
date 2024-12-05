@@ -201,7 +201,7 @@ Xfer documents can contain metadata that is not part of the data itself. This me
 
 ```xfer
 <!
-    version "1.0.0"
+    xfer "1.0.0"
     message_id "5D3208CB-77EC-4BC4-A256-97AD296BBEF7"
     ttl 3600
     description "This is a sample document."
@@ -637,30 +637,30 @@ The Metadata element is used to represent metadata that is not part of the data 
 
 ```xfer
 <!
-    version "1.0.0" 
+    xfer "1.0.0" 
     message_id "5D3208CB-77EC-4BC4-A256-97AD296BBEF7" 
     ttl 3600 
     description "This is a sample document." 
 !>
 ```
 
-The `version` keyword is reserved by the Xfer specification and indicates the version of Xfer to which the document conforms. Additional key/value pairs may be included, with their meanings defined by the document itself or its schema.
+The `xfer` keyword is reserved by the Xfer specification and indicates the version of Xfer to which the document conforms. Additional key/value pairs may be included, with their meanings defined by the document itself or its schema.
 
 The metadata element may only appear at the beginning of a document before any other non-comment elements.
 
 ```xfer
 </ This is a valid document />
-!version "1.0.0"!
+!xfer "1.0.0"!
 "Hello, World!"
 </ Metadata may not appear after any non-comment elements. />
 ```
 
-#### `version` Keyword
+#### `xfer` Keyword
 
-The `version` keyword is reserved by the Xfer specification and indicates the version of Xfer to which the document conforms. The value of the `version` keyword must be a string element.
+The `xfer` keyword is reserved by the Xfer specification and indicates the version of Xfer to which the document conforms. The value of the `xfer` keyword must be a string element.
 
 ```xfer
-! version "1.0.0" !
+! xfer "1.0.0" !
 ```
 
 ### Comment Element
@@ -688,7 +688,7 @@ The root content element of an Xfer document is an implicit [property bag](#prop
 In the document below, the string value with the content `Hello, World!` is the first element in the root property bag, the integer with the value `42` is the second element in the root property bag, and the array element containing three string values is the third element in the root property bag.
 
 ```xfer
-!version "1.0.0"!
+!xfer "1.0.0"!
 "Hello, World!"
 42
 ["abc""def""ghi"]
