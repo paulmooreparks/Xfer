@@ -4,7 +4,7 @@
         name "address"
         description "An adaptation of the JSON address schema example."
         definition {
-            object address {
+            address object {
                 postOfficeBox element "string"
                 extendedAddress element "string"
                 streetAddress {
