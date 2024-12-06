@@ -44,16 +44,16 @@ public abstract class TextElement : TypedElement<string>
 
     protected virtual void CheckAndUpdateDelimiterStyle()
     {
-        int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.ClosingSpecifier);
-        Delimiter.SpecifierCount = maxConsecutiveSpecifiers + 1;
+        if (Delimiter.Style != ElementStyle.Explicit) {
+            int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.ClosingSpecifier);
+            Delimiter.SpecifierCount = maxConsecutiveSpecifiers + 1;
 
-        if (Value.Count() == 0 || Value.Last() == Delimiter.ClosingSpecifier)
-        {
-            Delimiter.Style = ElementStyle.Explicit;
-        }
-        else
-        {
-            Delimiter.Style = ElementStyle.Compact;
+            if (Value.Count() == 0 || Value.Last() == Delimiter.ClosingSpecifier) {
+                Delimiter.Style = ElementStyle.Explicit;
+            }
+            else {
+                Delimiter.Style = ElementStyle.Compact;
+            }
         }
     }
 

@@ -88,8 +88,7 @@ public class ObjectElement : Element
 
     public bool Add(KeyValuePairElement value)
     {
-        if (_values.ContainsKey(value.Key))
-        {
+        if (_values.ContainsKey(value.Key)) {
             return false;
         }
 
@@ -99,12 +98,10 @@ public class ObjectElement : Element
 
     public void AddOrUpdate(KeyValuePairElement value)
     {
-        if (_values.TryGetValue(value.Key, out KeyValuePairElement? tuple))
-        {
+        if (_values.TryGetValue(value.Key, out KeyValuePairElement? tuple)) {
             _values[value.Key] = value;
         }
-        else
-        {
+        else {
             _values.Add(value.Key, value);
         }
     }
@@ -169,14 +166,12 @@ public class ObjectElement : Element
 
         var sb = new StringBuilder();
 
-        if (isIndented)
-        {
+        if (isIndented) {
             rootIndent = new string(indentChar, indentation * depth);
             nestIndent = new string(indentChar, indentation * (depth + 1));
         }
 
-        switch (Delimiter.Style)
-        {
+        switch (Delimiter.Style) {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Opening);
                 break;
@@ -185,38 +180,30 @@ public class ObjectElement : Element
                 break;
         }
 
-        if (isIndented)
-        {
+        if (isIndented) {
             sb.Append(Environment.NewLine);
         }
 
-        /* TODO: Whitespace between elements can be removed in a few situations by examining the delimiter style of the surrounding elements. */
         int i = 0;
-        foreach (var value in _values.Values)
-        {
+        foreach (var value in _values.Values) {
             ++i;
-            if (isIndented)
-            {
+            if (isIndented) {
                 sb.Append(nestIndent);
             }
             sb.Append(value.ToXfer(formatting, indentChar, indentation, depth + 1));
-            if ((value.Delimiter.Style == ElementStyle.Implicit || value.Delimiter.Style == ElementStyle.Compact) && i < _values.Values.Count())
-            {
+            if ((value.Delimiter.Style == ElementStyle.Implicit || value.Delimiter.Style == ElementStyle.Compact) && i < _values.Values.Count()) {
                 sb.Append(' ');
             }
-            if (isIndented)
-            {
+            if (isIndented) {
                 sb.Append(Environment.NewLine);
             }
         }
 
-        if (isIndented)
-        {
+        if (isIndented) {
             sb.Append(rootIndent);
         }
 
-        switch (Delimiter.Style)
-        {
+        switch (Delimiter.Style) {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Closing);
                 break;

@@ -35,7 +35,7 @@ public class MetadataElement : Element
                 return;
             }
 
-            SetElement(index, value);
+            SetElement(index, value.Value);
         }
     }
 
@@ -136,6 +136,10 @@ public class MetadataElement : Element
 
     public bool Add(KeyValuePairElement value) {
         if (_values.ContainsKey(value.Key)) {
+            if (string.Equals(value.Key, XferKeyword)) {
+                AddOrUpdate(value);
+                return true;
+            }
             return false;
         }
 
@@ -162,44 +166,50 @@ public class MetadataElement : Element
 
         var sb = new StringBuilder();
 
-        if (isIndented)
-        {
+        if (isIndented) {
             rootIndent = new string(indentChar, indentation * depth);
             nestIndent = new string(indentChar, indentation * (depth + 1));
         }
 
-        sb.Append(Delimiter.Opening);
+        switch (Delimiter.Style) {
+            case ElementStyle.Explicit:
+                sb.Append(Delimiter.Opening);
+                break;
+            case ElementStyle.Compact:
+                sb.Append(Delimiter.MinOpening);
+                break;
+        }
 
-        if (isIndented)
-        {
+        if (isIndented) {
             sb.Append(Environment.NewLine);
         }
 
         int i = 0;
-        foreach (var value in _values.Values)
-        {
+        foreach (var value in _values.Values) {
             ++i;
-            if (isIndented)
-            {
+            if (isIndented) {
                 sb.Append(nestIndent);
             }
             sb.Append(value.ToXfer(formatting, indentChar, indentation, depth + 1));
-            if (isIndented && i < _values.Values.Count())
-            {
+            if ((value.Delimiter.Style == ElementStyle.Implicit || value.Delimiter.Style == ElementStyle.Compact) && i < _values.Values.Count()) {
+                sb.Append(' ');
+            }
+            if (isIndented) {
                 sb.Append(Environment.NewLine);
             }
         }
 
-        if (isIndented)
-        {
+        if (isIndented) {
             sb.Append(Environment.NewLine);
         }
 
-        sb.Append(Delimiter.Closing);
-
-        if (isIndented)
-        {
-            sb.Append(Environment.NewLine);
+        switch (Delimiter.Style) {
+            case ElementStyle.Explicit:
+                sb.Append(Delimiter.Closing);
+                break;
+            case ElementStyle.Compact:
+                sb.Append(Delimiter.MinClosing);
+                break;
         }
 
         return sb.ToString();

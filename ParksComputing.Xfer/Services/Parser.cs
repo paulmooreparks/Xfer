@@ -683,13 +683,17 @@ public class Parser {
                 return metadataElement;
             }
 
+            var lastRow = CurrentRow;
+            var lastColumn = CurrentColumn;
             var element = ParseElement();
 
             if (element is KeyValuePairElement kvp) {
-                metadataElement.AddOrUpdate(kvp);
+                if (!metadataElement.Add(kvp)) {
+                    throw new InvalidOperationException($"Duplicate key '{kvp.Key}' in object at row {lastRow}, column {lastColumn}.");
+                }
             }
             else {
-                throw new InvalidOperationException($"Unexpected element type at row {CurrentRow}, column {CurrentColumn}.");
+                throw new InvalidOperationException($"Unexpected element type at row {lastRow}, column {lastColumn}.");
             }
         }
 
@@ -766,7 +770,7 @@ public class Parser {
                 }
             }
             else {
-                throw new InvalidOperationException($"Unexpected element type at row {CurrentRow}, column {CurrentColumn}.");
+                throw new InvalidOperationException($"Unexpected element type at row {lastRow}, column {lastColumn}.");
             }
         }
 

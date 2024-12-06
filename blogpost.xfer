@@ -1,0 +1,46 @@
+<! 
+    xfer "0.7.2" 
+    schema {
+        name "blogpost"
+        id "http://xfer-schema.org/schema/example/blogpost.xfer"
+        description "An adaptation of the JSON blog post schema example"
+        definition [
+            object blogpost {
+                title element "string"
+                content element "string"
+                publishedDate element "dateTime"
+                author object "user_profile"
+            }
+            object user_profile {
+                username element "string"
+                email element "string"
+                fullname element "string"
+                age element "integer"
+                location element "string"
+                interests array "string"
+            }
+        ]
+    }
+!>
+
+{
+    title "Introduction to Xfer"
+    content <""<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Introduction to Xfer</title>
+</head>
+<body>
+<p>This is the blog content</p>
+</body>
+</html>"">
+    publishedDate @2020-12-06T13:53:00@
+    author {
+        username "paulmooreparks"
+        email "paul@parkscomputing.com"
+        fullname "Paul Moore Parks"
+        age 54
+        location "Singapore"
+        interests ["guitar" "running" "weightlifting"]
+    }
+}

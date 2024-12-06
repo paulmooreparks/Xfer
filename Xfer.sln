@@ -19,7 +19,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.Xfer", "Park
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "xferc", "xferc\xferc.csproj", "{0812F3D3-4597-44FE-B034-1C7A98593D77}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XferTest", "XferTest\XferTest.csproj", "{19679332-F7D5-4056-BB30-D38EE92A47F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XferTest", "XferTest\XferTest.csproj", "{19679332-F7D5-4056-BB30-D38EE92A47F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "schemas", "schemas", "{99E409EE-BBEC-406C-ACB0-7B4DD2F0B711}"
+	ProjectSection(SolutionItems) = preProject
+		address.xfer = address.xfer
+		blogpost.xfer = blogpost.xfer
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +48,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{99E409EE-BBEC-406C-ACB0-7B4DD2F0B711} = {47A4F442-5258-4AC2-83D0-7D4063BB4A7D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {598DCE09-FB2A-4599-94B4-4F3FA1B81884}

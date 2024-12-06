@@ -1,0 +1,51 @@
+<! 
+    xfer "0.7.2"
+    schema {
+        name "address"
+        description "An adaptation of the JSON address schema example."
+        definition {
+            object address {
+                postOfficeBox element "string"
+                extendedAddress element "string"
+                streetAddress {
+                    element "string"
+                    constraints [
+                        required any [
+                            fields ["postOfficeBox" "extendedAddress"]
+                        ]
+                    ]
+                }
+                locality {
+                    element "string"
+                    constraints [
+                        required ~true
+                    ]
+                }
+                region {
+                    element "string"
+                    constraints [
+                        required ~true
+                    ]
+                }
+                postalCode element "string"
+                countryName {
+                    element "string"
+                    constraints [
+                        required ~true
+                    ]
+                }
+            }
+        }
+    }
+!>
+
+{
+  postOfficeBox "123"
+  extendedAddress "Block 470"
+  streetAddress "Jurong West Street 41"
+  locality "Jurong West"
+  region "Singapore"
+  postalCode "640470"
+  countryName "Republic of Singapore"
+}
+
