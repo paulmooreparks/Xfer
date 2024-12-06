@@ -199,10 +199,6 @@ public class MetadataElement : Element
             }
         }
 
-        if (isIndented) {
-            sb.Append(Environment.NewLine);
-        }
-
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Closing);

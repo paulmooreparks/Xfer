@@ -121,40 +121,7 @@ public class ObjectElement : Element
 
     public override string ToXfer()
     {
-        var sb = new StringBuilder();
-        switch (Delimiter.Style)
-        {
-            case ElementStyle.Explicit:
-                sb.Append(Delimiter.Opening);
-                break;
-            case ElementStyle.Compact:
-                sb.Append(Delimiter.MinOpening);
-                break;
-        }
-
-
-        /* TODO: Whitespace between elements can be removed in a few situations by examining the delimiter style of the surrounding elements. */
-        int i = 0;
-        foreach (var value in _values.Values)
-        {
-            ++i;
-            sb.Append($"{value.ToXfer()}");
-            if (value.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i < _values.Values.Count())
-            {
-                sb.Append(' ');
-            }
-        }
-
-        switch (Delimiter.Style)
-        {
-            case ElementStyle.Explicit:
-                sb.Append(Delimiter.Closing);
-                break;
-            case ElementStyle.Compact:
-                sb.Append(Delimiter.MinClosing);
-                break;
-        }
-        return sb.ToString();
+        return ToXfer(Formatting.None);
     }
 
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)

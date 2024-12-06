@@ -10,8 +10,10 @@
                 streetAddress {
                     element "string"
                     constraints [
-                        required any [
-                            fields ["postOfficeBox" "extendedAddress"]
+                        required when [
+                            any [
+                                fields ["postOfficeBox" "extendedAddress"]
+                            ]
                         ]
                     ]
                 }
