@@ -5,6 +5,7 @@ using System.Diagnostics;
 
 using ParksComputing.Xfer.Extensions;
 using ParksComputing.Xfer.Elements;
+using ParksComputing.Xfer.Schema;
 
 namespace ParksComputing.Xfer.Services;
 
@@ -680,6 +681,7 @@ public class Parser {
 
         while (IsCharAvailable()) {
             if (MetadataElementClosing()) {
+
                 return metadataElement;
             }
 

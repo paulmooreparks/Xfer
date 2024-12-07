@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "schemas", "schemas", "{99E4
 	ProjectSection(SolutionItems) = preProject
 		schemas\address.xfer = schemas\address.xfer
 		schemas\blogpost.xfer = schemas\blogpost.xfer
-		person.schema.xfer = person.schema.xfer
+		person.xfer = person.xfer
 	EndProjectSection
 EndProject
 Global

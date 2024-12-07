@@ -5,25 +5,24 @@ schema {
     description "A person"
     definition {
         person object {
-            firstName [
-                    element "string"
-                    description "The person's first name."
-                ]
-            lastName element string {
-                    type string
-                    description "The person's last name."
-                }
-                age {
-                    type integer
-                    description "Age in years which must be equal to or greater than zero."
+            firstName {
+                element "string"
+                description "The person's first name."
+            }
+            lastName {
+                element "string"
+                description "The person's last name."
+            }
+            age {
+                element "integer"
+                description "Age in years which must be equal to or greater than zero."
+                constraints [
                     minimum 0
-                }
+                ]
             }
         }
     }
 }
-
-
 !>
 
 </
