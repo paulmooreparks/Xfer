@@ -13,6 +13,7 @@ public class MetadataElement : Element
     public static readonly string DefaultVersion = Parser.Version;
 
     public static readonly string XferKeyword = "xfer";
+    public static readonly string SchemaKeyword = "schema";
 
     private static readonly SortedSet<string> Keywords = new() {
         XferKeyword

@@ -13,7 +13,7 @@ namespace ParksComputing.Xferc;
 internal class ParseCommand {
     public int Execute(string file) {
         /* TODO: Temporary... */
-        file = "..\\..\\..\\..\\schemas\\address.xfer";
+        file = "..\\..\\..\\..\\sample.xfer";
         var inputBytes = File.ReadAllBytes(file);
         var parser = new Parser();
         var document = parser.Parse(inputBytes);

@@ -15,7 +15,8 @@ public class XferSchemaValidator {
         _schemaObjects = schemaObjects;
     }
 
-    public void Validate(ListElement document, string schemaName) {
+    public void Validate(PropertyBagElement document) {
+#if false
         if (!_schemaObjects.TryGetValue(schemaName, out var schemaObject)) {
             throw new InvalidOperationException($"Schema '{schemaName}' not found.");
         }
@@ -25,6 +26,7 @@ public class XferSchemaValidator {
                 ValidateObject(obj, schemaObject);
             }
         }
+#endif
     }
 
     private void ValidateObject(ObjectElement obj, SchemaObject schemaObject) {
@@ -40,7 +42,7 @@ public class XferSchemaValidator {
     }
 
     private void ValidateField(KeyValuePairElement fieldValue, SchemaField schemaField) {
-        if (schemaField.Type != fieldValue.Value.GetType().Name) {
+        if (schemaField.Type != fieldValue.Value.Name) {
             throw new InvalidOperationException($"Field '{schemaField.Name}' has an invalid type. Expected '{schemaField.Type}', got '{fieldValue.Value.GetType().Name}'.");
         }
 

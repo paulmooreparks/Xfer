@@ -4,14 +4,13 @@ using ParksComputing.Xfer.Services;
 
 namespace ParksComputing.Xfer.Elements;
 
-public class ObjectElement : Element
+public class ObjectElement : DictionaryElement
 {
     public static readonly string ElementName = "object";
     public const char OpeningSpecifier = '{';
     public const char ClosingSpecifier = '}';
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact);
 
-    private Dictionary<string, KeyValuePairElement> _values = new();
     public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
 
     public Element this[string index]
@@ -84,16 +83,6 @@ public class ObjectElement : Element
     public bool Remove(string key)
     {
         return _values.Remove(key);
-    }
-
-    public bool Add(KeyValuePairElement value)
-    {
-        if (_values.ContainsKey(value.Key)) {
-            return false;
-        }
-
-        _values.Add(value.Key, value);
-        return true;
     }
 
     public void AddOrUpdate(KeyValuePairElement value)

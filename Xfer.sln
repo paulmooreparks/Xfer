@@ -8,9 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		experiments.xfer = experiments.xfer
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
-		rowcoltest.xfer = rowcoltest.xfer
 		sample.xfer = sample.xfer
-		schema.xfer = schema.xfer
 		test.xfer = test.xfer
 		xfer.bnf = xfer.bnf
 	EndProjectSection
@@ -24,8 +22,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "schemas", "schemas", "{99E409EE-BBEC-406C-ACB0-7B4DD2F0B711}"
 	ProjectSection(SolutionItems) = preProject
 		schemas\address.xfer = schemas\address.xfer
-		schemas\blogpost.xfer = schemas\blogpost.xfer
-		person.xfer = person.xfer
+		schemas\blog_post_inline.xfer = schemas\blog_post_inline.xfer
+		schemas\person.xfer = schemas\person.xfer
+		schemas\blog_post.xfer = schemas\blog_post.xfer
+		schemas\user_profile.xfer = schemas\user_profile.xfer
 	EndProjectSection
 EndProject
 Global

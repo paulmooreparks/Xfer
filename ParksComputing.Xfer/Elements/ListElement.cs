@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Elements;
 
-public abstract class ListElement : CollectionElement {
+public abstract class ListElement : CollectionElement<Element> {
     protected List<Element> _items = new();
 
     protected ListElement(string elementName, ElementDelimiter delimiter) : base(elementName, delimiter) { }
@@ -15,7 +15,10 @@ public abstract class ListElement : CollectionElement {
 
     public override Element GetElementAt(int index) => index < Count ? _items[index] : throw new InvalidOperationException("No element at index {index}");
 
-    public override void Add(Element element) => _items.Add(element);
+    public override bool Add(Element element) {
+        _items.Add(element);
+        return true;
+    }
 
     public override string ToString() {
         return string.Join(" ", _items);

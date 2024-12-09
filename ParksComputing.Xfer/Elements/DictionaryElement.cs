@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Elements;
-public abstract class DictionaryElement : CollectionElement {
-    protected Dictionary<string, Element> _values = new();
+
+public abstract class DictionaryElement : CollectionElement<KeyValuePairElement> {
+    protected Dictionary<string, KeyValuePairElement> _values = new();
 
     protected DictionaryElement(string elementName, ElementDelimiter delimiter) : base(elementName, delimiter) { }
 
@@ -14,17 +15,17 @@ public abstract class DictionaryElement : CollectionElement {
 
     public Element? GetValue(string key) => _values.TryGetValue(key, out var value) ? value : null;
 
-    public override Element? GetElementAt(int index) => index < Count ? _values.Values.ElementAt(index) : null;
+    public override KeyValuePairElement? GetElementAt(int index) => index < Count ? _values.Values.ElementAt(index) : null;
 
-    public void Add(string key, Element value) => _values[key] = value;
+    public void Add(string key, KeyValuePairElement value) => _values[key] = value;
 
-    public override void Add(Element element) {
-        if (element is KeyValuePairElement kvp) {
-            _values[kvp.Key] = kvp.Value;
+    public override bool Add(KeyValuePairElement value) {
+        if (_values.ContainsKey(value.Key)) {
+            return false;
         }
-        else {
-            throw new InvalidOperationException($"Only KeyValuePairElement is allowed in {GetType().Name}");
-        }
+
+        _values.Add(value.Key, value);
+        return true;
     }
 
     public override string ToString() {

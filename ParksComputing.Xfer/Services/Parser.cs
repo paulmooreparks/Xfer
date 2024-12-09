@@ -529,7 +529,12 @@ public class Parser {
         // Maybe do something with the BOM here?
         SkipBOM();
 
-        return ParseDocument();
+        var document = ParseDocument();
+
+        if (document is { } && _validator is { }) {
+            _validator.Validate(document.Root);
+        }
+        return document!;
     }
 
     internal XferDocument ParseDocument() {
@@ -675,12 +680,26 @@ public class Parser {
         }
     }
 
+    XferSchemaValidator? _validator = null;
+
     private MetadataElement ParseMetadataElement(int specifierCount = 1) {
         SkipWhitespace();
         var metadataElement = new MetadataElement();
 
         while (IsCharAvailable()) {
             if (MetadataElementClosing()) {
+                if (metadataElement.ContainsKey(MetadataElement.SchemaKeyword)) {
+                    var schemaElement = metadataElement[MetadataElement.SchemaKeyword];
+
+                    if (schemaElement.Value is ObjectElement schemaObject) {
+                        var schemaParser = new XferSchemaParser();
+                        var schemaObjects = schemaParser.ParseSchema(schemaObject);
+
+                        if (schemaObjects is { }) {
+                            _validator = new XferSchemaValidator(schemaObjects);
+                        }
+                    }
+                }
 
                 return metadataElement;
             }

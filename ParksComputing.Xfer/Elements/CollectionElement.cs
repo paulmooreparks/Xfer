@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Elements;
 
-public abstract class CollectionElement : Element {
+public abstract class CollectionElement<T> : Element {
     protected CollectionElement(string elementName, ElementDelimiter delimiter) : base(elementName, delimiter) { }
 
     public abstract int Count { get; }
 
-    public abstract Element? GetElementAt(int index);
+    public abstract T? GetElementAt(int index);
 
-    public abstract void Add(Element element);
+    public abstract bool Add(T element);
 }

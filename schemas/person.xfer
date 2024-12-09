@@ -1,0 +1,27 @@
+<! xfer "0.7.2" 
+
+schema {
+    name "person"
+    description "A person"
+    definition (
+        person object {
+            fullName string {
+                description "The person's full name."
+                required ~true
+            }
+            preferredName string {
+                description "The person's preferred name."
+                required ~true
+            }
+            age integer {
+                description "Age in years which must be equal to or greater than zero."
+                constraints {
+                    minimum 0
+                    required ~false
+                }
+            }
+        }
+    )
+}
+!>
+

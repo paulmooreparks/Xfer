@@ -1,0 +1,50 @@
+<! 
+    xfer "0.7.2" 
+    schema {
+        name "user_profile"
+        id "https://parkscomputing.com/xfer/schemas/user_profile.xfer"
+        description "An adaptation of the JSON user profile schema example"
+    }
+!>
+
+definitions [
+    user_profile type object {
+        </ This defines the username property of the object. The property name is "username" and the property type is a string. 
+        The constraints object has a single property specifying that the property is required. />
+        username string {
+            required ~true
+            constraints {
+                pattern "[a-zA-Z0-9_]+"
+            }
+        }
+
+        </ This defines the email property of the object. It's otherwise the same as username, but I'm taking advantage of 
+        the structure of key/value pairs to form s-expressions. This can generate more compact declarations when only one 
+        property is used from a nested object. Instead of creating an object to hold the constraints property, as in username 
+        above, we can just put that key after "string", and make its value the constraints object. />
+        email string {
+            required ~true
+        }
+
+        </ This defines the fullname property of the object. It also has the same structure as username and email above, but 
+        we've used an s-expression to pull the required property and its value up to the top level. />
+        fullname string constraints required ~true
+
+        </ This defines the age property of the object. It's an integer, and has a minimum value of 0. It's not required, so
+        the required property is set to false. We could have pulled the constraints key up a level, if we wanted to. />
+        age integer { 
+            required ~false
+            constraints {
+                minimum 0 
+            }
+        } 
+
+        </ This defines the location property of the object. It's a string, and it's not required. />
+        location string constraints required ~false
+
+        </ This defines the interests property of the object. It's an array of strings, and it's not required. />
+        interests array string {
+            required ~false
+        }
+    }
+]

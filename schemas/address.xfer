@@ -3,41 +3,38 @@
     schema {
         name "address"
         description "An adaptation of the JSON address schema example."
-        definition {
-            address object {
-                postOfficeBox element "string"
-                extendedAddress element "string"
-                streetAddress {
-                    element "string"
-                    constraints [
-                        required when [
-                            any [
-                                fields ["postOfficeBox" "extendedAddress"]
-                            ]
+        definition (
+            foo element "string"
+            object {
+                postOfficeBox string {
+                    required ~false
+                    default ?
+                }
+                extendedAddress string {
+                    required ~false
+                    default ?
+                }
+                streetAddress string {
+                    required when {
+                        any [
+                            included ["postOfficeBox" "extendedAddress"]
                         ]
-                    ]
+                    }
                 }
-                locality {
-                    element "string"
-                    constraints [
-                        required ~true
-                    ]
+                locality string {
+                    required ~true
                 }
-                region {
-                    element "string"
-                    constraints [
-                        required ~true
-                    ]
+                region string {
+                    required ~true
                 }
-                postalCode element "string"
-                countryName {
-                    element "string"
-                    constraints [
-                        required ~true
-                    ]
+                postalCode string {
+                    required ~true
+                }
+                countryName string {
+                    required ~true
                 }
             }
-        }
+        )
     }
 !>
 
@@ -50,4 +47,3 @@
   postalCode "640470"
   countryName "Republic of Singapore"
 }
-
