@@ -4,33 +4,36 @@
         name "address"
         description "An adaptation of the JSON address schema example."
         definition (
-            foo element "string"
-            object {
-                postOfficeBox string {
+            foo :string {
+                required ~false
+                default "bar"
+            }
+            :object {
+                postOfficeBox :string {
                     required ~false
                     default ?
                 }
-                extendedAddress string {
+                extendedAddress :string {
                     required ~false
                     default ?
                 }
-                streetAddress string {
+                streetAddress :string {
                     required when {
                         any [
                             included ["postOfficeBox" "extendedAddress"]
                         ]
                     }
                 }
-                locality string {
+                locality :string {
                     required ~true
                 }
-                region string {
+                region :string {
                     required ~true
                 }
-                postalCode string {
+                postalCode :string {
                     required ~true
                 }
-                countryName string {
+                countryName :string {
                     required ~true
                 }
             }

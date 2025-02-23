@@ -2,29 +2,29 @@
     xfer "0.7.2" 
     schema {
         imports [
-            import "https://parkscomputing.com/xfer/schemas/user_profile.xfer"
+            user "https://parkscomputing.com/xfer/schemas/user_profile.xfer"
         ]
         name "blog_post"
         id "https://parkscomputing.com/xfer/schemas/blogpost.xfer"
         description "An adaptation of the JSON blog post schema example"
         definitions [
-            blog_post type object {
-                title string {
+            blog_post {
+                title :string {
                     required ~true
                 }
-                content string {
+                content :string {
                     required ~true
                 }
-                publishedDate dateTime {
+                publishedDate :dateTime {
                     required ~true
                 }
-                author user_profile {
+                author :user {
                     required ~true
                 }
             }
         ]
         body (
-            type blog_post
+            :blog_post
         )
     }
 !>

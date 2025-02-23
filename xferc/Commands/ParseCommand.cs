@@ -2,9 +2,9 @@
 
 using System.CommandLine;
 using System.Text;
-using ParksComputing.Xfer;
-using ParksComputing.Xfer.Services;
-using ParksComputing.Xfer.Extensions;
+using ParksComputing.Xfer.Lang;
+using ParksComputing.Xfer.Lang.Services;
+using ParksComputing.Xfer.Lang.Extensions;
 
 namespace ParksComputing.Xferc;
 
@@ -13,7 +13,8 @@ namespace ParksComputing.Xferc;
 internal class ParseCommand {
     public int Execute(string file) {
         /* TODO: Temporary... */
-        file = "..\\..\\..\\..\\sample.xfer";
+        // file = "../../../../schemas/address.xfer";
+        file = "../../../../xfertest.xfer";
         var inputBytes = File.ReadAllBytes(file);
         var parser = new Parser();
         var document = parser.Parse(inputBytes);

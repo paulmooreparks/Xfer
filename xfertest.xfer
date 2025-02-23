@@ -1,0 +1,38 @@
+﻿<! xfer "0.7.2" !>
+
+baseurl "https://parkscomputing.com/"
+
+xfertest request {
+    get "/content/about.html"
+    headers {
+        Authorization 'Bearer <|environment.BearerToken|>'
+        Accept 'application/json'
+    }
+    parameters {
+        foo "bar"
+    }
+    response (
+        case when (
+            eq status #200
+            script <'
+                console.log(response.content);
+            '>
+        )
+        case when (
+            eq status #500
+            script <'
+                console.error("Server error: response.message");
+            '>
+        )
+        case default (
+            script <'
+                console.error("Status <|response.status|> <|response.message|> <|NUMBER_OF_PROCESSORS|>");
+            '>
+        )
+        case all (
+            script <" 
+                console.log(response.content);
+            ">
+        )
+    )
+}

@@ -1,4 +1,6 @@
 ﻿<! xfer "0.7.2" !>
+foo []
+:string bar ?
 {foo"bar"}(numProcs #<|NUMBER_OF_PROCESSORS|></ A key-value pair element may have a key/value pair as a value. />
     keyValuePair key "value"
     'What if an eval element contains a comment?</ The comment is removed./>' )
@@ -154,6 +156,69 @@ class Program {
         modified @2024-11-11T12:30:00@
     }
 }
+
+xfer :interface {
+    if :static :method {
+        params [
+            condition :boolean {
+                required ~true
+            }
+            then :block {
+                required ~true
+            }
+            else :block {
+                required ~false
+                default ?
+            }
+        ]
+    }
+}
+
+console :object {
+    width :static :property {
+        value :int #80
+        get (
+            :let [ value <|hardware.console.width|> ]
+        )
+    }
+    writeLine :static :method {
+        result status :int #0
+        params {
+            out :string <"">
+        }
+        main (
+            </
+            :if [
+                out ? 
+                (
+                    :let { status #3 }
+                    :return
+                )
+            ]
+            try (
+                :let [ status stdio.out ( <|s|> ) ]
+                xfer.if [ status #0 ( :let status stdio.out ( '<\nl\>' ) ) ]
+            )
+            catch {
+                exception.io (
+                    :let { status #1 }
+                )
+            }
+            />
+        )
+        catch {
+            exception.unexpected (
+                :let { status #2 }
+            )
+        }
+        finally (
+        )
+    }
+}
+
+main (
+    console.writeLine { out "Hello, Xfer!" }
+)
 
 </ I parked this comment here so that I could remember how to replace the parse parameter for testing. />
 </ parse ..\..\..\..\sample.xfer />
