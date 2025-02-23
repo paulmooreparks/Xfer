@@ -7,45 +7,46 @@ using System.Threading.Tasks;
 using Cliffer;
 
 using ParksComputing.Xfer.Cli.Services;
+using ParksComputing.Xfer.Workspace.Services;
+using ParksComputing.Xfer.Http.Services;
 
 namespace ParksComputing.Xfer.Cli.Commands;
 
 [Command("post", "Send resources to the specified API endpoint via a POST request.")]
-[Option(typeof(string), "--baseUrl", "The base URL of the API to send the POST request to.", new[] { "-b" }, IsRequired = false)]
-[Option(typeof(string), "--endpoint", "The relative endpoint to send the POST request to. This is appended to the base URL.", new[] { "-e" }, IsRequired = true)]
-[Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, parameters can also be read from standard input.", new[] { "-p" }, Arity = ArgumentArity.ZeroOrOne)]
+[Argument(typeof(string), "endpoint", "The endpoint to send the POST request to.")]
+[Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-p" }, Arity = ArgumentArity.ZeroOrOne)]
 internal class PostCommand {
     public async Task<int> Execute(
-        [OptionParam("--baseUrl")] string baseUrl,
-        [OptionParam("--endpoint")] string endpoint,
+        [ArgumentParam("endpoint")] string endpoint,
         [OptionParam("--payload")] string payload,
         IHttpService httpService,
         IWorkspaceService workspaceService
         ) 
     {
-        baseUrl ??= workspaceService.BaseUrl ?? string.Empty;
-
-        if (string.IsNullOrWhiteSpace(baseUrl)) {
-            Console.Error.WriteLine("Error: Base URL is required but was not provided.");
-            return Result.ErrorInvalidArgument;
-        }
+        var baseUrl = string.Empty;
 
         // Validate URL format
-        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
-            Console.Error.WriteLine($"Error: Invalid base URL: {baseUrl}");
-            return Result.ErrorInvalidArgument;
+        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
+            baseUrl = workspaceService.BaseUrl;
+
+            if (string.IsNullOrEmpty(baseUrl) || !Uri.TryCreate(new Uri(baseUrl), endpoint, out baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
+                Console.Error.WriteLine($"Error: Invalid base URL: {baseUrl}");
+                return Result.ErrorInvalidArgument;
+            }
         }
 
+        baseUrl = baseUri.ToString();
+
         if (Console.IsInputRedirected) {
-            var contentString = Console.In.ReadToEnd();
-            payload = contentString.Trim();
+            var payloadString = Console.In.ReadToEnd();
+            payload = payloadString.Trim();
         }
 
         var httpClient = new HttpClient();
-        string responseContent;
+        string responseContent = string.Empty;
 
         try {
-            responseContent = await httpService.PostAsync(httpClient, baseUrl, endpoint, payload);
+            responseContent = await httpService.PostAsync(httpClient, baseUrl, payload);
         }
         catch (HttpRequestException ex) {
             Console.Error.WriteLine($"Error: HTTP request failed - {ex.Message}");

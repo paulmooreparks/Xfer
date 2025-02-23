@@ -5,6 +5,10 @@ using Cliffer;
 using Microsoft.Extensions.DependencyInjection;
 
 using ParksComputing.Xfer.Cli.Services;
+using ParksComputing.Xfer.Workspace;
+using ParksComputing.Xfer.Workspace.Services;
+using ParksComputing.Xfer.Http;
+using ParksComputing.Xfer.Http.Services;
 
 namespace ParksComputing.Xfer.Cli;
 
@@ -30,8 +34,8 @@ internal class Program {
             })
             .ConfigureServices(services => {
                 services.AddSingleton<PersistenceService>();
-                services.AddSingleton<IHttpService, HttpService>();
-                services.AddSingleton<IWorkspaceService, WorkspaceService>();
+                services.AddXferHttpServices();
+                services.AddXferWorkspaceServices();
                 services.AddSingleton<CommandSplitter>();
             })
             .Build();

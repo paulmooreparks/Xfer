@@ -31,6 +31,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "xf", "xf\xf.csproj", "{A501
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.Xfer.Lang", "ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj", "{F729B59A-A1D0-4308-A2F6-9B8FE2BF790D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParksComputing.Xfer.Workspace", "ParksComputing.Xfer.Workspace\ParksComputing.Xfer.Workspace.csproj", "{81AECBF7-A9EA-41DC-9BC3-1BDF8296FCAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParksComputing.Xfer.Http", "ParksComputing.Xfer.Http\ParksComputing.Xfer.Http.csproj", "{63ABF338-7496-45F6-B0E6-FBC9B105D5DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +57,14 @@ Global
 		{F729B59A-A1D0-4308-A2F6-9B8FE2BF790D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F729B59A-A1D0-4308-A2F6-9B8FE2BF790D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F729B59A-A1D0-4308-A2F6-9B8FE2BF790D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81AECBF7-A9EA-41DC-9BC3-1BDF8296FCAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81AECBF7-A9EA-41DC-9BC3-1BDF8296FCAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81AECBF7-A9EA-41DC-9BC3-1BDF8296FCAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81AECBF7-A9EA-41DC-9BC3-1BDF8296FCAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63ABF338-7496-45F6-B0E6-FBC9B105D5DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63ABF338-7496-45F6-B0E6-FBC9B105D5DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63ABF338-7496-45F6-B0E6-FBC9B105D5DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63ABF338-7496-45F6-B0E6-FBC9B105D5DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

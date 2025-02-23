@@ -7,35 +7,35 @@ using System.Threading.Tasks;
 using Cliffer;
 
 using ParksComputing.Xfer.Cli.Services;
+using ParksComputing.Xfer.Workspace.Services;
+using ParksComputing.Xfer.Http.Services;
 
 namespace ParksComputing.Xfer.Cli.Commands;
 
 [Command("get", "Retrieve resources from the specified API endpoint via a GET request.")]
-[Option(typeof(string), "--baseUrl", "The base URL of the API to send the GET request to.", new[] { "-b" }, IsRequired = false)]
-[Option(typeof(string), "--endpoint", "The relative endpoint to send the GET request to. This is appended to the base URL.", new[] { "-e" }, IsRequired = true)]
+[Argument(typeof(string), "endpoint", "The endpoint to send the GET request to.")]
 [Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request. If input is redirected, parameters can also be read from standard input.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 internal class GetCommand {
     public async Task<int> Execute(
-        [OptionParam("--baseUrl")] string baseUrl,
-        [OptionParam("--endpoint")] string endpoint,
+        [ArgumentParam("endpoint")] string endpoint,
         [OptionParam("--parameters")] IEnumerable<string> parameters,
         IHttpService httpService,
         IWorkspaceService workspaceService
         ) 
     {
-        baseUrl ??= workspaceService.BaseUrl ?? string.Empty;
-
-        if (string.IsNullOrWhiteSpace(baseUrl)) {
-            Console.Error.WriteLine("Error: Base URL is required but was not provided.");
-            return Result.ErrorInvalidArgument;
-        }
+        var baseUrl = string.Empty;
 
         // Validate URL format
-        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
-            Console.Error.WriteLine($"Error: Invalid base URL: {baseUrl}");
-            return Result.ErrorInvalidArgument;
+        if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
+            baseUrl = workspaceService.BaseUrl;
+
+            if (string.IsNullOrEmpty(baseUrl) || !Uri.TryCreate(new Uri(baseUrl), endpoint, out baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
+                Console.Error.WriteLine($"Error: Invalid base URL: {baseUrl}");
+                return Result.ErrorInvalidArgument;
+            }
         }
 
+        baseUrl = baseUri.ToString();
         var paramList = new List<string>();
 
         if (parameters is not null) { 
@@ -53,10 +53,10 @@ internal class GetCommand {
         }
 
         var httpClient = new HttpClient();
-        string responseContent;
+        string responseContent = string.Empty;
 
         try {
-            responseContent = await httpService.GetAsync(httpClient, baseUrl, endpoint, paramList);
+            responseContent = await httpService.GetAsync(httpClient, baseUrl, paramList);
         }
         catch (HttpRequestException ex) {
             Console.Error.WriteLine($"Error: HTTP request failed - {ex.Message}");

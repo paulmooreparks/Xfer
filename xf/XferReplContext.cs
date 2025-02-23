@@ -6,6 +6,7 @@ using System.Reflection;
 using Cliffer;
 
 using ParksComputing.Xfer.Cli.Services;
+using ParksComputing.Xfer.Workspace.Services;
 
 namespace ParksComputing.Xfer.Cli;
 

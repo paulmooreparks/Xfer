@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParksComputing.Xfer.Cli.Services;
+namespace ParksComputing.Xfer.Workspace.Services;
 
-internal class IWorkspaceService {
+public interface IWorkspaceService {
     public string? BaseUrl { get; set; }
 }
