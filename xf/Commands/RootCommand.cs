@@ -14,6 +14,7 @@ internal class RootCommand {
         [OptionParam("--baseUrl")] string baseUrl,
         IServiceProvider serviceProvider, 
         IWorkspaceService workspaceService,
+        CommandSplitter splitter,
         InvocationContext context
         ) 
     {
@@ -21,7 +22,7 @@ internal class RootCommand {
         return await command.Repl(
             serviceProvider, 
             context, 
-            new XferReplContext(serviceProvider, workspaceService)
+            new XferReplContext(serviceProvider, workspaceService, splitter)
             );
     }
 }

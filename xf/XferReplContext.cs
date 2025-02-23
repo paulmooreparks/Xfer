@@ -12,17 +12,20 @@ namespace ParksComputing.Xfer.Cli;
 internal class XferReplContext : Cliffer.DefaultReplContext {
     private readonly IServiceProvider _serviceProvider;
     private readonly IWorkspaceService _workspaceService;
+    private readonly CommandSplitter _commandSplitter;
 
     public string Title => "Xfer CLI Application";
     public override string[] GetPopCommands() => [];
 
     public XferReplContext(
         IServiceProvider serviceProvider,
-        IWorkspaceService workspaceService
+        IWorkspaceService workspaceService,
+        CommandSplitter commandSplitter
         ) 
     {
         _serviceProvider = serviceProvider;
         _workspaceService = workspaceService;
+        _commandSplitter = commandSplitter;
     }
 
     public override string GetTitleMessage() {
@@ -43,5 +46,9 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
         }
 
         return base.RunAsync(command, args);
+    }
+
+    public override string[] SplitCommandLine(string input) {
+        return _commandSplitter.Split(input).ToArray();
     }
 }

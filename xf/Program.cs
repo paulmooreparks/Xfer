@@ -32,6 +32,7 @@ internal class Program {
                 services.AddSingleton<PersistenceService>();
                 services.AddSingleton<IHttpService, HttpService>();
                 services.AddSingleton<IWorkspaceService, WorkspaceService>();
+                services.AddSingleton<CommandSplitter>();
             })
             .Build();
 
