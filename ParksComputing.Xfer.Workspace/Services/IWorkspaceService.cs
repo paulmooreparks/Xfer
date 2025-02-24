@@ -4,8 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ParksComputing.Xfer.Workspace.Services.Impl;
+
 namespace ParksComputing.Xfer.Workspace.Services;
 
 public interface IWorkspaceService {
-    public string? BaseUrl { get; set; }
+    BaseConfig? BaseConfig { get; }
+    IEnumerable<string> WorkspaceList { get; }
+    WorkspaceConfig ActiveWorkspace { get; }
+    string CurrentWorkspaceName { get; }
+    void SetActiveWorkspace(string workspaceName);
 }

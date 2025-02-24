@@ -17,19 +17,29 @@ namespace ParksComputing.Xfer.Cli.Commands;
 [Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-p" }, Arity = ArgumentArity.ZeroOrOne)]
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 internal class PostCommand {
+    public readonly IHttpService _httpService;
+    public readonly IWorkspaceService _workspaceService;
+
+    public PostCommand(
+        IHttpService httpService,
+        IWorkspaceService workspaceService
+        ) 
+    {
+        _httpService = httpService;
+        _workspaceService = workspaceService;
+    }
+
     public async Task<int> Execute(
         [ArgumentParam("endpoint")] string endpoint,
         [OptionParam("--payload")] string payload,
-        [OptionParam("--headers")] IEnumerable<string> headers,
-        IHttpService httpService,
-        IWorkspaceService workspaceService
+        [OptionParam("--headers")] IEnumerable<string> headers
         ) 
     {
         var baseUrl = string.Empty;
 
         // Validate URL format
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
-            baseUrl = workspaceService.BaseUrl;
+            baseUrl = _workspaceService.ActiveWorkspace.BaseUrl;
 
             if (string.IsNullOrEmpty(baseUrl) || !Uri.TryCreate(new Uri(baseUrl), endpoint, out baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
                 Console.Error.WriteLine($"Error: Invalid base URL: {baseUrl}");
@@ -49,7 +59,7 @@ internal class PostCommand {
         int result = Result.Success;
 
         try {
-            var response = await httpService.PostAsync(baseUrl, payload, headers);
+            var response = await _httpService.PostAsync(baseUrl, payload, headers);
 
             if (!response.IsSuccessStatusCode) {
                 Console.Error.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase} at {baseUrl}");

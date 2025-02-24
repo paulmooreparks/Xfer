@@ -46,6 +46,7 @@ public class XferConvert {
             string[] stringArray => SerializeStringArray(stringArray),
             byte[] byteArray => new StringElement(Convert.ToBase64String(byteArray)),
             object[] objectArray => new PropertyBagElement(objectArray.Select(SerializeValue)),
+            IDictionary dictionary when IsGenericDictionary(dictionary.GetType()) => SerializeDictionary(dictionary),
 #if false
             IDictionary dictionary => new ObjectElement(
                 dictionary.Cast<dynamic>().Select(kvp =>
@@ -62,6 +63,23 @@ public class XferConvert {
             ),
             object objectValue => SerializeObject(objectValue)
         };
+    }
+
+    private static bool IsGenericDictionary(Type type) {
+        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>)
+            && type.GetGenericArguments()[0] == typeof(string);
+    }
+
+    private static ObjectElement SerializeDictionary(IDictionary dictionary) {
+        var objElement = new ObjectElement();
+
+        foreach (DictionaryEntry kvp in dictionary) {
+            var keyElement = new IdentifierElement(kvp.Key.ToString()!);
+            var valueElement = SerializeValue(kvp.Value);
+            objElement.AddOrUpdate(new KeyValuePairElement(keyElement, valueElement));
+        }
+
+        return objElement;
     }
 
     public static object Deserialize(string xfer, Type targetType) {
@@ -82,6 +100,19 @@ public class XferConvert {
                 .MakeGenericMethod(targetType);
 
             return deserializeEnumMethod.Invoke(null, new object[] { textElement });
+        }
+
+        if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Dictionary<,>)) {
+            var keyType = targetType.GetGenericArguments()[0];
+            var valueType = targetType.GetGenericArguments()[1];
+
+            if (keyType != typeof(string)) {
+                throw new NotSupportedException("Only Dictionary<string, T> is supported.");
+            }
+
+            if (element is ObjectElement objectElement) {
+                return DeserializeDictionary(objectElement, valueType);
+            }
         }
 
         return element switch {
@@ -123,6 +154,19 @@ public class XferConvert {
             ObjectElement objectElement => DeserializeObject(objectElement, targetType),
             _ => throw new NotSupportedException($"Type '{targetType.Name}' is not supported for deserialization")
         };
+    }
+
+    private static object DeserializeDictionary(ObjectElement objectElement, Type valueType) {
+        var dictionaryType = typeof(Dictionary<,>).MakeGenericType(typeof(string), valueType);
+        var dictionary = (IDictionary)Activator.CreateInstance(dictionaryType)!;
+
+        foreach (var kvp in objectElement.Values) {
+            var key = kvp.Key;
+            var value = DeserializeValue(kvp.Value.Value, valueType);
+            dictionary.Add(key, value);
+        }
+
+        return dictionary;
     }
 
     private static ObjectElement SerializeObject(object o) {

@@ -43,7 +43,7 @@ internal class RootCommand {
         }
 
         if (baseUrl is not null) {
-            _workspaceService.BaseUrl = baseUrl;
+            _workspaceService.ActiveWorkspace.BaseUrl = baseUrl;
         }
 
         if (isRecursive) {

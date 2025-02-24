@@ -39,6 +39,11 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
         return $"{Title} v{versionString}";
     }
 
+    override public string GetPrompt(Command command, InvocationContext context) {
+        return $"{command.Name}:{_workspaceService.CurrentWorkspaceName}> ";
+    }
+
+
     public override string[] PreprocessArgs(string[] args, Command command, InvocationContext context) {
         var parseResult = command.Parse(args);
         var newArgs = new List<string>();
