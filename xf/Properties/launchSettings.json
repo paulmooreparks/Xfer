@@ -2,7 +2,7 @@
   "profiles": {
     "xf": {
       "commandName": "Project",
-      "commandLineArgs": "--baseurl https://3445fa04-e63a-4125-825c-059c8876042d.mock.pstmn.io"
+      "commandLineArgs": "--baseurl https://httpbin.org/"
     }
   }
 }
