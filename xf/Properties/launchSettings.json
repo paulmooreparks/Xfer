@@ -1,8 +1,7 @@
 {
   "profiles": {
     "xf": {
-      "commandName": "Project",
-      "commandLineArgs": "--baseurl https://httpbin.org/"
+      "commandName": "Project"
     }
   }
 }

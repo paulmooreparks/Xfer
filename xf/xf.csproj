@@ -10,12 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cliffer" Version="0.4.9-prerelease" />
     <PackageReference Include="Jint" Version="4.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Cliffer\ClifferLib\Cliffer.csproj" />
     <ProjectReference Include="..\ParksComputing.Xfer.Http\ParksComputing.Xfer.Http.csproj" />
     <ProjectReference Include="..\ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj" />
     <ProjectReference Include="..\ParksComputing.Xfer.Workspace\ParksComputing.Xfer.Workspace.csproj" />

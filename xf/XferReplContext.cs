@@ -14,6 +14,7 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
     private readonly IServiceProvider _serviceProvider;
     private readonly IWorkspaceService _workspaceService;
     private readonly CommandSplitter _commandSplitter;
+    private readonly System.CommandLine.Option _recursionOption;
 
     public string Title => "Xfer CLI Application";
     public override string[] GetPopCommands() => [];
@@ -21,12 +22,14 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
     public XferReplContext(
         IServiceProvider serviceProvider,
         IWorkspaceService workspaceService,
-        CommandSplitter commandSplitter
+        CommandSplitter commandSplitter,
+        System.CommandLine.Option recursionOption
         ) 
     {
         _serviceProvider = serviceProvider;
         _workspaceService = workspaceService;
         _commandSplitter = commandSplitter;
+        _recursionOption = recursionOption;
     }
 
     public override string GetTitleMessage() {
@@ -37,7 +40,16 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
     }
 
     public override string[] PreprocessArgs(string[] args, Command command, InvocationContext context) {
-        return base.PreprocessArgs(args, command, context);
+        var parseResult = command.Parse(args);
+        var newArgs = new List<string>();
+        newArgs.AddRange(args);
+
+        if (parseResult.CommandResult.Command == command) {
+            newArgs.Add(_recursionOption.Aliases.First());
+            newArgs.Add("true");
+        }
+
+        return base.PreprocessArgs(newArgs.ToArray(), command, context);
     }
 
     public override Task<int> RunAsync(Command command, string[] args) {

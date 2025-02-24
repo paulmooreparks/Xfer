@@ -14,28 +14,51 @@ namespace ParksComputing.Xfer.Cli;
 
 internal class Program {
     private static readonly string _configFilePath;
-    private static readonly string _xfercDirectory;
+    private static readonly string _xfDirectory;
 
     static Program() {
-        var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        _xfercDirectory = Path.Combine(homeDirectory, Constants.XferDirectoryName);
+        try {
+            // Get user's home directory in a cross-platform way
+            string homeDirectory = GetUserHomeDirectory();
 
-        if (!Directory.Exists(_xfercDirectory)) {
-            Directory.CreateDirectory(_xfercDirectory);
+            // Define the .xf directory path
+            _xfDirectory = Path.Combine(homeDirectory, Constants.XferDirectoryName);
+
+            // Ensure the directory exists
+            if (!Directory.Exists(_xfDirectory)) {
+                Directory.CreateDirectory(_xfDirectory);
+            }
+
+            // Define the configuration file path
+            _configFilePath = Path.Combine(_xfDirectory, Constants.ConfigFileName);
         }
+        catch (Exception ex) {
+            Console.Error.WriteLine($"Error initializing .xf directory: {ex.Message}");
+            Environment.Exit(1);
+        }
+    }
 
-        _configFilePath = Path.Combine(_xfercDirectory, Constants.ConfigFileName);
+    /// <summary>
+    /// Gets the user's home directory in a cross-platform way.
+    /// </summary>
+    private static string GetUserHomeDirectory() {
+        if (OperatingSystem.IsWindows()) {
+            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        }
+        else if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) {
+            return Environment.GetEnvironmentVariable("HOME") ?? throw new InvalidOperationException("HOME environment variable is not set.");
+        }
+        else {
+            throw new PlatformNotSupportedException("Unsupported operating system.");
+        }
     }
 
     static async Task<int> Main(string[] args) {
         var cli = new ClifferBuilder()
-            .ConfigureAppConfiguration((configurationBuilder) => {
-                // configurationBuilder.AddJsonFile(_configFilePath, true);
-            })
             .ConfigureServices(services => {
                 services.AddSingleton<PersistenceService>();
                 services.AddXferHttpServices();
-                services.AddXferWorkspaceServices();
+                services.AddXferWorkspaceServices(_configFilePath);
                 services.AddSingleton<CommandSplitter>();
             })
             .Build();
