@@ -15,10 +15,12 @@ namespace ParksComputing.Xfer.Cli.Commands;
 [Command("get", "Retrieve resources from the specified API endpoint via a GET request.")]
 [Argument(typeof(string), "endpoint", "The endpoint to send the GET request to.")]
 [Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request. If input is redirected, parameters can also be read from standard input.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
+[Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 internal class GetCommand {
     public async Task<int> Execute(
         [ArgumentParam("endpoint")] string endpoint,
         [OptionParam("--parameters")] IEnumerable<string> parameters,
+        [OptionParam("--headers")] IEnumerable<string> headers,
         IHttpService httpService,
         IWorkspaceService workspaceService
         ) 
@@ -54,9 +56,17 @@ internal class GetCommand {
 
         var httpClient = new HttpClient();
         string responseContent = string.Empty;
+        int result = Result.Success;
 
         try {
-            responseContent = await httpService.GetAsync(httpClient, baseUrl, paramList);
+            var response = await httpService.GetAsync(baseUrl, paramList, headers);
+            
+            if (!response.IsSuccessStatusCode) {
+                Console.Error.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase} at {baseUrl}");
+                result = Result.Error;
+            }
+
+            responseContent = await response.Content.ReadAsStringAsync();
         }
         catch (HttpRequestException ex) {
             Console.Error.WriteLine($"Error: HTTP request failed - {ex.Message}");
@@ -64,6 +74,6 @@ internal class GetCommand {
         }
 
         Console.WriteLine(responseContent);
-        return Result.Success;
+        return result;
     }
 }

@@ -12,145 +12,106 @@ using System.Threading.Tasks;
 namespace ParksComputing.Xfer.Http.Services.Impl;
 
 public class HttpService : IHttpService {
+    private readonly HttpClient _httpClient;
 
-    public HttpService() {
+    public HttpService(HttpClient httpClient) {
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     }
 
-    public async Task<string> GetAsync(HttpClient httpClient, string baseUrl, IEnumerable<string> queryParameters, string? accessToken = null) {
-        // if (accessToken is null) {
-        //     accessToken = _config.GetConfigValue("AccessToken");
-        // }
+    private static void AddHeaders(HttpRequestMessage request, IEnumerable<string> headers) {
+        if (headers is not null) {
+            foreach (var header in headers) {
+                var parts = header.Split(new[] { ':' }, 2);
 
-
-        // if (string.IsNullOrEmpty(accessToken)) {
-        //     throw new InvalidOperationException("Access token not found. Please log in.");
-        // }
-
-        // httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        // httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        var query = string.Join("&", queryParameters.Select(param => {
-            if (param.Contains("=")) {
-                var parts = param.Split(new[] { '=' }, 2); // Splitting only on the first occurrence
                 if (parts.Length == 2) {
-                    // Key=value pair, escape separately
-                    return $"{Uri.EscapeDataString(parts[0])}={Uri.EscapeDataString(parts[1])}";
+                    var key = parts[0].Trim();
+                    var value = parts[1].Trim();
+
+                    if (!request.Headers.TryAddWithoutValidation(key, value)) {
+                        if (request.Content == null) {
+                            request.Content = new StringContent("");
+                        }
+                        request.Content.Headers.TryAddWithoutValidation(key, value);
+                    }
+                }
+            }
+        }
+    }
+
+    public async Task<HttpResponseMessage> GetAsync(string baseUrl, IEnumerable<string> queryParameters, IEnumerable<string> headers) {
+        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
+            throw new HttpRequestException($"Error: Invalid base URL: {baseUrl}");
+        }
+
+        var uriBuilder = new UriBuilder(baseUri);
+        var query = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
+
+        if (queryParameters is not null) {
+            foreach (var param in queryParameters) {
+                var parts = param.Split(new[] { '=' }, 2);
+                if (parts.Length == 2) {
+                    query[parts[0]] = parts[1];
                 }
                 else {
-                    // Shouldn't reach here due to the check, but just in case
-                    return Uri.EscapeDataString(param);
+                    query[param] = string.Empty;
                 }
             }
-            else {
-                // Not a key=value pair, escape the whole parameter
-                return Uri.EscapeDataString(param);
-            }
-        }));
-
-        if (!string.IsNullOrEmpty(query)) {
-            baseUrl = string.Join ("?", baseUrl, query);
         }
 
-        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
-            throw new HttpRequestException($"Error: Invalid base URL: {baseUrl}");
-        }
+        uriBuilder.Query = query.ToString();
+        var finalUrl = uriBuilder.ToString();
 
-        var response = await httpClient.GetAsync(baseUrl);
+        using var request = new HttpRequestMessage(HttpMethod.Get, finalUrl);
+        AddHeaders(request, headers);
 
-        if (!response.IsSuccessStatusCode) {
-            throw new HttpRequestException($"{response.ReasonPhrase} calling GET at {baseUrl}", null, statusCode: response.StatusCode);
-        }
-
-        var responseContent = await response.Content.ReadAsStringAsync();
-        // var jsonObject = JsonConvert.DeserializeObject(responseContent);
-        // var formattedJson = JsonConvert.SerializeObject(jsonObject, Newtonsoft.Json.Formatting.Indented);
-        // return formattedJson;
-        return responseContent;
+        return await _httpClient.SendAsync(request);
     }
 
-    public async Task<string> PostAsync(HttpClient httpClient, string baseUrl, string payload, string? accessToken = null) {
-        //if (accessToken is null) {
-        //    accessToken = _config.GetConfigValue("AccessToken");
-        //}
-
-        //if (string.IsNullOrEmpty(accessToken)) {
-        //    throw new InvalidOperationException("Access token not found. Please log in.");
-        //}
-
-        //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        //httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
+    public async Task<HttpResponseMessage> PostAsync(string baseUrl, string payload, IEnumerable<string> headers) {
         if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
             throw new HttpRequestException($"Error: Invalid base URL: {baseUrl}");
         }
 
-        var response = await httpClient.PostAsync(baseUrl, new StringContent(payload, Encoding.UTF8, "application/json"));
+        using var request = new HttpRequestMessage(HttpMethod.Post, baseUrl) {
+            Content = !string.IsNullOrEmpty(payload)
+            ? new StringContent(payload, Encoding.UTF8, "application/json")
+            : null
+        };
 
-        if (!response.IsSuccessStatusCode) {
-            throw new HttpRequestException($"{response.ReasonPhrase} calling POST at {baseUrl}", null, statusCode: response.StatusCode);
-        }
+        AddHeaders(request, headers);
 
-        var responseContent = await response.Content.ReadAsStringAsync();
-        // var jsonObject = JsonConvert.DeserializeObject(responseContent);
-        // var formattedJson = JsonConvert.SerializeObject(jsonObject, Newtonsoft.Json.Formatting.Indented);
-        return responseContent;
+        var response = await _httpClient.SendAsync(request);
+        return response;
     }
 
-    public async Task<string> PutAsync(HttpClient httpClient, string baseUrl, string endpoint, string payload, string? accessToken = null) {
-        //if (accessToken is null) {
-        //    accessToken = _config.GetConfigValue("AccessToken");
-        //}
-
-        //if (string.IsNullOrEmpty(accessToken)) {
-        //    throw new InvalidOperationException("Access token not found. Please log in.");
-        //}
-
-        //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        //httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
+    public async Task<HttpResponseMessage> PutAsync(string baseUrl, string endpoint, string payload, IEnumerable<string> headers) {
         if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
             throw new HttpRequestException($"Error: Invalid base URL: {baseUrl}");
         }
 
-        var fullUrl = new Uri(baseUri, endpoint).ToString();
-        var response = await httpClient.PutAsync(fullUrl, new StringContent(payload, Encoding.UTF8, "application/json"));
+        var fullUrl = new UriBuilder(baseUri) { Path = endpoint }.ToString();
 
-        if (!response.IsSuccessStatusCode) {
-            throw new HttpRequestException($"{response.ReasonPhrase} calling PUT at {fullUrl}", null, statusCode: response.StatusCode);
-        }
+        using var request = new HttpRequestMessage(HttpMethod.Put, fullUrl) {
+            Content = !string.IsNullOrEmpty(payload)
+                ? new StringContent(payload, Encoding.UTF8, "application/json")
+                : null
+        };
 
-        var responseContent = await response.Content.ReadAsStringAsync();
-        // var jsonObject = JsonConvert.DeserializeObject(responseContent);
-        // var formattedJson = JsonConvert.SerializeObject(jsonObject, Newtonsoft.Json.Formatting.Indented);
-        return responseContent;
+        AddHeaders(request, headers);
+
+        return await _httpClient.SendAsync(request);
     }
 
-    public async Task<string> DeleteAsync(HttpClient httpClient, string baseUrl, string endpoint, string? accessToken = null) {
-        //if (accessToken is null) {
-        //    accessToken = _config.GetConfigValue("AccessToken");
-        //}
-
-        //if (string.IsNullOrEmpty(accessToken)) {
-        //    throw new InvalidOperationException("Access token not found. Please log in.");
-        //}
-
-        //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        //httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
+    public async Task<HttpResponseMessage> DeleteAsync(string baseUrl, string endpoint, IEnumerable<string> headers) {
         if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
             throw new HttpRequestException($"Error: Invalid base URL: {baseUrl}");
         }
 
-        var fullUrl = new Uri(baseUri, endpoint).ToString();
-        var response = await httpClient.DeleteAsync(fullUrl);
+        var fullUrl = new UriBuilder(baseUri) { Path = endpoint }.ToString();
 
-        if (!response.IsSuccessStatusCode) {
-            throw new HttpRequestException($"{response.ReasonPhrase} calling DELETE at {fullUrl}", null, statusCode: response.StatusCode);
-        }
+        using var request = new HttpRequestMessage(HttpMethod.Delete, fullUrl);
+        AddHeaders(request, headers);
 
-        var responseContent = await response.Content.ReadAsStringAsync();
-        // var jsonObject = JsonConvert.DeserializeObject(responseContent);
-        // var formattedJson = JsonConvert.SerializeObject(jsonObject, Newtonsoft.Json.Formatting.Indented);
-        return responseContent;
+        return await _httpClient.SendAsync(request);
     }
 }
