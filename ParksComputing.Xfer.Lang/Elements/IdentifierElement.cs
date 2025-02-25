@@ -25,7 +25,7 @@ public class IdentifierElement : TextElement
         int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.ClosingSpecifier);
         Delimiter.SpecifierCount = maxConsecutiveSpecifiers + 1;
 
-        if (!Regex.IsMatch(Value, @"^[A-Za-z_\.][A-Za-z0-9_\.]*$"))
+        if (!Regex.IsMatch(Value, @"^[A-Za-z_\-\.][A-Za-z0-9_\-\.]*$"))
         {
             Delimiter.Style = ElementStyle.Compact;
 

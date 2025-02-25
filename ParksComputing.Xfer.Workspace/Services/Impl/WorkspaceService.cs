@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using ParksComputing.Xfer.Lang;
 using ParksComputing.Xfer.Lang.Attributes;
+using ParksComputing.Xfer.Workspace.Models;
 
 namespace ParksComputing.Xfer.Workspace.Services.Impl;
 
@@ -114,13 +115,4 @@ internal class WorkspaceService : IWorkspaceService
             Console.Error.WriteLine($"Error saving workspace file '{WorkspaceFilePath}': {ex.Message}");
         }
     }
-}
-
-public class BaseConfig {
-    public string? ActiveWorkspace { get; set; }
-    public Dictionary<string, WorkspaceConfig>? Workspaces { get; set; }
-}
-
-public class WorkspaceConfig {
-    public string? BaseUrl { get; set; }
 }

@@ -17,7 +17,7 @@ internal class SetWsCommand {
     public readonly IWorkspaceService _workspaceService;
 
     public SetWsCommand(IWorkspaceService workspaceService) {
-        _workspaceService = workspaceService ?? throw new ArgumentNullException(nameof(workspaceService));
+        _workspaceService = workspaceService;
     }
 
     public int Execute(
@@ -48,10 +48,7 @@ internal class SetWsCommand {
             workspace = keyArray[selectedItem - 1];
         }
 
-        if (_workspaceService != null) {
-            _workspaceService.SetActiveWorkspace(workspace);
-        }
-
+        _workspaceService.SetActiveWorkspace(workspace);
         return Result.Success;
     }
 }

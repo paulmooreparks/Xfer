@@ -15,14 +15,12 @@ internal class ListWsCommand {
     public readonly IWorkspaceService _workspaceService;
 
     public ListWsCommand(IWorkspaceService workspaceService) {
-        _workspaceService = workspaceService ?? throw new ArgumentNullException(nameof(workspaceService));
+        _workspaceService = workspaceService;
     }
 
     public int Execute() {
-        if (_workspaceService != null) {
-            foreach (var item in _workspaceService.WorkspaceList) {
-                Console.WriteLine(item);
-            }
+        foreach (var item in _workspaceService.WorkspaceList) {
+            Console.WriteLine(item);
         }
 
         return Result.Success;

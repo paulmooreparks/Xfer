@@ -66,7 +66,7 @@ public class XferConvert {
     }
 
     private static bool IsGenericDictionary(Type type) {
-        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Dictionary<,>)
+        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IDictionary<,>)
             && type.GetGenericArguments()[0] == typeof(string);
     }
 
