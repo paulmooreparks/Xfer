@@ -12,6 +12,9 @@ namespace ParksComputing.Xfer.Cli.Commands;
 
 [Command("send", "Send a request defined in the current workspace.")]
 [Argument(typeof(string), "requestName", "The name of the request to send.")]
+[Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request. If input is redirected, parameters can also be read from standard input.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
+[Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
+[Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-pl" }, Arity = ArgumentArity.ZeroOrOne)]
 internal class SendCommand {
     public readonly IWorkspaceService _ws;
 
@@ -22,7 +25,10 @@ internal class SendCommand {
     public async Task<int> Execute(
         [CommandParam("get")] GetCommand getCommand,
         [CommandParam("post")] PostCommand postCommand,
-        string requestName
+        [ArgumentParam("requestName")] string requestName,
+        [OptionParam("--parameters")] IEnumerable<string> parameters,
+        [OptionParam("--payload")] string payload,
+        [OptionParam("--headers")] IEnumerable<string> headers
         ) 
     {
         if (!_ws.ActiveWorkspace.RequestDefinitions.TryGetValue(requestName, out var definition) || definition is null) { 
@@ -33,18 +39,24 @@ internal class SendCommand {
         var method = definition.Method?.ToUpper() ?? string.Empty;
         var endpoint = definition.Endpoint ?? string.Empty;
 
-        switch (method) {
-            case "GET":
-                return await getCommand.Execute(endpoint, null, null);
+        var finalParameters = new List<string>();
+        var finalHeaders = new List<string>();
 
-            case "POST":
-                break;
+        switch (method) {
+            case "GET": {
+                    return await getCommand.Execute(endpoint, finalParameters, finalHeaders);
+                }
+
+            case "POST": {
+                    var finalPayload = payload ?? definition.Payload ?? string.Empty;
+                    return await postCommand.Execute(endpoint, finalPayload, finalHeaders);
+                }
 
             default:
                 Console.Error.WriteLine($"Unknown method {method}");
                 return Result.Error;
         }
 
-        return Result.Success;
+        // return Result.Success;
     }
 }
