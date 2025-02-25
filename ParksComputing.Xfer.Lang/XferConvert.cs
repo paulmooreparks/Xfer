@@ -46,6 +46,7 @@ public class XferConvert {
             string[] stringArray => SerializeStringArray(stringArray),
             byte[] byteArray => new StringElement(Convert.ToBase64String(byteArray)),
             object[] objectArray => new PropertyBagElement(objectArray.Select(SerializeValue)),
+            IEnumerable enumerable when IsGenericEnumerable(enumerable.GetType()) => SerializeEnumerable(enumerable),
             IDictionary dictionary when IsGenericDictionary(dictionary.GetType()) => SerializeDictionary(dictionary),
 #if false
             IDictionary dictionary => new ObjectElement(
@@ -68,6 +69,22 @@ public class XferConvert {
     private static bool IsGenericDictionary(Type type) {
         return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IDictionary<,>)
             && type.GetGenericArguments()[0] == typeof(string);
+    }
+
+    private static bool IsGenericEnumerable(Type type) {
+        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+            && type.GetGenericArguments()[0] == typeof(string);
+    }
+
+    private static PropertyBagElement SerializeEnumerable(IEnumerable enumerable) {
+        var objElement = new PropertyBagElement();
+
+        foreach (var value in enumerable) {
+            var valueElement = SerializeValue(value);
+            objElement.Add(valueElement);
+        }
+
+        return objElement;
     }
 
     private static ObjectElement SerializeDictionary(IDictionary dictionary) {
@@ -102,16 +119,29 @@ public class XferConvert {
             return deserializeEnumMethod.Invoke(null, new object[] { textElement });
         }
 
-        if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Dictionary<,>)) {
-            var keyType = targetType.GetGenericArguments()[0];
-            var valueType = targetType.GetGenericArguments()[1];
+        if (targetType.IsGenericType) {
+            var genericType = targetType.GetGenericTypeDefinition();
 
-            if (keyType != typeof(string)) {
-                throw new NotSupportedException("Only Dictionary<string, T> is supported.");
+            // Handle Dictionary<string, T>
+            if (genericType == typeof(Dictionary<,>)) {
+                var keyType = targetType.GetGenericArguments()[0];
+                var valueType = targetType.GetGenericArguments()[1];
+
+                if (keyType != typeof(string)) {
+                    throw new NotSupportedException("Only Dictionary<string, T> is supported.");
+                }
+
+                if (element is ObjectElement objectElement) {
+                    return DeserializeDictionary(objectElement, valueType);
+                }
             }
+            // Handle List<T>
+            else if (genericType == typeof(List<>)) {
+                var valueType = targetType.GetGenericArguments()[0];
 
-            if (element is ObjectElement objectElement) {
-                return DeserializeDictionary(objectElement, valueType);
+                if (element is PropertyBagElement propBagElement) {
+                    return DeserializeEnumerable(propBagElement, valueType);
+                }
             }
         }
 
@@ -168,6 +198,19 @@ public class XferConvert {
 
         return dictionary;
     }
+
+    private static object DeserializeEnumerable(PropertyBagElement propBagElement, Type valueType) {
+        var listType = typeof(List<>).MakeGenericType(valueType);
+        var list = (IList)Activator.CreateInstance(listType)!; // Create List<T>
+
+        foreach (var element in propBagElement.Values) {
+            var value = DeserializeValue(element, valueType);
+            list.Add(value); // Now safe because IList supports Add()
+        }
+
+        return list;
+    }
+
 
     private static ObjectElement SerializeObject(object o) {
         var type = o.GetType();

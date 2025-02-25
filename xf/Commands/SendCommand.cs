@@ -39,7 +39,38 @@ internal class SendCommand {
         var method = definition.Method?.ToUpper() ?? string.Empty;
         var endpoint = definition.Endpoint ?? string.Empty;
 
-        var finalParameters = new List<string>();
+        var cfgParameters = definition.Parameters ?? Enumerable.Empty<string>();
+        var mergedParams = new Dictionary<string, string?>();
+
+        // Add configuration parameters first (lower precedence)
+        foreach (var cfgParam in cfgParameters) {
+            var parts = cfgParam.Split('=', 2);
+            var key = parts[0];
+            var value = parts.Length > 1 ? parts[1] : null; // Handle standalone values
+
+            if (!mergedParams.ContainsKey(key)) // Avoid overwriting with lower-priority values
+            {
+                mergedParams[key] = value;
+            }
+        }
+
+        // Override with command-line parameters (higher precedence)
+        if (parameters is not null) {
+            foreach (var parameter in parameters) {
+                var parts = parameter.Split('=', 2);
+                var key = parts[0];
+                var value = parts.Length > 1 ? parts[1] : null;
+
+                // Always overwrite since command-line parameters take precedence
+                mergedParams[key] = value;
+            }
+        }
+
+        // Convert back to List<string>
+        var finalParameters = mergedParams
+            .Select(kvp => kvp.Value is not null ? $"{kvp.Key}={kvp.Value}" : kvp.Key)
+            .ToList();
+
         var finalHeaders = new List<string>();
 
         switch (method) {
