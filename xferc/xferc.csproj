@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Cliffer" Version="0.4.10-prerelease" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
@@ -23,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Cliffer\ClifferLib\Cliffer.csproj" />
     <ProjectReference Include="..\ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj" />
   </ItemGroup>
 
