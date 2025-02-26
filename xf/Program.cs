@@ -63,6 +63,39 @@ internal class Program {
             })
             .Build();
 
+        Cliffer.Macro.CustomMacroArgumentProcessor += (args) => {
+            int? removeIndex = null;
+            int? tmpIndex = null;
+
+            for (int i = 0; i < args.Length; i++) {
+                if (args[i] == "-b" || args[i] == "--baseurl") {
+                    if (tmpIndex.HasValue) {
+                        removeIndex = tmpIndex;
+                        break;
+                    }
+                    else {
+                        tmpIndex = i;
+                    }
+                }
+            }
+
+            if (removeIndex.HasValue) {
+                var newArgs = new List<string>();
+
+                for (int i = 0; i < args.Length; i++) {
+                    if (i == removeIndex.Value || i == removeIndex.Value + 1) {
+                        continue;
+                    }
+
+                    newArgs.Add(args[i]);
+                }
+
+                return newArgs.ToArray();
+            }
+
+            return args;
+        };
+
         Utility.SetServiceProvider(cli.ServiceProvider);
 
         ClifferEventHandler.OnExit += () => {

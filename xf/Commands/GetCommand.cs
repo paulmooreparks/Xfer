@@ -14,6 +14,7 @@ namespace ParksComputing.Xfer.Cli.Commands;
 
 [Command("get", "Retrieve resources from the specified API endpoint via a GET request.")]
 [Argument(typeof(string), "endpoint", "The endpoint to send the GET request to.")]
+[Option(typeof(string), "--baseurl", "The base URL of the API to send HTTP requests to.", new[] { "-b" }, IsRequired = false)]
 [Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request. If input is redirected, parameters can also be read from standard input.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 internal class GetCommand {
@@ -30,16 +31,15 @@ internal class GetCommand {
     }
 
     public async Task<int> Execute(
+        [OptionParam("--baseurl")] string? baseUrl,
         [ArgumentParam("endpoint")] string endpoint,
         [OptionParam("--parameters")] IEnumerable<string> parameters,
         [OptionParam("--headers")] IEnumerable<string> headers
         ) 
     {
-        var baseUrl = string.Empty;
-
         // Validate URL format
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
-            baseUrl = _workspaceService.ActiveWorkspace.BaseUrl;
+            baseUrl ??= _workspaceService.ActiveWorkspace.BaseUrl;
 
             if (string.IsNullOrEmpty(baseUrl) || !Uri.TryCreate(new Uri(baseUrl), endpoint, out baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
                 Console.Error.WriteLine($"Error: Invalid base URL: {baseUrl}");

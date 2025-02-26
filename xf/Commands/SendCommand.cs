@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 
 using Cliffer;
 
+using ParksComputing.Xfer.Workspace.Models;
 using ParksComputing.Xfer.Workspace.Services;
 
 namespace ParksComputing.Xfer.Cli.Commands;
 
 [Command("send", "Send a request defined in the current workspace.")]
 [Argument(typeof(string), "requestName", "The name of the request to send.")]
+[Option(typeof(string), "--baseurl", "The base URL of the API to send HTTP requests to.", new[] { "-b" }, IsRequired = false)]
 [Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request. If input is redirected, parameters can also be read from standard input.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-pl" }, Arity = ArgumentArity.ZeroOrOne)]
@@ -23,15 +25,34 @@ internal class SendCommand {
     }
 
     public async Task<int> Execute(
-        [CommandParam("get")] GetCommand getCommand,
-        [CommandParam("post")] PostCommand postCommand,
         [ArgumentParam("requestName")] string requestName,
+        [OptionParam("--baseurl")] string? baseUrl,
         [OptionParam("--parameters")] IEnumerable<string> parameters,
         [OptionParam("--payload")] string payload,
-        [OptionParam("--headers")] IEnumerable<string> headers
+        [OptionParam("--headers")] IEnumerable<string> headers,
+        [CommandParam("get")] GetCommand getCommand,
+        [CommandParam("post")] PostCommand postCommand
         ) 
     {
-        if (!_ws.ActiveWorkspace.RequestDefinitions.TryGetValue(requestName, out var definition) || definition is null) { 
+        var reqSplit = requestName.Split('.');
+        var workspaceName = _ws.CurrentWorkspaceName;
+
+        if (reqSplit.Length > 1) {
+            workspaceName = reqSplit[0];
+            requestName = reqSplit[1];
+        }
+
+        if (_ws == null || _ws.BaseConfig == null || _ws.BaseConfig.Workspaces == null) {
+            Console.Error.WriteLine($"Workspace name '{workspaceName}' not found in current configuration.");
+            return Result.Error;
+        }
+
+        if (!_ws.BaseConfig.Workspaces.TryGetValue(workspaceName, out WorkspaceConfig? workspace)) {
+            Console.Error.WriteLine($"Workspace name '{workspaceName}' not found in current configuration.");
+            return Result.Error;
+        }
+
+        if (!workspace.RequestDefinitions.TryGetValue(requestName, out var definition) || definition is null) { 
             Console.Error.WriteLine($"Request name '{requestName}' not found in current workspace.");
             return Result.Error;
         }
@@ -48,7 +69,7 @@ internal class SendCommand {
             var key = parts[0];
             var value = parts.Length > 1 ? parts[1] : null; // Handle standalone values
 
-            if (!mergedParams.ContainsKey(key)) // Avoid overwriting with lower-priority values
+            if (!mergedParams.ContainsKey(key))
             {
                 mergedParams[key] = value;
             }
@@ -66,21 +87,37 @@ internal class SendCommand {
             }
         }
 
-        // Convert back to List<string>
         var finalParameters = mergedParams
             .Select(kvp => kvp.Value is not null ? $"{kvp.Key}={kvp.Value}" : kvp.Key)
             .ToList();
 
-        var finalHeaders = new List<string>();
+        var configHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var kvp in definition.Headers) {
+            configHeaders[kvp.Key] = kvp.Value; // Add default headers
+        }
+
+        if (headers is not null) {
+            foreach (var header in headers) {
+                var parts = header.Split(':', 2);
+                if (parts.Length == 2) {
+                    configHeaders[parts[0].Trim()] = parts[1].Trim(); // Override
+                }
+            }
+        }
+
+        var finalHeaders = configHeaders
+            .Select(kvp => $"{kvp.Key}: {kvp.Value}")
+            .ToList();
 
         switch (method) {
             case "GET": {
-                    return await getCommand.Execute(endpoint, finalParameters, finalHeaders);
+                    return await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders);
                 }
 
             case "POST": {
                     var finalPayload = payload ?? definition.Payload ?? string.Empty;
-                    return await postCommand.Execute(endpoint, finalPayload, finalHeaders);
+                    return await postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
                 }
 
             default:

@@ -46,10 +46,15 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
 
     public override string[] PreprocessArgs(string[] args, Command command, InvocationContext context) {
         var parseResult = command.Parse(args);
+
+        if (parseResult != null && parseResult.Errors.Count > 0) {
+            args[0] = $"{_workspaceService.CurrentWorkspaceName}.{args[0]}";
+        }
+
         var newArgs = new List<string>();
         newArgs.AddRange(args);
 
-        if (parseResult.CommandResult.Command == command) {
+        if (parseResult?.CommandResult.Command == command) {
             newArgs.Add(_recursionOption.Aliases.First());
             newArgs.Add("true");
         }
