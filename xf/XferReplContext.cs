@@ -49,12 +49,13 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
 
         if (parseResult != null && parseResult.Errors.Count > 0) {
             args[0] = $"{_workspaceService.CurrentWorkspaceName}.{args[0]}";
+            parseResult = command.Parse(args);
         }
 
         var newArgs = new List<string>();
         newArgs.AddRange(args);
 
-        if (parseResult?.CommandResult.Command == command) {
+        if (parseResult?.Errors.Count == 0 && parseResult?.CommandResult.Command == command) {
             newArgs.Add(_recursionOption.Aliases.First());
             newArgs.Add("true");
         }
