@@ -84,6 +84,26 @@ internal class WorkspaceService : IWorkspaceService
         try {
             var xfer = File.ReadAllText(WorkspaceFilePath, Encoding.UTF8);
             baseConfig = XferConvert.Deserialize<BaseConfig>(xfer);
+
+            if (baseConfig.Workspaces is null) {
+                baseConfig.Workspaces = new Dictionary<string, WorkspaceConfig>();
+            }
+
+            if (baseConfig.ActiveWorkspace is null) {
+                baseConfig.ActiveWorkspace = "default";
+            }
+
+            foreach (var workspaceKvp in baseConfig.Workspaces) {
+                var workspace = workspaceKvp.Value;
+
+                if (workspace is not null) {
+                    if (workspace.Extend is not null) {
+                        if (baseConfig.Workspaces.TryGetValue(workspace.Extend, out var parentWorkspace)) {
+                            workspace.Merge(parentWorkspace);
+                        }
+                    }
+                }
+            }
         }
         catch (Exception ex) {
             Console.Error.WriteLine($"Error loading workspace file '{WorkspaceFilePath}': {ex.Message}");

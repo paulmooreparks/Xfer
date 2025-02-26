@@ -9,6 +9,10 @@ using Cliffer;
 using ParksComputing.Xfer.Workspace.Models;
 using ParksComputing.Xfer.Workspace.Services;
 
+using Jint;
+using Jint.Runtime.Interop;
+using Newtonsoft.Json.Linq;
+
 namespace ParksComputing.Xfer.Cli.Commands;
 
 [Command("send", "Send a request defined in the current workspace.")]
@@ -18,10 +22,15 @@ namespace ParksComputing.Xfer.Cli.Commands;
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-pl" }, Arity = ArgumentArity.ZeroOrOne)]
 internal class SendCommand {
-    public readonly IWorkspaceService _ws;
+    private readonly IWorkspaceService _ws;
+    private readonly Engine _engine = new ();
 
     public SendCommand(IWorkspaceService workspaceService) {
         _ws = workspaceService;
+        _engine = new Engine(cfg => cfg.AllowClr(typeof(JObject).Assembly)) // Allow Newtonsoft.Json
+            .SetValue("log", new Action<string>(Console.WriteLine))
+            .SetValue("JObject", TypeReference.CreateTypeReference<JObject>(_engine)) // Expose JObject
+            .SetValue("JsonConvert", typeof(Newtonsoft.Json.JsonConvert)); // Expose JsonConvert    
     }
 
     public async Task<int> Execute(
@@ -110,21 +119,31 @@ internal class SendCommand {
             .Select(kvp => $"{kvp.Key}: {kvp.Value}")
             .ToList();
 
+        var result = Result.Success;
+        _engine.Execute(definition.PreRequest ?? string.Empty);
+
         switch (method) {
             case "GET": {
-                    return await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders);
+                    result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders);
+                    _engine.SetValue("responseContent", getCommand.ResponseContent);
+                    break;
                 }
 
             case "POST": {
                     var finalPayload = payload ?? definition.Payload ?? string.Empty;
-                    return await postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
+                    result = await postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
+                    _engine.SetValue("responseContent", postCommand.ResponseContent);
+                    break;
                 }
 
             default:
                 Console.Error.WriteLine($"Unknown method {method}");
-                return Result.Error;
+                result = Result.Error;
+                break;
         }
 
-        // return Result.Success;
+        _engine.Execute(definition.PostRequest ?? string.Empty);
+
+        return result;
     }
 }

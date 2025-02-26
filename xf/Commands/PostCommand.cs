@@ -18,8 +18,10 @@ namespace ParksComputing.Xfer.Cli.Commands;
 [Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-p" }, Arity = ArgumentArity.ZeroOrOne)]
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 internal class PostCommand {
-    public readonly IHttpService _httpService;
-    public readonly IWorkspaceService _workspaceService;
+    private readonly IHttpService _httpService;
+    private readonly IWorkspaceService _workspaceService;
+
+    public string ResponseContent { get; protected set; } = string.Empty;
 
     public PostCommand(
         IHttpService httpService,
@@ -73,7 +75,7 @@ internal class PostCommand {
             return Result.Error;
         }
 
-        Console.WriteLine(responseContent);
+        ResponseContent = responseContent;
         return result;
     }
 }

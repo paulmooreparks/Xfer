@@ -54,6 +54,9 @@ internal class Program {
     }
 
     static async Task<int> Main(string[] args) {
+        Console.WriteLine(Environment.GetEnvironmentVariable("AccessToken"));
+        Environment.SetEnvironmentVariable("AccessToken", "12345");
+
         var cli = new ClifferBuilder()
             .ConfigureServices(services => {
                 services.AddSingleton<PersistenceService>();

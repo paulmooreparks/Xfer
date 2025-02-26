@@ -18,8 +18,10 @@ namespace ParksComputing.Xfer.Cli.Commands;
 [Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request. If input is redirected, parameters can also be read from standard input.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 internal class GetCommand {
-    public readonly IHttpService _httpService;
-    public readonly IWorkspaceService _workspaceService;
+    private readonly IHttpService _httpService;
+    private readonly IWorkspaceService _workspaceService;
+
+    public string ResponseContent { get; protected set; } = string.Empty;
 
     public GetCommand(
         IHttpService httpService,
@@ -83,7 +85,7 @@ internal class GetCommand {
             return Result.Error;
         }
 
-        Console.WriteLine(responseContent);
+        ResponseContent = responseContent;
         return result;
     }
 }
