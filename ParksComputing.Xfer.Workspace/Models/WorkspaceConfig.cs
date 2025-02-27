@@ -17,6 +17,9 @@ public class WorkspaceConfig {
 
         // Merge BaseUrl if not set in current workspace
         BaseUrl ??= parentWorkspace.BaseUrl;
+        InitScript ??= parentWorkspace.InitScript;
+        PreRequest ??= parentWorkspace.PreRequest;
+        PostRequest ??= parentWorkspace.PostRequest;
 
         // Merge Requests (combine existing with parent, prioritizing child values)
         foreach (var kvp in parentWorkspace.Requests) {

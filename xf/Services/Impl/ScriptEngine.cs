@@ -19,19 +19,22 @@ internal class ScriptEngine : IScriptEngine {
     private readonly IPackageService _packageService;
     private readonly IWorkspaceService _workspaceService;
     private readonly IStoreService _storeService;
+    private readonly ISettingsService _settingsService;
 
     private Engine _engine = new Engine(options => options.AllowClr());
 
     public ScriptEngine(
         IPackageService packageService,
         IWorkspaceService workspaceService,
-        IStoreService storeService
+        IStoreService storeService,
+        ISettingsService settingsService
         ) 
     {
         _workspaceService = workspaceService;
         _storeService = storeService;
         _packageService = packageService;
         _packageService.PackagesUpdated += PackagesUpdated;
+        _settingsService = settingsService;
         LoadPackageAssemblies();
     }
 
@@ -98,19 +101,71 @@ internal class ScriptEngine : IScriptEngine {
         }
     }
 
-    public void SetGlobalVariable(string name, object value) {
+    public void SetGlobalVariable(string name, object? value) {
         _engine.SetValue(name, value);
     }
 
-    public string ExecuteScript(string script) {
+    public string ExecuteScript(string? script) {
         try {
-            var result = _engine.Execute(script);
+            var scriptCode = GetScriptContent(script);
+
+            if (string.IsNullOrEmpty(scriptCode)) {
+                return string.Empty;
+            }
+
+            var result = _engine.Execute(scriptCode);
             return result?.ToString() ?? string.Empty;  // .Type == Types.String ? result.AsString() : result.ToString();
         }
         catch (Exception ex) {
             var result = $"Error executing script: {ex.Message}";
             Console.Error.WriteLine(result);
             return result;
+        }
+    }
+
+    private string? GetScriptContent(string? scriptValue) {
+        if (string.IsNullOrWhiteSpace(scriptValue)) {
+            return null;
+        }
+
+        // Save the original working directory
+        var originalDirectory = Directory.GetCurrentDirectory();
+        var xferSettingsDirectory = _settingsService.XferSettingsDirectory;
+
+        try {
+            // Change to XferSettingsDirectory if it's set and exists
+            // Check if the scriptValue is a file reference
+            if (scriptValue.Trim().StartsWith(Constants.ScriptFilePrefix)) {
+                var filePath = scriptValue.Trim().Substring(Constants.ScriptFilePrefixLength).Trim();
+
+                // If the path is relative, it will now be resolved from XferSettingsDirectory
+                if (!Path.IsPathRooted(filePath)) {
+                    if (!string.IsNullOrWhiteSpace(xferSettingsDirectory) && Directory.Exists(xferSettingsDirectory)) {
+                        Directory.SetCurrentDirectory(xferSettingsDirectory);
+                    }
+
+                    filePath = Path.GetFullPath(filePath);
+                }
+
+                if (File.Exists(filePath)) {
+                    return File.ReadAllText(filePath);
+                }
+                else {
+                    Console.Error.WriteLine($"⚠️ Script file not found: {filePath}");
+                    return null;
+                }
+            }
+
+            // If it's not a file reference, return inline script
+            return scriptValue;
+        }
+        catch (Exception ex) {
+            Console.Error.WriteLine($"⚠️ Error processing script content: {ex.Message}");
+            return null;
+        }
+        finally {
+            // Restore the original working directory
+            Directory.SetCurrentDirectory(originalDirectory);
         }
     }
 }
