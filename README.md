@@ -14,16 +14,20 @@ Like most people who write and work with RESTful APIs, I've mainly used Postman 
 
 ## Features
 
-Here are some of the features I have planned for the Xfer CLI tool:
+Here are some of the features of the Xfer CLI tool:
 
-- **HTTP Interaction**: Call HTTP methods (GET, HEAD, POST, PUT, DELETE, OPTIONS, TRACE, PATCH) over HTTP and HTTPS.
+- **HTTP Interaction**: Call HTTP methods (GET, HEAD, POST, PUT, DELETE, OPTIONS, TRACE, PATCH) over HTTP and HTTPS. Set or modify headers, query parameters, and request bodies.
 - **Workspaces**: Define workspaces (similar to Postman collections) to encapsulate related API interactions.
-- **Headers**: Set headers when calling HTTP methods.
-- **Query Parameters**: Pass parameters to HTTP methods.
-- **Request Body**: Define the request body to pass to HTTP methods.
+- **Derived Workspaces**: Create new workspaces by deriving from existing workspaces. This allows you to create a new workspace that is a copy of an existing workspace, but with some changes.
 - **Environment Variables**: Pass and store values in the environment.
-- **Scripting**: Automate workflows and process responses using JavaScript.
+- **Scripting**: Pre-process requests, post-process responses, automate workflows, configure your environment, and MUCH more using JavaScript.
 - **Object Model**: Define and use objects in the environment for passing, storing, and manipulating values from script.
+- **Nuget Package Management**: Install Nuget packages and use them from JavaScript to extend the functionality of the tool.
+- **REPL Mode**: The tool may be used in REPL mode (Read/Eval/Print Loop) or as a traditional command-line tool.
+
+More is waiting to be documented, and even more is waiting to be implemented.
+
+![Screen shot 01](XferScreen01.png)
 
 ## But... Why?
 
