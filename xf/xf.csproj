@@ -12,7 +12,11 @@
   <ItemGroup>
     <PackageReference Include="Cliffer" Version="0.4.10-prerelease" />
     <PackageReference Include="Jint" Version="4.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NuGet.Common" Version="6.13.1" />
+    <PackageReference Include="NuGet.Configuration" Version="6.13.1" />
+    <PackageReference Include="NuGet.PackageManagement" Version="6.13.1" />
+    <PackageReference Include="NuGet.Packaging" Version="6.13.1" />
+    <PackageReference Include="NuGet.Protocol" Version="6.13.1" />
   </ItemGroup>
 
   <ItemGroup>

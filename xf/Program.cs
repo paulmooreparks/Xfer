@@ -9,12 +9,14 @@ using ParksComputing.Xfer.Workspace;
 using ParksComputing.Xfer.Workspace.Services;
 using ParksComputing.Xfer.Http;
 using ParksComputing.Xfer.Http.Services;
+using ParksComputing.Xfer.Cli.Services.Impl;
 
 namespace ParksComputing.Xfer.Cli;
 
 internal class Program {
     private static readonly string _configFilePath;
     private static readonly string _xfDirectory;
+    private static readonly string _pluginDirectory;
 
     static Program() {
         try {
@@ -31,6 +33,11 @@ internal class Program {
 
             // Define the configuration file path
             _configFilePath = Path.Combine(_xfDirectory, Constants.ConfigFileName);
+            _pluginDirectory = Path.Combine(_xfDirectory, Constants.PackageDirName);
+
+            if (!Directory.Exists(_pluginDirectory)) {
+                Directory.CreateDirectory(_pluginDirectory);
+            }
         }
         catch (Exception ex) {
             Console.Error.WriteLine($"Error initializing .xf directory: {ex.Message}");
@@ -54,15 +61,14 @@ internal class Program {
     }
 
     static async Task<int> Main(string[] args) {
-        Console.WriteLine(Environment.GetEnvironmentVariable("AccessToken"));
-        Environment.SetEnvironmentVariable("AccessToken", "12345");
-
         var cli = new ClifferBuilder()
             .ConfigureServices(services => {
                 services.AddSingleton<PersistenceService>();
                 services.AddXferHttpServices();
                 services.AddXferWorkspaceServices(_configFilePath);
                 services.AddSingleton<CommandSplitter>();
+                services.AddSingleton<PackageService>(provider => new PackageService(_pluginDirectory));
+                services.AddSingleton<ScriptEngine>();
             })
             .Build();
 

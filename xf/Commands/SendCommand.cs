@@ -11,7 +11,7 @@ using ParksComputing.Xfer.Workspace.Services;
 
 using Jint;
 using Jint.Runtime.Interop;
-using Newtonsoft.Json.Linq;
+using ParksComputing.Xfer.Cli.Services.Impl;
 
 namespace ParksComputing.Xfer.Cli.Commands;
 
@@ -23,14 +23,11 @@ namespace ParksComputing.Xfer.Cli.Commands;
 [Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-pl" }, Arity = ArgumentArity.ZeroOrOne)]
 internal class SendCommand {
     private readonly IWorkspaceService _ws;
-    private readonly Engine _engine = new ();
+    private readonly ScriptEngine _scriptEngine;
 
-    public SendCommand(IWorkspaceService workspaceService) {
+    public SendCommand(IWorkspaceService workspaceService, ScriptEngine scriptEngine) {
         _ws = workspaceService;
-        _engine = new Engine(cfg => cfg.AllowClr(typeof(JObject).Assembly)) // Allow Newtonsoft.Json
-            .SetValue("log", new Action<string>(Console.WriteLine))
-            .SetValue("JObject", TypeReference.CreateTypeReference<JObject>(_engine)) // Expose JObject
-            .SetValue("JsonConvert", typeof(Newtonsoft.Json.JsonConvert)); // Expose JsonConvert    
+        _scriptEngine = scriptEngine;
     }
 
     public async Task<int> Execute(
@@ -120,19 +117,19 @@ internal class SendCommand {
             .ToList();
 
         var result = Result.Success;
-        _engine.Execute(definition.PreRequest ?? string.Empty);
+        _scriptEngine.ExecuteScript(definition.PreRequest ?? string.Empty);
 
         switch (method) {
             case "GET": {
                     result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders);
-                    _engine.SetValue("responseContent", getCommand.ResponseContent);
+                    _scriptEngine.SetGlobalVariable("responseContent", getCommand.ResponseContent);
                     break;
                 }
 
             case "POST": {
                     var finalPayload = payload ?? definition.Payload ?? string.Empty;
                     result = await postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
-                    _engine.SetValue("responseContent", postCommand.ResponseContent);
+                    _scriptEngine.SetGlobalVariable("responseContent", postCommand.ResponseContent);
                     break;
                 }
 
@@ -142,7 +139,7 @@ internal class SendCommand {
                 break;
         }
 
-        _engine.Execute(definition.PostRequest ?? string.Empty);
+        _scriptEngine.ExecuteScript(definition.PostRequest ?? string.Empty);
 
         return result;
     }

@@ -4,13 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParksComputing.Xfer.Cli.Services;
+namespace ParksComputing.Xfer.Cli.Services.Impl;
 
-internal class CommandSplitter {
-    public CommandSplitter() {
+internal class CommandSplitter
+{
+    public CommandSplitter()
+    {
     }
 
-    private enum Boundary {
+    private enum Boundary
+    {
         TokenStart,
         WordEnd,
         QuoteStart,
@@ -22,7 +25,8 @@ internal class CommandSplitter {
     /// </summary>
     /// <param name="commandLine">A command line input string.</param>
     /// <returns>A sequence of strings.</returns>
-    public IEnumerable<string> Split(string commandLine) {
+    public IEnumerable<string> Split(string commandLine)
+    {
         var memory = commandLine.AsMemory();
 
         var startTokenIndex = 0;
@@ -32,12 +36,16 @@ internal class CommandSplitter {
         var seeking = Boundary.TokenStart;
         var seekingQuote = Boundary.QuoteStart;
 
-        while (pos < memory.Length) {
+        while (pos < memory.Length)
+        {
             var c = memory.Span[pos];
 
-            if (char.IsWhiteSpace(c)) {
-                if (seekingQuote == Boundary.QuoteStart) {
-                    switch (seeking) {
+            if (char.IsWhiteSpace(c))
+            {
+                if (seekingQuote == Boundary.QuoteStart)
+                {
+                    switch (seeking)
+                    {
                         case Boundary.WordEnd:
                             yield return CurrentToken();
                             startTokenIndex = pos;
@@ -50,9 +58,12 @@ internal class CommandSplitter {
                     }
                 }
             }
-            else if (c == '\"') {
-                if (seeking == Boundary.TokenStart) {
-                    switch (seekingQuote) {
+            else if (c == '\"')
+            {
+                if (seeking == Boundary.TokenStart)
+                {
+                    switch (seekingQuote)
+                    {
                         case Boundary.QuoteEnd:
                             Advance();
                             yield return CurrentToken();
@@ -67,8 +78,10 @@ internal class CommandSplitter {
                             break;
                     }
                 }
-                else {
-                    switch (seekingQuote) {
+                else
+                {
+                    switch (seekingQuote)
+                    {
                         case Boundary.QuoteEnd:
                             seekingQuote = Boundary.QuoteStart;
                             break;
@@ -79,15 +92,18 @@ internal class CommandSplitter {
                     }
                 }
             }
-            else if (seeking == Boundary.TokenStart && seekingQuote == Boundary.QuoteStart) {
+            else if (seeking == Boundary.TokenStart && seekingQuote == Boundary.QuoteStart)
+            {
                 seeking = Boundary.WordEnd;
                 startTokenIndex = pos;
             }
 
             Advance();
 
-            if (IsAtEndOfInput()) {
-                switch (seeking) {
+            if (IsAtEndOfInput())
+            {
+                switch (seeking)
+                {
                     case Boundary.TokenStart:
                         break;
                     default:
@@ -99,7 +115,8 @@ internal class CommandSplitter {
 
         void Advance() => pos++;
 
-        string CurrentToken() {
+        string CurrentToken()
+        {
             return memory.Slice(startTokenIndex, IndexOfEndOfToken()).ToString();
         }
 
