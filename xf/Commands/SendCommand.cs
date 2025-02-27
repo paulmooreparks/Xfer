@@ -63,8 +63,6 @@ internal class SendCommand {
             return Result.Error;
         }
 
-        _scriptEngine.ExecuteScript(definition.PreRequest ?? string.Empty);
-
         var method = definition.Method?.ToUpper() ?? string.Empty;
         var endpoint = definition.Endpoint ?? string.Empty;
 
@@ -113,6 +111,12 @@ internal class SendCommand {
                 }
             }
         }
+
+        _scriptEngine.SetGlobalVariable("requestDefinition", definition);
+        _scriptEngine.SetGlobalVariable("parameters", finalParameters);
+        _scriptEngine.SetGlobalVariable("headers", configHeaders);
+        _scriptEngine.SetGlobalVariable("payload", payload);
+        _scriptEngine.ExecuteScript(definition.PreRequest ?? string.Empty);
 
         var finalHeaders = configHeaders
             .Select(kvp => $"{kvp.Key}: {kvp.Value}")
