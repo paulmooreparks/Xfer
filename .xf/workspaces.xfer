@@ -1,0 +1,61 @@
+﻿{
+    ActiveWorkspace "httpbin"
+
+    InitScript <'file:globalInitScript.js'>
+
+    </ A workspace is a collection of related requests and associated configuration. />
+    Workspaces {
+
+        httpbin {
+            BaseUrl "https://httpbin.org/"
+
+            InitScript <''>
+            PreRequest <''>
+            PostRequest <'log(responseContent)'>
+
+            </ These are requests that may be executed by name from the command line. />
+            Requests {
+                gettest {
+                    Endpoint "/get"
+                    Method "GET"
+
+                    </ Default headers to be sent with the request unless overridden. />
+                    Headers {
+                        Accept "application/json"
+                    }
+                    
+                    </ Default parameters to be sent with the request unless overridden. />
+                    Parameters (
+                        'key1=value1'
+                        'key2=value2'
+                    )
+                }
+                posttest {
+                    Endpoint "/post"
+                    Method "POST"
+                    Headers {
+                        Content-Type "application/json"
+                    }
+                    Payload <'{ "key1": "value1", "key2": "value2"} '>
+                }
+                bearer {
+                    Endpoint "/bearer"
+                    Method "GET"
+                    Headers {
+                        Authorization 'Bearer <|httpBinBearerToken|>'
+                    }
+                }
+            }
+        }
+
+        parkscomputing {
+            BaseUrl "https://parkscomputing.com/"
+            Requests {
+                about {
+                    Endpoint "/content/about.html"
+                    Method "GET"
+                }
+            }
+        }
+    }
+}
