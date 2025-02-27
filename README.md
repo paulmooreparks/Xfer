@@ -29,6 +29,25 @@ More is waiting to be documented, and even more is waiting to be implemented.
 
 ![Screen shot 01](XferScreen01.png)
 
+## Sample Configuration
+
+When you run the tool for the first time (`xf` at the command line), it will create a `.xf` folder in your home directory ($HOME on Unix-like systems, %USERPROFILE% on Windows). In that folder, you can create the following configuration files:
+
+- [`workspaces.xfer`](.xf/workspaces.xfer): Defines the workspace structure, the requests in each workspace, and blocks of JavaScript code that can be executed in conjunction with the workspace or request.
+- [`store.xfer`](.xf/store.xfer): Defines key/value pairs that can be used in the workspace and request definitions. These may be updated by scripts or commands.
+- [`.env`](.xf/.env): Defines environment variables that can be used in the workspace and request definitions.
+
+Script files may also be placed in '.xf', and they can be referenced from the workspace or request definitions.
+
+```xfer
+</ Your workspace may reference external script like this. />
+InitScript <'file:globalInitScript.js'>
+```
+
+If the file is in the `.xf` folder, the script engine will load it and execute the contents. The file path may also be fully specified if you wish to store it elsewhere.
+
+Nuget packages installed with the `package` command are stored in the `.xf/packages` folder.
+
 ## But... Why?
 
 Because Postman is too pointy-clicky and curl is too low-level. I want something in a sweet spot in between that lets me work with APIs at a higher level of abstraction, as if they were just another command on the command line, while still giving me the power to script and automate workflows.
