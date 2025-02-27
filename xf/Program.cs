@@ -68,10 +68,10 @@ internal class Program {
                 services.AddSingleton<PersistenceService>();
                 services.AddXferHttpServices();
                 services.AddXferWorkspaceServices(_configFilePath);
-                services.AddSingleton<CommandSplitter>();
-                services.AddSingleton<PackageService>(provider => new PackageService(_pluginDirectory));
-                services.AddSingleton<ScriptEngine>();
-                services.AddSingleton<StoreService>(provider => new StoreService(_storeFilePath));
+                services.AddSingleton<ICommandSplitter, CommandSplitter>();
+                services.AddSingleton<IPackageService, PackageService>(provider => new PackageService(_pluginDirectory));
+                services.AddSingleton<IScriptEngine, ScriptEngine>();
+                services.AddSingleton<IStoreService, StoreService>(provider => new StoreService(_storeFilePath));
             })
             .Build();
 

@@ -81,7 +81,6 @@ internal class WorkspaceService : IWorkspaceService
     private BaseConfig LoadWorkspace() {
         var baseConfig = new BaseConfig();
 
-        try {
             var xfer = File.ReadAllText(WorkspaceFilePath, Encoding.UTF8);
             baseConfig = XferConvert.Deserialize<BaseConfig>(xfer);
 
@@ -104,10 +103,6 @@ internal class WorkspaceService : IWorkspaceService
                     }
                 }
             }
-        }
-        catch (Exception ex) {
-            Console.Error.WriteLine($"Error loading workspace file '{WorkspaceFilePath}': {ex.Message}");
-        }
 
         return baseConfig;
     }

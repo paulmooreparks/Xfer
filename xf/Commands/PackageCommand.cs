@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Cliffer;
 
-using ParksComputing.Xfer.Cli.Services.Impl;
+using ParksComputing.Xfer.Cli.Services;
 
 namespace ParksComputing.Xfer.Cli.Commands;
 
@@ -17,9 +17,9 @@ namespace ParksComputing.Xfer.Cli.Commands;
 [Option(typeof(string), "--search", "Search for packages", ["-s"])]
 [Option(typeof(bool), "--list", "List installed packages", ["-l"])]
 internal class PackageCommand {
-    private readonly PackageService _packageService;
+    private readonly IPackageService _packageService;
 
-    public PackageCommand(PackageService pluginService) {
+    public PackageCommand(IPackageService pluginService) {
         _packageService = pluginService;
     }
 

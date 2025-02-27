@@ -13,7 +13,7 @@ using NuGet.Versioning;
 
 namespace ParksComputing.Xfer.Cli.Services.Impl;
 
-internal class PackageService {
+internal class PackageService : IPackageService {
     private readonly string _packageDirectory;
 
     private static readonly string PackageSourceUrl = "https://api.nuget.org/v3/index.json";
@@ -101,14 +101,14 @@ internal class PackageService {
     }
 
     public async Task UpdatePackageAsync(string packageName) {
-        await InstallPackageAsync(packageName); 
+        await InstallPackageAsync(packageName);
     }
 
     public async Task UninstallPackageAsync(string packageName) {
         try {
             var packagePath = Path.Combine(_packageDirectory, packageName);
             if (Directory.Exists(packagePath)) {
-                await Task.Run(() => Directory.Delete(packagePath, true)); 
+                await Task.Run(() => Directory.Delete(packagePath, true));
                 Console.WriteLine($"Uninstalled {packageName}.");
             }
             else {

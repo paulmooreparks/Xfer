@@ -6,7 +6,9 @@ namespace ParksComputing.Xfer.Workspace.Models;
 public class WorkspaceConfig {
     public string? Extend { get; set; }
     public string? BaseUrl { get; set; }
-    [XferProperty("Requests")]
+    public string? InitScript { get; set; }
+    public string? PreRequest { get; set; }
+    public string? PostRequest { get; set; }
     public Dictionary<string, RequestDefinition> Requests { get; set; } = [];
 
     internal void Merge(WorkspaceConfig? parentWorkspace) {

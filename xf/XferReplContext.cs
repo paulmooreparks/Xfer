@@ -4,7 +4,7 @@ using System.CommandLine.Parsing;
 using System.Reflection;
 
 using Cliffer;
-using ParksComputing.Xfer.Cli.Services.Impl;
+using ParksComputing.Xfer.Cli.Services;
 using ParksComputing.Xfer.Workspace.Services;
 
 namespace ParksComputing.Xfer.Cli;
@@ -12,7 +12,7 @@ namespace ParksComputing.Xfer.Cli;
 internal class XferReplContext : Cliffer.DefaultReplContext {
     private readonly IServiceProvider _serviceProvider;
     private readonly IWorkspaceService _workspaceService;
-    private readonly CommandSplitter _commandSplitter;
+    private readonly ICommandSplitter _commandSplitter;
     private readonly System.CommandLine.Option _recursionOption;
 
     public string Title => "Xfer CLI Application";
@@ -21,7 +21,7 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
     public XferReplContext(
         IServiceProvider serviceProvider,
         IWorkspaceService workspaceService,
-        CommandSplitter commandSplitter,
+        ICommandSplitter commandSplitter,
         System.CommandLine.Option recursionOption
         ) 
     {

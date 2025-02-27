@@ -13,19 +13,19 @@ using Jint.Runtime.Interop;
 
 using ParksComputing.Xfer.Workspace.Services;
 
-namespace ParksComputing.Xfer.Cli.Services.Impl;
+namespace ParksComputing.Xfer.Cli.Services;
 
-internal class ScriptEngine {
-    private readonly PackageService _packageService;
+internal class ScriptEngine : IScriptEngine {
+    private readonly IPackageService _packageService;
     private readonly IWorkspaceService _workspaceService;
-    private readonly StoreService _storeService;
+    private readonly IStoreService _storeService;
 
     private Engine _engine = new Engine(options => options.AllowClr());
 
     public ScriptEngine(
-        PackageService packageService,
+        IPackageService packageService,
         IWorkspaceService workspaceService,
-        StoreService storeService
+        IStoreService storeService
         ) 
     {
         _workspaceService = workspaceService;
@@ -57,6 +57,9 @@ internal class ScriptEngine {
             }
         }
 
+        var langAssembly = Assembly.Load("ParksComputing.Xfer.Lang");
+        assemblies.Add(langAssembly);
+
         // Create a new Jint engine and allow access to all loaded assemblies
         _engine = new Engine(options => options.AllowClr(assemblies.ToArray()));
 
@@ -82,8 +85,16 @@ internal class ScriptEngine {
             clear = new Action(() => _storeService.Clear())
         });
 
-        if (_workspaceService?.BaseConfig?.InitScript is not null) {
+        if (_workspaceService.BaseConfig?.InitScript is not null) {
             ExecuteScript(_workspaceService.BaseConfig.InitScript);
+        }
+
+        if (_workspaceService.BaseConfig?.Workspaces is not null) {
+            foreach (var workspace in _workspaceService.BaseConfig.Workspaces) {
+                if (workspace.Value.InitScript is not null) {
+                    ExecuteScript(workspace.Value.InitScript);
+                }
+            }
         }
     }
 

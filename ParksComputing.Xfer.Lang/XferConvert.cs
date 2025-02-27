@@ -82,7 +82,7 @@ public class XferConvert {
 
             return false;
         }
-        catch (Exception ex) {
+        catch (Exception) {
             return false;
         }
     }
@@ -398,7 +398,8 @@ public class XferConvert {
                 IDictionary? dictionary = instance as IDictionary;
                 if (dictionary is not null) {
                     foreach (var element in objectElement.Values) {
-                        dictionary.Add(element.Key, element.Value.Value);
+                        string value = DeserializeValue(element.Value.Value, typeof(string)) as string ?? string.Empty;
+                        dictionary.Add(element.Key, value);
                     }
 
                     return instance;

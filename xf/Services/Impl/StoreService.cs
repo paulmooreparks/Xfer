@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using ParksComputing.Xfer.Lang;
 
 namespace ParksComputing.Xfer.Cli.Services.Impl;
 
-public class StoreService {
+public class StoreService : IStoreService {
     private readonly string _storeFilePath;
     private Dictionary<string, object> _store;
     private FileSystemWatcher? _watcher;
@@ -32,7 +31,7 @@ public class StoreService {
                 _lastModified = File.GetLastWriteTimeUtc(_storeFilePath);
                 var xfer = File.ReadAllText(_storeFilePath);
                 var table = XferConvert.Deserialize(xfer, typeof(Dictionary<string, object>)) as Dictionary<string, object>;
-                return table;
+                return table ?? new Dictionary<string, object>();
                 // return XferConvert.Deserialize<Dictionary<string, object>>(xfer);
             }
             catch (Exception ex) {

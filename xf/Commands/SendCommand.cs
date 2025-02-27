@@ -11,7 +11,7 @@ using ParksComputing.Xfer.Workspace.Services;
 
 using Jint;
 using Jint.Runtime.Interop;
-using ParksComputing.Xfer.Cli.Services.Impl;
+using ParksComputing.Xfer.Cli.Services;
 
 namespace ParksComputing.Xfer.Cli.Commands;
 
@@ -23,9 +23,9 @@ namespace ParksComputing.Xfer.Cli.Commands;
 [Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-pl" }, Arity = ArgumentArity.ZeroOrOne)]
 internal class SendCommand {
     private readonly IWorkspaceService _ws;
-    private readonly ScriptEngine _scriptEngine;
+    private readonly IScriptEngine _scriptEngine;
 
-    public SendCommand(IWorkspaceService workspaceService, ScriptEngine scriptEngine) {
+    public SendCommand(IWorkspaceService workspaceService, IScriptEngine scriptEngine) {
         _ws = workspaceService;
         _scriptEngine = scriptEngine;
     }
@@ -118,6 +118,7 @@ internal class SendCommand {
         _scriptEngine.SetGlobalVariable("payload", payload);
 
         _scriptEngine.ExecuteScript(_ws.BaseConfig.PreRequest ?? string.Empty);
+        _scriptEngine.ExecuteScript(workspace.PreRequest ?? string.Empty);
         _scriptEngine.ExecuteScript(definition.PreRequest ?? string.Empty);
 
         var finalHeaders = configHeaders
@@ -147,6 +148,7 @@ internal class SendCommand {
         }
 
         _scriptEngine.ExecuteScript(definition.PostRequest ?? string.Empty);
+        _scriptEngine.ExecuteScript(workspace.PostRequest ?? string.Empty);
         _scriptEngine.ExecuteScript(_ws.BaseConfig.PostRequest ?? string.Empty);
 
         return result;

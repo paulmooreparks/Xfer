@@ -1,5 +1,5 @@
 ﻿using Cliffer;
-using ParksComputing.Xfer.Cli.Services.Impl;
+using ParksComputing.Xfer.Cli.Services;
 using ParksComputing.Xfer.Workspace.Services;
 
 using System.CommandLine;
@@ -23,7 +23,7 @@ internal class RootCommand {
         IServiceProvider serviceProvider,
         IWorkspaceService workspaceService,
         System.CommandLine.RootCommand rootCommand,
-        CommandSplitter splitter,
+        ICommandSplitter splitter,
         [OptionParam("--recursive")] Option recursionOption
         ) 
     { 
