@@ -42,7 +42,6 @@ internal class RootCommand {
 
                 var baseurlOption = new Option<string>(["--baseurl", "-b"], "The base URL of the API to send HTTP requests to.");
                 baseurlOption.IsRequired = false;
-                // baseurlOption.AllowMultipleArgumentsPerToken = true;
                 macroCommand.AddOption(baseurlOption);
 
                 var parameterOption = new Option<IEnumerable<string>>(["--parameters", "-p"], "Query parameters to include in the request. If input is redirected, parameters can also be read from standard input.");
