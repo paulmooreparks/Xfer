@@ -17,6 +17,7 @@ internal class Program {
     private static readonly string _configFilePath;
     private static readonly string _xfDirectory;
     private static readonly string _pluginDirectory;
+    private static readonly string _storeFilePath;
 
     static Program() {
         try {
@@ -32,7 +33,8 @@ internal class Program {
             }
 
             // Define the configuration file path
-            _configFilePath = Path.Combine(_xfDirectory, Constants.ConfigFileName);
+            _configFilePath = Path.Combine(_xfDirectory, Constants.WorkspacesFileName);
+            _storeFilePath = Path.Combine(_xfDirectory, Constants.StoreFileName);
             _pluginDirectory = Path.Combine(_xfDirectory, Constants.PackageDirName);
 
             if (!Directory.Exists(_pluginDirectory)) {
@@ -69,6 +71,7 @@ internal class Program {
                 services.AddSingleton<CommandSplitter>();
                 services.AddSingleton<PackageService>(provider => new PackageService(_pluginDirectory));
                 services.AddSingleton<ScriptEngine>();
+                services.AddSingleton<StoreService>(provider => new StoreService(_storeFilePath));
             })
             .Build();
 

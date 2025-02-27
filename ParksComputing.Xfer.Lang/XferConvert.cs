@@ -29,11 +29,11 @@ public class XferConvert {
             TimeOnly timeOnlyValue => new TimeElement(timeOnlyValue),
             TimeSpan timeSpanValue => new TimeSpanElement(timeSpanValue),
             DateTimeOffset dateTimeOffsetValue => new DateTimeElement(dateTimeOffsetValue.ToString("o")),
-            string stringValue => new StringElement(stringValue),
+            string stringValue => new StringElement(stringValue, style: ElementStyle.Explicit),
             char charValue => new CharacterElement(charValue),
             Guid guidValue => new StringElement(guidValue.ToString()),
             Enum enumValue => SerializeEnumValue(enumValue),
-            Uri uriValue => new StringElement(uriValue.ToString()),
+            Uri uriValue => new StringElement(uriValue.ToString(), style: ElementStyle.Explicit),
             int[] intArray => SerializeIntArray(intArray),
             long[] longArray => SerializeLongArray(longArray),
             bool[] boolArray => SerializeBooleanArray(boolArray),
@@ -44,10 +44,10 @@ public class XferConvert {
             TimeOnly[] timeOnlyArray => SerializeTimeOnlyArray(timeOnlyArray),
             TimeSpan[] timeSpanArray => SerializeTimeSpanArray(timeSpanArray),
             string[] stringArray => SerializeStringArray(stringArray),
-            byte[] byteArray => new StringElement(Convert.ToBase64String(byteArray)),
+            byte[] byteArray => new StringElement(Convert.ToBase64String(byteArray), style: ElementStyle.Explicit),
             object[] objectArray => new PropertyBagElement(objectArray.Select(SerializeValue)),
-            IEnumerable enumerable when IsGenericEnumerable(enumerable.GetType()) => SerializeEnumerable(enumerable),
             IDictionary dictionary when IsGenericDictionary(dictionary.GetType()) => SerializeDictionary(dictionary),
+            IEnumerable enumerable when IsGenericEnumerable(enumerable.GetType()) => SerializeEnumerable(enumerable),
 #if false
             IDictionary dictionary => new ObjectElement(
                 dictionary.Cast<dynamic>().Select(kvp =>
@@ -67,8 +67,24 @@ public class XferConvert {
     }
 
     private static bool IsGenericDictionary(Type type) {
-        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IDictionary<,>)
-            && type.GetGenericArguments()[0] == typeof(string);
+        try {
+            var isGenericType = type.IsGenericType;
+
+            if (isGenericType) {
+                var genericTypeDefinition = type.GetGenericTypeDefinition();
+                var genericArguments = type.GetGenericArguments();
+                var idictType = typeof(IDictionary<,>);
+                var dictType = typeof(Dictionary<,>);
+
+                return isGenericType && (genericTypeDefinition == idictType || genericTypeDefinition == dictType)
+                    && genericArguments[0] == typeof(string);
+            }
+
+            return false;
+        }
+        catch (Exception ex) {
+            return false;
+        }
     }
 
     private static bool IsGenericEnumerable(Type type) {
@@ -123,7 +139,7 @@ public class XferConvert {
             var genericType = targetType.GetGenericTypeDefinition();
 
             // Handle Dictionary<string, T>
-            if (genericType == typeof(Dictionary<,>)) {
+            if (genericType == typeof(Dictionary<,>) || genericType == typeof(IDictionary<,>)) {
                 var keyType = targetType.GetGenericArguments()[0];
                 var valueType = targetType.GetGenericArguments()[1];
 
@@ -338,7 +354,7 @@ public class XferConvert {
         var arrayElement = new TypedArrayElement<StringElement>();
 
         foreach (var item in stringArray) {
-            arrayElement.Add(new StringElement(item));
+            arrayElement.Add(new StringElement(item, style: ElementStyle.Explicit));
         }
 
         return arrayElement;
@@ -378,6 +394,17 @@ public class XferConvert {
         var first = document.Root.Values.First();
 
         if (first is ObjectElement objectElement) {
+            if (instance is not null && IsGenericDictionary(instance.GetType())) {
+                IDictionary? dictionary = instance as IDictionary;
+                if (dictionary is not null) {
+                    foreach (var element in objectElement.Values) {
+                        dictionary.Add(element.Key, element.Value.Value);
+                    }
+
+                    return instance;
+                }
+            }
+
             foreach (var element in objectElement.Values) {
                 if (propertyMap.TryGetValue(element.Key, out var property)) {
                     object? value = DeserializeValue(element.Value.Value, property.PropertyType);
@@ -385,6 +412,16 @@ public class XferConvert {
                 }
             }
         }
+#if false
+        else if (first is PropertyBagElement propertyBagElement) {
+            foreach (var element in propertyBagElement.Values) {
+                if (propertyMap.TryGetValue(element, out var property)) {
+                    object? value = DeserializeValue(element, property.PropertyType);
+                    property.SetValue(instance, value);
+                }
+            }
+        }
+#endif
 
         return instance;
     }

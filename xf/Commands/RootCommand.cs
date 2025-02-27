@@ -37,7 +37,7 @@ internal class RootCommand {
             var workspaceName = workspaceKvp.Key;
             var workspaceConfig = workspaceKvp.Value;
 
-            foreach (var request in workspaceConfig.RequestDefinitions) {
+            foreach (var request in workspaceConfig.Requests) {
                 var macroCommand = new Macro($"{workspaceName}.{request.Key}", $"[request] {new string($"{request.Value.Method} {request.Value.Endpoint}")}", $"send {workspaceName}.{request.Key} --baseurl {workspaceKvp.Value.BaseUrl}");
 
                 var baseurlOption = new Option<string>(["--baseurl", "-b"], "The base URL of the API to send HTTP requests to.");

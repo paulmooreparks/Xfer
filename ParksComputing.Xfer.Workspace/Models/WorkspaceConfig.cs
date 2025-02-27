@@ -7,7 +7,7 @@ public class WorkspaceConfig {
     public string? Extend { get; set; }
     public string? BaseUrl { get; set; }
     [XferProperty("Requests")]
-    public Dictionary<string, RequestDefinition> RequestDefinitions { get; set; } = [];
+    public Dictionary<string, RequestDefinition> Requests { get; set; } = [];
 
     internal void Merge(WorkspaceConfig? parentWorkspace) {
         if (parentWorkspace is null)
@@ -16,14 +16,14 @@ public class WorkspaceConfig {
         // Merge BaseUrl if not set in current workspace
         BaseUrl ??= parentWorkspace.BaseUrl;
 
-        // Merge RequestDefinitions (combine existing with parent, prioritizing child values)
-        foreach (var kvp in parentWorkspace.RequestDefinitions) {
-            if (!RequestDefinitions.ContainsKey(kvp.Key)) {
-                RequestDefinitions[kvp.Key] = kvp.Value; // Inherit from parent
+        // Merge Requests (combine existing with parent, prioritizing child values)
+        foreach (var kvp in parentWorkspace.Requests) {
+            if (!Requests.ContainsKey(kvp.Key)) {
+                Requests[kvp.Key] = kvp.Value; // Inherit from parent
             }
             else {
                 // Merge the request definition (headers, parameters, etc.)
-                RequestDefinitions[kvp.Key].Merge(kvp.Value);
+                Requests[kvp.Key].Merge(kvp.Value);
             }
         }
     }

@@ -18,15 +18,18 @@ namespace ParksComputing.Xfer.Cli.Services.Impl;
 internal class ScriptEngine {
     private readonly PackageService _packageService;
     private readonly IWorkspaceService _workspaceService;
+    private readonly StoreService _storeService;
 
     private Engine _engine = new Engine(options => options.AllowClr());
 
     public ScriptEngine(
         PackageService packageService,
-        IWorkspaceService workspaceService
+        IWorkspaceService workspaceService,
+        StoreService storeService
         ) 
     {
         _workspaceService = workspaceService;
+        _storeService = storeService;
         _packageService = packageService;
         _packageService.PackagesUpdated += PackagesUpdated;
         LoadPackageAssemblies();
@@ -72,6 +75,12 @@ internal class ScriptEngine {
         _engine.SetValue("console", new ConsoleBridge());
         _engine.SetValue("log", new Action<string>(Console.WriteLine));
         _engine.SetValue("workspace", _workspaceService);
+        _engine.SetValue("store", new {
+            get = new Func<string, object?>(key => _storeService.Get(key)),
+            set = new Action<string, object>((key, value) => _storeService.Set(key, value)),
+            delete = new Action<string>(key => _storeService.Delete(key)),
+            clear = new Action(() => _storeService.Clear())
+        });
 
         if (_workspaceService?.BaseConfig?.InitScript is not null) {
             ExecuteScript(_workspaceService.BaseConfig.InitScript);
@@ -88,7 +97,9 @@ internal class ScriptEngine {
             return result?.ToString() ?? string.Empty;  // .Type == Types.String ? result.AsString() : result.ToString();
         }
         catch (Exception ex) {
-            return $"Error executing script: {ex.Message}";
+            var result = $"Error executing script: {ex.Message}";
+            Console.Error.WriteLine(result);
+            return result;
         }
     }
 }

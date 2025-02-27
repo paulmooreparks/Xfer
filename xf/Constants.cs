@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace ParksComputing.Xfer.Cli;
 internal static class Constants {
     public const string XferDirectoryName = ".xf";
-    public const string ConfigFileName = "xfsettings.xfer";
+    public const string WorkspacesFileName = "workspaces.xfer";
+    public const string StoreFileName = "store.xfer";
     public const string PackageDirName = "packages";
     public const string MutexName = "Global\\XferMutex"; // Global mutex name for cross-process synchronization
 }

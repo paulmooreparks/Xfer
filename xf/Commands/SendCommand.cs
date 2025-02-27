@@ -58,7 +58,7 @@ internal class SendCommand {
             return Result.Error;
         }
 
-        if (!workspace.RequestDefinitions.TryGetValue(requestName, out var definition) || definition is null) { 
+        if (!workspace.Requests.TryGetValue(requestName, out var definition) || definition is null) { 
             Console.Error.WriteLine($"Request name '{requestName}' not found in current workspace.");
             return Result.Error;
         }
@@ -116,6 +116,8 @@ internal class SendCommand {
         _scriptEngine.SetGlobalVariable("parameters", finalParameters);
         _scriptEngine.SetGlobalVariable("headers", configHeaders);
         _scriptEngine.SetGlobalVariable("payload", payload);
+
+        _scriptEngine.ExecuteScript(_ws.BaseConfig.PreRequest ?? string.Empty);
         _scriptEngine.ExecuteScript(definition.PreRequest ?? string.Empty);
 
         var finalHeaders = configHeaders
@@ -145,6 +147,7 @@ internal class SendCommand {
         }
 
         _scriptEngine.ExecuteScript(definition.PostRequest ?? string.Empty);
+        _scriptEngine.ExecuteScript(_ws.BaseConfig.PostRequest ?? string.Empty);
 
         return result;
     }
