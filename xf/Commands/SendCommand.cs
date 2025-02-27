@@ -63,6 +63,8 @@ internal class SendCommand {
             return Result.Error;
         }
 
+        _scriptEngine.ExecuteScript(definition.PreRequest ?? string.Empty);
+
         var method = definition.Method?.ToUpper() ?? string.Empty;
         var endpoint = definition.Endpoint ?? string.Empty;
 
@@ -117,7 +119,6 @@ internal class SendCommand {
             .ToList();
 
         var result = Result.Success;
-        _scriptEngine.ExecuteScript(definition.PreRequest ?? string.Empty);
 
         switch (method) {
             case "GET": {

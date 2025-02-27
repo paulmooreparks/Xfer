@@ -71,6 +71,7 @@ internal class ScriptEngine {
 
         _engine.SetValue("console", new ConsoleBridge());
         _engine.SetValue("log", new Action<string>(Console.WriteLine));
+        _engine.SetValue("workspace", _workspaceService);
 
         if (_workspaceService?.BaseConfig?.InitScript is not null) {
             ExecuteScript(_workspaceService.BaseConfig.InitScript);
