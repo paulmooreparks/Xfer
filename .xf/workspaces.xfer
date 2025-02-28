@@ -41,6 +41,21 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     }
                     Payload <'{ "key1": "value1", "key2": "value2"} '>
                 }
+
+                basic {
+                    Endpoint '/basic-auth/<|httpBinBasicAuthUser|>/<|httpBinBasicAuthPassword|>'
+                    Method "GET"
+                    Headers {
+                        </ The httpBinBearerToken environment variable is set in the .xf/.env file. />
+                        Authorization 'Bearer <|httpBinBearerToken|>'
+                    }
+
+                    PreRequest <'
+                    var basicAuth = btoa("<|httpBinBasicAuthUser|>:<|httpBinBasicAuthPassword|>");
+                    headers["Authorization"] = "Basic " + basicAuth;
+                    '>
+                }
+
                 bearer {
                     Endpoint "/bearer"
                     Method "GET"

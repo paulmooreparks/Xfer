@@ -87,6 +87,8 @@ internal class ScriptEngine : IScriptEngine {
             delete = new Action<string>(key => _storeService.Delete(key)),
             clear = new Action(() => _storeService.Clear())
         });
+        _engine.SetValue("btoa", new Func<string, string>(s => Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(s))));
+        _engine.SetValue("atob", new Func<string, string>(s => System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(s))));
 
         if (_workspaceService.BaseConfig?.InitScript is not null) {
             ExecuteScript(_workspaceService.BaseConfig.InitScript);
