@@ -12,6 +12,7 @@ using ParksComputing.Xfer.Workspace.Services;
 using Jint;
 using Jint.Runtime.Interop;
 using ParksComputing.Xfer.Cli.Services;
+using Newtonsoft.Json;
 
 namespace ParksComputing.Xfer.Cli.Commands;
 
@@ -112,14 +113,15 @@ internal class SendCommand {
             }
         }
 
-        _scriptEngine.SetGlobalVariable("requestDefinition", definition);
-        _scriptEngine.SetGlobalVariable("parameters", finalParameters);
-        _scriptEngine.SetGlobalVariable("headers", configHeaders);
-        _scriptEngine.SetGlobalVariable("payload", payload);
+        var preRequestResult = _scriptEngine.Invoke(
+            "invokePreRequest", 
+            workspaceName, 
+            requestName,
+            configHeaders,
+            finalParameters,
+            payload
+            );
 
-        _scriptEngine.ExecuteScript(_ws.BaseConfig.PreRequest ?? string.Empty);
-        _scriptEngine.ExecuteScript(workspace.PreRequest ?? string.Empty);
-        _scriptEngine.ExecuteScript(definition.PreRequest ?? string.Empty);
 
         var finalHeaders = configHeaders
             .Select(kvp => $"{kvp.Key}: {kvp.Value}")
@@ -130,14 +132,33 @@ internal class SendCommand {
         switch (method) {
             case "GET": {
                     result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders);
-                    _scriptEngine.SetGlobalVariable("responseContent", getCommand.ResponseContent);
+                    _scriptEngine.SetValue(
+                        $"xf.{workspaceName}.requests.{requestName}.response.body", 
+                        getCommand.ResponseContent
+                        );
+
+                    var postRequestResult = _scriptEngine.Invoke(
+                        "invokePostRequest", 
+                        workspaceName, 
+                        requestName, 
+                        getCommand.StatusCode, 
+                        getCommand.Headers,
+                        getCommand.ResponseContent
+                        );
                     break;
                 }
 
             case "POST": {
                     var finalPayload = payload ?? definition.Payload ?? string.Empty;
                     result = await postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
-                    _scriptEngine.SetGlobalVariable("responseContent", postCommand.ResponseContent);
+                    var postRequestResult = _scriptEngine.Invoke(
+                        "invokePostRequest", 
+                        workspaceName, 
+                        requestName, 
+                        postCommand.StatusCode, 
+                        postCommand.Headers, 
+                        postCommand.ResponseContent
+                        );
                     break;
                 }
 
@@ -146,10 +167,6 @@ internal class SendCommand {
                 result = Result.Error;
                 break;
         }
-
-        _scriptEngine.ExecuteScript(definition.PostRequest ?? string.Empty);
-        _scriptEngine.ExecuteScript(workspace.PostRequest ?? string.Empty);
-        _scriptEngine.ExecuteScript(_ws.BaseConfig.PostRequest ?? string.Empty);
 
         return result;
     }

@@ -22,6 +22,8 @@ internal class PostCommand {
     private readonly IWorkspaceService _workspaceService;
 
     public string ResponseContent { get; protected set; } = string.Empty;
+    public int StatusCode { get; protected set; } = 0;
+    public System.Net.Http.Headers.HttpResponseHeaders? Headers { get; protected set; } = default;
 
     public PostCommand(
         IHttpService httpService,
@@ -62,6 +64,8 @@ internal class PostCommand {
 
         try {
             var response = await _httpService.PostAsync(baseUrl, payload, headers);
+            StatusCode = (int)response.StatusCode;
+            Headers = response.Headers;
 
             if (!response.IsSuccessStatusCode) {
                 Console.Error.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase} at {baseUrl}");
@@ -69,13 +73,14 @@ internal class PostCommand {
             }
 
             responseContent = await response.Content.ReadAsStringAsync();
+            ResponseContent = responseContent;
+            StatusCode = (int)response.StatusCode;
         }
         catch (HttpRequestException ex) {
             Console.Error.WriteLine($"Error: HTTP request failed - {ex.Message}");
             return Result.Error;
         }
 
-        ResponseContent = responseContent;
         return result;
     }
 }

@@ -4,7 +4,9 @@ using ParksComputing.Xfer.Lang.Elements;
 namespace ParksComputing.Xfer.Workspace.Models;
 
 public class WorkspaceConfig {
+    public string? Name { get; set; }
     public string? Extend { get; set; }
+    public WorkspaceConfig? Base { get; protected set; }
     public string? BaseUrl { get; set; }
     public string? InitScript { get; set; }
     public string? PreRequest { get; set; }
@@ -12,22 +14,24 @@ public class WorkspaceConfig {
     public Dictionary<string, RequestDefinition> Requests { get; set; } = [];
 
     internal void Merge(WorkspaceConfig? parentWorkspace) {
-        if (parentWorkspace is null)
+        if (parentWorkspace is null) {
             return;
+        }
 
-        // Merge BaseUrl if not set in current workspace
+        Extend ??= parentWorkspace.Extend;
+        Base ??= parentWorkspace.Base;
+
         BaseUrl ??= parentWorkspace.BaseUrl;
         InitScript ??= parentWorkspace.InitScript;
         PreRequest ??= parentWorkspace.PreRequest;
         PostRequest ??= parentWorkspace.PostRequest;
+        Name ??= parentWorkspace.Name;
 
-        // Merge Requests (combine existing with parent, prioritizing child values)
         foreach (var kvp in parentWorkspace.Requests) {
             if (!Requests.ContainsKey(kvp.Key)) {
-                Requests[kvp.Key] = kvp.Value; // Inherit from parent
+                Requests[kvp.Key] = kvp.Value; 
             }
             else {
-                // Merge the request definition (headers, parameters, etc.)
                 Requests[kvp.Key].Merge(kvp.Value);
             }
         }
@@ -35,6 +39,7 @@ public class WorkspaceConfig {
 }
 
 public class RequestDefinition {
+    public string? Name { get; set; }
     public string? Endpoint { get; set; }
     public string? Method { get; set; }
     public Dictionary<string, string> Headers { get; set; } = [];
@@ -42,6 +47,7 @@ public class RequestDefinition {
     public string? Payload { get; set; }
     public string? PreRequest { get; set; }
     public string? PostRequest { get; set; }
+    public ResponseDefinition Response { get; set; } = new ResponseDefinition();
 
     public void Merge(RequestDefinition parentRequest) {
         if (parentRequest is null) { 
@@ -54,6 +60,7 @@ public class RequestDefinition {
         Payload ??= parentRequest.Payload;
         PreRequest ??= parentRequest.PreRequest;
         PostRequest ??= parentRequest.PostRequest;
+        Response ??= parentRequest.Response;
 
         // Merge Headers (child values override parent)
         foreach (var kvp in parentRequest.Headers) {
@@ -67,4 +74,10 @@ public class RequestDefinition {
         paramSet.UnionWith(Parameters); // Child parameters take precedence
         Parameters = paramSet.ToList();
     }
+}
+
+public class ResponseDefinition {
+    public int StatusCode { get; set; }
+    public string? Body { get; set; }
+    public System.Net.Http.Headers.HttpResponseHeaders Headers { get; set; } = default;
 }

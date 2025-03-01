@@ -55,7 +55,8 @@ internal class WorkspaceService : IWorkspaceService
             var dict = new Dictionary<string, WorkspaceConfig>();
 
             var defaultConfig = new WorkspaceConfig {
-                BaseUrl = "https://httpbin.org/"
+                Name = "default",
+                BaseUrl = string.Empty,
             };
 
             dict.Add("default", defaultConfig);
@@ -96,6 +97,12 @@ internal class WorkspaceService : IWorkspaceService
                 var workspace = workspaceKvp.Value;
 
                 if (workspace is not null) {
+                    workspace.Name = workspaceKvp.Key;
+
+                    foreach (var reqKvp in workspace.Requests) {
+                        reqKvp.Value.Name = reqKvp.Key;
+                    }
+
                     if (workspace.Extend is not null) {
                         if (baseConfig.Workspaces.TryGetValue(workspace.Extend, out var parentWorkspace)) {
                             workspace.Merge(parentWorkspace);
