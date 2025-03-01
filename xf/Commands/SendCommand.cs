@@ -19,7 +19,7 @@ namespace ParksComputing.Xfer.Cli.Commands;
 [Command("send", "Send a request defined in the current workspace.")]
 [Argument(typeof(string), "requestName", "The name of the request to send.")]
 [Option(typeof(string), "--baseurl", "The base URL of the API to send HTTP requests to.", new[] { "-b" }, IsRequired = false)]
-[Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request. If input is redirected, parameters can also be read from standard input.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
+[Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-pl" }, Arity = ArgumentArity.ZeroOrOne)]
 internal class SendCommand {
@@ -62,6 +62,11 @@ internal class SendCommand {
         if (!workspace.Requests.TryGetValue(requestName, out var definition) || definition is null) { 
             Console.Error.WriteLine($"Request name '{requestName}' not found in current workspace.");
             return Result.Error;
+        }
+
+        if (Console.IsInputRedirected) {
+            var payloadString = Console.In.ReadToEnd();
+            payload = payloadString.Trim();
         }
 
         var method = definition.Method?.ToUpper() ?? string.Empty;

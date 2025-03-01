@@ -22,18 +22,14 @@ internal class Program {
 
     static Program() {
         try {
-            // Get user's home directory in a cross-platform way
             string homeDirectory = GetUserHomeDirectory();
 
-            // Define the .xf directory path
             _xfDirectory = Path.Combine(homeDirectory, Constants.XferDirectoryName);
 
-            // Ensure the directory exists
             if (!Directory.Exists(_xfDirectory)) {
                 Directory.CreateDirectory(_xfDirectory);
             }
 
-            // Define the configuration file path
             _configFilePath = Path.Combine(_xfDirectory, Constants.WorkspacesFileName);
             _storeFilePath = Path.Combine(_xfDirectory, Constants.StoreFileName);
             _pluginDirectory = Path.Combine(_xfDirectory, Constants.PackageDirName);
@@ -75,9 +71,6 @@ internal class Program {
     }
 
 
-    /// <summary>
-    /// Gets the user's home directory in a cross-platform way.
-    /// </summary>
     private static string GetUserHomeDirectory() {
         if (OperatingSystem.IsWindows()) {
             return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -86,6 +79,7 @@ internal class Program {
             return Environment.GetEnvironmentVariable("HOME") ?? throw new InvalidOperationException("HOME environment variable is not set.");
         }
         else {
+            // Eh... let's do something about this
             throw new PlatformNotSupportedException("Unsupported operating system.");
         }
     }
