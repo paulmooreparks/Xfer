@@ -7,10 +7,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-// using Jint;
-// using Jint.Native;
-// using Jint.Runtime.Interop;
-
 using Microsoft.ClearScript;
 
 using ParksComputing.Xfer.Workspace.Services;
@@ -72,19 +68,6 @@ internal class ClearScriptEngine : IScriptEngine {
         assemblies.Add(langAssembly);
 
         InitializeScriptEnvironment(assemblies);
-
-        // This seems like overkill. I'm doing this selectively in InitScript now.
-#if false
-        // Dynamically expose all public types in loaded assemblies
-        foreach (var assembly in assemblies) {
-            foreach (var type in assembly.GetExportedTypes()) {
-                if (!type.IsGenericTypeDefinition) {
-                    _engine.SetValue(type.Name, type);
-                }
-            }
-        }
-#endif
-
     }
 
     private void InitializeScriptEnvironment(IEnumerable<Assembly> assemblies) {
