@@ -118,8 +118,7 @@ internal class SendCommand {
             }
         }
 
-        var preRequestResult = _scriptEngine.Invoke(
-            "invokePreRequest", 
+        _scriptEngine.InvokePreRequest(
             workspaceName, 
             requestName,
             configHeaders,
@@ -137,13 +136,7 @@ internal class SendCommand {
         switch (method) {
             case "GET": {
                     result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders);
-                    _scriptEngine.SetValue(
-                        $"xf.{workspaceName}.requests.{requestName}.response.body", 
-                        getCommand.ResponseContent
-                        );
-
-                    var postRequestResult = _scriptEngine.Invoke(
-                        "invokePostRequest", 
+                    _scriptEngine.InvokePostRequest(
                         workspaceName, 
                         requestName, 
                         getCommand.StatusCode, 
@@ -156,12 +149,11 @@ internal class SendCommand {
             case "POST": {
                     var finalPayload = payload ?? definition.Payload ?? string.Empty;
                     result = await postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
-                    var postRequestResult = _scriptEngine.Invoke(
-                        "invokePostRequest", 
-                        workspaceName, 
-                        requestName, 
-                        postCommand.StatusCode, 
-                        postCommand.Headers, 
+                    _scriptEngine.InvokePostRequest(
+                        workspaceName,
+                        requestName,
+                        postCommand.StatusCode,
+                        postCommand.Headers,
                         postCommand.ResponseContent
                         );
                     break;

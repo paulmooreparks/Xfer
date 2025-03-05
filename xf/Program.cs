@@ -101,7 +101,7 @@ internal class Program {
                 );
                 services.AddSingleton<ICommandSplitter, CommandSplitter>();
                 services.AddSingleton<IPackageService, PackageService>(provider => new PackageService(_pluginDirectory));
-                services.AddSingleton<IScriptEngine, ScriptEngine>();
+                services.AddSingleton<IScriptEngine, ClearScriptEngine>();
                 services.AddSingleton<IStoreService, StoreService>(provider => new StoreService(_storeFilePath));
             })
             .Build();

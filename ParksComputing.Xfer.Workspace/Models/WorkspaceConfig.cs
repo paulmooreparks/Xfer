@@ -62,7 +62,7 @@ public class RequestDefinition {
         PostRequest ??= parentRequest.PostRequest;
         Response ??= parentRequest.Response;
 
-        // Merge Headers (child values override parent)
+        // Merge headers (child values override parent)
         foreach (var kvp in parentRequest.Headers) {
             if (!Headers.ContainsKey(kvp.Key)) {
                 Headers[kvp.Key] = kvp.Value;
@@ -77,7 +77,7 @@ public class RequestDefinition {
 }
 
 public class ResponseDefinition {
-    public int StatusCode { get; set; }
-    public string? Body { get; set; }
-    public System.Net.Http.Headers.HttpResponseHeaders Headers { get; set; } = default;
+    public int statusCode { get; set; }
+    public string? body { get; set; }
+    public System.Net.Http.Headers.HttpResponseHeaders? headers { get; set; } = default;
 }
