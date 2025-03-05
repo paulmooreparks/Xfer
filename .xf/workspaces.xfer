@@ -8,7 +8,7 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
 
     </ This is a global post-request script that will be executed after each request completes. />
     PostRequest <'
-        log(response.Body);
+        log(request.response.body);
     '>
 
     </ A workspace is a collection of related requests and associated configuration. />
@@ -34,10 +34,13 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                         'key2=value2'
                     )
 
+                    PreRequest <'
+                        request.basePreRequest();
+                        '>
+
                     PostRequest <'
-                        log("In the gettest post-request handler");
                         // Delegate to upstream post-request handler
-                        workspace.postRequest(workspace, request, response);
+                        request.basePostRequest();
                     '>
                 }
                 posttest {
