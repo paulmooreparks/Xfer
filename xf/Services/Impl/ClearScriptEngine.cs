@@ -253,12 +253,23 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
         var srcHeaders = args[2] as IDictionary<string, string>;
         var destHeaders = request.headers as IDictionary<string, object>;
 
-        foreach (var kvp in srcHeaders) {
-            destHeaders.Add(kvp.Key, kvp.Value);
+        if (srcHeaders is not null && destHeaders is not null) {
+            foreach (var kvp in srcHeaders) {
+                destHeaders.Add(kvp.Key, kvp.Value);
+            }
         }
 
-        request.parameters = args[3] as List<string> ?? [];
-        request.payload = args[4] as string ?? null;
+        var srcParameters = args[3] as IList<string>;
+        var destParameters = request.parameters as IList<string>;
+
+        if (srcParameters is not null && destParameters is not null) {
+            foreach (var param in srcParameters) {
+                destParameters.Add(param);
+            }
+        }
+
+        var srcPayload = args[4] as string;
+        request.payload = srcPayload;
 
         var preRequestResult = _engine.Invoke(
             $"__preRequest__{workspaceName}__{requestName}",
@@ -268,9 +279,21 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
 
         // Copy headers back to original dictionary
         // I think this can be done better.
-        foreach (var kvp in destHeaders) {
-            srcHeaders[kvp.Key] = kvp.Value?.ToString() ?? string.Empty;
+        if (srcHeaders is not null && destHeaders is not null) {
+            foreach (var kvp in destHeaders) {
+                srcHeaders[kvp.Key] = kvp.Value?.ToString() ?? string.Empty;
+            }
         }
+
+        // Copy parameters back to original list
+        if (srcParameters is not null && destParameters is not null) {
+            srcParameters.Clear();
+            foreach (var param in destParameters) {
+                srcParameters.Add(param);
+            }
+        }
+
+        srcPayload = request.payload;
     }
 
     public void InvokePostRequest(params object[] args) {
