@@ -6,9 +6,9 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
 
     InitScript <'file:globalInitScript.js'>
 
-    </ This is a global pre-request script that will be executed after each request completes. />
+    </ This is a global pre-request script that will be executed before each request. />
     PreRequest <'
-        '>
+    '>
 
     </ This is a global post-request script that will be executed after each request completes. />
     PostRequest <'
