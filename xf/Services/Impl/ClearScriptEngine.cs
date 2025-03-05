@@ -123,8 +123,6 @@ function __postRequest(workspace, request) {{
                 workspaceObj.baseWorkspace = workspaceConfig.Base ?? null;
                 workspaceObj.baseUrl = workspaceConfig.BaseUrl ?? "";
                 workspaceObj.requests = new ExpandoObject();
-                workspaceObj.basePreRequest = _engine.Evaluate($"__preRequest");
-                workspaceObj.basePostRequest = _engine.Evaluate($"__postRequest");
                 workspaceObj.requests = new ExpandoObject();
 
                 // What a hack! There must be a better way to do this.
@@ -139,7 +137,7 @@ function __preRequest__{workspaceName}(workspace, request) {{
 
 function __postRequest__{workspaceName}(workspace, request) {{
     var baseHandler = function() {{ __postRequest(workspace, request); }};
-    {(workspaceConfig.PreRequest == null ? $"__postRequest(workspace, request)" : GetScriptContent(workspaceConfig.PostRequest))}
+    {(workspaceConfig.PostRequest == null ? $"__postRequest(workspace, request)" : GetScriptContent(workspaceConfig.PostRequest))}
 }};
 
 ");
@@ -172,34 +170,6 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
                     requestObj.parameters = requestDef.Parameters ?? new List<string>();
                     requestObj.payload = requestDef.Payload ?? string.Empty;
                     requestObj.response = new ResponseDefinition();
-
-                    requestObj.basePreRequest = new Func<object?>(
-                        () => {
-                            var workspace = _engine.Evaluate($"xf.{workspaceName}");
-                            var request = _engine.Evaluate($"xf.{workspaceName}.requests.{requestName}");
-                            var fn = $"__preRequest__{workspaceName}";
-
-                            var result = _engine.Invoke(
-                                fn,
-                                workspace,
-                                request
-                                );
-                            return result;
-                        });
-
-                    requestObj.basePostRequest = new Func<object?>(
-                        () => {
-                            var workspace = _engine.Evaluate($"xf.{workspaceName}");
-                            var request = _engine.Evaluate($"xf.{workspaceName}.requests.{requestName}");
-                            var fn = $"__postRequest__{workspaceName}";
-
-                            var result = _engine.Invoke(
-                                fn,
-                                workspace,
-                                request
-                                );
-                            return result;
-                        });
 
                     (workspaceObj.requests as IDictionary<string, object>).Add(requestName, requestObj);
                     var requestTmp = _engine.Evaluate($"xf.{workspaceName}.requests.{requestName}");

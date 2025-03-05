@@ -6,6 +6,10 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
 
     InitScript <'file:globalInitScript.js'>
 
+    </ This is a global pre-request script that will be executed after each request completes. />
+    PreRequest <'
+        '>
+
     </ This is a global post-request script that will be executed after each request completes. />
     PostRequest <'
         log(request.response.body);
@@ -64,6 +68,7 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     PreRequest <'
                         var basicAuth = btoa("<|httpBinBasicAuthUser|>:<|httpBinBasicAuthPassword|>");
                         request.headers["Authorization"] = "Basic " + basicAuth;
+                        baseHandler();
                     '>
                 }
 
