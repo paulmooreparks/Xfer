@@ -35,12 +35,13 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     )
 
                     PreRequest <'
-                        request.basePreRequest();
+                        // Delegate to upstream pre-request handler
+                        baseHandler();
                         '>
 
                     PostRequest <'
                         // Delegate to upstream post-request handler
-                        request.basePostRequest();
+                        baseHandler();
                     '>
                 }
                 posttest {
