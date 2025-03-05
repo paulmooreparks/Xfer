@@ -117,11 +117,11 @@ internal class ClearScriptEngine : IScriptEngine {
 
             _engine.Execute(
 $@"
-function __preRequest(workspaceName, requestName) {{
+function __preRequest(workspace, request) {{
     {GetScriptContent(_workspaceService.BaseConfig.PreRequest)}
 }};
 
-function __postRequest(workspaceName, requestName) {{
+function __postRequest(workspace, request) {{
     {GetScriptContent(_workspaceService.BaseConfig.PostRequest)}
 }};
 ");
@@ -149,13 +149,12 @@ function __postRequest(workspaceName, requestName) {{
                 var workspaceTmp = _engine.Evaluate($"xf.{workspaceName}");
 
                 _engine.Execute($@"
-function __preRequest__{workspaceName}(workspaceName, requestName) {{
-    log('4 ' + requestName);
-    {(workspaceConfig.PreRequest == null ? $"__preRequest(workspaceName, requestName)" : GetScriptContent(workspaceConfig.PreRequest))}
+function __preRequest__{workspaceName}(workspace, request) {{
+    {(workspaceConfig.PreRequest == null ? $"__preRequest(workspace, request)" : GetScriptContent(workspaceConfig.PreRequest))}
 }};
 
-function __postRequest__{workspaceName}(workspaceName, requestName) {{
-    {(workspaceConfig.PreRequest == null ? $"__postRequest(workspaceName, requestName)" : GetScriptContent(workspaceConfig.PostRequest))}
+function __postRequest__{workspaceName}(workspace, request) {{
+    {(workspaceConfig.PreRequest == null ? $"__postRequest(workspace, request)" : GetScriptContent(workspaceConfig.PostRequest))}
 }};
 
 ");
@@ -165,64 +164,19 @@ function __postRequest__{workspaceName}(workspaceName, requestName) {{
 
                     var requestDef = request.Value;
 
-                    var preRequestScript = $"{requestDef.PreRequest ?? "__preRequest__{workspaceName}(workspaceName, requestName);"}";
-
-                    if (string.IsNullOrEmpty(requestDef.PreRequest)) {
-                        preRequestScript = $"{workspaceConfig.PreRequest ?? "__preRequest(workspaceName, requestName);"}";
-
-                        if (string.IsNullOrEmpty(workspaceConfig.PreRequest)) {
-                            preRequestScript = $"{_workspaceService.BaseConfig?.PreRequest}";
-
-                            if (string.IsNullOrEmpty(_workspaceService.BaseConfig?.PreRequest)) {
-                                preRequestScript = string.Empty;
-                            }
-                        }
-                    }
-
-                    var postRequestScript = $"{requestDef.PostRequest ?? "__postRequest__{workspaceName}(workspaceName, requestName);"}";
-
-                    if (string.IsNullOrEmpty(requestDef.PostRequest)) {
-                        postRequestScript = $"{workspaceConfig.PostRequest ?? "__postRequest(workspaceName, requestName);"}";
-
-                        if (string.IsNullOrEmpty(workspaceConfig.PostRequest)) {
-                            postRequestScript = $"{_workspaceService.BaseConfig?.PostRequest}";
-
-                            if (string.IsNullOrEmpty(_workspaceService.BaseConfig?.PostRequest)) {
-                                postRequestScript = string.Empty;
-                            }
-                        }
-                    }
-
                     _engine.Execute($@"
-function __invoke__preRequest__{workspaceName}__{requestName} (workspaceName, requestName, headers, parameters, payload) {{
-    let workspace = xf.{workspaceName};
-    let request = xf.{workspaceName}.requests.{requestName};
+function __preRequest__{workspaceName}__{requestName} (workspace, request) {{
+    // let workspace = xf.{workspaceName};
+    // let request = xf.{workspaceName}.requests.{requestName};
 
-    request.workspace = workspace;
-    request.headers = headers;
-    request.parameters = parameters;
-    request.payload = payload;
-
-    {GetScriptContent(preRequestScript)}
+    {(requestDef.PreRequest == null ? $"__preRequest__{workspaceName}(workspace, request)" : GetScriptContent(requestDef.PreRequest))}
 }}
 
-function __invoke__postRequest__{workspaceName}__{requestName} (workspaceName, requestName, statusCode, headers, responseBody) {{
-    let workspace = xf.{workspaceName};
-    let request = xf.{workspaceName}.requests.{requestName};
+function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
+    // let workspace = xf.{workspaceName};
+    // let request = xf.{workspaceName}.requests.{requestName};
 
-    request.response.statusCode = statusCode;
-    request.response.headers = headers;
-    request.response.body = responseBody;
-
-    {GetScriptContent(postRequestScript)}
-}}
-
-function __preRequest__{workspaceName}__{requestName} (workspaceName, requestName, headers, parameters, payload) {{
-    {GetScriptContent(preRequestScript)}
-}}
-
-function __postRequest__{workspaceName}__{requestName} (workspaceName, requestName, statusCode, headers, responseBody) {{
-    {GetScriptContent(postRequestScript)}
+    {(requestDef.PostRequest == null ? $"__postRequest__{workspaceName}(workspace, request)" : GetScriptContent(requestDef.PostRequest))}
 }}
 
 ");
@@ -233,37 +187,37 @@ function __postRequest__{workspaceName}__{requestName} (workspaceName, requestNa
                     requestObj.workspace = workspaceConfig;
                     requestObj.endpoint = requestDef.Endpoint ?? string.Empty;
                     requestObj.method = requestDef.Method ?? "GET";
-                    requestObj.headers = requestDef.Headers ?? new Dictionary<string, string>();
+                    requestObj.headers = new ExpandoObject();
                     requestObj.parameters = requestDef.Parameters ?? new List<string>();
                     requestObj.payload = requestDef.Payload ?? string.Empty;
                     requestObj.response = new ResponseDefinition();
 
-                    requestObj.basePreRequest = new Func<object?, object?, object?>(
-                        (workspace, request) => {
-                                var args = new object?[] {
+                    requestObj.basePreRequest = new Func<object?>(
+                        () => {
+                            var workspace = _engine.Evaluate($"xf.{workspaceName}");
+                            var request = _engine.Evaluate($"xf.{workspaceName}.requests.{requestName}");
+                            var fn = $"__preRequest__{workspaceName}";
+
+                            var result = _engine.Invoke(
+                                fn,
                                 workspace,
                                 request
-                            };
-                            var preRequestResult = _engine.Invoke(
-                                $"__invoke__preRequest__{workspaceName}",
-                                workspace,
-                                args
                                 );
-                            return preRequestResult;
+                            return result;
                         });
 
-                    requestObj.basePostRequest = new Func<object?, object?, object?>(
-                        (workspace, request) => {
-                                var args = new object?[] {
+                    requestObj.basePostRequest = new Func<object?>(
+                        () => {
+                            var workspace = _engine.Evaluate($"xf.{workspaceName}");
+                            var request = _engine.Evaluate($"xf.{workspaceName}.requests.{requestName}");
+                            var fn = $"__postRequest__{workspaceName}";
+
+                            var result = _engine.Invoke(
+                                fn,
                                 workspace,
                                 request
-                            };
-                            var preRequestResult = _engine.Invoke(
-                                $"__postRequest__{workspaceName}",
-                                workspace,
-                                args
                                 );
-                            return preRequestResult;
+                            return result;
                         });
 
                     (workspaceObj.requests as IDictionary<string, object>).Add(requestName, requestObj);
@@ -292,14 +246,31 @@ function __postRequest__{workspaceName}__{requestName} (workspaceName, requestNa
         var request = _engine.Evaluate($"xf['{workspaceName}'].requests['{requestName}'];") as dynamic;
 
         request.name = requestName;
-        request.headers = args[2] as Dictionary<string, string> ?? [];
+        request.workspace = workspace;
+        // request.headers = args[2] as Dictionary<string, string> ?? [];
+        request.headers = new ExpandoObject() as dynamic;
+
+        var srcHeaders = args[2] as IDictionary<string, string>;
+        var destHeaders = request.headers as IDictionary<string, object>;
+
+        foreach (var kvp in srcHeaders) {
+            destHeaders.Add(kvp.Key, kvp.Value);
+        }
+
         request.parameters = args[3] as List<string> ?? [];
         request.payload = args[4] as string ?? null;
 
         var preRequestResult = _engine.Invoke(
-            $"__invoke__preRequest__{workspaceName}__{requestName}",
-            args
+            $"__preRequest__{workspaceName}__{requestName}",
+            workspace,
+            request
             );
+
+        // Copy headers back to original dictionary
+        // I think this can be done better.
+        foreach (var kvp in destHeaders) {
+            srcHeaders[kvp.Key] = kvp.Value?.ToString() ?? string.Empty;
+        }
     }
 
     public void InvokePostRequest(params object[] args) {
@@ -321,14 +292,18 @@ function __postRequest__{workspaceName}__{requestName} (workspaceName, requestNa
         var request = _engine.Evaluate($"xf['{workspaceName}'].requests['{requestName}'];") as dynamic;
 
         request.name = requestName;
+        request.response = new ExpandoObject() as dynamic;
         request.response.statusCode = statusCode;
         request.response.headers = headers ?? default;
         request.response.body = responseContent;
 
         var postRequestResult = _engine.Invoke(
-            $"__invoke__postRequest__{workspaceName}__{requestName}",
-            args
+            $"__postRequest__{workspaceName}__{requestName}",
+            workspace,
+            request
             );
+
+
     }
 
     public void SetValue(string name, object? value) {
