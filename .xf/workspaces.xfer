@@ -106,9 +106,6 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
             Extend "httpbin"
             Requests {
                 gettest {
-                    Endpoint "/get"
-                    Method "GET"
-
                     Parameters (
                         'key3=value1'
                         'key4=value2'
