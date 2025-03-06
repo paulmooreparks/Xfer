@@ -90,7 +90,7 @@ internal class WorkspaceService : IWorkspaceService
             }
 
             if (baseConfig.ActiveWorkspace is null) {
-                baseConfig.ActiveWorkspace = "default";
+                // baseConfig.ActiveWorkspace = "default";
             }
 
             foreach (var workspaceKvp in baseConfig.Workspaces) {

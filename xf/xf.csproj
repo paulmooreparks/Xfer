@@ -11,7 +11,6 @@
 
   <ItemGroup>
     <PackageReference Include="Cliffer" Version="0.4.10-prerelease" />
-    <PackageReference Include="Jint" Version="4.2.0" />
     <PackageReference Include="Microsoft.ClearScript.V8" Version="7.4.5" />
     <PackageReference Include="Microsoft.ClearScript.V8.Native.win-x64" Version="7.4.5" />
     <PackageReference Include="NuGet.Common" Version="6.13.1" />

@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.ClearScript;
 
 using ParksComputing.Xfer.Workspace.Services;
-using Newtonsoft.Json;
 using ParksComputing.Xfer.Workspace.Models;
 using System.Net.Http.Headers;
 using Microsoft.ClearScript.V8;
@@ -25,7 +24,7 @@ internal class ClearScriptEngine : IScriptEngine {
     private readonly ISettingsService _settingsService;
 
     // private Engine _engine = new Engine(options => options.AllowClr());
-    private V8ScriptEngine _engine = new V8ScriptEngine();
+    private V8ScriptEngine _engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDebugging);
 
     public ClearScriptEngine(
         IPackageService packageService,
@@ -39,14 +38,15 @@ internal class ClearScriptEngine : IScriptEngine {
         _packageService = packageService;
         _packageService.PackagesUpdated += PackagesUpdated;
         _settingsService = settingsService;
-        LoadPackageAssemblies();
+        var assemblies = LoadPackageAssemblies();
+        InitializeScriptEnvironment(assemblies);
     }
 
     private void PackagesUpdated() {
         LoadPackageAssemblies();
     }
 
-    private void LoadPackageAssemblies() {
+    private IEnumerable<Assembly> LoadPackageAssemblies() {
         var assemblies = new List<Assembly>();
         var packageAssemblies = _packageService.GetInstalledPackagePaths();
 
@@ -64,21 +64,25 @@ internal class ClearScriptEngine : IScriptEngine {
             }
         }
 
-        var langAssembly = Assembly.Load("ParksComputing.Xfer.Lang");
-        assemblies.Add(langAssembly);
-
-        InitializeScriptEnvironment(assemblies);
+        // var langAssembly = Assembly.Load("ParksComputing.Xfer.Lang");
+        // assemblies.Add(langAssembly);
+        return assemblies;
     }
+
+    private readonly Dictionary<string, dynamic> _workspaceCache = new Dictionary<string, dynamic>();
+    private readonly Dictionary<string, dynamic> _requestCache = new Dictionary<string, dynamic>();
 
     private void InitializeScriptEnvironment(IEnumerable<Assembly> assemblies) {
         // _engine = new Engine(options => options.AllowClr(assemblies.ToArray()));
+        _engine.AddHostObject("host", new ExtendedHostFunctions());
 
         var typeCollection = new HostTypeCollection("mscorlib", "System", "System.Core");
 
         _engine.AddHostObject("clr", typeCollection);
 
-        _engine.AddHostObject("console", new ConsoleScriptObject());
-        _engine.AddHostObject("log", new Action<string>(Console.WriteLine));
+        _engine.AddHostType("Console", typeof(Console));
+        _engine.AddHostType("console", typeof(ConsoleScriptObject));
+        _engine.AddHostObject("log", new Action<string>(ConsoleScriptObject.log));
         _engine.AddHostObject("workspaceService", _workspaceService);
         _engine.AddHostObject("store", new {
             get = new Func<string, object?>(key => _storeService.Get(key)),
@@ -127,7 +131,7 @@ function __postRequest(workspace, request) {{
 
                 // What a hack! There must be a better way to do this.
                 (globalObject as IDictionary<string, object?>)[workspaceName] = workspaceObj;
-                var workspaceTmp = _engine.Evaluate($"xf.{workspaceName}");
+                _workspaceCache.Add(workspaceName, workspaceObj);
 
                 _engine.Execute($@"
 function __preRequest__{workspaceName}(workspace, request) {{
@@ -176,7 +180,7 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
                     requestObj.response = new ResponseDefinition();
 
                     (workspaceObj.requests as IDictionary<string, object>).Add(requestName, requestObj);
-                    var requestTmp = _engine.Evaluate($"xf.{workspaceName}.requests.{requestName}");
+                    _requestCache.Add($"{workspaceName}.{requestName}", requestObj);
                 }
             }
         }
@@ -197,8 +201,8 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
         // var workspace = _workspaceService.BaseConfig!.Workspaces![workspaceName];
         // var request = workspace.Requests[requestName];
 
-        var workspace = _engine.Evaluate($"xf['{workspaceName}']") as dynamic;
-        var request = _engine.Evaluate($"xf['{workspaceName}'].requests['{requestName}'];") as dynamic;
+        var workspace = _workspaceCache[workspaceName];
+        var request = _requestCache[$"{workspaceName}.{requestName}"];
 
         request.name = requestName;
         request.workspace = workspace;
@@ -266,8 +270,8 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
         var headers = args[3] as HttpResponseHeaders;
         var responseContent = args[4] as string ?? string.Empty;
 
-        var workspace = _engine.Evaluate($"xf['{workspaceName}']") as dynamic;
-        var request = _engine.Evaluate($"xf['{workspaceName}'].requests['{requestName}'];") as dynamic;
+        var workspace = _workspaceCache[workspaceName];
+        var request = _requestCache[$"{workspaceName}.{requestName}"];
 
         request.name = requestName;
         request.response = new ExpandoObject() as dynamic;

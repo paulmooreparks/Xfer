@@ -9,10 +9,7 @@ using Cliffer;
 using ParksComputing.Xfer.Workspace.Models;
 using ParksComputing.Xfer.Workspace.Services;
 
-using Jint;
-using Jint.Runtime.Interop;
 using ParksComputing.Xfer.Cli.Services;
-using Newtonsoft.Json;
 
 namespace ParksComputing.Xfer.Cli.Commands;
 

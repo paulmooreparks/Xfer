@@ -39,6 +39,10 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
     }
 
     override public string GetPrompt(Command command, InvocationContext context) {
+        if (string.IsNullOrEmpty(_workspaceService.CurrentWorkspaceName)) {
+            return $"{command.Name}> ";
+        }
+
         return $"{command.Name}:{_workspaceService.CurrentWorkspaceName}> ";
     }
 

@@ -3,10 +3,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 
-using Jint;
-using Jint.Native;
-using Jint.Runtime.Interop;
-
 namespace ParksComputing.Xfer.Cli.Services;
 
 internal interface IScriptEngine {
