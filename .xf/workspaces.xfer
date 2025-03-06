@@ -23,6 +23,24 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
 
             </ These are requests that may be executed by name from the command line. />
             Requests {
+                cookies {
+                    Endpoint "/cookies"
+                    Method "GET"
+                    Cookies {
+                        session-id "1234567"
+                        session-token "abcdef"
+                    }
+                }
+
+                setcookies {
+                    Endpoint "/cookies/set"
+                    Method "GET"
+                    Parameters (
+                        'key1=value1'
+                        'key2=value2'
+                    )
+                }
+
                 gettest {
                     Endpoint "/get"
                     Method "GET"
@@ -39,13 +57,14 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     )
 
                     PreRequest <'
+                        log("This is the httpbin.gettest pre-request handler");
                         // Delegate to upstream pre-request handler
-                        baseHandler();
+                        nextHandler();
                         '>
 
                     PostRequest <'
                         // Delegate to upstream post-request handler
-                        baseHandler();
+                        nextHandler();
                     '>
                 }
                 posttest {
@@ -68,7 +87,7 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     PreRequest <'
                         var basicAuth = btoa("<|httpBinBasicAuthUser|>:<|httpBinBasicAuthPassword|>");
                         request.headers["Authorization"] = "Basic " + basicAuth;
-                        baseHandler();
+                        nextHandler();
                     '>
                 }
 
@@ -79,6 +98,27 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                         </ The httpBinBearerToken environment variable is set in the .xf/.env file. />
                         Authorization 'Bearer <|httpBinBearerToken|>'
                     }
+                }
+            }
+        }
+
+        foo {
+            Extend "httpbin"
+            Requests {
+                gettest {
+                    Endpoint "/get"
+                    Method "GET"
+
+                    Parameters (
+                        'key3=value1'
+                        'key4=value2'
+                    )
+
+                    PreRequest <'
+                        log("This is the foo.gettest pre-request handler");
+                        // Delegate to base pre-request handler
+                        baseHandler();
+                        '>
                 }
             }
         }
