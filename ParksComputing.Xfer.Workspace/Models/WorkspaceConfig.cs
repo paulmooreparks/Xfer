@@ -43,6 +43,7 @@ public class RequestDefinition {
     public string? Endpoint { get; set; }
     public string? Method { get; set; }
     public Dictionary<string, string> Headers { get; set; } = [];
+    public Dictionary<string, string> Cookies { get; set; } = [];
     public List<string> Parameters { get; set; } = [];
     public string? Payload { get; set; }
     public string? PreRequest { get; set; }

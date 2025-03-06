@@ -21,6 +21,7 @@ namespace ParksComputing.Xfer.Cli.Commands;
 [Option(typeof(string), "--baseurl", "The base URL of the API to send HTTP requests to.", new[] { "-b" }, IsRequired = false)]
 [Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
+[Option(typeof(IEnumerable<string>), "--cookies", "Cookies to include in the request.", new[] { "-c" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-pl" }, Arity = ArgumentArity.ZeroOrOne)]
 internal class SendCommand {
     private readonly IWorkspaceService _ws;
@@ -37,6 +38,7 @@ internal class SendCommand {
         [OptionParam("--parameters")] IEnumerable<string> parameters,
         [OptionParam("--payload")] string payload,
         [OptionParam("--headers")] IEnumerable<string> headers,
+        [OptionParam("--cookies")] IEnumerable<string> cookies,
         [CommandParam("get")] GetCommand getCommand,
         [CommandParam("post")] PostCommand postCommand
         ) 
@@ -118,12 +120,28 @@ internal class SendCommand {
             }
         }
 
+        var configCookies = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var kvp in definition.Cookies) {
+            configCookies[kvp.Key] = kvp.Value; // Add default cookies
+        }
+
+        if (cookies is not null) {
+            foreach (var cookie in cookies) {
+                var parts = cookie.Split('=', 2);
+                if (parts.Length == 2) {
+                    configCookies[parts[0].Trim()] = parts[1].Trim(); // Override
+                }
+            }
+        }
+
         _scriptEngine.InvokePreRequest(
             workspaceName, 
             requestName,
             configHeaders,
             finalParameters,
-            payload
+            payload,
+            configCookies
             );
 
 
@@ -131,11 +149,15 @@ internal class SendCommand {
             .Select(kvp => $"{kvp.Key}: {kvp.Value}")
             .ToList();
 
+        var finalCookies = configCookies
+            .Select(kvp => $"{kvp.Key}={kvp.Value}")
+            .ToList();
+
         var result = Result.Success;
 
         switch (method) {
             case "GET": {
-                    result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders);
+                    result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders, finalCookies);
                     _scriptEngine.InvokePostRequest(
                         workspaceName, 
                         requestName, 

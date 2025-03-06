@@ -131,12 +131,14 @@ function __postRequest(workspace, request) {{
 
                 _engine.Execute($@"
 function __preRequest__{workspaceName}(workspace, request) {{
-    var baseHandler = function() {{ __preRequest(workspace, request); }};
+    var nextHandler = function() {{ __preRequest(workspace, request); }};
+    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspaceConfig.Extend) ? "" : $"__preRequest__{workspaceConfig.Extend}(workspace, request);")} }};
     {(workspaceConfig.PreRequest == null ? $"__preRequest(workspace, request)" : GetScriptContent(workspaceConfig.PreRequest))}
 }};
 
 function __postRequest__{workspaceName}(workspace, request) {{
-    var baseHandler = function() {{ __postRequest(workspace, request); }};
+    var nextHandler = function() {{ __postRequest(workspace, request); }};
+    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspaceConfig.Extend) ? "" : $"__postRequest__{workspaceConfig.Extend}(workspace, request);")} }};
     {(workspaceConfig.PostRequest == null ? $"__postRequest(workspace, request)" : GetScriptContent(workspaceConfig.PostRequest))}
 }};
 
@@ -149,12 +151,14 @@ function __postRequest__{workspaceName}(workspace, request) {{
 
                     _engine.Execute($@"
 function __preRequest__{workspaceName}__{requestName} (workspace, request) {{
-    var baseHandler = function() {{ __preRequest__{workspaceName}(workspace, request); }};
+    var nextHandler = function() {{ __preRequest__{workspaceName}(workspace, request); }};
+    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspaceConfig.Extend) ? "" : $"__preRequest__{workspaceConfig.Extend}__{requestName}(workspace, request);")} }};
     {(requestDef.PreRequest == null ? $"__preRequest__{workspaceName}(workspace, request)" : GetScriptContent(requestDef.PreRequest))}
 }}
 
 function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
-    var baseHandler = function() {{ __postRequest__{workspaceName}(workspace, request); }};
+    var nextHandler = function() {{ __postRequest__{workspaceName}(workspace, request); }};
+    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspaceConfig.Extend) ? "" : $"__postRequest__{workspaceConfig.Extend}__{requestName}(workspace, request);")} }};
     {(requestDef.PostRequest == null ? $"__postRequest__{workspaceName}(workspace, request)" : GetScriptContent(requestDef.PostRequest))}
 }}
 

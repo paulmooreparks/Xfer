@@ -9,6 +9,7 @@ using Cliffer;
 using ParksComputing.Xfer.Cli.Services;
 using ParksComputing.Xfer.Workspace.Services;
 using ParksComputing.Xfer.Http.Services;
+using System.Net;
 
 namespace ParksComputing.Xfer.Cli.Commands;
 
@@ -17,6 +18,7 @@ namespace ParksComputing.Xfer.Cli.Commands;
 [Option(typeof(string), "--baseurl", "The base URL of the API to send HTTP requests to.", new[] { "-b" }, IsRequired = false)]
 [Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request. If input is redirected, parameters can also be read from standard input.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
+[Option(typeof(IEnumerable<string>), "--cookies", "Cookies to include in the request.", new[] { "-c" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 internal class GetCommand {
     private readonly IHttpService _httpService;
     private readonly IWorkspaceService _workspaceService;
@@ -38,9 +40,9 @@ internal class GetCommand {
         [OptionParam("--baseurl")] string? baseUrl,
         [ArgumentParam("endpoint")] string endpoint,
         [OptionParam("--parameters")] IEnumerable<string> parameters,
-        [OptionParam("--headers")] IEnumerable<string> headers
-        ) 
-    {
+        [OptionParam("--headers")] IEnumerable<string> headers,
+        [OptionParam("--cookies")] IEnumerable<string> cookies
+        ) {
         // Validate URL format
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
             baseUrl ??= _workspaceService.ActiveWorkspace.BaseUrl;
@@ -73,17 +75,29 @@ internal class GetCommand {
         int result = Result.Success;
 
         try {
-            var response = await _httpService.GetAsync(baseUrl, paramList, headers);
-            Headers = response.Headers;
-            
-            if (!response.IsSuccessStatusCode) {
-                Console.Error.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase} at {baseUrl}");
-                result = Result.Error;
-            }
+            var cookieContainer = new CookieContainer();
+            var handler = new HttpClientHandler() {
+                CookieContainer = cookieContainer,
+                UseCookies = true
+            };
 
-            responseContent = await response.Content.ReadAsStringAsync();
-            ResponseContent = responseContent;
-            StatusCode = (int)response.StatusCode;
+
+
+            var response = await _httpService.GetAsync(baseUrl, paramList, headers);
+
+            if (response != null) {
+                Headers = response.Headers;
+
+                if (!response.IsSuccessStatusCode) {
+                    Console.Error.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase} at {baseUrl}");
+                    result = Result.Error;
+                }
+
+                responseContent = await response.Content.ReadAsStringAsync();
+                ResponseContent = responseContent;
+                StatusCode = (int)response.StatusCode;
+                List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
+            }
         }
         catch (HttpRequestException ex) {
             Console.Error.WriteLine($"Error: HTTP request failed - {ex.Message}");
