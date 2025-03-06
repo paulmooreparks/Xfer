@@ -4,7 +4,7 @@
 
 The Xfer CLI tool provides a command-line interface (CLI) for making HTTP requests, scripting workflows, and easily interacting with APIs from the command line.
 
-Note: I've been moving fast (and breaking things), and the design is very much in flux. I've implemented one JavaScript engine, ripped it out and replaced it, then restructured how scripting works altogether. Any documentation I might have written would have been horribly out of date by now. That said, I'm closing in on a solid design now, so I'll start documenting more of how the tool works soon. In the meantime, take a look at the sample configuration below to get an idea of how the tool is configured.
+Note: I've been moving fast (and breaking things), and the design is very much in flux. I've implemented one JavaScript engine, ripped it out and replaced it, then restructured how scripting works altogether. Any documentation I might have written would have been horribly out of date by now. That said, I'm closing in on a solid design now, so I'll start documenting more of how the tool works soon. In the meantime, take a look at the [sample configuration](#sample-configuration) below to get an idea of how the tool is configured.
 
 This repository was originally the home for the [Xfer data-transfer language](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang). That project still exists, but I'm now using XferLang to implement the configuration for the Xfer CLI tool as well as for some internal data transfer tasks. The [core language specification](ParksComputing.Xfer.Lang/README.md) has moved into the folder that contains the assembly for the language implementation.
 
