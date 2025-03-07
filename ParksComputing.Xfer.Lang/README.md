@@ -1,4 +1,6 @@
-﻿# The Xfer Data-Interchange Format
+﻿![XferLogo](logo/XferLang-sm.png)
+
+# The Xfer Data-Interchange Format
 
 ![Version](https://img.shields.io/badge/version-0.8.0-blue)
 
