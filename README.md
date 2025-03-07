@@ -1,4 +1,6 @@
-﻿# The XferKit API-Management CLI Tool
+﻿![XferLogo](logo/XferKit-sm.png)
+
+# The XferKit API-Management CLI Tool
 
 ![XferKit CLI Version](https://img.shields.io/badge/XferKit_CLI-0.1.0-green)
 
