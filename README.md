@@ -4,11 +4,26 @@
 
 The XferKit CLI tool provides a command-line interface (CLI) for making HTTP requests, scripting workflows, and easily interacting with APIs from the command line.
 
-## Okay, but what is it, really?
+## Okay, But What Is It, Really?
 
 The XferKit CLI tool (or "xk") is a command-line tool that lets you define workspaces that encapsulate API interactions. Each workspace contains one or more requests, which are HTTP requests that you can make to an API. You can define headers, query parameters, and request bodies for each request, and you can also define blocks of JavaScript code that can be executed before or after the request is made. This allows you to automate workflows, configure your environment, and much more.
 
-This repository was originally the home for the [Xfer data-transfer language](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang). That project still exists, but I'm now using XferLang to implement the configuration for the XferKit CLI tool as well as for some internal data transfer tasks. The [core language specification](ParksComputing.Xfer.Lang/README.md) has moved into the folder that contains the assembly for the language implementation.
+## All Right, But What Does It Do?
+
+It's not so much what it does, as much as what it enables you to do. XferKit itself mainly does two things:
+
+* Make HTTP requests
+* Run JavaScript code
+
+These two capabilities, combined, let you create a CLI that is customized to your needs. You can use it to interact with APIs, automate workflows, configure your environment, test your services, and much more. The possibilities are endless.
+
+## Where Are the Docs?
+
+They're coming, as soon as this weekend (8 and 9 March 2025). I've been designing on the fly, and to this point my Kanban board has been a checklist on my office whiteboard full of ideas that I scribble down as I have them. The design is beginning to stabilize now, so I'm ready to start documenting the features and capabilities of the tool.
+
+## XferLang and Cliffer
+
+This repository was originally the home for the [Xfer data-transfer language (or XferLang)](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang). That project still exists, but I'm now using XferLang to implement the configuration for the XferKit CLI tool as well as for some internal data transfer tasks. The [core language specification](ParksComputing.Xfer.Lang/README.md) has moved into the folder that contains the assembly for the language implementation.
 
 The XferKit CLI tool uses the [Cliffer CLI Library](https://github.com/paulmooreparks/Cliffer), another project I own, to implement the CLI interface.
 
@@ -35,7 +50,7 @@ More is waiting to be documented, and even more is waiting to be implemented.
 
 ## Sample Configuration
 
-When you run the tool for the first time (`xk` at the command line), it will create a `.xk` folder in your home directory ($HOME on Unix-like systems, %USERPROFILE% on Windows). In that folder, you can create the following configuration files:
+When you run the tool for the first time (`xk` at the command line), it will create a `.xk` folder in your home directory (`$HOME` on Unix-like systems, `%USERPROFILE%` on Windows). In that folder, you can create the following configuration files:
 
 - [`workspaces.xfer`](.xk/workspaces.xfer): Defines the workspace structure, the requests in each workspace, and blocks of JavaScript code that can be executed in conjunction with the workspace or request.
 - [`store.xfer`](.xk/store.xfer): Defines key/value pairs that can be used in the workspace and request definitions. These may be updated by scripts or commands.
