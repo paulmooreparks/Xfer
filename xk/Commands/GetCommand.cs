@@ -73,7 +73,7 @@ internal class GetCommand {
         int result = Result.Success;
 
         try {
-            var response = await _xk.GetAsync(baseUrl, paramList, headers);
+            var response = await _xk.Http.GetAsync(baseUrl, paramList, headers);
 
             if (response is null) {
                 Console.Error.WriteLine($"Error: No response received from {baseUrl}");
@@ -84,9 +84,9 @@ internal class GetCommand {
                 result = Result.Error;
             }
 
-            Headers = _xk.Headers;
-            ResponseContent = _xk.ResponseContent;
-            StatusCode = _xk.StatusCode;
+            Headers = _xk.Http.Headers;
+            ResponseContent = _xk.Http.ResponseContent;
+            StatusCode = _xk.Http.StatusCode;
             // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
         }
         catch (HttpRequestException ex) {

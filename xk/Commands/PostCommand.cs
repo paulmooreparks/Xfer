@@ -59,7 +59,7 @@ internal class PostCommand {
         int result = Result.Success;
 
         try {
-            var response = await _xk.PostAsync(baseUrl, payload, headers);
+            var response = await _xk.Http.PostAsync(baseUrl, payload, headers);
 
             if (response is null) {
                 Console.Error.WriteLine($"Error: No response received from {baseUrl}");
@@ -70,9 +70,9 @@ internal class PostCommand {
                 result = Result.Error;
             }
 
-            Headers = _xk.Headers;
-            ResponseContent = _xk.ResponseContent;
-            StatusCode = _xk.StatusCode;
+            Headers = _xk.Http.Headers;
+            ResponseContent = _xk.Http.ResponseContent;
+            StatusCode = _xk.Http.StatusCode;
             // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
         }
         catch (HttpRequestException ex) {

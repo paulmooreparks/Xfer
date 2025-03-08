@@ -51,15 +51,6 @@ internal class HttpMethods : IHttpMethods {
         return response;
     }
 
-    public HttpResponseMessage? Get(
-        string baseUrl,
-        IEnumerable<string>? queryParameters,
-        IEnumerable<string>? headers
-        ) 
-    { 
-        return GetAsync(baseUrl, queryParameters, headers).GetAwaiter().GetResult();
-    }
-
     public async Task<HttpResponseMessage?> PostAsync(
         string baseUrl, 
         string payload, 
@@ -88,16 +79,6 @@ internal class HttpMethods : IHttpMethods {
         return response;
     }
 
-    public HttpResponseMessage? Post(
-        string baseUrl,
-        string payload,
-        IEnumerable<string>? headers
-        ) 
-    { 
-        return PostAsync(baseUrl, payload, headers).GetAwaiter().GetResult();
-    }
-
-
     public async Task<HttpResponseMessage?> PutAsync(string baseUrl, string endpoint, string payload, IEnumerable<string>? headers) {
         var cookieContainer = new CookieContainer();
         var handler = new HttpClientHandler() {
@@ -122,17 +103,6 @@ internal class HttpMethods : IHttpMethods {
         return response;
     }
 
-
-    public HttpResponseMessage? Put(
-        string baseUrl,
-        string endpoint,
-        string payload,
-        IEnumerable<string>? headers
-        ) 
-    { 
-        return PutAsync(baseUrl, endpoint, payload, headers).GetAwaiter().GetResult();
-    }
-
     public async Task<HttpResponseMessage?> DeleteAsync(string baseUrl, string endpoint, IEnumerable<string>? headers) {
         var cookieContainer = new CookieContainer();
         var handler = new HttpClientHandler() {
@@ -145,14 +115,5 @@ internal class HttpMethods : IHttpMethods {
             endpoint,
             headers
         );
-    }
-
-    public HttpResponseMessage? Delete(
-        string baseUrl,
-        string endpoint,
-        IEnumerable<string>? headers
-        ) 
-    { 
-        return DeleteAsync(baseUrl, endpoint, headers).GetAwaiter().GetResult();
     }
 }
