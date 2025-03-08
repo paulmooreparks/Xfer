@@ -6,12 +6,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ParksComputing.XferKit.Http.Services;
+using ParksComputing.XferKit.Workspace.Services;
 
 namespace ParksComputing.XferKit.Api.ApiMethods.Impl;
 internal class HttpMethods : IHttpMethods {
     private readonly IHttpService _httpService;
 
-    public HttpMethods(IHttpService httpService) {
+    public HttpMethods(
+        IHttpService httpService
+        ) 
+    {
         _httpService = httpService;
     }
 

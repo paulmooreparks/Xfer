@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Cliffer;
 
+using ParksComputing.XferKit.Api;
 using ParksComputing.XferKit.Workspace.Services;
 
 namespace ParksComputing.XferKit.Cli.Commands;
@@ -14,10 +15,13 @@ namespace ParksComputing.XferKit.Cli.Commands;
 [Argument(typeof(string), "workspace", "The name of the workspace to set as current.")]
 
 internal class SetWsCommand {
-    public readonly IWorkspaceService _workspaceService;
+    private readonly XferKitApi _xk;
 
-    public SetWsCommand(IWorkspaceService workspaceService) {
-        _workspaceService = workspaceService;
+    public SetWsCommand(
+        XferKitApi xk
+    ) 
+    {
+        _xk = xk;
     }
 
     public int Execute(
@@ -29,11 +33,11 @@ internal class SetWsCommand {
             int defaultOption = 0;
             int currentOption = 0;
 
-            foreach (var item in _workspaceService.WorkspaceList) {
+            foreach (var item in _xk.WorkspaceList) {
                 ++currentOption;
                 keyList.Add(item);
 
-                if (item == _workspaceService.CurrentWorkspaceName) {
+                if (item == _xk.CurrentWorkspaceName) {
                     defaultOption = currentOption;
                 }
             }
@@ -48,7 +52,7 @@ internal class SetWsCommand {
             workspace = keyArray[selectedItem - 1];
         }
 
-        _workspaceService.SetActiveWorkspace(workspace);
+        _xk.SetActiveWorkspace(workspace);
         return Result.Success;
     }
 }

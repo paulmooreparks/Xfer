@@ -19,8 +19,6 @@ namespace ParksComputing.XferKit.Cli.Commands;
 [Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-p" }, Arity = ArgumentArity.ZeroOrOne)]
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 internal class PostCommand {
-    private readonly IHttpService _httpService;
-    private readonly IWorkspaceService _workspaceService;
     private readonly XferKitApi _xk;
 
     public string ResponseContent { get; protected set; } = string.Empty;
@@ -28,13 +26,9 @@ internal class PostCommand {
     public System.Net.Http.Headers.HttpResponseHeaders? Headers { get; protected set; } = default;
 
     public PostCommand(
-        IHttpService httpService,
-        IWorkspaceService workspaceService,
         XferKitApi xk
         ) 
     {
-        _httpService = httpService;
-        _workspaceService = workspaceService;
         _xk = xk;
     }
 
@@ -47,7 +41,7 @@ internal class PostCommand {
     {
         // Validate URL format
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
-            baseUrl ??= _workspaceService.ActiveWorkspace.BaseUrl;
+            baseUrl ??= _xk.ActiveWorkspace.BaseUrl;
 
             if (string.IsNullOrEmpty(baseUrl) || !Uri.TryCreate(new Uri(baseUrl), endpoint, out baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
                 Console.Error.WriteLine($"Error: Invalid base URL: {baseUrl}");

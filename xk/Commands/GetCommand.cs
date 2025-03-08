@@ -21,8 +21,6 @@ namespace ParksComputing.XferKit.Cli.Commands;
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(IEnumerable<string>), "--cookies", "Cookies to include in the request.", new[] { "-c" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 internal class GetCommand {
-    private readonly IHttpService _httpService;
-    private readonly IWorkspaceService _workspaceService;
     private readonly XferKitApi _xk;
 
     public string ResponseContent { get; protected set; } = string.Empty;
@@ -35,8 +33,6 @@ internal class GetCommand {
         XferKitApi xk
         ) 
     { 
-        _httpService = httpService;
-        _workspaceService = workspaceService;
         _xk = xk;
     }
 
@@ -49,7 +45,7 @@ internal class GetCommand {
         ) {
         // Validate URL format
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
-            baseUrl ??= _workspaceService.ActiveWorkspace.BaseUrl;
+            baseUrl ??= _xk.ActiveWorkspace.BaseUrl;
 
             if (string.IsNullOrEmpty(baseUrl) || !Uri.TryCreate(new Uri(baseUrl), endpoint, out baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
                 Console.Error.WriteLine($"Error: Invalid base URL: {baseUrl}");
