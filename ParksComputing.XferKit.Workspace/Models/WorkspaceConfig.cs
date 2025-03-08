@@ -47,6 +47,7 @@ public class RequestDefinition {
     public Dictionary<string, string> Cookies { get; set; } = [];
     public List<string> Parameters { get; set; } = [];
     public string? Payload { get; set; }
+    public dynamic? Properties { get; set; }
     public string? PreRequest { get; set; }
     public string? PostRequest { get; set; }
     public ResponseDefinition Response { get; set; } = new ResponseDefinition();

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParksComputing.XferKit.Cli;
+namespace ParksComputing.XferKit.Workspace;
 
-internal static class Constants {
+public static class Constants {
     public const string XferDirectoryName = ".xk";
     public const string WorkspacesFileName = "workspaces.xfer";
     public const string StoreFileName = "store.xfer";

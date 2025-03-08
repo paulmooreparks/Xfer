@@ -10,6 +10,7 @@ using ParksComputing.XferKit.Cli.Services;
 using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Http.Services;
 using System.Net;
+using ParksComputing.XferKit.Api;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
@@ -22,6 +23,7 @@ namespace ParksComputing.XferKit.Cli.Commands;
 internal class GetCommand {
     private readonly IHttpService _httpService;
     private readonly IWorkspaceService _workspaceService;
+    private readonly XferKitApi _xk;
 
     public string ResponseContent { get; protected set; } = string.Empty;
     public int StatusCode { get; protected set; } = 0;
@@ -29,11 +31,13 @@ internal class GetCommand {
 
     public GetCommand(
         IHttpService httpService,
-        IWorkspaceService workspaceService
+        IWorkspaceService workspaceService,
+        XferKitApi xk
         ) 
     { 
         _httpService = httpService;
         _workspaceService = workspaceService;
+        _xk = xk;
     }
 
     public async Task<int> Execute(
@@ -70,34 +74,24 @@ internal class GetCommand {
             }
         }
 
-        var httpClient = new HttpClient();
-        string responseContent = string.Empty;
         int result = Result.Success;
 
         try {
-            var cookieContainer = new CookieContainer();
-            var handler = new HttpClientHandler() {
-                CookieContainer = cookieContainer,
-                UseCookies = true
-            };
+            var response = await _xk.GetAsync(baseUrl, paramList, headers);
 
-
-
-            var response = await _httpService.GetAsync(baseUrl, paramList, headers);
-
-            if (response != null) {
-                Headers = response.Headers;
-
-                if (!response.IsSuccessStatusCode) {
-                    Console.Error.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase} at {baseUrl}");
-                    result = Result.Error;
-                }
-
-                responseContent = await response.Content.ReadAsStringAsync();
-                ResponseContent = responseContent;
-                StatusCode = (int)response.StatusCode;
-                List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
+            if (response is null) {
+                Console.Error.WriteLine($"Error: No response received from {baseUrl}");
+                result = Result.Error;
             }
+            else if (!response.IsSuccessStatusCode) {
+                Console.Error.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase} at {baseUrl}");
+                result = Result.Error;
+            }
+
+            Headers = _xk.Headers;
+            ResponseContent = _xk.ResponseContent;
+            StatusCode = _xk.StatusCode;
+            // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
         }
         catch (HttpRequestException ex) {
             Console.Error.WriteLine($"Error: HTTP request failed - {ex.Message}");

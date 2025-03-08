@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParksComputing.XferKit.Cli.Services.Impl;
+namespace ParksComputing.XferKit.Workspace.Services.Impl;
 
-internal class SettingsService : ISettingsService {
+public class SettingsService : ISettingsService {
     public string? XferSettingsDirectory { get; set; }
-    public string? ConfigFilePath { get; set; }
+    public string ConfigFilePath { get; set; } = string.Empty;
     public string? StoreFilePath { get; set; }
     public string? PluginDirectory { get; set; }
     public string? EnvironmentFilePath { get; set; }

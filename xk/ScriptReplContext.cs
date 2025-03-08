@@ -33,7 +33,7 @@ internal class ScriptReplContext : Cliffer.DefaultReplContext {
     public override string[] GetHelpCommands() => ["-?", "-h", "--help"];
 
     override public string GetPrompt(Command command, InvocationContext context) {
-        return $"{command.Name}:{_workspaceService.CurrentWorkspaceName}> ";
+        return $"{command.Name}> ";
     }
 
     public override void OnEntry() {

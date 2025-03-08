@@ -1,13 +1,14 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using ParksComputing.XferKit.Workspace.Services;
 
 namespace ParksComputing.XferKit.Workspace;
 
 public static class ServiceCollectionExtensions {
-    public static IServiceCollection AddXferWorkspaceServices(this IServiceCollection services, string configFilePath) {
-        var workspaceService = new Services.Impl.WorkspaceService(configFilePath);
-        services.AddSingleton<IWorkspaceService>(workspaceService);
+    public static IServiceCollection AddXferKitWorkspaceServices(this IServiceCollection services, ISettingsService settingsService) {
+        var workspaceService = new Services.Impl.WorkspaceService(settingsService.ConfigFilePath);
+        services.TryAddSingleton<IWorkspaceService>(workspaceService);
         return services;
     }
 }

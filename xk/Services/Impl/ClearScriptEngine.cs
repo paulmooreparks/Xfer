@@ -14,6 +14,7 @@ using ParksComputing.XferKit.Workspace.Models;
 using System.Net.Http.Headers;
 using Microsoft.ClearScript.V8;
 using System.Dynamic;
+using ParksComputing.XferKit.Api;
 
 namespace ParksComputing.XferKit.Cli.Services;
 
@@ -22,6 +23,7 @@ internal class ClearScriptEngine : IScriptEngine {
     private readonly IWorkspaceService _workspaceService;
     private readonly IStoreService _storeService;
     private readonly ISettingsService _settingsService;
+    private readonly XferKitApi _xk;
 
     // private Engine _engine = new Engine(options => options.AllowClr());
     private V8ScriptEngine _engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDebugging);
@@ -30,7 +32,8 @@ internal class ClearScriptEngine : IScriptEngine {
         IPackageService packageService,
         IWorkspaceService workspaceService,
         IStoreService storeService,
-        ISettingsService settingsService
+        ISettingsService settingsService,
+        XferKitApi apiRoot
         ) 
     {
         _workspaceService = workspaceService;
@@ -38,6 +41,7 @@ internal class ClearScriptEngine : IScriptEngine {
         _packageService = packageService;
         _packageService.PackagesUpdated += PackagesUpdated;
         _settingsService = settingsService;
+        _xk = apiRoot;
         var assemblies = LoadPackageAssemblies();
         InitializeScriptEnvironment(assemblies);
     }
@@ -92,6 +96,8 @@ internal class ClearScriptEngine : IScriptEngine {
         });
         _engine.AddHostObject("btoa", new Func<string, string>(s => Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(s))));
         _engine.AddHostObject("atob", new Func<string, string>(s => System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(s))));
+
+        _engine.AddHostObject("xk", _xk);
 
         if (_workspaceService is not null && _workspaceService.BaseConfig is not null && _workspaceService?.BaseConfig.Workspaces is not null) {
             if (_workspaceService.BaseConfig.InitScript is not null) {
@@ -316,11 +322,6 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
         }
     }
 
-    public object Invoke(string name, object? thisObj, params object?[] value) {
-        var v = _engine.Evaluate(name);
-        return _engine.Invoke(name, value);
-    }
-
     private string? GetScriptContent(string? scriptValue) {
         if (string.IsNullOrWhiteSpace(scriptValue)) {
             return string.Empty;
@@ -333,8 +334,8 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
         try {
             // Change to XferSettingsDirectory if it's set and exists
             // Check if the scriptValue is a file reference
-            if (scriptValue.Trim().StartsWith(Constants.ScriptFilePrefix)) {
-                var filePath = scriptValue.Trim().Substring(Constants.ScriptFilePrefixLength).Trim();
+            if (scriptValue.Trim().StartsWith(XferKit.Workspace.Constants.ScriptFilePrefix)) {
+                var filePath = scriptValue.Trim().Substring(XferKit.Workspace.Constants.ScriptFilePrefixLength).Trim();
 
                 // If the path is relative, it will now be resolved from XferSettingsDirectory
                 if (!Path.IsPathRooted(filePath)) {

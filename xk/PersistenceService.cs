@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+
 namespace ParksComputing.XferKit.Cli;
 internal class PersistenceService {
     private readonly string _xfercDirectory;
@@ -11,13 +13,13 @@ internal class PersistenceService {
 
     public PersistenceService() {
         var homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        _xfercDirectory = Path.Combine(homeDirectory, Constants.XferDirectoryName);
+        _xfercDirectory = Path.Combine(homeDirectory, XferKit.Workspace.Constants.XferDirectoryName);
 
         if (!Directory.Exists(_xfercDirectory)) {
             Directory.CreateDirectory(_xfercDirectory);
         }
 
-        _mutex = new Mutex(false, Constants.MutexName);
+        _mutex = new Mutex(false, XferKit.Workspace.Constants.MutexName);
     }
 
 }

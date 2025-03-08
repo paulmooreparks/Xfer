@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj" />
+    <ProjectReference Include="..\ParksComputing.XferKit.Api\ParksComputing.XferKit.Api.csproj" />
     <ProjectReference Include="..\ParksComputing.XferKit.Http\ParksComputing.XferKit.Http.csproj" />
     <ProjectReference Include="..\ParksComputing.XferKit.Workspace\ParksComputing.XferKit.Workspace.csproj" />
   </ItemGroup>

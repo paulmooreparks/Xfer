@@ -39,7 +39,7 @@ internal class PackageService : IPackageService {
             var latestVersion = packageVersions?.OrderByDescending(v => v).FirstOrDefault();
 
             if (latestVersion == null) {
-                Console.WriteLine($"⚠️ No valid versions found for {packageName}");
+                Console.Error.WriteLine($"⚠️ No valid versions found for {packageName}");
                 return;
             }
 
@@ -49,7 +49,7 @@ internal class PackageService : IPackageService {
             var packageMetadata = metadata.FirstOrDefault();
 
             if (packageMetadata == null) {
-                Console.WriteLine($"⚠️ Could not retrieve package metadata for {packageName}");
+                Console.Error.WriteLine($"⚠️ Could not retrieve package metadata for {packageName}");
                 return;
             }
 
@@ -74,7 +74,7 @@ internal class PackageService : IPackageService {
             }
 
             if (!packageFiles.Any()) {
-                Console.WriteLine($"⚠️ No compatible assemblies found in {confirmedPackageName}.");
+                Console.Error.WriteLine($"⚠️ No compatible assemblies found in {confirmedPackageName}.");
                 return;
             }
 
@@ -109,14 +109,14 @@ internal class PackageService : IPackageService {
             var packagePath = Path.Combine(_packageDirectory, packageName);
             if (Directory.Exists(packagePath)) {
                 await Task.Run(() => Directory.Delete(packagePath, true));
-                Console.WriteLine($"Uninstalled {packageName}.");
+                Console.WriteLine($"✅ Uninstalled {packageName}.");
             }
             else {
-                Console.Error.WriteLine($"Package {packageName} is not installed.");
+                Console.Error.WriteLine($"❌ Package {packageName} is not installed.");
             }
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"Error uninstalling {packageName}: {ex.Message}");
+            Console.Error.WriteLine($"❌ Error uninstalling {packageName}: {ex.Message}");
         }
 
         NotifyPackagesUpdated();
@@ -129,7 +129,7 @@ internal class PackageService : IPackageService {
             return targetPath;
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"Error extracting file {targetPath}: {ex.Message}");
+            Console.Error.WriteLine($"❌ Error extracting file {targetPath}: {ex.Message}");
             return string.Empty;
         }
     }
@@ -164,7 +164,7 @@ internal class PackageService : IPackageService {
             }
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"Error searching for packages: {ex.Message}");
+            Console.Error.WriteLine($"❌ Error searching for packages: {ex.Message}");
         }
     }
 

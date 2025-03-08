@@ -9,6 +9,7 @@ using Cliffer;
 using ParksComputing.XferKit.Cli.Services;
 using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Http.Services;
+using ParksComputing.XferKit.Api;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
@@ -20,6 +21,7 @@ namespace ParksComputing.XferKit.Cli.Commands;
 internal class PostCommand {
     private readonly IHttpService _httpService;
     private readonly IWorkspaceService _workspaceService;
+    private readonly XferKitApi _xk;
 
     public string ResponseContent { get; protected set; } = string.Empty;
     public int StatusCode { get; protected set; } = 0;
@@ -27,11 +29,13 @@ internal class PostCommand {
 
     public PostCommand(
         IHttpService httpService,
-        IWorkspaceService workspaceService
+        IWorkspaceService workspaceService,
+        XferKitApi xk
         ) 
     {
         _httpService = httpService;
         _workspaceService = workspaceService;
+        _xk = xk;
     }
 
     public async Task<int> Execute(
@@ -58,23 +62,24 @@ internal class PostCommand {
             payload = payloadString.Trim();
         }
 
-        var httpClient = new HttpClient();
-        string responseContent = string.Empty;
         int result = Result.Success;
 
         try {
-            var response = await _httpService.PostAsync(baseUrl, payload, headers);
-            StatusCode = (int)response.StatusCode;
-            Headers = response.Headers;
+            var response = await _xk.PostAsync(baseUrl, payload, headers);
 
-            if (!response.IsSuccessStatusCode) {
+            if (response is null) {
+                Console.Error.WriteLine($"Error: No response received from {baseUrl}");
+                result = Result.Error;
+            }
+            else if (!response.IsSuccessStatusCode) {
                 Console.Error.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase} at {baseUrl}");
                 result = Result.Error;
             }
 
-            responseContent = await response.Content.ReadAsStringAsync();
-            ResponseContent = responseContent;
-            StatusCode = (int)response.StatusCode;
+            Headers = _xk.Headers;
+            ResponseContent = _xk.ResponseContent;
+            StatusCode = _xk.StatusCode;
+            // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
         }
         catch (HttpRequestException ex) {
             Console.Error.WriteLine($"Error: HTTP request failed - {ex.Message}");
