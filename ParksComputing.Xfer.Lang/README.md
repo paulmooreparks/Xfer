@@ -1,24 +1,24 @@
 ﻿![XferLogo](logo/XferLang-sm.png)
 
-# The Xfer Data-Interchange Format
+# The XferLang Data-Interchange Format
 
 ![Version](https://img.shields.io/badge/version-0.8.0-blue)
 
 _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.com/item?id=42114543). Thank you so much for all the great input and discussion!_
 
-Xfer is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. 
+XferLang is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. 
 
-This project is still in its infancy and is quite experimental, even exploratory. The code you'll find in this repository is also experimental. So far, I've built an [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang/Elements), a [parser](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/Services/Parser.cs), and a [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/XferConvert.cs) as part of my [.NET Xfer Library](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang), but at the moment this code is completely not ready for prime time. It's not even thread safe yet! About once a week I'll completely refactor everything, so don't get terribly attached to code you see here. However, if you do like some of the ideas, please [let me know](mailto:paul@parkscomputing.com). I'm always open to feedback.
+This project is still in its infancy and is quite experimental, even exploratory. The code you'll find in this repository is also experimental. So far, I've built an [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang/Elements), a [parser](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/Services/Parser.cs), and a [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/XferConvert.cs) as part of my [.NET XferLang Library](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang), but at the moment this code is completely not ready for prime time. It's not even thread safe yet! About once a week I'll completely refactor everything, so don't get terribly attached to code you see here. However, if you do like some of the ideas, please [let me know](mailto:paul@parkscomputing.com). I'm always open to feedback.
 
 That said, I do plan to make the code professional-grade in the future, and I want to add implementations in other languages (Java, Rust, C++, JavaScript, and TypeScript are on my list). If you want to contribute, please [let me know](mailto:paul@parkscomputing.com). I'd love to have your help.
 
 ## Design Goals
 * **Explicit Types**: All values are explicitly typed.
-* **No Commas**: Xfer allows for objects and arrays to be defined without any separator characters between elements.
-* **No Escaping**: Xfer does not require escaping of special characters in values. Instead, values are enclosed in unique delimiters that eliminate the need for escaping.
-* **Nullable Values**: ~~Xfer supports null values only for types that are defined as nullable.~~ This idea is on hold for now. Stay tuned for updates.
+* **No Commas**: XferLang allows for objects and arrays to be defined without any separator characters between elements.
+* **No Escaping**: XferLang does not require escaping of special characters in values. Instead, values are enclosed in unique delimiters that eliminate the need for escaping.
+* **Nullable Values**: ~~XferLang supports null values only for types that are defined as nullable.~~ This idea is on hold for now. Stay tuned for updates.
 
-## Xfer and JSON Compared
+## XferLang and JSON Compared
 
 Here's a simple example of a JSON document:
 
@@ -35,7 +35,7 @@ Here's a simple example of a JSON document:
 }
 ```
 
-Following is the equivalent Xfer document, using [compact syntax](#compact-syntax) and [implicit syntax](#implicit-syntax).
+Following is the equivalent XferLang document, using [compact syntax](#compact-syntax) and [implicit syntax](#implicit-syntax).
 
 ```xfer
 {
@@ -50,15 +50,15 @@ Following is the equivalent Xfer document, using [compact syntax](#compact-synta
 }
 ```
 
-Here is the same Xfer document with all unnecessary whitespace removed.
+Here is the same XferLang document with all unnecessary whitespace removed.
 
 ```xfer
 {name"Alice"age 30 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00@}}
 ```
 
-## Xfer Syntax
+## XferLang Syntax
 
-An Xfer document is composed of keywords and elements. When using [explicit syntax](#explicit-syntax), an element begins and ends with angle brackets (`<` and `>`). The first character inside the angle brackets is the specifier character, which indicates the type of the element. The specifier character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.
+An XferLang document is composed of keywords and elements. When using [explicit syntax](#explicit-syntax), an element begins and ends with angle brackets (`<` and `>`). The first character inside the angle brackets is the specifier character, which indicates the type of the element. The specifier character is followed by the element's content. The content varies based on the type of the element. Elements may be nested, and they may contain comments.
 
 ```xfer
 </ This is a comment, and below is a string element />
@@ -97,7 +97,7 @@ Comments are always enclosed in angle brackets and one or more slash (`/`) chara
 <// Comments may enclose </other comments/> if the enclosing specifiers are repeated. //>
 ```
 
-Due to the nature of the Xfer syntax, representing empty values requires explicit delimiters.
+Due to the nature of the XferLang syntax, representing empty values requires explicit delimiters.
 
 ```xfer
 emptyString <""> 
@@ -110,7 +110,7 @@ nullValue ?
 alsoNull <??>
 ```
 
-## Features of Xfer
+## Features of XferLang
 * [Nested Elements](#nested-elements)
 * [Safer Embedding](#safer-embedding)
 * [Comments](#comments)
@@ -119,7 +119,7 @@ alsoNull <??>
 * [Placeholder substitution](#placeholder-substitution)
 
 ### Nested Elements
-In Xfer, elements are delimited by angle brackets (`<` and `>`) and element-specific specifier characters  (such as `!`, `/`, `#`, `"`, and so on). Nesting of elements is accomplished by repeating the specifier character in the enclosing delimiters as many times as necessary to disambiguate the inner elements.
+In XferLang, elements are delimited by angle brackets (`<` and `>`) and element-specific specifier characters  (such as `!`, `/`, `#`, `"`, and so on). Nesting of elements is accomplished by repeating the specifier character in the enclosing delimiters as many times as necessary to disambiguate the inner elements.
 
 ```xfer
 <//This is how a comment </can contain another comment/>, //>
@@ -127,7 +127,7 @@ In Xfer, elements are delimited by angle brackets (`<` and `>`) and element-spec
 ```
 
 ### Safer Embedding
-One of the design goals of Xfer is to eliminate the requirement to escape special characters. Enclosing data with unique delimiters already reduces the chances of a collision with the enclosed data, but in the event that a collision does occur, the specifier character can be repeated as many times as necessary to disambiguate the data.
+One of the design goals of XferLang is to eliminate the requirement to escape special characters. Enclosing data with unique delimiters already reduces the chances of a collision with the enclosed data, but in the event that a collision does occur, the specifier character can be repeated as many times as necessary to disambiguate the data.
 
 ```xfer
 <"String elements may already contain "quotes" without any issues.">
@@ -138,20 +138,20 @@ One of the design goals of Xfer is to eliminate the requirement to escape specia
 This does not mean that escaping is not supported. There is a text element, the Evaluated Element (or eval element), that will evaluate any embedded elements and include their resulting values in the text value of the element. Using this feature and embedding character elements, it is possible to escape any character sequence.
 
 ```xfer
-</ The following evaluated-text element will render as " I ❤︎ Xfer 😀 ". />
-' I <\$2764\><\$fe0e\> Xfer <\$1F600\> '
+</ The following evaluated-text element will render as " I ❤︎ XferLang 😀 ". />
+' I <\$2764\><\$fe0e\> XferLang <\$1F600\> '
 ```
 
 Compare this to the standard string element, where the contents are not evaluated but rather rendered verbatim.
 
 ```xfer
-</ The following string element will render as " I <\$2764\><\$fe0e\> Xfer <\$1F600\> ". />
-" I <\$2764\><\$fe0e\> Xfer <\$1F600\> "
+</ The following string element will render as " I <\$2764\><\$fe0e\> XferLang <\$1F600\> ". />
+" I <\$2764\><\$fe0e\> XferLang <\$1F600\> "
 ```
 
 ### Comments
 
-Xfer documents may contain comments that are ignored by the parser.
+XferLang documents may contain comments that are ignored by the parser.
 
 ```xfer
 </ This is a comment. />
@@ -166,7 +166,7 @@ Comments may also be embedded in other elements, including other comments.
 
 ### Strict Typing
 
-While JSON relies on JavaScript's type inference, Xfer requires explicit typing. The core types supported by Xfer are [string](#string-element), [character](#character-element), [integer](#integer-element), [long integer](#long-element), [double](#double-element), [decimal](#decimal-element), [Boolean](#boolean-element), and [date/time](#datetime-element). Each element's type is indicated by a specifier character in its opening delimter, and its content is then parsed according to the rules for that type.
+While JSON relies on JavaScript's type inference, XferLang requires explicit typing. The core types supported by XferLang are [string](#string-element), [character](#character-element), [integer](#integer-element), [long integer](#long-element), [double](#double-element), [decimal](#decimal-element), [Boolean](#boolean-element), and [date/time](#datetime-element). Each element's type is indicated by a specifier character in its opening delimter, and its content is then parsed according to the rules for that type.
 
 ```xfer
 </ String element />
@@ -199,7 +199,7 @@ While JSON relies on JavaScript's type inference, Xfer requires explicit typing.
 
 ### Metadata
 
-Xfer documents can contain metadata that is not part of the data itself. This metadata can be used for a variety of purposes, such as defining the version of Xfer that the document conforms to and other information that may be useful to the parser or the consumer of the data.
+XferLang documents can contain metadata that is not part of the data itself. This metadata can be used for a variety of purposes, such as defining the version of XferLang that the document conforms to and other information that may be useful to the parser or the consumer of the data.
 
 ```xfer
 <!
@@ -212,14 +212,14 @@ Xfer documents can contain metadata that is not part of the data itself. This me
 
 ### Placeholder Substitution
 
-Xfer documents may contain placeholders that are replaced with values at runtime.
+XferLang documents may contain placeholders that are replaced with values at runtime.
 
 ```xfer
 message 'Hello, <|USER|>!'
 ```
 
-## Xfer Element Syntax
-An Xfer element may support up to three syntax variations: explicit syntax, compact syntax, and implicit syntax. All elements support explicit syntax, but the compact and implicit syntaxes are more concise.
+## XferLang Element Syntax
+An XferLang element may support up to three syntax variations: explicit syntax, compact syntax, and implicit syntax. All elements support explicit syntax, but the compact and implicit syntaxes are more concise.
 
 ### Explicit Syntax
 When using explicit syntax, the element is enclosed in opening and closing delimiters composed of outer angle brackets (less-than, `<`, and greater-than, `>`) and an inner specifier character. The content of the element is enclosed in the opening and closing delimiters.
@@ -285,13 +285,13 @@ Keywords in a key/value pair may also be used without enclosing delimiters when 
 
 ### Why Three Different Element Syntaxes?
 
-In the prototype design of Xfer, digraph pairs (such as `<" ">` or `<{ }>`) were used to delimit elements. However, I received feedback that this syntax was difficult to read and write, especially for large or complex documents. The compact syntax is more concise and easier to read and write, but the explicit syntax allows for nested elements and comments. In nearly all cases, the compact syntax is sufficient, but the explicit syntax is always available for cases where it is needed.
+In the prototype design of XferLang, digraph pairs (such as `<" ">` or `<{ }>`) were used to delimit elements. However, I received feedback that this syntax was difficult to read and write, especially for large or complex documents. The compact syntax is more concise and easier to read and write, but the explicit syntax allows for nested elements and comments. In nearly all cases, the compact syntax is sufficient, but the explicit syntax is always available for cases where it is needed.
 
-What this means, in a practical sense, is that you'll almost always use a mixture of implicit and compact syntax when you work with Xfer, only stepping up the syntax ladder when you need to disambiguate the contents of an element from the element's delimiters.
+What this means, in a practical sense, is that you'll almost always use a mixture of implicit and compact syntax when you work with XferLang, only stepping up the syntax ladder when you need to disambiguate the contents of an element from the element's delimiters.
 
-## Xfer Elements
+## XferLang Elements
 
-This section describes the various Xfer element types.
+This section describes the various XferLang element types.
 
 ### String Element
 
@@ -320,8 +320,8 @@ A String element may contain any UTF-8 character, including whitespace, line bre
 A String element may also contain embedded elements, which will be rendered as entered.
 
 ```xfer
-</ The following will render as " I <\$2764\><\$fe0e\> Xfer <\$1F600\> ". />
-' I <\$2764\><\$fe0e\> Xfer <\$1F600\> '
+</ The following will render as " I <\$2764\><\$fe0e\> XferLang <\$1F600\> ". />
+' I <\$2764\><\$fe0e\> XferLang <\$1F600\> '
 ```
 
 ### Evaluated Text Element
@@ -356,8 +356,8 @@ All elements embedded in an evaluated-text element which are intended to be eval
 
 <'Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><''as<\$20\>is''>.'>
 
-</ The following will render as " I ❤︎ Xfer 😀 ". />
-' I <\$2764\><\$fe0e\> Xfer <\$1F600\> '
+</ The following will render as " I ❤︎ XferLang 😀 ". />
+' I <\$2764\><\$fe0e\> XferLang <\$1F600\> '
 
 ```
 
@@ -630,7 +630,7 @@ The Property Bag element is used to represent a collection of values of any type
 
 ### Metadata Element
 
-The Metadata element is used to represent metadata that is not part of the data itself. It contains key/value pairs that may be used for a variety of purposes, such as defining the version of Xfer that the document conforms to or other information that may be useful to the parser or the consumer of the data.
+The Metadata element is used to represent metadata that is not part of the data itself. It contains key/value pairs that may be used for a variety of purposes, such as defining the version of XferLang that the document conforms to or other information that may be useful to the parser or the consumer of the data.
 
 * **Specifiers:** `!` (Exclamation Mark, U+0021)
 * **Explicit Syntax:** Enclose the content in `<!` and `!>` delimiters.
@@ -646,7 +646,7 @@ The Metadata element is used to represent metadata that is not part of the data 
 !>
 ```
 
-The `xfer` keyword is reserved by the Xfer specification and indicates the version of Xfer to which the document conforms. Additional key/value pairs may be included, with their meanings defined by the document itself or its schema.
+The `xfer` keyword is reserved by the XferLang specification and indicates the version of XferLang to which the document conforms. Additional key/value pairs may be included, with their meanings defined by the document itself or its schema.
 
 The metadata element may only appear at the beginning of a document before any other non-comment elements.
 
@@ -659,7 +659,7 @@ The metadata element may only appear at the beginning of a document before any o
 
 #### `xfer` Keyword
 
-The `xfer` keyword is reserved by the Xfer specification and indicates the version of Xfer to which the document conforms. The value of the `xfer` keyword must be a string element.
+The `xfer` keyword is reserved by the XferLang specification and indicates the version of XferLang to which the document conforms. The value of the `xfer` keyword must be a string element.
 
 ```xfer
 ! xfer "1.0.0" !
@@ -679,13 +679,13 @@ The Comment element is used to represent a comment that is not part of the data 
 <// A comment may safely contain </other comments/> when the outer specifiers are repeated. //>
 ```
 
-## Xfer Document Structure
+## XferLang Document Structure
 
-Comment elements may appear anywhere in an Xfer document and are ignored by the parser. No comments will appear in the parsed structure.
+Comment elements may appear anywhere in an XferLang document and are ignored by the parser. No comments will appear in the parsed structure.
 
-An Xfer document begins with a metadata element. If the element is not provided explicitly, an implicit metadata element is added to the document with a default version number assigned. A metadata element may not appear after any non-comment elements.
+An XferLang document begins with a metadata element. If the element is not provided explicitly, an implicit metadata element is added to the document with a default version number assigned. A metadata element may not appear after any non-comment elements.
 
-The root content element of an Xfer document is an implicit [property bag](#property-bag-element) element. This element may contain any number of other elements.
+The root content element of an XferLang document is an implicit [property bag](#property-bag-element) element. This element may contain any number of other elements.
 
 In the document below, the string value with the content `Hello, World!` is the first element in the root property bag, the integer with the value `42` is the second element in the root property bag, and the array element containing three string values is the third element in the root property bag.
 
@@ -696,21 +696,21 @@ In the document below, the string value with the content `Hello, World!` is the 
 ["abc""def""ghi"]
 ```
 
-## Xfer Object Model
+## XferLang Object Model
 
 _Coming soon..._
 
-## Xfer Parser
+## XferLang Parser
 
 _Coming soon..._
 
 ## Serialization
 
-The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/XferConvert.cs) makes use of the [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang/Elements) to write object contents out to a stream or read object contents from a stream. The class is not yet thread safe, and it is not yet optimized for performance, but it's is already useful for demonstrating Xfer's capabilities.
+The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/XferConvert.cs) makes use of the [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang/Elements) to write object contents out to a stream or read object contents from a stream. The class is not yet thread safe, and it is not yet optimized for performance, but it's is already useful for demonstrating XferLang's capabilities.
 
-## Xfer Grammar
+## XferLang Grammar
 
-This grammar is not 100% accurate, but it's close enough to give you an idea of how Xfer is structured. It doesn't capture that the counts of opening and closing specifiers should be balanced, and it doesn't capture all the characters that are legal for `<text>` (bascially, ".*").
+This grammar is not 100% accurate, but it's close enough to give you an idea of how XferLang is structured. It doesn't capture that the counts of opening and closing specifiers should be balanced, and it doesn't capture all the characters that are legal for `<text>` (bascially, ".*").
 
 This grammar is also [in the repository](xfer.bnf).
 
