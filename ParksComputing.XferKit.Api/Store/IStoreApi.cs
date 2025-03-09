@@ -11,6 +11,6 @@ public interface IStoreApi {
     void set(string key, object value);
     void delete(string key);
     void clear();
-    IEnumerable<string> keys { get; }
-    IEnumerable<object> values { get; }
+    string[] keys { get; }
+    object[] values { get; }
 }

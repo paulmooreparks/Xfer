@@ -25,6 +25,6 @@ internal class StoreApi : IStoreApi {
 
     public void set(string key, object value) => _storeService.Set(key, value);
 
-    public IEnumerable<string> keys => _storeService.Keys;
-    public IEnumerable<object> values => _storeService.Values;
+    public string[] keys => _storeService.Keys.ToArray();
+    public object[] values => _storeService.Values.ToArray();
 }

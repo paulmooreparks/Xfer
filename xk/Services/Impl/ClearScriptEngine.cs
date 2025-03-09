@@ -314,6 +314,18 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
         }
     }
 
+    public string ExecuteCommand(string? script) {
+        try {
+            return _engine.ExecuteCommand(script);
+        }
+        catch (Exception ex) {
+            var result = $"Error executing script: {ex.Message}";
+            Console.Error.WriteLine(result);
+            return result;
+        }
+    }
+
+
     private string? GetScriptContent(string? scriptValue) {
         if (string.IsNullOrWhiteSpace(scriptValue)) {
             return string.Empty;

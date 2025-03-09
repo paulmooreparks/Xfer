@@ -19,9 +19,9 @@ public class XferKitApi : DynamicObject {
     public IEnumerable<string> workspaceList => _workspaceService.WorkspaceList;
     public string currentWorkspaceName => _workspaceService.CurrentWorkspaceName;
 
-    public IHttpApi Http { get; }
+    public IHttpApi http { get; }
 
-    public IStoreApi Store { get; }
+    public IStoreApi store { get; }
 
     public XferKitApi(
         IWorkspaceService workspaceService, 
@@ -30,8 +30,8 @@ public class XferKitApi : DynamicObject {
         ) 
     {
         _workspaceService = workspaceService;
-        Http = httpApi;
-        Store = storeApi;
+        http = httpApi;
+        store = storeApi;
     }
 
     public void setActiveWorkspace(string workspaceName) => _workspaceService.SetActiveWorkspace(workspaceName);

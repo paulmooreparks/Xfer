@@ -5,7 +5,7 @@ var jObject = jsonLinq.JObject;
 
 var xferLang = host.lib('ParksComputing.Xfer.Lang');
 
-var startWorkspace = xk.Store.get("startWorkspace");
+var startWorkspace = xk.store.get("startWorkspace");
 
 if (startWorkspace != null) {
     xk.setActiveWorkspace(startWorkspace);

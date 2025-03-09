@@ -28,7 +28,9 @@ public class PackageService : IPackageService {
         PackagesUpdated?.Invoke();
     }
 
-    public async Task InstallPackageAsync(string packageName) {
+    public async Task<PackageInstallResult> InstallPackageAsync(string packageName) {
+        var result = new PackageInstallResult { PackageName = packageName };
+
         try {
             var repository = Repository.Factory.GetCoreV3(PackageSourceUrl);
             var resource = await repository.GetResourceAsync<FindPackageByIdResource>();
@@ -39,9 +41,12 @@ public class PackageService : IPackageService {
             var latestVersion = packageVersions?.OrderByDescending(v => v).FirstOrDefault();
 
             if (latestVersion == null) {
-                Console.Error.WriteLine($"⚠️ No valid versions found for {packageName}");
-                return;
+                result.ErrorMessage = $"No valid versions found for {packageName}";
+                result.Success = false;
+                return result;
             }
+
+            result.Version = latestVersion.ToFullString();
 
             // Retrieve package metadata to get the correct canonical name
             var metadataResource = await repository.GetResourceAsync<PackageMetadataResource>();
@@ -49,8 +54,9 @@ public class PackageService : IPackageService {
             var packageMetadata = metadata.FirstOrDefault();
 
             if (packageMetadata == null) {
-                Console.Error.WriteLine($"⚠️ Could not retrieve package metadata for {packageName}");
-                return;
+                result.ErrorMessage = $"Could not retrieve package metadata for {packageName}";
+                result.Success = false;
+                return result;
             }
 
             string confirmedPackageName = packageMetadata.Identity.Id; // Use the exact name from NuGet
@@ -66,7 +72,6 @@ public class PackageService : IPackageService {
 
             IEnumerable<string> packageFiles = Enumerable.Empty<string>();
 
-            // Find the best matching framework directory
             foreach (var framework in preferredFrameworks) {
                 packageFiles = packageReader.GetFiles($"lib/{framework}");
                 if (packageFiles.Any())
@@ -74,12 +79,13 @@ public class PackageService : IPackageService {
             }
 
             if (!packageFiles.Any()) {
-                Console.Error.WriteLine($"⚠️ No compatible assemblies found in {confirmedPackageName}.");
-                return;
+                result.ErrorMessage = $"No compatible assemblies found in {confirmedPackageName}.";
+                result.Success = false;
+                return result;
             }
 
-            // Create the correct directory under .xf/packages/{confirmedPackageName}
             var packagePath = Path.Combine(_packageDirectory, confirmedPackageName);
+
             if (!Directory.Exists(packagePath)) {
                 Directory.CreateDirectory(packagePath);
             }
@@ -91,35 +97,39 @@ public class PackageService : IPackageService {
                 await entryStream.CopyToAsync(fileStream);
             }
 
-            Console.WriteLine($"✅ Installed {confirmedPackageName} to {packagePath}");
+            result.ConfirmedPackageName = confirmedPackageName;
+            result.Path = packagePath;
+            result.Success = true;
+            NotifyPackagesUpdated();
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"❌ Error installing {packageName}: {ex.Message}");
+            result.ErrorMessage = $"Error installing {packageName}: {ex.Message}";
+            result.Success = false;
         }
 
-        NotifyPackagesUpdated();
+        return result;
     }
 
-    public async Task UpdatePackageAsync(string packageName) {
-        await InstallPackageAsync(packageName);
+    public async Task<PackageInstallResult> UpdatePackageAsync(string packageName) {
+        return await InstallPackageAsync(packageName);
     }
 
-    public async Task UninstallPackageAsync(string packageName) {
+    public async Task<PackageUninstallResult> UninstallPackageAsync(string packageName) {
         try {
             var packagePath = Path.Combine(_packageDirectory, packageName);
             if (Directory.Exists(packagePath)) {
                 await Task.Run(() => Directory.Delete(packagePath, true));
-                Console.WriteLine($"✅ Uninstalled {packageName}.");
             }
             else {
-                Console.Error.WriteLine($"❌ Package {packageName} is not installed.");
+                return PackageUninstallResult.NotFound;
             }
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"❌ Error uninstalling {packageName}: {ex.Message}");
+            return PackageUninstallResult.Failed;
         }
 
         NotifyPackagesUpdated();
+        return PackageUninstallResult.Success;
     }
 
     private static string ExtractPackageFile(string sourcePath, string targetPath, Stream stream) {
@@ -129,12 +139,12 @@ public class PackageService : IPackageService {
             return targetPath;
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"❌ Error extracting file {targetPath}: {ex.Message}");
+            // Console.Error.WriteLine($"❌ Error extracting file {targetPath}: {ex.Message}");
             return string.Empty;
         }
     }
 
-    public List<string?> GetInstalledPackages() {
+    public IEnumerable<string?> GetInstalledPackages() {
         if (Directory.Exists(_packageDirectory)) {
             var dirs = Directory.GetDirectories(_packageDirectory);
             return dirs.Select(Path.GetFileName).ToList();
@@ -143,7 +153,11 @@ public class PackageService : IPackageService {
         return new List<string?>();
     }
 
-    public async Task SearchPackagesAsync(string searchTerm) {
+    public async Task<PackageSearchResult> SearchPackagesAsync(string searchTerm) {
+        var result = new PackageSearchResult();
+        var items = new List<PackageSearchItem>();
+
+
         try {
             var packageSource = new PackageSource(PackageSourceUrl);
             var sourceRepository = Repository.Factory.GetCoreV3(packageSource);
@@ -158,17 +172,28 @@ public class PackageService : IPackageService {
                 CancellationToken.None
             );
 
-            Console.WriteLine($"Search results for '{searchTerm}':");
             foreach (var package in searchResults) {
-                Console.WriteLine($"  - {package.Identity.Id} ({package.Identity.Version})");
+                items.Add(
+                    new PackageSearchItem {
+                        Name = package.Identity.Id,
+                        Version = package.Identity.Version.ToString(),
+                        Description = package.Description
+                    }
+                );
             }
+
+            result.Success = true;
+            result.Items = items;
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"❌ Error searching for packages: {ex.Message}");
+            result.Success = false;
+            result.ErrorMessage = $"❌ Error searching for packages: {ex.Message}";
         }
+
+        return result;
     }
 
-    public List<string> GetInstalledPackagePaths() {
+    public IEnumerable<string> GetInstalledPackagePaths() {
         return Directory.EnumerateFiles(_packageDirectory, "*.dll", SearchOption.AllDirectories).ToList();
     }
 }
