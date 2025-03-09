@@ -15,6 +15,11 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
         log(request.response.body);
     '>
 
+    </ These are global variables that may be referenced in the configuration. />
+    Properties {
+        sampleValue "This is a sample value"
+    }
+
     </ A workspace is a collection of related requests and associated configuration. />
     Workspaces {
 
