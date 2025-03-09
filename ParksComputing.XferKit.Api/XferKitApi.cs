@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Runtime.CompilerServices;
 
-using ParksComputing.XferKit.Api.ApiMethods;
 using ParksComputing.XferKit.Api.Http;
 using ParksComputing.XferKit.Workspace.Models;
 using ParksComputing.XferKit.Workspace.Services;

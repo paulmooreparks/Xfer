@@ -3,23 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ParksComputing.XferKit.Api.ApiMethods;
+using ParksComputing.XferKit.Http.Services;
+using System.Net;
 
 namespace ParksComputing.XferKit.Api.Http.Impl;
 
 public class HttpApi : IHttpApi
 {
-    private readonly IHttpMethods _httpMethods;
+    private readonly IHttpService _httpService;
 
     public string ResponseContent { get; protected set; } = string.Empty;
     public int StatusCode { get; protected set; } = 0;
     public System.Net.Http.Headers.HttpResponseHeaders? Headers { get; protected set; } = default;
 
     public HttpApi(
-        IHttpMethods httpMethods
-        )
+        IHttpService httpService
+        ) 
     {
-        _httpMethods = httpMethods;
+        _httpService = httpService;
     }
 
     public async Task<HttpResponseMessage?> GetAsync(
@@ -28,11 +29,19 @@ public class HttpApi : IHttpApi
         IEnumerable<string>? headers
         )
     {
-        var response = await _httpMethods.GetAsync(baseUrl, queryParameters, headers);
+        var cookieContainer = new CookieContainer();
+        var handler = new HttpClientHandler() {
+            CookieContainer = cookieContainer,
+            UseCookies = true
+        };
 
-        if (response is not null)
-        {
-            Headers = response.Headers;
+        var response = await _httpService.GetAsync(
+            baseUrl,
+            queryParameters,
+            headers
+            );
+
+        if (response != null) {
             Headers = response.Headers;
             ResponseContent = await response.Content.ReadAsStringAsync();
             StatusCode = (int)response.StatusCode;
@@ -57,10 +66,19 @@ public class HttpApi : IHttpApi
         IEnumerable<string>? headers
         )
     {
-        var response = await _httpMethods.PostAsync(baseUrl, payload, headers);
+        var cookieContainer = new CookieContainer();
+        var handler = new HttpClientHandler() {
+            CookieContainer = cookieContainer,
+            UseCookies = true
+        };
 
-        if (response is not null)
-        {
+        var response = await _httpService.PostAsync(
+            baseUrl,
+            payload,
+            headers
+            );
+
+        if (response != null) {
             Headers = response.Headers;
             ResponseContent = await response.Content.ReadAsStringAsync();
             StatusCode = (int)response.StatusCode;
@@ -86,10 +104,20 @@ public class HttpApi : IHttpApi
         IEnumerable<string>? headers
         )
     {
-        var response = await _httpMethods.PutAsync(baseUrl, endpoint, payload, headers);
+        var cookieContainer = new CookieContainer();
+        var handler = new HttpClientHandler() {
+            CookieContainer = cookieContainer,
+            UseCookies = true
+        };
 
-        if (response is not null)
-        {
+        var response = await _httpService.PutAsync(
+            baseUrl,
+            endpoint,
+            payload,
+            headers
+        );
+
+        if (response != null) {
             Headers = response.Headers;
             ResponseContent = await response.Content.ReadAsStringAsync();
             StatusCode = (int)response.StatusCode;
@@ -115,17 +143,17 @@ public class HttpApi : IHttpApi
         IEnumerable<string>? headers
         )
     {
-        var response = await _httpMethods.DeleteAsync(baseUrl, endpoint, headers);
+        var cookieContainer = new CookieContainer();
+        var handler = new HttpClientHandler() {
+            CookieContainer = cookieContainer,
+            UseCookies = true
+        };
 
-        if (response is not null)
-        {
-            Headers = response.Headers;
-            ResponseContent = await response.Content.ReadAsStringAsync();
-            StatusCode = (int)response.StatusCode;
-            // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
-        }
-
-        return response;
+        return await _httpService.DeleteAsync(
+            baseUrl,
+            endpoint,
+            headers
+        );
     }
 
     public HttpResponseMessage? Delete(
