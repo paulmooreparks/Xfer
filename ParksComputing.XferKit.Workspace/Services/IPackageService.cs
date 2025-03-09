@@ -1,6 +1,6 @@
-﻿namespace ParksComputing.XferKit.Cli.Services;
+﻿namespace ParksComputing.XferKit.Workspace.Services;
 
-internal interface IPackageService
+public interface IPackageService
 {
     event Action? PackagesUpdated;
 

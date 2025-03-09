@@ -80,7 +80,7 @@ internal class ClearScriptEngine : IScriptEngine {
         // _engine = new Engine(options => options.AllowClr(assemblies.ToArray()));
         _engine.AddHostObject("host", new ExtendedHostFunctions());
 
-        var typeCollection = new HostTypeCollection("mscorlib", "System", "System.Core");
+        var typeCollection = new HostTypeCollection("mscorlib", "System", "System.Core", "ParksComputing.XferKit.Workspace");
 
         _engine.AddHostObject("clr", typeCollection);
 

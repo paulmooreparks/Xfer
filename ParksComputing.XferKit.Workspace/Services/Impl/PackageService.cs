@@ -11,9 +11,9 @@ using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 
-namespace ParksComputing.XferKit.Cli.Services.Impl;
+namespace ParksComputing.XferKit.Workspace.Services.Impl;
 
-internal class PackageService : IPackageService {
+public class PackageService : IPackageService {
     private readonly string _packageDirectory;
 
     private static readonly string PackageSourceUrl = "https://api.nuget.org/v3/index.json";

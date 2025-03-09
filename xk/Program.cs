@@ -23,13 +23,11 @@ internal class Program {
         var cli = new ClifferBuilder()
             .ConfigureServices(services => {
                 services.AddSingleton<PersistenceService>();
-                ISettingsService settingsService = WorkspaceInitializer.InitializeWorkspace(services);
+                services.AddXferKitWorkspaceServices();
                 services.AddXferKitHttpServices();
                 services.AddXferKitApiServices();
                 services.AddSingleton<ICommandSplitter, CommandSplitter>();
                 services.AddSingleton<IScriptEngine, ClearScriptEngine>();
-                services.AddSingleton<IPackageService, PackageService>(provider => new PackageService(settingsService.PluginDirectory));
-                services.AddSingleton<IStoreService, StoreService>(provider => new StoreService(settingsService.StoreFilePath));
             })
             .Build();
 

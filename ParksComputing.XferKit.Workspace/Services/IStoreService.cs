@@ -1,4 +1,4 @@
-﻿namespace ParksComputing.XferKit.Cli.Services;
+﻿namespace ParksComputing.XferKit.Workspace.Services;
 
 public interface IStoreService
 {

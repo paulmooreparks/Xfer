@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using Cliffer;
 
-using ParksComputing.XferKit.Cli.Services;
+using ParksComputing.XferKit.Workspace.Services;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 

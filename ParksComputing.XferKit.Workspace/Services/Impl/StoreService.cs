@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ParksComputing.Xfer.Lang;
 
-namespace ParksComputing.XferKit.Cli.Services.Impl;
+namespace ParksComputing.XferKit.Workspace.Services.Impl;
 
 public class StoreService : IStoreService {
     private readonly string _storeFilePath;

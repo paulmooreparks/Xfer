@@ -36,9 +36,6 @@ public static class WorkspaceInitializer {
                 StoreFilePath = storeFilePath,
                 EnvironmentFilePath = environmentFilePath
             };
-
-            services.AddSingleton<ISettingsService>(settingsService);
-            services.AddXferKitWorkspaceServices(settingsService);
         }
         catch (Exception ex) {
             Console.Error.WriteLine($"Error initializing workspace: {ex.Message}");

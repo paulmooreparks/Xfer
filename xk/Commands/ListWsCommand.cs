@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 
 using Cliffer;
 
-using ParksComputing.XferKit.Workspace.Services;
+using ParksComputing.XferKit.Api;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
 [Command("listws", "List available workspaces.")]
 internal class ListWsCommand {
-    public readonly IWorkspaceService _workspaceService;
+    private readonly XferKitApi _xk;
 
-    public ListWsCommand(IWorkspaceService workspaceService) {
-        _workspaceService = workspaceService;
+    public ListWsCommand(XferKitApi xk) {
+        _xk = xk;
     }
 
     public int Execute() {
-        foreach (var item in _workspaceService.WorkspaceList) {
+        foreach (var item in _xk.WorkspaceList) {
             Console.WriteLine(item);
         }
 
