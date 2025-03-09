@@ -67,11 +67,6 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
     }
 
     public override Task<int> RunAsync(Command command, string[] args) {
-        if (args.Length > 0 && args[0].Trim().ToLower() == "foo") {
-            Console.WriteLine("Do foo stuff");
-            return Task.FromResult(Result.Success);
-        }
-
         return base.RunAsync(command, args);
     }
 

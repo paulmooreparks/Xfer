@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Cliffer;
 
+using ParksComputing.XferKit.Api;
 using ParksComputing.XferKit.Workspace.Services;
 
 namespace ParksComputing.XferKit.Cli.Commands;
@@ -17,10 +18,10 @@ namespace ParksComputing.XferKit.Cli.Commands;
 [Option(typeof(string), "--search", "Search for packages", ["-s"])]
 [Option(typeof(bool), "--list", "List installed packages", ["-l"])]
 internal class PackageCommand {
-    private readonly IPackageService _packageService;
+    private readonly XferKitApi _xk;
 
-    public PackageCommand(IPackageService pluginService) {
-        _packageService = pluginService;
+    public PackageCommand(XferKitApi xferKitApi) {
+        _xk = xferKitApi;
     }
 
     public async Task<int> Execute(
@@ -32,59 +33,58 @@ internal class PackageCommand {
         ) 
     {
         if (!string.IsNullOrEmpty(install)) {
-            var packageInstallResult = await _packageService.InstallPackageAsync(install);
+            var packageInstallResult = await _xk.package.installAsync(install);
 
             if (packageInstallResult == null) {
-                Console.WriteLine($"Unexpected error installing package '{install}'.");
+                Console.Error.WriteLine($"❌ Unexpected error installing package '{install}'.");
                 return Result.Error;
             }
 
-            if (packageInstallResult.Success) {
-                Console.WriteLine($"✅ Installed {packageInstallResult.ConfirmedPackageName} {packageInstallResult.Version} to {packageInstallResult.Path}");
+            if (packageInstallResult.success) {
+                Console.WriteLine($"✅ Installed {packageInstallResult.packageName} {packageInstallResult.version} to {packageInstallResult.path}");
             }
             else {
-                Console.WriteLine($"❌ Failed to install package '{install}': {packageInstallResult.ErrorMessage}");
+                Console.Error.WriteLine($"❌ Failed to install package '{install}': {packageInstallResult.message}");
                 return Result.Error;
             }
         }
         else if (!string.IsNullOrEmpty(uninstall)) {
-            var uninstallResult = await _packageService.UninstallPackageAsync(uninstall);
+            var uninstallResult = await _xk.package.uninstallAsync(uninstall);
 
-            switch (uninstallResult) {
-                case Result.Success:
-                    Console.WriteLine($"✅ Uninstalled {uninstall}");
-                    break;
+            if (uninstallResult == null) {
+                Console.Error.WriteLine($"❌ Unexpected error uninstalling package '{uninstall}'.");
+                return Result.Error;
+            }
 
-                case PackageUninstallResult.NotFound:
-                    Console.Error.WriteLine($"❌ Package {uninstall} is not installed.");
-                    return Result.Error;
-
-                case PackageUninstallResult.Failed:
-                default:
-                    Console.Error.WriteLine($"❌ Error uninstalling package '{uninstall}'.");
-                    return Result.Error;
+            if (uninstallResult.success) {
+                Console.WriteLine($"✅ {uninstallResult.message}");
+            }
+            else {
+                Console.Error.WriteLine($"❌ {uninstallResult.message}");
+                return Result.Error;
             }
 
             return Result.Success;
         }
         else if (!string.IsNullOrEmpty(update)) {
-            var packageInstallResult = await _packageService.UpdatePackageAsync(update);
+            var packageInstallResult = await _xk.package.updateAsync(update);
 
             if (packageInstallResult == null) {
-                Console.WriteLine($"Unexpected error updating package '{install}'.");
+                Console.Error.WriteLine($"❌ Unexpected error updating package '{install}'.");
                 return Result.Error;
             }
 
-            if (packageInstallResult.Success) {
-                Console.WriteLine($"✅ Updated {packageInstallResult.ConfirmedPackageName} to {packageInstallResult.Version}");
+            if (packageInstallResult.success) {
+                Console.WriteLine($"✅ {packageInstallResult.message}");
             }
             else {
-                Console.WriteLine($"❌ Failed to update package '{install}': {packageInstallResult.ErrorMessage}");
+                Console.Error.WriteLine($"❌ {packageInstallResult.message}");
                 return Result.Error;
             }
         }
         else if (list) {
-            var plugins = _packageService.GetInstalledPackages();
+            var plugins = _xk.package.list;
+
             if (plugins.Count() > 0) {
                 Console.WriteLine("Installed Plugins:");
                 foreach (var plugin in plugins) {
@@ -96,29 +96,31 @@ internal class PackageCommand {
             }
         }
         else if (!string.IsNullOrEmpty(search)) {
-            var searchResult = await _packageService.SearchPackagesAsync(search);
+            var searchResult = await _xk.package.searchAsync(search);
 
-            if (searchResult.Success == false) {
-                Console.WriteLine($"Error searching for packages: {searchResult.ErrorMessage}");
+            if (searchResult == null) {
+                Console.Error.WriteLine($"❌ Unexpected error searching for package '{search}'.");
                 return Result.Error;
             }
 
-            if (searchResult.Items is null || searchResult.Items.Count() == 0) {
-                Console.Error.WriteLine($"No results found for search term '{search}'.");
+            if (searchResult.success == false) {
+                Console.Error.WriteLine($"❌ Error searching for packages: {searchResult.message}");
+                return Result.Error;
+            }
+
+            if (searchResult.list is null || searchResult.list.Count() == 0) {
+                Console.Error.WriteLine($"❌ No results found for search term '{search}'.");
                 return Result.Error;
             }
 
             Console.WriteLine($"Search results for search term '{search}':");
 
-            foreach (var package in searchResult.Items) {
-                Console.WriteLine($"  - {package.Name} ({package.Version}) {package.Description}");
+            foreach (var package in searchResult.list) {
+                Console.WriteLine($"  - {package}");
             }
-
-            // $"{package.Identity.Id} ({package.Identity.Version}) {package.Description}");
-
         }
         else {
-            Console.WriteLine("No command specified. Use --help for usage.");
+            Console.Error.WriteLine("❌ No command specified. Use --help for usage.");
             return Result.Error;
         }
 

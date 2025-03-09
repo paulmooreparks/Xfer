@@ -36,7 +36,7 @@ internal class Utility {
             Console.WriteLine($"[{i + 1}] {options[i]}{(i + 1 == defaultOptionIndex ? " " + markerText : "")}");
         }
 
-        Console.Write($"Please enter a selection (default is {defaultOptionIndex}, 0 to cancel): ");
+        Console.Write($"⚠️ Please enter a selection (default is {defaultOptionIndex}, 0 to cancel): ");
 
         while (true) {
             var userInput = Console.ReadLine();
@@ -54,7 +54,7 @@ internal class Utility {
                 return selection; // Return user selection
             }
 
-            Console.WriteLine($"Invalid selection. Please enter a number between 1 and {options.Length}.");
+            Console.WriteLine($"⚠️ Invalid selection. Please enter a number between 1 and {options.Length}.");
 
             while (Console.KeyAvailable) {
                 Console.ReadKey(true); // Clear input buffer

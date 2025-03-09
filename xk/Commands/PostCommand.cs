@@ -44,7 +44,7 @@ internal class PostCommand {
             baseUrl ??= _xk.activeWorkspace.BaseUrl;
 
             if (string.IsNullOrEmpty(baseUrl) || !Uri.TryCreate(new Uri(baseUrl), endpoint, out baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
-                Console.Error.WriteLine($"Error: Invalid base URL: {baseUrl}");
+                Console.Error.WriteLine($"❌ Error: Invalid base URL: {baseUrl}");
                 return Result.ErrorInvalidArgument;
             }
         }
@@ -62,11 +62,11 @@ internal class PostCommand {
             var response = await _xk.http.postAsync(baseUrl, payload, headers);
 
             if (response is null) {
-                Console.Error.WriteLine($"Error: No response received from {baseUrl}");
+                Console.Error.WriteLine($"❌ Error: No response received from {baseUrl}");
                 result = Result.Error;
             }
             else if (!response.IsSuccessStatusCode) {
-                Console.Error.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase} at {baseUrl}");
+                Console.Error.WriteLine($"❌ {(int)response.StatusCode} {response.ReasonPhrase} at {baseUrl}");
                 result = Result.Error;
             }
 
@@ -76,7 +76,7 @@ internal class PostCommand {
             // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
         }
         catch (HttpRequestException ex) {
-            Console.Error.WriteLine($"Error: HTTP request failed - {ex.Message}");
+            Console.Error.WriteLine($"❌ Error: HTTP request failed - {ex.Message}");
             return Result.Error;
         }
 

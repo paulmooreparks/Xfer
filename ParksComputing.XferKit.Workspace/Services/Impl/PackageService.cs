@@ -139,7 +139,6 @@ public class PackageService : IPackageService {
             return targetPath;
         }
         catch (Exception ex) {
-            // Console.Error.WriteLine($"❌ Error extracting file {targetPath}: {ex.Message}");
             return string.Empty;
         }
     }
@@ -187,7 +186,7 @@ public class PackageService : IPackageService {
         }
         catch (Exception ex) {
             result.Success = false;
-            result.ErrorMessage = $"❌ Error searching for packages: {ex.Message}";
+            result.ErrorMessage = $"Error searching for packages: {ex.Message}";
         }
 
         return result;

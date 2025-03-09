@@ -50,17 +50,17 @@ internal class SendCommand {
         }
 
         if (_ws == null || _ws.BaseConfig == null || _ws.BaseConfig.Workspaces == null) {
-            Console.Error.WriteLine($"Workspace name '{workspaceName}' not found in current configuration.");
+            Console.Error.WriteLine($"❌ Workspace name '{workspaceName}' not found in current configuration.");
             return Result.Error;
         }
 
         if (!_ws.BaseConfig.Workspaces.TryGetValue(workspaceName, out WorkspaceConfig? workspace)) {
-            Console.Error.WriteLine($"Workspace name '{workspaceName}' not found in current configuration.");
+            Console.Error.WriteLine($"❌ Workspace name '{workspaceName}' not found in current configuration.");
             return Result.Error;
         }
 
         if (!workspace.Requests.TryGetValue(requestName, out var definition) || definition is null) { 
-            Console.Error.WriteLine($"Request name '{requestName}' not found in current workspace.");
+            Console.Error.WriteLine($"❌ Request name '{requestName}' not found in current workspace.");
             return Result.Error;
         }
 
@@ -180,7 +180,7 @@ internal class SendCommand {
                 }
 
             default:
-                Console.Error.WriteLine($"Unknown method {method}");
+                Console.Error.WriteLine($"❌ Unknown method {method}");
                 result = Result.Error;
                 break;
         }

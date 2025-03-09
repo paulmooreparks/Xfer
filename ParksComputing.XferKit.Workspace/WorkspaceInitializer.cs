@@ -38,8 +38,7 @@ public static class WorkspaceInitializer {
             };
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"Error initializing workspace: {ex.Message}");
-            Environment.Exit(1);
+            throw new Exception($"Error initializing workspace: {ex.Message}", ex);
         }
 
         return settingsService;

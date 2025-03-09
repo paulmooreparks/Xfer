@@ -4,6 +4,7 @@ using System.Dynamic;
 using System.Runtime.CompilerServices;
 
 using ParksComputing.XferKit.Api.Http;
+using ParksComputing.XferKit.Api.Package;
 using ParksComputing.XferKit.Api.Store;
 using ParksComputing.XferKit.Workspace.Models;
 using ParksComputing.XferKit.Workspace.Services;
@@ -23,15 +24,19 @@ public class XferKitApi : DynamicObject {
 
     public IStoreApi store { get; }
 
+    public IPackageApi package { get; }
+
     public XferKitApi(
         IWorkspaceService workspaceService, 
         IHttpApi httpApi,
-        IStoreApi storeApi
+        IStoreApi storeApi,
+        IPackageApi packageApi
         ) 
     {
         _workspaceService = workspaceService;
         http = httpApi;
         store = storeApi;
+        package = packageApi;
     }
 
     public void setActiveWorkspace(string workspaceName) => _workspaceService.SetActiveWorkspace(workspaceName);

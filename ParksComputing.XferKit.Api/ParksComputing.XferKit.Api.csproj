@@ -16,8 +16,4 @@
     <ProjectReference Include="..\ParksComputing.XferKit.Workspace\ParksComputing.XferKit.Workspace.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Package\Impl\" />
-  </ItemGroup>
-
 </Project>

@@ -57,12 +57,11 @@ internal class ClearScriptEngine : IScriptEngine {
                 var assembly = Assembly.LoadFrom(assemblyPath);
                 if (assembly != null) {
                     var name = assembly.GetName().Name;
-                    // Console.WriteLine($"Loaded package assembly: {assembly.FullName}");
                     assemblies.Add(assembly);
                 }
             }
             catch (Exception ex) {
-                Console.Error.WriteLine($"Failed to load package assembly {assemblyPath}: {ex.Message}");
+                throw new Exception($"❌ Failed to load package assembly {assemblyPath}: {ex.Message}", ex);
             }
         }
 
@@ -308,7 +307,7 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
             return string.Empty;
         }
         catch (Exception ex) {
-            var result = $"Error executing script: {ex.Message}";
+            var result = $"❌ Error executing script: {ex.Message}";
             Console.Error.WriteLine(result);
             return result;
         }
@@ -319,8 +318,8 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
             return _engine.ExecuteCommand(script);
         }
         catch (Exception ex) {
-            var result = $"Error executing script: {ex.Message}";
-            Console.Error.WriteLine(result);
+            var result = $"❌ Error executing script: {ex.Message}";
+            // Console.Error.WriteLine(result);
             return result;
         }
     }
@@ -360,7 +359,7 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
             return scriptValue;
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"⚠️ Error processing script content: {ex.Message}");
+            Console.Error.WriteLine($"❌ Error processing script content: {ex.Message}");
             return null;
         }
         finally {
