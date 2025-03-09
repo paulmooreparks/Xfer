@@ -1,6 +1,6 @@
 ﻿namespace ParksComputing.XferKit.Workspace.Services;
 
-public interface IStoreService
+public interface IStoreService : IDictionary<string, object>
 {
     void Clear();
     void Delete(string key);

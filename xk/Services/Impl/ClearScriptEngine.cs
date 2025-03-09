@@ -21,7 +21,6 @@ namespace ParksComputing.XferKit.Cli.Services;
 internal class ClearScriptEngine : IScriptEngine {
     private readonly IPackageService _packageService;
     private readonly IWorkspaceService _workspaceService;
-    private readonly IStoreService _storeService;
     private readonly ISettingsService _settingsService;
     private readonly XferKitApi _xk;
 
@@ -37,7 +36,6 @@ internal class ClearScriptEngine : IScriptEngine {
         ) 
     {
         _workspaceService = workspaceService;
-        _storeService = storeService;
         _packageService = packageService;
         _packageService.PackagesUpdated += PackagesUpdated;
         _settingsService = settingsService;
@@ -88,12 +86,6 @@ internal class ClearScriptEngine : IScriptEngine {
         _engine.AddHostType("console", typeof(ConsoleScriptObject));
         _engine.AddHostObject("log", new Action<string>(ConsoleScriptObject.log));
         _engine.AddHostObject("workspaceService", _workspaceService);
-        _engine.AddHostObject("store", new {
-            get = new Func<string, object?>(key => _storeService.Get(key)),
-            set = new Action<string, object>((key, value) => _storeService.Set(key, value)),
-            delete = new Action<string>(key => _storeService.Delete(key)),
-            clear = new Action(() => _storeService.Clear())
-        });
         _engine.AddHostObject("btoa", new Func<string, string>(s => Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(s))));
         _engine.AddHostObject("atob", new Func<string, string>(s => System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(s))));
 
@@ -327,13 +319,10 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
             return string.Empty;
         }
 
-        // Save the original working directory
         var originalDirectory = Directory.GetCurrentDirectory();
         var xferSettingsDirectory = _settingsService.XferSettingsDirectory;
 
         try {
-            // Change to XferSettingsDirectory if it's set and exists
-            // Check if the scriptValue is a file reference
             if (scriptValue.Trim().StartsWith(XferKit.Workspace.Constants.ScriptFilePrefix)) {
                 var filePath = scriptValue.Trim().Substring(XferKit.Workspace.Constants.ScriptFilePrefixLength).Trim();
 
@@ -363,7 +352,6 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
             return null;
         }
         finally {
-            // Restore the original working directory
             Directory.SetCurrentDirectory(originalDirectory);
         }
     }

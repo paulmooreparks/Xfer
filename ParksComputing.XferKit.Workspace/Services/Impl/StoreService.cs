@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +15,16 @@ public class StoreService : IStoreService {
     private FileSystemWatcher? _watcher;
     private DateTime _lastModified;
     private readonly object _lock = new();
+
+    public ICollection<string> Keys => _store.Keys;
+    public ICollection<object> Values => _store.Values;
+    public int Count => _store.Count;
+    public bool IsReadOnly => false;
+
+    public object this[string key] { 
+        get => _store[key];
+        set => _store[key] = value;
+    }
 
     public StoreService(string storeFilePath) {
         _storeFilePath = storeFilePath;
@@ -108,4 +120,26 @@ public class StoreService : IStoreService {
             _store = LoadStore();
         }
     }
+
+    public void Add(string key, object value) => _store.Add(key, value);
+
+    public bool ContainsKey(string key) => _store.ContainsKey(key);
+
+    public bool Remove(string key) => _store.Remove(key);
+
+    public bool TryGetValue(string key, [MaybeNullWhen(false)] out object value) => _store.TryGetValue(key, out value);
+
+    public void Add(KeyValuePair<string, object> item) => _store.Add(item.Key, item.Value);
+
+    public bool Contains(KeyValuePair<string, object> item) => _store.Contains(item);
+
+    public void CopyTo(KeyValuePair<string, object>[] array, int arrayIndex) {
+        throw new NotImplementedException();
+    }
+
+    public bool Remove(KeyValuePair<string, object> item) => _store.Remove(item.Key);
+
+    public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _store.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

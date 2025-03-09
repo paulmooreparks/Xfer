@@ -19,7 +19,7 @@ internal class ListWsCommand {
     }
 
     public int Execute() {
-        foreach (var item in _xk.WorkspaceList) {
+        foreach (var item in _xk.workspaceList) {
             Console.WriteLine(item);
         }
 

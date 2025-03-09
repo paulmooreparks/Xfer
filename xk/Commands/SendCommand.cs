@@ -9,6 +9,7 @@ using Cliffer;
 using ParksComputing.XferKit.Workspace.Models;
 using ParksComputing.XferKit.Workspace.Services;
 
+using ParksComputing.XferKit.Api;
 using ParksComputing.XferKit.Cli.Services;
 
 namespace ParksComputing.XferKit.Cli.Commands;

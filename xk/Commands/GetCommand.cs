@@ -45,7 +45,7 @@ internal class GetCommand {
         ) {
         // Validate URL format
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
-            baseUrl ??= _xk.ActiveWorkspace.BaseUrl;
+            baseUrl ??= _xk.activeWorkspace.BaseUrl;
 
             if (string.IsNullOrEmpty(baseUrl) || !Uri.TryCreate(new Uri(baseUrl), endpoint, out baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
                 Console.Error.WriteLine($"Error: Invalid base URL: {baseUrl}");
@@ -73,7 +73,7 @@ internal class GetCommand {
         int result = Result.Success;
 
         try {
-            var response = await _xk.Http.GetAsync(baseUrl, paramList, headers);
+            var response = await _xk.Http.getAsync(baseUrl, paramList, headers);
 
             if (response is null) {
                 Console.Error.WriteLine($"Error: No response received from {baseUrl}");
@@ -84,9 +84,9 @@ internal class GetCommand {
                 result = Result.Error;
             }
 
-            Headers = _xk.Http.Headers;
-            ResponseContent = _xk.Http.ResponseContent;
-            StatusCode = _xk.Http.StatusCode;
+            Headers = _xk.Http.headers;
+            ResponseContent = _xk.Http.responseContent;
+            StatusCode = _xk.Http.statusCode;
             // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
         }
         catch (HttpRequestException ex) {

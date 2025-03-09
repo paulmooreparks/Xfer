@@ -12,9 +12,9 @@ public class HttpApi : IHttpApi
 {
     private readonly IHttpService _httpService;
 
-    public string ResponseContent { get; protected set; } = string.Empty;
-    public int StatusCode { get; protected set; } = 0;
-    public System.Net.Http.Headers.HttpResponseHeaders? Headers { get; protected set; } = default;
+    public string responseContent { get; protected set; } = string.Empty;
+    public int statusCode { get; protected set; } = 0;
+    public System.Net.Http.Headers.HttpResponseHeaders? headers { get; protected set; } = default;
 
     public HttpApi(
         IHttpService httpService
@@ -23,7 +23,7 @@ public class HttpApi : IHttpApi
         _httpService = httpService;
     }
 
-    public async Task<HttpResponseMessage?> GetAsync(
+    public async Task<HttpResponseMessage?> getAsync(
         string baseUrl,
         IEnumerable<string>? queryParameters,
         IEnumerable<string>? headers
@@ -42,25 +42,25 @@ public class HttpApi : IHttpApi
             );
 
         if (response != null) {
-            Headers = response.Headers;
-            ResponseContent = await response.Content.ReadAsStringAsync();
-            StatusCode = (int)response.StatusCode;
+            this.headers = response.Headers;
+            responseContent = await response.Content.ReadAsStringAsync();
+            statusCode = (int)response.StatusCode;
             // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
         }
 
         return response;
     }
 
-    public HttpResponseMessage? Get(
+    public HttpResponseMessage? get(
         string baseUrl,
         IEnumerable<string>? queryParameters,
         IEnumerable<string>? headers
         )
     {
-        return GetAsync(baseUrl, queryParameters, headers).GetAwaiter().GetResult();
+        return getAsync(baseUrl, queryParameters, headers).GetAwaiter().GetResult();
     }
 
-    public async Task<HttpResponseMessage?> PostAsync(
+    public async Task<HttpResponseMessage?> postAsync(
         string baseUrl,
         string payload,
         IEnumerable<string>? headers
@@ -79,25 +79,25 @@ public class HttpApi : IHttpApi
             );
 
         if (response != null) {
-            Headers = response.Headers;
-            ResponseContent = await response.Content.ReadAsStringAsync();
-            StatusCode = (int)response.StatusCode;
+            this.headers = response.Headers;
+            responseContent = await response.Content.ReadAsStringAsync();
+            statusCode = (int)response.StatusCode;
             // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
         }
 
         return response;
     }
 
-    public HttpResponseMessage? Post(
+    public HttpResponseMessage? post(
         string baseUrl,
         string payload,
         IEnumerable<string>? headers
         )
     {
-        return PostAsync(baseUrl, payload, headers).GetAwaiter().GetResult();
+        return postAsync(baseUrl, payload, headers).GetAwaiter().GetResult();
     }
 
-    public async Task<HttpResponseMessage?> PutAsync(
+    public async Task<HttpResponseMessage?> putAsync(
         string baseUrl,
         string endpoint,
         string payload,
@@ -118,26 +118,26 @@ public class HttpApi : IHttpApi
         );
 
         if (response != null) {
-            Headers = response.Headers;
-            ResponseContent = await response.Content.ReadAsStringAsync();
-            StatusCode = (int)response.StatusCode;
+            this.headers = response.Headers;
+            responseContent = await response.Content.ReadAsStringAsync();
+            statusCode = (int)response.StatusCode;
             // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
         }
 
         return response;
     }
 
-    public HttpResponseMessage? Put(
+    public HttpResponseMessage? put(
         string baseUrl,
         string endpoint,
         string payload,
         IEnumerable<string>? headers
         )
     {
-        return PutAsync(baseUrl, endpoint, payload, headers).GetAwaiter().GetResult();
+        return putAsync(baseUrl, endpoint, payload, headers).GetAwaiter().GetResult();
     }
 
-    public async Task<HttpResponseMessage?> DeleteAsync(
+    public async Task<HttpResponseMessage?> deleteAsync(
         string baseUrl,
         string endpoint,
         IEnumerable<string>? headers
@@ -156,12 +156,12 @@ public class HttpApi : IHttpApi
         );
     }
 
-    public HttpResponseMessage? Delete(
+    public HttpResponseMessage? delete(
         string baseUrl,
         string endpoint,
         IEnumerable<string>? headers
         )
     {
-        return DeleteAsync(baseUrl, endpoint, headers).GetAwaiter().GetResult();
+        return deleteAsync(baseUrl, endpoint, headers).GetAwaiter().GetResult();
     }
 }

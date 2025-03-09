@@ -32,11 +32,11 @@ internal class SetWsCommand {
             int defaultOption = 0;
             int currentOption = 0;
 
-            foreach (var item in _xk.WorkspaceList) {
+            foreach (var item in _xk.workspaceList) {
                 ++currentOption;
                 keyList.Add(item);
 
-                if (item == _xk.CurrentWorkspaceName) {
+                if (item == _xk.currentWorkspaceName) {
                     defaultOption = currentOption;
                 }
             }
@@ -51,7 +51,7 @@ internal class SetWsCommand {
             workspace = keyArray[selectedItem - 1];
         }
 
-        _xk.SetActiveWorkspace(workspace);
+        _xk.setActiveWorkspace(workspace);
         return Result.Success;
     }
 }
