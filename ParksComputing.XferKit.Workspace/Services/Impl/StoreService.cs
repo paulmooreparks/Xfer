@@ -9,7 +9,7 @@ using ParksComputing.Xfer.Lang;
 
 namespace ParksComputing.XferKit.Workspace.Services.Impl;
 
-public class StoreService : IStoreService {
+internal class StoreService : IStoreService {
     private readonly string _storeFilePath;
     private Dictionary<string, object> _store;
     private FileSystemWatcher? _watcher;

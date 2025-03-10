@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using ParksComputing.XferKit.Workspace.Services;
 
 namespace ParksComputing.XferKit.Api.Package.Impl;
-public class PackageApi : IPackageApi {
+internal class PackageApi : IPackageApi {
     private readonly IPackageService _packageService;
 
     public PackageApi(

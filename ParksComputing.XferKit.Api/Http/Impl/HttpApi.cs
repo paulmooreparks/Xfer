@@ -8,7 +8,7 @@ using System.Net;
 
 namespace ParksComputing.XferKit.Api.Http.Impl;
 
-public class HttpApi : IHttpApi
+internal class HttpApi : IHttpApi
 {
     private readonly IHttpService _httpService;
 

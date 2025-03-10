@@ -13,7 +13,7 @@ using NuGet.Versioning;
 
 namespace ParksComputing.XferKit.Workspace.Services.Impl;
 
-public class PackageService : IPackageService {
+internal class PackageService : IPackageService {
     private readonly string _packageDirectory;
 
     private static readonly string PackageSourceUrl = "https://api.nuget.org/v3/index.json";

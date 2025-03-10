@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.XferKit.Workspace.Services.Impl;
 
-public class SettingsService : ISettingsService {
+internal class SettingsService : ISettingsService {
     public string? XferSettingsDirectory { get; set; }
     public string ConfigFilePath { get; set; } = string.Empty;
     public string? StoreFilePath { get; set; }
