@@ -71,7 +71,7 @@ internal class WorkspaceService : IWorkspaceService
                 File.WriteAllText(WorkspaceFilePath, xfer, Encoding.UTF8);
             }
             catch (Exception ex) {
-                Console.Error.WriteLine($"Error creating workspace file '{WorkspaceFilePath}': {ex.Message}");
+                throw new Exception($"Error creating workspace file '{WorkspaceFilePath}': {ex.Message}", ex);
             }
         }
     }
@@ -116,8 +116,7 @@ internal class WorkspaceService : IWorkspaceService
 
     public void LoadWorkspace(string workspaceFilePath) {
         if (!File.Exists(workspaceFilePath)) {
-            Console.Error.WriteLine($"Error: Workspace file '{workspaceFilePath}' not found.");
-            return;
+            throw new Exception($"Error: Workspace file '{workspaceFilePath}' not found.");
         }
 
         WorkspaceFilePath = workspaceFilePath;
@@ -134,7 +133,7 @@ internal class WorkspaceService : IWorkspaceService
             File.WriteAllText(WorkspaceFilePath, xfer, Encoding.UTF8);
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"Error saving workspace file '{WorkspaceFilePath}': {ex.Message}");
+            throw new Exception($"Error saving workspace file '{WorkspaceFilePath}': {ex.Message}", ex);
         }
     }
 }

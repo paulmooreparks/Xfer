@@ -47,8 +47,7 @@ public class StoreService : IStoreService {
                 // return XferConvert.Deserialize<Dictionary<string, object>>(xfer);
             }
             catch (Exception ex) {
-                Console.Error.WriteLine($"[STORE] Error loading store: {ex.Message}");
-                return new Dictionary<string, object>();
+                throw new Exception($"Error loading store: {ex.Message}", ex);
             }
         }
     }
@@ -61,7 +60,7 @@ public class StoreService : IStoreService {
                 _lastModified = File.GetLastWriteTimeUtc(_storeFilePath);
             }
             catch (Exception ex) {
-                Console.Error.WriteLine($"[STORE] Error saving store: {ex.Message}");
+                throw new Exception($"Error saving store: {ex.Message}", ex);
             }
         }
     }
@@ -87,7 +86,6 @@ public class StoreService : IStoreService {
             var lastWriteTime = File.GetLastWriteTimeUtc(_storeFilePath);
 
             if (lastWriteTime > _lastModified) {
-                Console.WriteLine("[STORE] Store file changed externally, reloading...");
                 _store = LoadStore();
             }
         }
@@ -116,7 +114,6 @@ public class StoreService : IStoreService {
     private void ReloadIfNeeded() {
         var lastWriteTime = File.GetLastWriteTimeUtc(_storeFilePath);
         if (lastWriteTime > _lastModified) {
-            Console.WriteLine("[STORE] Detected modification, reloading...");
             _store = LoadStore();
         }
     }

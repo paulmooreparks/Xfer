@@ -308,8 +308,7 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
         }
         catch (Exception ex) {
             var result = $"❌ Error executing script: {ex.Message}";
-            Console.Error.WriteLine(result);
-            return result;
+            throw new Exception(result, ex);
         }
     }
 
@@ -319,7 +318,6 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
         }
         catch (Exception ex) {
             var result = $"❌ Error executing script: {ex.Message}";
-            // Console.Error.WriteLine(result);
             return result;
         }
     }
@@ -350,8 +348,7 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
                     return File.ReadAllText(filePath);
                 }
                 else {
-                    Console.Error.WriteLine($"⚠️ Script file not found: {filePath}");
-                    return null;
+                    throw new FileNotFoundException($"Script file not found: {filePath}");
                 }
             }
 
@@ -359,8 +356,7 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
             return scriptValue;
         }
         catch (Exception ex) {
-            Console.Error.WriteLine($"❌ Error processing script content: {ex.Message}");
-            return null;
+            throw new Exception($"❌ Error processing script content: {ex.Message}", ex);
         }
         finally {
             Directory.SetCurrentDirectory(originalDirectory);
