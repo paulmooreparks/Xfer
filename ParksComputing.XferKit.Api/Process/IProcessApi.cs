@@ -6,5 +6,8 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.XferKit.Api.Process;
 
-internal interface IProcessApi {
+public interface IProcessApi {
+    void run(string? command, string? workingDirectory, string[]? arguments);
+    void run(string? command, string? workingDirectory);
+    void run(string? command);
 }
