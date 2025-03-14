@@ -11,14 +11,13 @@
 
   <ItemGroup>
     <PackageReference Include="Cliffer" Version="0.4.10-prerelease" />
-    <PackageReference Include="Microsoft.ClearScript.V8" Version="7.4.5" />
-    <PackageReference Include="Microsoft.ClearScript.V8.Native.win-x64" Version="7.4.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj" />
     <ProjectReference Include="..\ParksComputing.XferKit.Api\ParksComputing.XferKit.Api.csproj" />
     <ProjectReference Include="..\ParksComputing.XferKit.Http\ParksComputing.XferKit.Http.csproj" />
+    <ProjectReference Include="..\ParksComputing.XferKit.Scripting\ParksComputing.XferKit.Scripting.csproj" />
     <ProjectReference Include="..\ParksComputing.XferKit.Workspace\ParksComputing.XferKit.Workspace.csproj" />
   </ItemGroup>
 

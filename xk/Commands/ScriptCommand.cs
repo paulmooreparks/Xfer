@@ -10,6 +10,7 @@ using System.CommandLine.Invocation;
 
 using ParksComputing.XferKit.Cli.Services;
 using ParksComputing.XferKit.Workspace.Services;
+using ParksComputing.XferKit.Scripting.Services;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 

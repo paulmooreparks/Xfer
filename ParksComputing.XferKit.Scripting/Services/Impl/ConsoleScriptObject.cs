@@ -1,4 +1,4 @@
-﻿namespace ParksComputing.XferKit.Cli.Services;
+﻿namespace ParksComputing.XferKit.Scripting.Services;
 
 public class ConsoleScriptObject {
     private static Dictionary<string, int> _counts = new();

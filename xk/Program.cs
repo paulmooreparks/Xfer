@@ -7,9 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using ParksComputing.XferKit.Cli.Services;
 using ParksComputing.XferKit.Workspace;
 using ParksComputing.XferKit.Api;
-using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Http;
-using ParksComputing.XferKit.Http.Services;
+using ParksComputing.XferKit.Scripting;
 using ParksComputing.XferKit.Cli.Services.Impl;
 using ParksComputing.XferKit.Cli;
 
@@ -26,8 +25,8 @@ internal class Program {
                 services.AddXferKitWorkspaceServices();
                 services.AddXferKitHttpServices();
                 services.AddXferKitApiServices();
+                services.AddXferKitScriptingServices();
                 services.AddSingleton<ICommandSplitter, CommandSplitter>();
-                services.AddSingleton<IScriptEngine, ClearScriptEngine>();
             })
             .Build();
 

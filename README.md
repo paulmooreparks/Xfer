@@ -8,7 +8,7 @@ The XferKit CLI tool provides a command-line interface (CLI) for making HTTP req
 
 ## Okay, But What Is It, Really?
 
-The XferKit CLI tool (or "xk") is a command-line tool that lets you define workspaces that encapsulate API interactions. Each workspace contains one or more requests, which are HTTP requests that you can make to an API. You can define headers, query parameters, and request bodies for each request, and you can also define blocks of JavaScript code that can be executed before or after the request is made. This allows you to automate workflows, configure your environment, and much more.
+Basically, the XferKit Command-Line Interface (CLI) tool (or "xk") is a CLI construction kit. More specifically, it is a tool that lets you define workspaces that encapsulate API interactions. Each workspace contains one or more requests, which are HTTP requests that you can make to an API. You can define headers, query parameters, and request bodies for each request, and you can also define blocks of JavaScript code that can be executed before or after the request is made. This allows you to automate workflows, configure your environment, and much more.
 
 ## All Right, But What Does It Do?
 
@@ -21,7 +21,7 @@ These two capabilities, combined, let you create a CLI that is customized to you
 
 ## Where Are the Docs?
 
-They're coming, as soon as this weekend (8 and 9 March 2025). I've been designing on the fly, and to this point my Kanban board has been a checklist on my office whiteboard full of ideas that I scribble down as I have them. The design is beginning to stabilize now, so I'm ready to start documenting the features and capabilities of the tool.
+They're coming. I've been designing on the fly, and to this point my Kanban board has been a checklist on my office whiteboard full of ideas that I scribble down as I have them. The design is beginning to stabilize now, so I'm ready to start documenting the features and capabilities of the tool.
 
 ## XferLang and Cliffer
 

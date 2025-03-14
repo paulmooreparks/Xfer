@@ -16,7 +16,7 @@ using Microsoft.ClearScript.V8;
 using System.Dynamic;
 using ParksComputing.XferKit.Api;
 
-namespace ParksComputing.XferKit.Cli.Services;
+namespace ParksComputing.XferKit.Scripting.Services;
 
 internal class ClearScriptEngine : IScriptEngine {
     private readonly IPackageService _packageService;
