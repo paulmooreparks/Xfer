@@ -11,6 +11,7 @@ using ParksComputing.XferKit.Http;
 using ParksComputing.XferKit.Scripting;
 using ParksComputing.XferKit.Cli.Services.Impl;
 using ParksComputing.XferKit.Cli;
+using System.Reflection;
 
 namespace ParksComputing.Xfer.Cli;
 

@@ -89,15 +89,18 @@ internal class ClearScriptEngine : IScriptEngine {
         _engine.AddHostObject("atob", new Func<string, string>(s => System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(s))));
 
         _engine.AddHostObject("xk", _xk);
+        dynamic dxk = _xk;
 
         if (_workspaceService is not null && _workspaceService.BaseConfig is not null && _workspaceService?.BaseConfig.Workspaces is not null) {
             if (_workspaceService.BaseConfig.InitScript is not null) {
                 ExecuteScript(_workspaceService.BaseConfig.InitScript);
             }
 
-            dynamic globalObject = new ExpandoObject();
-            _engine.AddHostObject("xf", globalObject);
-            var xfTmp = _engine.Evaluate($"xf");
+            if (_workspaceService.BaseConfig.Properties is not null) {
+                foreach (var kvp in _workspaceService.BaseConfig.Properties) {
+                    _xk.TrySetProperty(kvp.Key, kvp.Value);
+                }
+            }
 
             _engine.Execute(
 $@"
@@ -127,7 +130,6 @@ function __postRequest(workspace, request) {{
                 workspaceObj.requests = new ExpandoObject();
 
                 // What a hack! There must be a better way to do this.
-                (globalObject as IDictionary<string, object?>)[workspaceName] = workspaceObj;
                 _workspaceCache.Add(workspaceName, workspaceObj);
 
                 _engine.Execute($@"
@@ -176,7 +178,7 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
                     requestObj.payload = requestDef.Payload ?? string.Empty;
                     requestObj.response = new ResponseDefinition();
 
-                    (workspaceObj.requests as IDictionary<string, object>).Add(requestName, requestObj);
+                    (workspaceObj.requests as IDictionary<string, object>)!.Add(requestName, requestObj);
                     _requestCache.Add($"{workspaceName}.{requestName}", requestObj);
                 }
             }
@@ -252,7 +254,7 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
         srcPayload = request.payload;
     }
 
-    public void InvokePostRequest(params object[] args) {
+    public void InvokePostRequest(params object?[] args) {
         /*
         workspaceName = args[0]
         requestName = args[1]

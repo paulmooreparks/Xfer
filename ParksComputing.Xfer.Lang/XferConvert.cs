@@ -428,7 +428,16 @@ public class XferConvert {
     }
 
     private static object DeserializeArray(ArrayElement arrayElement, Type targetType) {
-        var elementType = targetType.GetElementType();
+        Type? elementType;
+        var elementTypeArray = targetType.GenericTypeArguments;
+
+        if (elementTypeArray.Length == 0) {
+            elementType = targetType.GetElementType();
+        }
+        else {
+            elementType = elementTypeArray[0];
+        }
+
         if (elementType == null) {
             throw new InvalidOperationException($"Unable to determine element type for array.");
         }

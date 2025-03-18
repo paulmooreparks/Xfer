@@ -26,8 +26,8 @@ internal class StoreService : IStoreService {
         set => _store[key] = value;
     }
 
-    public StoreService(string storeFilePath) {
-        _storeFilePath = storeFilePath;
+    public StoreService(string? storeFilePath) {
+        _storeFilePath = storeFilePath ?? throw new ArgumentNullException(nameof(storeFilePath));
         _store = LoadStore();
         _lastModified = File.Exists(_storeFilePath) ? File.GetLastWriteTimeUtc(_storeFilePath) : DateTime.MinValue;
 

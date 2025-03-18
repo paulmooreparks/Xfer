@@ -92,7 +92,7 @@ internal class PackageCommand {
                 }
             }
             else {
-                Console.WriteLine("No plugins installed.");
+                Console.WriteLine("⚠️ No plugins installed.");
             }
         }
         else if (!string.IsNullOrEmpty(search)) {

@@ -29,7 +29,7 @@ internal class PackageApi : IPackageApi {
                 }
             }
 
-            return list.ToArray();
+            return [.. list];
         }
     }
 
@@ -40,11 +40,11 @@ internal class PackageApi : IPackageApi {
 
         if (searchResult.Success == false) {
             result.success = false;
-            result.message = $"❌ Error searching for packages: {searchResult.ErrorMessage}";
+            result.message = $"Error searching for packages: {searchResult.ErrorMessage}";
         }
         else if (searchResult.Items is null || searchResult.Items.Count() == 0) {
             result.success = false;
-            result.message = $"❌ No results found for search term '{search}'.";
+            result.message = $"No results found for search term '{search}'.";
         }
         else {
             foreach (var package in searchResult.Items) {
@@ -69,18 +69,18 @@ internal class PackageApi : IPackageApi {
 
         if (packageInstallResult == null) {
             result.success = false;
-            result.message = $"❌ Unexpected error installing package '{packageName}'.";
+            result.message = $"Unexpected error installing package '{packageName}'.";
         }
         else if (packageInstallResult.Success) {
             result.success = true;
             result.packageName = packageInstallResult.ConfirmedPackageName;
             result.version = packageInstallResult.Version;
             result.path = packageInstallResult.Path;
-            result.message = $"✅ Installed {packageInstallResult.ConfirmedPackageName} {packageInstallResult.Version} to {packageInstallResult.Path}";
+            result.message = $"Installed {packageInstallResult.ConfirmedPackageName} {packageInstallResult.Version} to {packageInstallResult.Path}";
         }
         else {
             result.success = false;
-            result.message = $"❌ Failed to install package '{packageName}': {packageInstallResult.ErrorMessage}";
+            result.message = $"Failed to install package '{packageName}': {packageInstallResult.ErrorMessage}";
         }
 
         return result;
@@ -127,18 +127,18 @@ internal class PackageApi : IPackageApi {
 
         if (packageInstallResult == null) {
             result.success = false;
-            result.message = $"❌ Unexpected error updating package '{install}'.";
+            result.message = $"Unexpected error updating package '{install}'.";
         }
         else if (packageInstallResult.Success) {
             result.success = true;
             result.packageName = packageInstallResult.ConfirmedPackageName;
             result.version = packageInstallResult.Version;
             result.path = packageInstallResult.Path;
-            result.message = $"✅ Updated {packageInstallResult.ConfirmedPackageName} to {packageInstallResult.Version}";
+            result.message = $"Updated {packageInstallResult.ConfirmedPackageName} to {packageInstallResult.Version}";
         }
         else {
             result.success = false;
-            result.message = $"❌ Failed to update package '{install}': {packageInstallResult.ErrorMessage}";
+            result.message = $"Failed to update package '{install}': {packageInstallResult.ErrorMessage}";
         }
 
         return result;

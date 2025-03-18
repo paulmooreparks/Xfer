@@ -28,6 +28,8 @@ public class XferKitApi : DynamicObject {
     public IPackageApi package { get; }
 
     public IProcessApi process { get; }
+    
+    public dynamic workspaces { get; }
 
     public XferKitApi(
         IWorkspaceService workspaceService, 
@@ -38,6 +40,14 @@ public class XferKitApi : DynamicObject {
         ) 
     {
         _workspaceService = workspaceService;
+        var workspacesDict = new ExpandoObject() as IDictionary<string, object>;
+
+        foreach (var workspaceKvp in _workspaceService.BaseConfig?.Workspaces ?? []) {
+            workspacesDict[workspaceKvp.Key] = workspaceKvp.Value;
+        }
+
+        workspaces = workspacesDict;
+
         http = httpApi;
         store = storeApi;
         package = packageApi;
@@ -48,7 +58,13 @@ public class XferKitApi : DynamicObject {
 
     public WorkspaceConfig activeWorkspace => _workspaceService.ActiveWorkspace;
 
-    public string[] workspaces => _workspaceService.WorkspaceList.ToArray();
+    public bool TrySetProperty(string name, object? value) {
+        return _properties.TryAdd(name, value);
+    }
+
+    public bool TryGetProperty(string name, out object? value) {
+        return _properties.TryGetValue(name, out value);
+    }
 
     public override bool TryGetMember(GetMemberBinder binder, out object? result) {
         return _properties.TryGetValue(binder.Name, out result);

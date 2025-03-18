@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions {
     public static IServiceCollection AddXferKitWorkspaceServices(this IServiceCollection services) {
         ISettingsService settingsService = WorkspaceInitializer.InitializeWorkspace(services);
         services.TryAddSingleton<ISettingsService>(settingsService);
-        var workspaceService = new Services.Impl.WorkspaceService(settingsService.ConfigFilePath);
+        var workspaceService = new Services.Impl.WorkspaceService(settingsService);
         services.AddSingleton<IPackageService, PackageService>(provider => new PackageService(settingsService.PluginDirectory));
         services.AddSingleton<IStoreService, StoreService>(provider => new StoreService(settingsService.StoreFilePath));
         services.TryAddSingleton<IWorkspaceService>(workspaceService);

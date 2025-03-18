@@ -1,15 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using NuGet.Common;
+﻿using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Packaging;
-using NuGet.Packaging.Core;
-using NuGet.Versioning;
 
 namespace ParksComputing.XferKit.Workspace.Services.Impl;
 
@@ -20,8 +13,8 @@ internal class PackageService : IPackageService {
 
     public event Action? PackagesUpdated;
 
-    public PackageService(string packageDirectory) {
-        _packageDirectory = packageDirectory;
+    public PackageService(string? packageDirectory) {
+        _packageDirectory = packageDirectory ?? throw new ArgumentNullException(nameof(packageDirectory));
     }
 
     private void NotifyPackagesUpdated() {
@@ -124,7 +117,7 @@ internal class PackageService : IPackageService {
                 return PackageUninstallResult.NotFound;
             }
         }
-        catch (Exception ex) {
+        catch (Exception) {
             return PackageUninstallResult.Failed;
         }
 
@@ -138,7 +131,7 @@ internal class PackageService : IPackageService {
             stream.CopyTo(fileStream);
             return targetPath;
         }
-        catch (Exception ex) {
+        catch (Exception) {
             return string.Empty;
         }
     }

@@ -1,14 +1,11 @@
-﻿using System;
-using System.IO;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using ParksComputing.XferKit.Workspace.Services;
-using ParksComputing.XferKit.Workspace.Services.Impl;
 
 namespace ParksComputing.XferKit.Workspace;
 
 public static class WorkspaceInitializer {
     public static ISettingsService InitializeWorkspace(IServiceCollection services) {
-        ISettingsService settingsService = null;
+        ISettingsService settingsService;
 
         try {
             string homeDirectory = GetUserHomeDirectory();

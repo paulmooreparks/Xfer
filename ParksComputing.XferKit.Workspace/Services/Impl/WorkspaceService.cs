@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,10 +13,14 @@ namespace ParksComputing.XferKit.Workspace.Services.Impl;
 
 internal class WorkspaceService : IWorkspaceService
 {
+    public readonly ISettingsService _settingsService;
+
     public BaseConfig BaseConfig { get; protected set; }
     public WorkspaceConfig ActiveWorkspace { get; protected set; }
     public string WorkspaceFilePath { get; protected set; }
-    public string CurrentWorkspaceName => BaseConfig?.ActiveWorkspace ?? string.Empty; 
+    public string CurrentWorkspaceName => BaseConfig?.ActiveWorkspace ?? string.Empty;
+
+    private readonly string _packageDirectory;
 
     public IEnumerable<string> WorkspaceList {
         get {
@@ -27,14 +32,18 @@ internal class WorkspaceService : IWorkspaceService
         }
     }
 
-    public WorkspaceService(string workspaceFilePath)
+    public WorkspaceService(ISettingsService settingsService)
     {
+        _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
         ActiveWorkspace = new WorkspaceConfig();
-        WorkspaceFilePath = workspaceFilePath ?? throw new ArgumentNullException(nameof(workspaceFilePath));
+        WorkspaceFilePath = _settingsService.ConfigFilePath;
+        _packageDirectory = _settingsService.PluginDirectory ?? string.Empty;
 
         EnsureWorkspaceFileExists();
         BaseConfig = LoadWorkspace();
+        LoadConfiguredAssemblies();
         SetActiveWorkspace(BaseConfig.ActiveWorkspace ?? string.Empty);
+
     }
 
     public void SetActiveWorkspace(string workspaceName) {
@@ -114,13 +123,44 @@ internal class WorkspaceService : IWorkspaceService
         return baseConfig;
     }
 
+#if false
     public void LoadWorkspace(string workspaceFilePath) {
         if (!File.Exists(workspaceFilePath)) {
             throw new Exception($"Error: Workspace file '{workspaceFilePath}' not found.");
         }
 
         WorkspaceFilePath = workspaceFilePath;
-        LoadWorkspace();
+        BaseConfig = LoadWorkspace();
+    }
+#endif
+
+    public IEnumerable<Assembly> LoadConfiguredAssemblies() {
+        var loadedAssemblies = new List<Assembly>();
+
+        var assemblyNames = BaseConfig.Assemblies;
+        if (assemblyNames is null)
+            return loadedAssemblies;
+
+        foreach (var name in assemblyNames) {
+            var path = Path.IsPathRooted(name)
+                ? name
+                : Path.Combine(_packageDirectory, name);
+
+            if (File.Exists(path)) {
+                try {
+                    var assembly = Assembly.LoadFrom(path);
+                    loadedAssemblies.Add(assembly);
+                }
+                catch (Exception ex) {
+                    Console.Error.WriteLine($"⚠️ Failed to load assembly {path}: {ex.Message}");
+                }
+            }
+            else {
+                Console.Error.WriteLine($"⚠️ Assembly not found: {path}");
+            }
+        }
+
+        return loadedAssemblies;
     }
 
     /// <summary>
