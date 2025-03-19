@@ -49,8 +49,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParksComputing.XferKit.Scri
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParksComputing.XferKit.CliCommands", "ParksComputing.XferKit.CliCommands\ParksComputing.XferKit.CliCommands.csproj", "{00B2C8E8-2E99-46A4-9061-D3D8C7EB77AB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cliffer", "..\Cliffer\ClifferLib\Cliffer.csproj", "{E1E9F1CA-A0C4-441A-8892-0988F6482B2F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParksComputing.XferKit.Diagnostics", "ParksComputing.XferKit.Diagnostics\ParksComputing.XferKit.Diagnostics.csproj", "{43E05EE2-E51A-40BE-A931-6AB4DA8E4364}"
 EndProject
 Global
@@ -95,10 +93,6 @@ Global
 		{00B2C8E8-2E99-46A4-9061-D3D8C7EB77AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00B2C8E8-2E99-46A4-9061-D3D8C7EB77AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00B2C8E8-2E99-46A4-9061-D3D8C7EB77AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E1E9F1CA-A0C4-441A-8892-0988F6482B2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E1E9F1CA-A0C4-441A-8892-0988F6482B2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E1E9F1CA-A0C4-441A-8892-0988F6482B2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E1E9F1CA-A0C4-441A-8892-0988F6482B2F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{43E05EE2-E51A-40BE-A931-6AB4DA8E4364}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{43E05EE2-E51A-40BE-A931-6AB4DA8E4364}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43E05EE2-E51A-40BE-A931-6AB4DA8E4364}.Release|Any CPU.ActiveCfg = Release|Any CPU
