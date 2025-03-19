@@ -2,6 +2,9 @@
 https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/README.md />
 
 {
+    Assemblies [
+    ]
+
     </ ActiveWorkspace "httpbin" />
 
     InitScript <'file:globalInitScript.js'>

@@ -15,7 +15,7 @@ namespace ParksComputing.XferKit.Workspace.Services.Impl;
 internal class WorkspaceService : IWorkspaceService
 {
     private readonly ISettingsService _settingsService;
-    private readonly IAppDiagnostics<WorkspaceService> _appDiagnostics;
+    private readonly IAppDiagnostics<WorkspaceService> _diags;
 
     public BaseConfig BaseConfig { get; protected set; }
     public WorkspaceConfig ActiveWorkspace { get; protected set; }
@@ -41,7 +41,7 @@ internal class WorkspaceService : IWorkspaceService
     {
         WorkspaceInitializer.InitializeWorkspace(settingsService);
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
-        _appDiagnostics = appDiagnostics ?? throw new ArgumentNullException(nameof(appDiagnostics));
+        _diags = appDiagnostics ?? throw new ArgumentNullException(nameof(appDiagnostics));
 
         ActiveWorkspace = new WorkspaceConfig();
         WorkspaceFilePath = _settingsService.ConfigFilePath;
@@ -160,7 +160,7 @@ internal class WorkspaceService : IWorkspaceService
                     loadedAssemblies.Add(assembly);
                 }
                 catch (Exception ex) {
-                    _appDiagnostics.Emit(
+                    _diags.Emit(
                         nameof(IWorkspaceService), 
                         new { 
                             Message = $"Failed to load assembly {path}: {ex.Message}",
@@ -170,7 +170,7 @@ internal class WorkspaceService : IWorkspaceService
                 }
             }
             else {
-                _appDiagnostics.Emit(
+                _diags.Emit(
                     nameof(IWorkspaceService),
                     new {
                         Message = $"Assembly not found: {path}"

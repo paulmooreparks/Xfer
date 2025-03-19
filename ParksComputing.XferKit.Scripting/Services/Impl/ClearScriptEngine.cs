@@ -15,6 +15,7 @@ using System.Net.Http.Headers;
 using Microsoft.ClearScript.V8;
 using System.Dynamic;
 using ParksComputing.XferKit.Api;
+using ParksComputing.XferKit.Diagnostics.Services;
 
 namespace ParksComputing.XferKit.Scripting.Services;
 
@@ -22,6 +23,7 @@ internal class ClearScriptEngine : IScriptEngine {
     private readonly IPackageService _packageService;
     private readonly IWorkspaceService _workspaceService;
     private readonly ISettingsService _settingsService;
+    private readonly IAppDiagnostics<ClearScriptEngine> _diags;
     private readonly XferKitApi _xk;
 
     // private Engine _engine = new Engine(options => options.AllowClr());
@@ -32,6 +34,7 @@ internal class ClearScriptEngine : IScriptEngine {
         IWorkspaceService workspaceService,
         IStoreService storeService,
         ISettingsService settingsService,
+        IAppDiagnostics<ClearScriptEngine> appDiagnostics,
         XferKitApi apiRoot
         ) 
     {
@@ -39,6 +42,7 @@ internal class ClearScriptEngine : IScriptEngine {
         _packageService = packageService;
         _packageService.PackagesUpdated += PackagesUpdated;
         _settingsService = settingsService;
+        _diags = appDiagnostics;
         _xk = apiRoot;
         var assemblies = LoadPackageAssemblies();
         InitializeScriptEnvironment(assemblies);
@@ -98,7 +102,14 @@ internal class ClearScriptEngine : IScriptEngine {
 
             if (_workspaceService.BaseConfig.Properties is not null) {
                 foreach (var kvp in _workspaceService.BaseConfig.Properties) {
-                    _xk.TrySetProperty(kvp.Key, kvp.Value);
+                    if (!_xk.TrySetProperty(kvp.Key, kvp.Value)) {
+                        _diags.Emit(
+                            nameof(ClearScriptEngine),
+                            new {
+                                Message = $"Failed to set property {kvp.Key} to {kvp.Value}"
+                            }
+                        );
+                    }
                 }
             }
 
