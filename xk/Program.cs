@@ -9,9 +9,12 @@ using ParksComputing.XferKit.Workspace;
 using ParksComputing.XferKit.Api;
 using ParksComputing.XferKit.Http;
 using ParksComputing.XferKit.Scripting;
+using ParksComputing.XferKit.Diagnostics;
 using ParksComputing.XferKit.Cli.Services.Impl;
 using ParksComputing.XferKit.Cli;
+using System.Diagnostics;
 using System.Reflection;
+using ParksComputing.XferKit.Workspace.Services;
 
 namespace ParksComputing.Xfer.Cli;
 
@@ -20,6 +23,8 @@ internal class Program {
     }
 
     static async Task<int> Main(string[] args) {
+        DiagnosticListener.AllListeners.Subscribe(new MyObserver());
+
         var cli = new ClifferBuilder()
             .ConfigureServices(services => {
                 services.AddSingleton<PersistenceService>();
@@ -27,6 +32,7 @@ internal class Program {
                 services.AddXferKitHttpServices();
                 services.AddXferKitApiServices();
                 services.AddXferKitScriptingServices();
+                services.AddXferKitDiagnosticsServices("XferKit");
                 services.AddSingleton<ICommandSplitter, CommandSplitter>();
             })
             .Build();
@@ -76,4 +82,22 @@ internal class Program {
 
         return args;
     }
+}
+
+public class MyObserver : IObserver<DiagnosticListener>, IObserver<KeyValuePair<string, object?>> {
+    public void OnNext(DiagnosticListener listener) {
+        if (listener.Name == Constants.XferDiagnosticsName) {
+            // Explicitly subscribe only to events matching specific criteria:
+            // listener.Subscribe(this, eventName => eventName.StartsWith("MyEventPrefix"));
+            listener.Subscribe(this);
+        }
+    }
+
+    public void OnNext(KeyValuePair<string, object?> evt) {
+        Console.WriteLine($"{evt.Key}: ");
+        Console.WriteLine($"  {evt.Value}");
+    }
+
+    public void OnCompleted() { }
+    public void OnError(Exception error) { }
 }

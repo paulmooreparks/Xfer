@@ -4,44 +4,16 @@ using ParksComputing.XferKit.Workspace.Services;
 namespace ParksComputing.XferKit.Workspace;
 
 public static class WorkspaceInitializer {
-    public static ISettingsService InitializeWorkspace(IServiceCollection services) {
-        ISettingsService settingsService;
-
+    public static void InitializeWorkspace(ISettingsService settingsService) {
         try {
-            string homeDirectory = GetUserHomeDirectory();
-            string xfDirectory = Path.Combine(homeDirectory, Constants.XferDirectoryName);
-
-            if (!Directory.Exists(xfDirectory)) {
-                Directory.CreateDirectory(xfDirectory);
-            }
-
-            string configFilePath = Path.Combine(xfDirectory, Constants.WorkspacesFileName);
-            string storeFilePath = Path.Combine(xfDirectory, Constants.StoreFileName);
-            string pluginDirectory = Path.Combine(xfDirectory, Constants.PackageDirName);
-            string environmentFilePath = Path.Combine(xfDirectory, Constants.EnvironmentFileName);
-
-            if (!Directory.Exists(pluginDirectory)) {
-                Directory.CreateDirectory(pluginDirectory);
-            }
-
-            LoadEnvironmentVariables(environmentFilePath);
-
-            settingsService = new Services.Impl.SettingsService {
-                XferSettingsDirectory = xfDirectory,
-                ConfigFilePath = configFilePath,
-                PluginDirectory = pluginDirectory,
-                StoreFilePath = storeFilePath,
-                EnvironmentFilePath = environmentFilePath
-            };
+            LoadEnvironmentVariables(settingsService.EnvironmentFilePath);
         }
         catch (Exception ex) {
             throw new Exception($"Error initializing workspace: {ex.Message}", ex);
         }
-
-        return settingsService;
     }
 
-    private static void LoadEnvironmentVariables(string environmentFilePath) {
+    private static void LoadEnvironmentVariables(string? environmentFilePath) {
         if (File.Exists(environmentFilePath)) {
             var lines = File.ReadAllLines(environmentFilePath);
 
@@ -60,19 +32,6 @@ public static class WorkspaceInitializer {
                     Environment.SetEnvironmentVariable(key, value);
                 }
             }
-        }
-    }
-
-    private static string GetUserHomeDirectory() {
-        if (OperatingSystem.IsWindows()) {
-            return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        }
-        else if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()) {
-            return Environment.GetEnvironmentVariable("HOME")
-                ?? throw new InvalidOperationException("HOME environment variable is not set.");
-        }
-        else {
-            throw new PlatformNotSupportedException("Unsupported operating system.");
         }
     }
 }

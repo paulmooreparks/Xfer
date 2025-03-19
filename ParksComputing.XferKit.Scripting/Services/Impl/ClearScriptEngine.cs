@@ -129,7 +129,6 @@ function __postRequest(workspace, request) {{
                 workspaceObj.requests = new ExpandoObject();
                 workspaceObj.requests = new ExpandoObject();
 
-                // What a hack! There must be a better way to do this.
                 _workspaceCache.Add(workspaceName, workspaceObj);
 
                 _engine.Execute($@"

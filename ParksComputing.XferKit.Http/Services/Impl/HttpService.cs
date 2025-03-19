@@ -4,13 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ParksComputing.XferKit.Diagnostics.Services;
+
 namespace ParksComputing.XferKit.Http.Services.Impl;
 
 public class HttpService : IHttpService {
     private readonly HttpClient _httpClient;
+    private readonly IAppDiagnostics<IHttpService> _appDiagnostics;
 
-    public HttpService(HttpClient httpClient) {
+    public HttpService(HttpClient httpClient, IAppDiagnostics<IHttpService> appDiagnostics) {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        _appDiagnostics = appDiagnostics ?? throw new ArgumentNullException(nameof(appDiagnostics));
     }
 
     private static void AddHeaders(HttpRequestMessage request, IEnumerable<string>? headers) {

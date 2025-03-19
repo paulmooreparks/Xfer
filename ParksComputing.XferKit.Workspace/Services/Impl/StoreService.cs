@@ -10,6 +10,7 @@ using ParksComputing.Xfer.Lang;
 namespace ParksComputing.XferKit.Workspace.Services.Impl;
 
 internal class StoreService : IStoreService {
+    private readonly ISettingsService _settingsService;
     private readonly string _storeFilePath;
     private Dictionary<string, object> _store;
     private FileSystemWatcher? _watcher;
@@ -26,8 +27,9 @@ internal class StoreService : IStoreService {
         set => _store[key] = value;
     }
 
-    public StoreService(string? storeFilePath) {
-        _storeFilePath = storeFilePath ?? throw new ArgumentNullException(nameof(storeFilePath));
+    public StoreService(ISettingsService settingsService) {
+        _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        _storeFilePath = _settingsService.StoreFilePath ?? throw new ArgumentNullException(nameof(_settingsService.StoreFilePath));
         _store = LoadStore();
         _lastModified = File.Exists(_storeFilePath) ? File.GetLastWriteTimeUtc(_storeFilePath) : DateTime.MinValue;
 
@@ -105,6 +107,8 @@ internal class StoreService : IStoreService {
         if (_store.Remove(key))
             SaveStore();
     }
+
+    public void ClearStore() => Clear();
 
     public void Clear() {
         _store.Clear();

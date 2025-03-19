@@ -54,7 +54,9 @@ public class XferKitApi : DynamicObject {
         process = processApi;
     }
 
-    public void setActiveWorkspace(string workspaceName) => _workspaceService.SetActiveWorkspace(workspaceName);
+    public void setActiveWorkspace(string workspaceName) {
+        _workspaceService.SetActiveWorkspace(workspaceName);
+    }
 
     public WorkspaceConfig activeWorkspace => _workspaceService.ActiveWorkspace;
 

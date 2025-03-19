@@ -7,14 +7,16 @@ using NuGet.Packaging;
 namespace ParksComputing.XferKit.Workspace.Services.Impl;
 
 internal class PackageService : IPackageService {
+    private readonly ISettingsService _settingsService;
     private readonly string _packageDirectory;
 
     private static readonly string PackageSourceUrl = "https://api.nuget.org/v3/index.json";
 
     public event Action? PackagesUpdated;
 
-    public PackageService(string? packageDirectory) {
-        _packageDirectory = packageDirectory ?? throw new ArgumentNullException(nameof(packageDirectory));
+    public PackageService(ISettingsService settingsService) {
+        _settingsService = settingsService;
+        _packageDirectory = _settingsService.PluginDirectory ?? throw new ArgumentNullException(nameof(_settingsService.PluginDirectory));
     }
 
     private void NotifyPackagesUpdated() {

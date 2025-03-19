@@ -7,13 +7,15 @@ using System.Threading.Tasks;
 
 using ParksComputing.Xfer.Lang;
 using ParksComputing.Xfer.Lang.Attributes;
+using ParksComputing.XferKit.Diagnostics.Services;
 using ParksComputing.XferKit.Workspace.Models;
 
 namespace ParksComputing.XferKit.Workspace.Services.Impl;
 
 internal class WorkspaceService : IWorkspaceService
 {
-    public readonly ISettingsService _settingsService;
+    private readonly ISettingsService _settingsService;
+    private readonly IAppDiagnostics<WorkspaceService> _appDiagnostics;
 
     public BaseConfig BaseConfig { get; protected set; }
     public WorkspaceConfig ActiveWorkspace { get; protected set; }
@@ -32,9 +34,15 @@ internal class WorkspaceService : IWorkspaceService
         }
     }
 
-    public WorkspaceService(ISettingsService settingsService)
+    public WorkspaceService(
+        ISettingsService settingsService,
+        IAppDiagnostics<WorkspaceService> appDiagnostics
+        )
     {
+        WorkspaceInitializer.InitializeWorkspace(settingsService);
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        _appDiagnostics = appDiagnostics ?? throw new ArgumentNullException(nameof(appDiagnostics));
+
         ActiveWorkspace = new WorkspaceConfig();
         WorkspaceFilePath = _settingsService.ConfigFilePath;
         _packageDirectory = _settingsService.PluginDirectory ?? string.Empty;
@@ -152,11 +160,22 @@ internal class WorkspaceService : IWorkspaceService
                     loadedAssemblies.Add(assembly);
                 }
                 catch (Exception ex) {
-                    Console.Error.WriteLine($"⚠️ Failed to load assembly {path}: {ex.Message}");
+                    _appDiagnostics.Emit(
+                        nameof(IWorkspaceService), 
+                        new { 
+                            Message = $"Failed to load assembly {path}: {ex.Message}",
+                            ex 
+                        }
+                    );
                 }
             }
             else {
-                Console.Error.WriteLine($"⚠️ Assembly not found: {path}");
+                _appDiagnostics.Emit(
+                    nameof(IWorkspaceService),
+                    new {
+                        Message = $"Assembly not found: {path}"
+                    }
+                );
             }
         }
 

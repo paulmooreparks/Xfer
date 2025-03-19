@@ -2,7 +2,7 @@
 
 public interface IStoreService : IDictionary<string, object>
 {
-    void Clear();
+    void ClearStore();
     void Delete(string key);
     object? Get(string key);
     void Set(string key, object value);
