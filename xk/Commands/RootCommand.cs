@@ -33,6 +33,12 @@ internal class RootCommand {
         _recursionOption = recursionOption;
         _replContext = new XferReplContext(_serviceProvider, _workspaceService, splitter, _recursionOption);
 
+        foreach (var macro in _workspaceService.BaseConfig.Macros) {
+            var macroCommand = new Macro($"{macro.Key}", $"[macro] {macro.Value.Description}", macro.Value.Command);
+
+            _rootCommand.AddCommand(macroCommand);
+        }
+
         foreach (var workspaceKvp in _workspaceService.BaseConfig?.Workspaces ?? new Dictionary<string, Workspace.Models.WorkspaceConfig>()) {
             var workspaceName = workspaceKvp.Key;
             var workspaceConfig = workspaceKvp.Value;
@@ -57,6 +63,12 @@ internal class RootCommand {
                 var payloadOption = new Option<string>(["--payload", "-pl"], "Content to send with the request. If input is redirected, content can also be read from standard input.");
                 payloadOption.Arity = System.CommandLine.ArgumentArity.ZeroOrOne;
                 macroCommand.AddOption(payloadOption);
+
+                _rootCommand.AddCommand(macroCommand);
+            }
+
+            foreach (var macro in workspaceConfig.Macros) {
+                var macroCommand = new Macro($"{workspaceName}.{macro.Key}", $"[macro] {macro.Value.Description}", macro.Value.Command);
 
                 _rootCommand.AddCommand(macroCommand);
             }

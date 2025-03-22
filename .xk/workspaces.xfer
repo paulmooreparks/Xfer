@@ -88,7 +88,7 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     Endpoint '/basic-auth/<|httpBinBasicAuthUser|>/<|httpBinBasicAuthPassword|>'
                     Method "GET"
                     Headers {
-                        </ The httpBinBearerToken environment variable is set in the .xf/.env file. />
+                        </ The httpBinBearerToken environment variable is set in the .xk/.env file. />
                         Authorization 'Bearer <|httpBinBearerToken|>'
                     }
 
@@ -103,7 +103,7 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     Endpoint "/bearer"
                     Method "GET"
                     Headers {
-                        </ The httpBinBearerToken environment variable is set in the .xf/.env file. />
+                        </ The httpBinBearerToken environment variable is set in the .xk/.env file. />
                         Authorization 'Bearer <|httpBinBearerToken|>'
                     }
                 }

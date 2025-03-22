@@ -156,7 +156,7 @@ internal class SendCommand {
 
         switch (method) {
             case "GET": {
-                    result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders, finalCookies);
+                    result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders, finalCookies, isQuiet: true);
                     _scriptEngine.InvokePostRequest(
                         workspaceName, 
                         requestName, 

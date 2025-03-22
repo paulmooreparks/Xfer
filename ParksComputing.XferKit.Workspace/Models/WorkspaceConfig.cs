@@ -13,6 +13,7 @@ public class WorkspaceConfig {
     public string? PreRequest { get; set; }
     public string? PostRequest { get; set; }
     public Dictionary<string, RequestDefinition> Requests { get; set; } = [];
+    public Dictionary<string, MacroConfig> Macros { get; set; } = [];
 
     internal void Merge(WorkspaceConfig? parentWorkspace) {
         if (parentWorkspace is null) {

@@ -20,6 +20,7 @@ namespace ParksComputing.XferKit.Cli.Commands;
 [Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request. If input is redirected, parameters can also be read from standard input.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(IEnumerable<string>), "--cookies", "Cookies to include in the request.", new[] { "-c" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
+[Option(typeof(bool), "--quiet", "If true, suppress echo of the response to the console.", new[] { "-q" }, Arity = ArgumentArity.ZeroOrOne, IsRequired = false)]
 internal class GetCommand {
     private readonly XferKitApi _xk;
 
@@ -41,8 +42,10 @@ internal class GetCommand {
         [ArgumentParam("endpoint")] string endpoint,
         [OptionParam("--parameters")] IEnumerable<string> parameters,
         [OptionParam("--headers")] IEnumerable<string> headers,
-        [OptionParam("--cookies")] IEnumerable<string> cookies
-        ) {
+        [OptionParam("--cookies")] IEnumerable<string> cookies,
+        [OptionParam("--quiet")] bool isQuiet = true
+        ) 
+    {
         // Validate URL format
         if (!Uri.TryCreate(endpoint, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
             baseUrl ??= _xk.activeWorkspace.BaseUrl;
@@ -88,6 +91,10 @@ internal class GetCommand {
             ResponseContent = _xk.http.responseContent;
             StatusCode = _xk.http.statusCode;
             // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
+
+            if (!isQuiet) {
+                Console.WriteLine(ResponseContent);
+            }
         }
         catch (HttpRequestException ex) {
             Console.Error.WriteLine($"❌ Error: HTTP request failed - {ex.Message}");

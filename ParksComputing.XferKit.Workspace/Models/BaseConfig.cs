@@ -8,5 +8,6 @@ public class BaseConfig
     public string? PostRequest { get; set; }
     public IDictionary<string, object>? Properties { get; set; }
     public Dictionary<string, WorkspaceConfig>? Workspaces { get; set; }
+    public Dictionary<string, MacroConfig> Macros { get; set; } = [];
     public string[]? Assemblies { get; set; }
 }
