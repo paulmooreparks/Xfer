@@ -11,7 +11,7 @@ using ParksComputing.XferKit.Api;
 namespace ParksComputing.XferKit.Cli.Commands;
 
 [Command("setws", "Set the current workspaces.")]
-[Argument(typeof(string), "workspace", "The name of the workspace to set as current.")]
+[Argument(typeof(string), "workspace", "The name of the workspace to set as current. Enter '.' to clear the current workspace and return to the top level.")]
 
 internal class SetWsCommand {
     private readonly XferKitApi _xk;
@@ -40,6 +40,8 @@ internal class SetWsCommand {
                     defaultOption = currentOption;
                 }
             }
+
+            keyList.Add(".");
 
             var keyArray = keyList.ToArray();
             var selectedItem = Services.Utility.ShowMenu(keyArray, defaultOption);

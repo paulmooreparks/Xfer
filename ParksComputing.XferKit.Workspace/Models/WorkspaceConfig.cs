@@ -11,7 +11,7 @@ public class WorkspaceConfig {
     public dynamic? Properties { get; set; }
     public string? InitScript { get; set; }
     public string? PreRequest { get; set; }
-    public string? PostRequest { get; set; }
+    public string? PostResponse { get; set; }
     public Dictionary<string, RequestDefinition> Requests { get; set; } = [];
     public Dictionary<string, MacroConfig> Macros { get; set; } = [];
 
@@ -26,7 +26,7 @@ public class WorkspaceConfig {
         BaseUrl ??= parentWorkspace.BaseUrl;
         InitScript ??= parentWorkspace.InitScript;
         PreRequest ??= parentWorkspace.PreRequest;
-        PostRequest ??= parentWorkspace.PostRequest;
+        PostResponse ??= parentWorkspace.PostResponse;
         Name ??= parentWorkspace.Name;
 
         foreach (var kvp in parentWorkspace.Requests) {

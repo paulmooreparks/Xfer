@@ -48,11 +48,21 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
 
 
     public override string[] PreprocessArgs(string[] args, Command command, InvocationContext context) {
-        var parseResult = command.Parse(args);
+        ParseResult? parseResult = null;
 
-        if (parseResult != null && parseResult.Errors.Count > 0) {
+        if (args[0].StartsWith(".")) {
+            args[0] = args[0].Substring(1);
+            parseResult = command.Parse(args);
+        }
+        else {
+            var tmparg = args[0];
             args[0] = $"{_workspaceService.CurrentWorkspaceName}.{args[0]}";
             parseResult = command.Parse(args);
+
+            if (parseResult?.Errors.Count > 0) {
+                args[0] = tmparg;
+                parseResult = command.Parse(args);
+            }
         }
 
         var newArgs = new List<string>();

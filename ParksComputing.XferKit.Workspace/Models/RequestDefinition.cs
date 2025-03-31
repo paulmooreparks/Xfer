@@ -10,7 +10,7 @@ public class RequestDefinition {
     public string? Payload { get; set; }
     public IDictionary<string, object>? Properties { get; set; }
     public string? PreRequest { get; set; }
-    public string? PostRequest { get; set; }
+    public string? PostResponse { get; set; }
     public ResponseDefinition Response { get; set; } = new ResponseDefinition();
 
     public void Merge(RequestDefinition parentRequest) {
@@ -23,7 +23,7 @@ public class RequestDefinition {
         Method ??= parentRequest.Method;
         Payload ??= parentRequest.Payload;
         PreRequest ??= parentRequest.PreRequest;
-        PostRequest ??= parentRequest.PostRequest;
+        PostResponse ??= parentRequest.PostResponse;
         Response ??= parentRequest.Response;
 
         // Merge headers (child values override parent)

@@ -5,7 +5,7 @@ public class BaseConfig
     public string? ActiveWorkspace { get; set; }
     public string? InitScript { get; set; }
     public string? PreRequest { get; set; }
-    public string? PostRequest { get; set; }
+    public string? PostResponse { get; set; }
     public IDictionary<string, object>? Properties { get; set; }
     public Dictionary<string, WorkspaceConfig>? Workspaces { get; set; }
     public Dictionary<string, MacroConfig> Macros { get; set; } = [];

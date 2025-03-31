@@ -157,7 +157,7 @@ internal class SendCommand {
         switch (method) {
             case "GET": {
                     result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders, finalCookies, isQuiet: true);
-                    _scriptEngine.InvokePostRequest(
+                    _scriptEngine.InvokePostResponse(
                         workspaceName, 
                         requestName, 
                         getCommand.StatusCode, 
@@ -170,7 +170,7 @@ internal class SendCommand {
             case "POST": {
                     var finalPayload = payload ?? definition.Payload ?? string.Empty;
                     result = await postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
-                    _scriptEngine.InvokePostRequest(
+                    _scriptEngine.InvokePostResponse(
                         workspaceName,
                         requestName,
                         postCommand.StatusCode,

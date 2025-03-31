@@ -119,8 +119,8 @@ function __preRequest(workspace, request) {{
     {GetScriptContent(_workspaceService.BaseConfig.PreRequest)}
 }};
 
-function __postRequest(workspace, request) {{
-    {GetScriptContent(_workspaceService.BaseConfig.PostRequest)}
+function __postResponse(workspace, request) {{
+    {GetScriptContent(_workspaceService.BaseConfig.PostResponse)}
 }};
 ");
 
@@ -149,10 +149,10 @@ function __preRequest__{workspaceName}(workspace, request) {{
     {(workspaceConfig.PreRequest == null ? $"__preRequest(workspace, request)" : GetScriptContent(workspaceConfig.PreRequest))}
 }};
 
-function __postRequest__{workspaceName}(workspace, request) {{
-    var nextHandler = function() {{ __postRequest(workspace, request); }};
-    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspaceConfig.Extend) ? "" : $"__postRequest__{workspaceConfig.Extend}(workspace, request);")} }};
-    {(workspaceConfig.PostRequest == null ? $"__postRequest(workspace, request)" : GetScriptContent(workspaceConfig.PostRequest))}
+function __postResponse__{workspaceName}(workspace, request) {{
+    var nextHandler = function() {{ __postResponse(workspace, request); }};
+    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspaceConfig.Extend) ? "" : $"__postResponse__{workspaceConfig.Extend}(workspace, request);")} }};
+    {(workspaceConfig.PostResponse == null ? $"__postResponse(workspace, request)" : GetScriptContent(workspaceConfig.PostResponse))}
 }};
 
 ");
@@ -169,10 +169,10 @@ function __preRequest__{workspaceName}__{requestName} (workspace, request) {{
     {(requestDef.PreRequest == null ? $"__preRequest__{workspaceName}(workspace, request)" : GetScriptContent(requestDef.PreRequest))}
 }}
 
-function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
-    var nextHandler = function() {{ __postRequest__{workspaceName}(workspace, request); }};
-    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspaceConfig.Extend) ? "" : $"__postRequest__{workspaceConfig.Extend}__{requestName}(workspace, request);")} }};
-    {(requestDef.PostRequest == null ? $"__postRequest__{workspaceName}(workspace, request)" : GetScriptContent(requestDef.PostRequest))}
+function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
+    var nextHandler = function() {{ __postResponse__{workspaceName}(workspace, request); }};
+    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspaceConfig.Extend) ? "" : $"__postResponse__{workspaceConfig.Extend}__{requestName}(workspace, request);")} }};
+    {(requestDef.PostResponse == null ? $"__postResponse__{workspaceName}(workspace, request)" : GetScriptContent(requestDef.PostResponse))}
 }}
 
 ");
@@ -264,7 +264,7 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
         srcPayload = request.payload;
     }
 
-    public void InvokePostRequest(params object?[] args) {
+    public void InvokePostResponse(params object?[] args) {
         /*
         workspaceName = args[0]
         requestName = args[1]
@@ -288,8 +288,8 @@ function __postRequest__{workspaceName}__{requestName} (workspace, request) {{
         request.response.headers = headers ?? default;
         request.response.body = responseContent;
 
-        var postRequestResult = _engine.Invoke(
-            $"__postRequest__{workspaceName}__{requestName}",
+        var postResponseResult = _engine.Invoke(
+            $"__postResponse__{workspaceName}__{requestName}",
             workspace,
             request
             );

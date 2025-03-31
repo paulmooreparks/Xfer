@@ -10,5 +10,5 @@ public interface IScriptEngine {
     string ExecuteScript(string? script);
     string ExecuteCommand(string? script);
     void InvokePreRequest(params object[] args);
-    void InvokePostRequest(params object?[] args);
+    void InvokePostResponse(params object?[] args);
 }
