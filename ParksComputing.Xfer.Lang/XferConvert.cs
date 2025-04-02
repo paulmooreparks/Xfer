@@ -159,6 +159,13 @@ public class XferConvert {
                     return DeserializeEnumerable(propBagElement, valueType);
                 }
             }
+            else if (genericType == typeof(KeyValuePair<,>)) {
+                var valueType = targetType.GetGenericArguments()[0];
+
+                if (element is KeyValuePairElement keyValueElement) {
+                    return DeserializeKeyValuePair(keyValueElement, valueType);
+                }
+            }
         }
 
         return element switch {
@@ -225,6 +232,15 @@ public class XferConvert {
         }
 
         return list;
+    }
+
+    private static object DeserializeKeyValuePair(KeyValuePairElement kvpElement, Type valueType) {
+        var kvpType = typeof(KeyValuePair<,>).MakeGenericType(typeof(string), valueType);
+
+        var key = kvpElement.Key;
+        var value = DeserializeValue(kvpElement.Value, valueType);
+
+        return Activator.CreateInstance(kvpType, key, value)!;
     }
 
 

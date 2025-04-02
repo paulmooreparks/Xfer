@@ -107,7 +107,7 @@ internal class SendCommand {
         var configHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var kvp in definition.Headers) {
-            configHeaders[kvp.Key] = kvp.Value; // Add default headers
+            configHeaders[kvp.Key] = kvp.Value?.ToString() ?? string.Empty; // Add default headers
         }
 
         if (headers is not null) {

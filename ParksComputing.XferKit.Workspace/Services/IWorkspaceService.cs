@@ -8,7 +8,7 @@ using ParksComputing.XferKit.Workspace.Models;
 namespace ParksComputing.XferKit.Workspace.Services;
 
 public interface IWorkspaceService {
-    BaseConfig? BaseConfig { get; }
+    BaseConfig BaseConfig { get; }
     IEnumerable<string> WorkspaceList { get; }
     WorkspaceConfig ActiveWorkspace { get; }
     string CurrentWorkspaceName { get; }

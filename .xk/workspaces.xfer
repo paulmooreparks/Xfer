@@ -2,97 +2,136 @@
 https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/README.md />
 
 {
-    Assemblies [
+    assemblies [
     ]
 
-    </ ActiveWorkspace "httpbin" />
+    </ activeWorkspace "httpbin" />
 
-    InitScript <'file:globalInitScript.js'>
+    initScript <'file:globalInitScript.js'>
+
+    scripts {
+        sample {
+            description "An example of a top-level named script."
+
+            arguments {
+                arg1 string "The first argument."
+                arg2 number "The second argument."
+                arg3 boolean "The third argument."
+            }
+
+            script <'
+                log("Global script is executed.");
+                log("arg1: " + arg1);
+                log("arg2: " + arg2);
+                log("arg3: " + arg3);
+                return arg2 + 123;
+            '>
+        }
+
+        echo {
+            description "Another way to do output."
+
+            arguments {
+                obj object "The object to echo."
+            }
+
+            script <'
+                log(obj.toString())
+            '>
+        }
+    }
 
     </ This is a global pre-request script that will be executed before each request. />
-    PreRequest <'
+    preRequest <'
     '>
 
     </ This is a global post-request script that will be executed after each request completes. />
-    PostRequest <'
+    postResponse <'
         log(request.response.body);
     '>
 
     </ These are global variables that may be referenced in the configuration. />
-    Properties {
+    properties {
         sampleValue "This is a sample value"
     }
 
+    macros {
+    }
+
     </ A workspace is a collection of related requests and associated configuration. />
-    Workspaces {
+    workspaces {
 
         httpbin {
-            BaseUrl "https://httpbin.org/"
+            description "Calling various endpoints in the httpbin.org service."
+
+            macros {
+            }
+
+            baseUrl "https://httpbin.org/"
 
             </ These are requests that may be executed by name from the command line. />
-            Requests {
+            requests {
                 cookies {
-                    Endpoint "/cookies"
-                    Method "GET"
-                    Cookies {
+                    endpoint "/cookies"
+                    method "GET"
+                    cookies {
                         session-id "1234567"
                         session-token "abcdef"
                     }
                 }
 
                 setcookies {
-                    Endpoint "/cookies/set"
-                    Method "GET"
-                    Parameters (
+                    endpoint "/cookies/set"
+                    method "GET"
+                    parameters (
                         'key1=value1'
                         'key2=value2'
                     )
                 }
 
                 gettest {
-                    Endpoint "/get"
-                    Method "GET"
+                    endpoint "/get"
+                    method "GET"
 
                     </ Default headers to be sent with the request unless overridden. />
-                    Headers {
+                    headers {
                         Accept "application/json"
                     }
                     
                     </ Default parameters to be sent with the request unless overridden. />
-                    Parameters (
+                    parameters (
                         'key1=value1'
                         'key2=value2'
                     )
 
-                    PreRequest <'
-                        log("This is the httpbin.gettest pre-request handler");
+                    preRequest <'
                         // Delegate to upstream pre-request handler
                         nextHandler();
                         '>
 
-                    PostRequest <'
+                    postResponse <'
                         // Delegate to upstream post-request handler
                         nextHandler();
                     '>
                 }
                 posttest {
-                    Endpoint "/post"
-                    Method "POST"
-                    Headers {
+                    endpoint "/post"
+                    method "POST"
+                    headers {
                         Content-Type "application/json"
                     }
-                    Payload <'{ "key1": "value1", "key2": "value2"} '>
+                    payload <'{ "key1": "value1", "key2": "value2"} '>
                 }
 
                 basic {
-                    Endpoint '/basic-auth/<|httpBinBasicAuthUser|>/<|httpBinBasicAuthPassword|>'
-                    Method "GET"
-                    Headers {
+                    endpoint '/basic-auth/<|httpBinBasicAuthUser|>/<|httpBinBasicAuthPassword|>'
+                    method "GET"
+                    headers {
                         </ The httpBinBearerToken environment variable is set in the .xk/.env file. />
                         Authorization 'Bearer <|httpBinBearerToken|>'
                     }
 
-                    PreRequest <'
+                    preRequest <'
                         var basicAuth = btoa("<|httpBinBasicAuthUser|>:<|httpBinBasicAuthPassword|>");
                         request.headers["Authorization"] = "Basic " + basicAuth;
                         nextHandler();
@@ -100,9 +139,9 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                 }
 
                 bearer {
-                    Endpoint "/bearer"
-                    Method "GET"
-                    Headers {
+                    endpoint "/bearer"
+                    method "GET"
+                    headers {
                         </ The httpBinBearerToken environment variable is set in the .xk/.env file. />
                         Authorization 'Bearer <|httpBinBearerToken|>'
                     }
@@ -111,15 +150,17 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
         }
 
         foo {
-            Extend "httpbin"
-            Requests {
+            description "An example of extending an existing workspace, in this case the httpbin workspace."
+
+            extend "httpbin"
+            requests {
                 gettest {
-                    Parameters (
+                    parameters (
                         'key3=value1'
                         'key4=value2'
                     )
 
-                    PreRequest <'
+                    preRequest <'
                         log("This is the foo.gettest pre-request handler");
                         // Delegate to base pre-request handler
                         baseHandler();
@@ -129,11 +170,13 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
         }
 
         parkscomputing {
-            BaseUrl "https://parkscomputing.com/"
-            Requests {
+            description "Making calls to the Parks Computing website."
+
+            baseUrl "https://parkscomputing.com/"
+            requests {
                 about {
-                    Endpoint "/content/about.html"
-                    Method "GET"
+                    endpoint "/content/about.html"
+                    method "GET"
                 }
             }
         }

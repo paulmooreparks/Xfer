@@ -52,7 +52,10 @@ internal class ScriptReplContext : Cliffer.DefaultReplContext {
         if (args.Length > 0 && !isHelp) {
             var script = string.Join(' ', args);
             var output = _scriptEngine.ExecuteCommand(script);
-            Console.WriteLine(output);
+
+            if (!string.IsNullOrEmpty(output)) {
+                Console.WriteLine(output);
+            }
             return Task.FromResult(Result.Success);
         }
 

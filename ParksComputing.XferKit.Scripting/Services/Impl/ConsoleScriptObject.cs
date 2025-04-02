@@ -6,7 +6,8 @@ public class ConsoleScriptObject {
 
     private static string GetIndent() => new string(' ', _groupDepth * 2);
 
-    public static void log(string s) => Console.WriteLine(GetIndent() + s);
+    // public static void log(string s) => Console.WriteLine(GetIndent() + s);
+    public static void log(object o) => Console.WriteLine(GetIndent() + o.ToString());
     public static void log(params object[] args) => Console.WriteLine(GetIndent() + string.Join(" ", args));
     public static void info(params object[] args) => Console.WriteLine(GetIndent() + "[INFO] " + string.Join(" ", args));
     public static void warn(params object[] args) => Console.WriteLine(GetIndent() + "[WARN] " + string.Join(" ", args));

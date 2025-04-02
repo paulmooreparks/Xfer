@@ -1,9 +1,13 @@
 ﻿using Cliffer;
 using ParksComputing.XferKit.Cli.Services;
+using ParksComputing.XferKit.Workspace;
 using ParksComputing.XferKit.Workspace.Services;
+using ParksComputing.XferKit.Scripting.Services;
+using ParksComputing.XferKit.Api;
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using Microsoft.VisualBasic;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 [RootCommand("Xfer CLI Application")]
@@ -16,6 +20,8 @@ internal class RootCommand {
     private readonly IWorkspaceService _workspaceService;
     private readonly IReplContext _replContext;
     private readonly System.CommandLine.RootCommand _rootCommand;
+    private readonly IScriptEngine _scriptEngine;
+    private readonly XferKitApi _xk;
 
     private string _currentWorkspaceName = string.Empty;
 
@@ -24,27 +30,127 @@ internal class RootCommand {
         IWorkspaceService workspaceService,
         System.CommandLine.RootCommand rootCommand,
         ICommandSplitter splitter,
+        IScriptEngine scriptEngine,
+        XferKitApi xferKitApi,
         [OptionParam("--recursive")] Option recursionOption
         ) 
     { 
         _serviceProvider = serviceProvider;
         _workspaceService = workspaceService;
         _rootCommand = rootCommand;
+        _scriptEngine = scriptEngine;
+        _xk = xferKitApi;
         _recursionOption = recursionOption;
         _replContext = new XferReplContext(_serviceProvider, _workspaceService, splitter, _recursionOption);
 
-        foreach (var macro in _workspaceService.BaseConfig.Macros) {
-            var macroCommand = new Macro($"{macro.Key}", $"[macro] {macro.Value.Description}", macro.Value.Command);
+        if (_workspaceService.BaseConfig is not null) {
+            foreach (var macro in _workspaceService.BaseConfig.Macros) {
+                var macroCommand = new Macro($"{macro.Key}", $"[macro] {macro.Value.Description}", macro.Value.Command);
 
-            _rootCommand.AddCommand(macroCommand);
+                _rootCommand.AddCommand(macroCommand);
+            }
+
+            foreach (var script in _workspaceService.BaseConfig.Scripts) {
+                var description = script.Value.Description ?? string.Empty;
+                var scriptName = script.Key;
+                var scriptBody = script.Value.Script;
+                var arguments = script.Value.Arguments;
+                var paramList = new List<string>();
+                var macroCommand = new Macro($"{scriptName}", $"[script] {description}", $"runwsscript --scriptName {scriptName}");
+
+                foreach (var argument in arguments) {
+                    var argType = argument.Value.Key;
+                    var argName = argument.Key;
+                    var argDescription = argument.Value.Value;
+
+                    switch (argType) {
+                        case "string":
+                            macroCommand.AddArgument(new Argument<string>(argName, argDescription));
+                            break;
+                        case "number":
+                            macroCommand.AddArgument(new Argument<double>(argName, argDescription));
+                            break;
+                        case "boolean":
+                            macroCommand.AddArgument(new Argument<bool>(argName, argDescription));
+                            break;
+                        case "object":
+                            macroCommand.AddArgument(new Argument<object>(argName, argDescription));
+                            break;
+                        default:
+                            Console.Error.WriteLine($"{ParksComputing.XferKit.Workspace.Constants.ErrorChar} Script {scriptName}: Invalid or unsupported argument type {argType} for argument {argName}");
+                            break;
+                    }
+
+                    paramList.Add(argument.Key);
+                }
+
+                _rootCommand.AddCommand(macroCommand);
+                var paramString = string.Join(", ", paramList);
+
+                _scriptEngine.ExecuteScript($@"
+function __script__{scriptName}({paramString}) {{
+{scriptBody}
+}};
+
+xk.{scriptName} = __script__{scriptName};
+");
+            }
         }
 
         foreach (var workspaceKvp in _workspaceService.BaseConfig?.Workspaces ?? new Dictionary<string, Workspace.Models.WorkspaceConfig>()) {
             var workspaceName = workspaceKvp.Key;
             var workspaceConfig = workspaceKvp.Value;
 
+            foreach (var script in workspaceConfig.Scripts) {
+                var description = script.Value.Description ?? string.Empty;
+                var scriptName = script.Key;
+                var scriptBody = script.Value.Script;
+                var arguments = script.Value.Arguments;
+                var paramList = new List<string>();
+                var macroCommand = new Macro($"{workspaceName}.{scriptName}", $"[script] {description}", $"runwsscript --workspaceName {workspaceName} --scriptName {scriptName}");
+
+                foreach (var argument in arguments) {
+                    var argType = argument.Value.Key;
+                    var argName = argument.Key;
+                    var argDescription = argument.Value.Value;
+
+                    switch (argType) {
+                        case "string":
+                            macroCommand.AddArgument(new Argument<string>(argName, argDescription));
+                            break;
+                        case "number":
+                            macroCommand.AddArgument(new Argument<double>(argName, argDescription));
+                            break;
+                        case "boolean":
+                            macroCommand.AddArgument(new Argument<bool>(argName, argDescription));
+                            break;
+                        case "object":
+                            macroCommand.AddArgument(new Argument<object>(argName, argDescription));
+                            break;
+                        default:
+                            Console.Error.WriteLine($"{ParksComputing.XferKit.Workspace.Constants.ErrorChar} Script {scriptName}: Invalid or unsupported argument type {argType} for argument {argName}");
+                            break;
+                    }
+
+                    paramList.Add(argument.Key);
+                }
+
+                _rootCommand.AddCommand(macroCommand);
+                var paramString = string.Join(", ", paramList);
+
+                _scriptEngine.ExecuteScript($@"
+function __script__{workspaceName}__{scriptName}({paramString}) {{
+{scriptBody}
+}};
+
+xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptName};
+
+");
+            }
+
             foreach (var request in workspaceConfig.Requests) {
-                var macroCommand = new Macro($"{workspaceName}.{request.Key}", $"[request] {new string($"{request.Value.Method} {request.Value.Endpoint}")}", $"send {workspaceName}.{request.Key} --baseurl {workspaceKvp.Value.BaseUrl}");
+                var description = request.Value.Description ?? $"{request.Value.Method} {request.Value.Endpoint}";
+                var macroCommand = new Macro($"{workspaceName}.{request.Key}", $"[request] {description}", $"send {workspaceName}.{request.Key} --baseurl {workspaceKvp.Value.BaseUrl}");
 
                 var baseurlOption = new Option<string>(["--baseurl", "-b"], "The base URL of the API to send HTTP requests to.");
                 baseurlOption.IsRequired = false;

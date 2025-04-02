@@ -28,8 +28,8 @@ public class XferKitApi : DynamicObject {
     public IPackageApi package { get; }
 
     public IProcessApi process { get; }
-    
-    public dynamic workspaces { get; }
+
+    public dynamic workspaces { get; } = new ExpandoObject() as dynamic;
 
     public XferKitApi(
         IWorkspaceService workspaceService, 
@@ -42,11 +42,13 @@ public class XferKitApi : DynamicObject {
         _workspaceService = workspaceService;
         var workspacesDict = new ExpandoObject() as IDictionary<string, object>;
 
+#if false
         foreach (var workspaceKvp in _workspaceService.BaseConfig?.Workspaces ?? []) {
             workspacesDict[workspaceKvp.Key] = workspaceKvp.Value;
         }
 
         workspaces = workspacesDict;
+#endif
 
         http = httpApi;
         store = storeApi;
