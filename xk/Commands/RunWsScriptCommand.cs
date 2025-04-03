@@ -113,6 +113,27 @@ internal class RunWsScriptCommand {
                 i++;
             }
 
+            if (i < argumentDefinitions.Count && Console.IsInputRedirected) {
+                var argString = Console.In.ReadToEnd().Trim();
+                var argType = argumentDefinitions[i].Key;
+
+                if (argType == "string") {
+                    quotedArgs.Add((argString.StartsWith("\"") && argString.EndsWith("\"")) || (argString.StartsWith("'") && argString.EndsWith("'"))
+                        ? argString
+                        : $"\"{argString}\"");
+                }
+                else if (argType == "stringArray") {
+                    var stringArray = argString.Split(',').Select(a =>
+                        (a.StartsWith("\"") && a.EndsWith("\"")) || (a.StartsWith("'") && a.EndsWith("'"))
+                        ? a
+                        : $"\"{a}\"");
+                    quotedArgs.Add($"[{string.Join(", ", stringArray)}]");
+                }
+                else {
+                    quotedArgs.Add(argString);
+                }
+            }
+
             paramList = string.Join(", ", quotedArgs);
         }
 

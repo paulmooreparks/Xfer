@@ -1,6 +1,10 @@
 {
   "profiles": {
-    "xf": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "xk": {
       "commandName": "Project"
     }
   }

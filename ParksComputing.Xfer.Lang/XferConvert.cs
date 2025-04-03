@@ -6,6 +6,7 @@ using ParksComputing.Xfer.Lang.Attributes;
 using ParksComputing.Xfer.Lang.Services;
 using ParksComputing.Xfer.Lang.Elements;
 using System.Collections;
+using System.Runtime.CompilerServices;
 
 namespace ParksComputing.Xfer.Lang;
 
@@ -48,6 +49,7 @@ public class XferConvert {
             object[] objectArray => new PropertyBagElement(objectArray.Select(SerializeValue)),
             IDictionary dictionary when IsGenericDictionary(dictionary.GetType()) => SerializeDictionary(dictionary),
             IEnumerable enumerable when IsGenericEnumerable(enumerable.GetType()) => SerializeEnumerable(enumerable),
+            System.Runtime.CompilerServices.ITuple tuple when IsGenericTuple(tuple.GetType()) => SerializeTuple(tuple),
 #if false
             IDictionary dictionary => new ObjectElement(
                 dictionary.Cast<dynamic>().Select(kvp =>
@@ -92,6 +94,25 @@ public class XferConvert {
             && type.GetGenericArguments()[0] == typeof(string);
     }
 
+    private static bool IsGenericTuple(Type type) {
+        try {
+            var isGenericType = type.IsGenericType;
+
+            if (isGenericType) {
+                var genericTypeDefinition = type.GetGenericTypeDefinition();
+                var genericArguments = type.GetGenericArguments();
+                var tupleType = typeof(Tuple<,>);
+
+                return isGenericType && genericTypeDefinition == tupleType;
+            }
+
+            return false;
+        }
+        catch (Exception) {
+            return false;
+        }
+    }
+
     private static PropertyBagElement SerializeEnumerable(IEnumerable enumerable) {
         var objElement = new PropertyBagElement();
 
@@ -113,6 +134,17 @@ public class XferConvert {
         }
 
         return objElement;
+    }
+
+    private static PropertyBagElement SerializeTuple(ITuple tuple) {
+        var element = new PropertyBagElement();
+
+        for (int i = 0; i < tuple.Length; ++i) {
+            var valueElement = SerializeValue(tuple[i]);
+            element.Add(valueElement);
+        }
+
+        return element;
     }
 
     public static object Deserialize(string xfer, Type targetType) {
@@ -157,6 +189,13 @@ public class XferConvert {
 
                 if (element is PropertyBagElement propBagElement) {
                     return DeserializeEnumerable(propBagElement, valueType);
+                }
+            }
+            else if (genericType == typeof(Tuple<>)) {
+                var valueType = targetType.GetGenericArguments()[0];
+
+                if (element is PropertyBagElement propBagElement) {
+                    return DeserializeTuple(propBagElement, valueType);
                 }
             }
             else if (genericType == typeof(KeyValuePair<,>)) {
@@ -224,14 +263,18 @@ public class XferConvert {
 
     private static object DeserializeEnumerable(PropertyBagElement propBagElement, Type valueType) {
         var listType = typeof(List<>).MakeGenericType(valueType);
-        var list = (IList)Activator.CreateInstance(listType)!; // Create List<T>
+        var list = (IList)Activator.CreateInstance(listType)!; 
 
         foreach (var element in propBagElement.Values) {
             var value = DeserializeValue(element, valueType);
-            list.Add(value); // Now safe because IList supports Add()
+            list.Add(value); 
         }
 
         return list;
+    }
+
+    private static object DeserializeTuple(PropertyBagElement propBagElement, Type valueType) {
+        throw new NotSupportedException();
     }
 
     private static object DeserializeKeyValuePair(KeyValuePairElement kvpElement, Type valueType) {

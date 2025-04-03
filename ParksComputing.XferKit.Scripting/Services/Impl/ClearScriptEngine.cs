@@ -130,7 +130,13 @@ function __postResponse(workspace, request) {{
                 workspaceObj.requests = new ExpandoObject() as dynamic;
 
                 foreach (var kvp in workspace.Properties) {
-                    if (workspaceObj.ContainsKey(kvp.Key)) {
+                    var workspaceDict = workspaceObj as IDictionary<string, object>;
+                    
+                    if (workspaceDict == null) {
+                        throw new InvalidOperationException("Failed to cast workspaceObj to IDictionary<string, object>");
+                    }
+
+                    if (workspaceDict.ContainsKey(kvp.Key)) {
                         _diags.Emit(
                             nameof(ClearScriptEngine),
                             new {
@@ -139,7 +145,7 @@ function __postResponse(workspace, request) {{
                         );
                     }
                     else {
-                        workspaceObj.Add(kvp.Key, kvp.Value);
+                        workspaceDict.Add(kvp.Key, kvp.Value);
                     }
                 }
 
@@ -234,6 +240,11 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
         request.name = requestName;
         request.headers = new ExpandoObject() as dynamic;
         var headers = request.headers as IDictionary<string, object>;
+
+        if (headers is null) {
+            return;
+        }
+
         var srcHeaders = args[2] as IDictionary<string, string>;
 
         if (srcHeaders is not null && request.headers is not null) {
@@ -296,7 +307,12 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
 
         var workspace = _workspaceCache[workspaceName];
         var requests = workspace.requests as IDictionary<string, object>;
-        var request = requests[requestName] as dynamic; // _requestCache[$"{workspaceName}.{requestName}"];
+
+        if (requests is null) {
+            return;
+        }
+
+        var request = requests[requestName] as dynamic; 
 
         request.name = requestName;
         request.response = new ExpandoObject() as dynamic;
