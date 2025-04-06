@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Cliffer;
 
 using ParksComputing.XferKit.Api;
+using ParksComputing.XferKit.Workspace;
 using ParksComputing.XferKit.Workspace.Services;
 
 namespace ParksComputing.XferKit.Cli.Commands;
@@ -36,15 +37,15 @@ internal class PackageCommand {
             var packageInstallResult = await _xk.package.installAsync(install);
 
             if (packageInstallResult == null) {
-                Console.Error.WriteLine($"❌ Unexpected error installing package '{install}'.");
+                Console.Error.WriteLine($"{Constants.ErrorChar} Unexpected error installing package '{install}'.");
                 return Result.Error;
             }
 
             if (packageInstallResult.success) {
-                Console.WriteLine($"✅ Installed {packageInstallResult.packageName} {packageInstallResult.version} to {packageInstallResult.path}");
+                Console.WriteLine($"{Constants.SuccessChar} Installed {packageInstallResult.packageName} {packageInstallResult.version} to {packageInstallResult.path}");
             }
             else {
-                Console.Error.WriteLine($"❌ Failed to install package '{install}': {packageInstallResult.message}");
+                Console.Error.WriteLine($"{Constants.ErrorChar} Failed to install package '{install}': {packageInstallResult.message}");
                 return Result.Error;
             }
         }
@@ -52,15 +53,15 @@ internal class PackageCommand {
             var uninstallResult = await _xk.package.uninstallAsync(uninstall);
 
             if (uninstallResult == null) {
-                Console.Error.WriteLine($"❌ Unexpected error uninstalling package '{uninstall}'.");
+                Console.Error.WriteLine($"{Constants.ErrorChar} Unexpected error uninstalling package '{uninstall}'.");
                 return Result.Error;
             }
 
             if (uninstallResult.success) {
-                Console.WriteLine($"✅ {uninstallResult.message}");
+                Console.WriteLine($"{Constants.SuccessChar} {uninstallResult.message}");
             }
             else {
-                Console.Error.WriteLine($"❌ {uninstallResult.message}");
+                Console.Error.WriteLine($"{Constants.ErrorChar} {uninstallResult.message}");
                 return Result.Error;
             }
 
@@ -70,15 +71,15 @@ internal class PackageCommand {
             var packageInstallResult = await _xk.package.updateAsync(update);
 
             if (packageInstallResult == null) {
-                Console.Error.WriteLine($"❌ Unexpected error updating package '{install}'.");
+                Console.Error.WriteLine($"{Constants.ErrorChar} Unexpected error updating package '{install}'.");
                 return Result.Error;
             }
 
             if (packageInstallResult.success) {
-                Console.WriteLine($"✅ {packageInstallResult.message}");
+                Console.WriteLine($"{Constants.SuccessChar} {packageInstallResult.message}");
             }
             else {
-                Console.Error.WriteLine($"❌ {packageInstallResult.message}");
+                Console.Error.WriteLine($"{Constants.ErrorChar} {packageInstallResult.message}");
                 return Result.Error;
             }
         }
@@ -92,24 +93,24 @@ internal class PackageCommand {
                 }
             }
             else {
-                Console.WriteLine("⚠️ No plugins installed.");
+                Console.WriteLine($"{Constants.WarningChar} No plugins installed.");
             }
         }
         else if (!string.IsNullOrEmpty(search)) {
             var searchResult = await _xk.package.searchAsync(search);
 
             if (searchResult == null) {
-                Console.Error.WriteLine($"❌ Unexpected error searching for package '{search}'.");
+                Console.Error.WriteLine($"{Constants.ErrorChar} Unexpected error searching for package '{search}'.");
                 return Result.Error;
             }
 
             if (searchResult.success == false) {
-                Console.Error.WriteLine($"❌ Error searching for packages: {searchResult.message}");
+                Console.Error.WriteLine($"{Constants.ErrorChar} Error searching for packages: {searchResult.message}");
                 return Result.Error;
             }
 
             if (searchResult.list is null || searchResult.list.Count() == 0) {
-                Console.Error.WriteLine($"❌ No results found for search term '{search}'.");
+                Console.Error.WriteLine($"{Constants.ErrorChar} No results found for search term '{search}'.");
                 return Result.Error;
             }
 
@@ -120,7 +121,7 @@ internal class PackageCommand {
             }
         }
         else {
-            Console.Error.WriteLine("❌ No command specified. Use --help for usage.");
+            Console.Error.WriteLine($"{Constants.ErrorChar} No command specified. Use --help for usage.");
             return Result.Error;
         }
 

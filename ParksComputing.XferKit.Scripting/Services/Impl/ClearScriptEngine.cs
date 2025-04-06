@@ -16,10 +16,11 @@ using Microsoft.ClearScript.V8;
 using System.Dynamic;
 using ParksComputing.XferKit.Api;
 using ParksComputing.XferKit.Diagnostics.Services;
+using ParksComputing.XferKit.Workspace;
 
-namespace ParksComputing.XferKit.Scripting.Services;
+namespace ParksComputing.XferKit.Scripting.Services.Impl;
 
-internal class ClearScriptEngine : IScriptEngine {
+internal class ClearScriptEngine : IXferScriptEngine {
     private readonly IPackageService _packageService;
     private readonly IWorkspaceService _workspaceService;
     private readonly ISettingsService _settingsService;
@@ -48,6 +49,8 @@ internal class ClearScriptEngine : IScriptEngine {
         InitializeScriptEnvironment(assemblies);
     }
 
+    public dynamic Script => _engine.Script;
+
     private void PackagesUpdated() {
         LoadPackageAssemblies();
     }
@@ -65,7 +68,7 @@ internal class ClearScriptEngine : IScriptEngine {
                 }
             }
             catch (Exception ex) {
-                throw new Exception($"❌ Failed to load package assembly {assemblyPath}: {ex.Message}", ex);
+                throw new Exception($"{Constants.ErrorChar} Failed to load package assembly {assemblyPath}: {ex.Message}", ex);
             }
         }
 
@@ -196,6 +199,26 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
                     requestObj.parameters = requestDef.Parameters ?? new List<string>();
                     requestObj.payload = requestDef.Payload ?? string.Empty;
                     requestObj.response = new ResponseDefinition();
+
+                    foreach (var kvp in requestDef.Properties) {
+                        var requestDict = requestObj as IDictionary<string, object>;
+
+                        if (requestDict == null) {
+                            throw new InvalidOperationException("Failed to cast requestObj to IDictionary<string, object>");
+                        }
+
+                        if (requestDict.ContainsKey(kvp.Key)) {
+                            _diags.Emit(
+                                nameof(ClearScriptEngine),
+                                new {
+                                    Message = $"Failed to set property {kvp.Key} to {kvp.Value} in request {workspaceName}.{requestName}"
+                                }
+                            );
+                        }
+                        else {
+                            requestDict.Add(kvp.Key, kvp.Value);
+                        }
+                    }
 
                     var requests = workspaceObj.requests as IDictionary<string, object>;
                     requests?.Add(requestName, requestObj);
@@ -351,12 +374,12 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
             return string.Empty;
         }
         catch (Exception ex) {
-            var result = $"❌ Error executing script: {ex.Message}";
+            var result = $"{Constants.ErrorChar} Error executing script: {ex.Message}";
             return result;
         }
     }
 
-    public string? EvaluateScript(string? script) {
+    public object? EvaluateScript(string? script) {
         try {
             var scriptCode = GetScriptContent(script);
 
@@ -366,13 +389,13 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
 
             var result = _engine.Evaluate(scriptCode);
             if (result != null && result != Undefined.Value) {
-                return result.ToString() ?? string.Empty;
+                return result;
             }
 
             return null;
         }
         catch (Exception ex) {
-            return $"❌ Error executing script: {ex.Message}";
+            return $"{Constants.ErrorChar} Error executing script: {ex.Message}";
         }
     }
 
@@ -381,7 +404,7 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
             return _engine.ExecuteCommand(script);
         }
         catch (Exception ex) {
-            var result = $"❌ Error executing script: {ex.Message}";
+            var result = $"{Constants.ErrorChar} Error executing script: {ex.Message}";
             return result;
         }
     }
@@ -420,7 +443,7 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
             return scriptValue;
         }
         catch (Exception ex) {
-            throw new Exception($"❌ Error processing script content: {ex.Message}", ex);
+            throw new Exception($"{Constants.ErrorChar} Error processing script content: {ex.Message}", ex);
         }
         finally {
             Directory.SetCurrentDirectory(originalDirectory);

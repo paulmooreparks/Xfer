@@ -4,10 +4,10 @@ using ParksComputing.XferKit.Workspace;
 using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Scripting.Services;
 using ParksComputing.XferKit.Api;
+using Microsoft.ClearScript;
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
-using Microsoft.VisualBasic;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 [RootCommand("Xfer CLI Application")]
@@ -20,7 +20,7 @@ internal class RootCommand {
     private readonly IWorkspaceService _workspaceService;
     private readonly IReplContext _replContext;
     private readonly System.CommandLine.RootCommand _rootCommand;
-    private readonly IScriptEngine _scriptEngine;
+    private readonly IXferScriptEngine _scriptEngine;
     private readonly XferKitApi _xk;
 
     private string _currentWorkspaceName = string.Empty;
@@ -30,7 +30,7 @@ internal class RootCommand {
         IWorkspaceService workspaceService,
         System.CommandLine.RootCommand rootCommand,
         ICommandSplitter splitter,
-        IScriptEngine scriptEngine,
+        IXferScriptEngine scriptEngine,
         XferKitApi xferKitApi,
         [OptionParam("--recursive")] Option recursionOption
         ) 
@@ -42,6 +42,24 @@ internal class RootCommand {
         _xk = xferKitApi;
         _recursionOption = recursionOption;
         _replContext = new XferReplContext(_serviceProvider, _workspaceService, splitter, _recursionOption);
+
+#if false
+        string functionScript = $@"
+function myFunction(baseUrl, page) {{
+    log(baseUrl);
+    return page;
+}}
+";
+
+        // Compile the function
+        _scriptEngine.EvaluateScript(functionScript);
+
+        string baseUrl = "https://example.com";
+        string page = "https://example.com/page";
+
+        // Call it with your values
+        _scriptEngine.Script["myFunction"](baseUrl, page);
+#endif
 
         if (_workspaceService.BaseConfig is not null) {
             foreach (var macro in _workspaceService.BaseConfig.Macros) {
@@ -58,30 +76,33 @@ internal class RootCommand {
                 var paramList = new List<string>();
                 var macroCommand = new Macro($"{scriptName}", $"[script] {description}", $"runwsscript --scriptName {scriptName}");
 
-                foreach (var argument in arguments) {
-                    var argType = argument.Value.Key;
-                    var argName = argument.Key;
-                    var argDescription = argument.Value.Value;
+                foreach (var kvp in arguments) {
+                    var argument = kvp.Value;
+                    var argType = argument.Type;
+                    var argName = kvp.Key;
+                    argument.Name = argName;
+                    var argDescription = argument.Description;
+                    System.CommandLine.ArgumentArity argArity = argument.IsRequired ? System.CommandLine.ArgumentArity.ExactlyOne : System.CommandLine.ArgumentArity.ZeroOrOne;
 
                     switch (argType) {
                         case "string":
-                            macroCommand.AddArgument(new Argument<string>(argName, argDescription));
+                            macroCommand.AddArgument(new Argument<string>(argName, argDescription) { Arity = argArity });
                             break;
                         case "number":
-                            macroCommand.AddArgument(new Argument<double>(argName, argDescription));
+                            macroCommand.AddArgument(new Argument<double>(argName, argDescription) { Arity = argArity });
                             break;
                         case "boolean":
-                            macroCommand.AddArgument(new Argument<bool>(argName, argDescription));
+                            macroCommand.AddArgument(new Argument<bool>(argName, argDescription) { Arity = argArity });
                             break;
                         case "object":
-                            macroCommand.AddArgument(new Argument<object>(argName, argDescription));
+                            macroCommand.AddArgument(new Argument<object>(argName, argDescription) { Arity = argArity });
                             break;
                         default:
                             Console.Error.WriteLine($"{ParksComputing.XferKit.Workspace.Constants.ErrorChar} Script {scriptName}: Invalid or unsupported argument type {argType} for argument {argName}");
                             break;
                     }
 
-                    paramList.Add(argument.Key);
+                    paramList.Add(argument.Name);
                 }
 
                 _rootCommand.AddCommand(macroCommand);
@@ -109,30 +130,33 @@ xk.{scriptName} = __script__{scriptName};
                 var paramList = new List<string>();
                 var macroCommand = new Macro($"{workspaceName}.{scriptName}", $"[script] {description}", $"runwsscript --workspaceName {workspaceName} --scriptName {scriptName}");
 
-                foreach (var argument in arguments) {
-                    var argType = argument.Value.Key;
-                    var argName = argument.Key;
-                    var argDescription = argument.Value.Value;
+                foreach (var kvp in arguments) {
+                    var argument = kvp.Value;
+                    var argType = argument.Type;
+                    var argName = kvp.Key;
+                    argument.Name = argName;
+                    var argDescription = argument.Description;
+                    System.CommandLine.ArgumentArity argArity = argument.IsRequired ? System.CommandLine.ArgumentArity.ExactlyOne : System.CommandLine.ArgumentArity.ZeroOrOne;
 
                     switch (argType) {
                         case "string":
-                            macroCommand.AddArgument(new Argument<string>(argName, argDescription));
+                            macroCommand.AddArgument(new Argument<string>(argName, argDescription) { Arity = argArity });
                             break;
                         case "number":
-                            macroCommand.AddArgument(new Argument<double>(argName, argDescription));
+                            macroCommand.AddArgument(new Argument<double>(argName, argDescription) { Arity = argArity });
                             break;
                         case "boolean":
-                            macroCommand.AddArgument(new Argument<bool>(argName, argDescription));
+                            macroCommand.AddArgument(new Argument<bool>(argName, argDescription) { Arity = argArity });
                             break;
                         case "object":
-                            macroCommand.AddArgument(new Argument<object>(argName, argDescription));
+                            macroCommand.AddArgument(new Argument<object>(argName, argDescription) { Arity = argArity });
                             break;
                         default:
                             Console.Error.WriteLine($"{ParksComputing.XferKit.Workspace.Constants.ErrorChar} Script {scriptName}: Invalid or unsupported argument type {argType} for argument {argName}");
                             break;
                     }
 
-                    paramList.Add(argument.Key);
+                    paramList.Add(argument.Name);
                 }
 
                 _rootCommand.AddCommand(macroCommand);
@@ -148,9 +172,12 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
 ");
             }
 
-            foreach (var request in workspaceConfig.Requests) {
-                var description = request.Value.Description ?? $"{request.Value.Method} {request.Value.Endpoint}";
-                var macroCommand = new Macro($"{workspaceName}.{request.Key}", $"[request] {description}", $"send {workspaceName}.{request.Key} --baseurl {workspaceKvp.Value.BaseUrl}");
+            foreach (var requestKvp in workspaceConfig.Requests) {
+                var request = requestKvp.Value;
+                var requestName = requestKvp.Key;
+                request.Name = requestName;
+                var description = request.Description ?? $"{request.Method} {request.Endpoint}";
+                var macroCommand = new Macro($"{workspaceName}.{requestName}", $"[request] {description}", $"send {workspaceName}.{requestName} --baseurl {workspaceKvp.Value.BaseUrl}");
 
                 var baseurlOption = new Option<string>(["--baseurl", "-b"], "The base URL of the API to send HTTP requests to.");
                 baseurlOption.IsRequired = false;
@@ -169,6 +196,33 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
                 var payloadOption = new Option<string>(["--payload", "-pl"], "Content to send with the request. If input is redirected, content can also be read from standard input.");
                 payloadOption.Arity = System.CommandLine.ArgumentArity.ZeroOrOne;
                 macroCommand.AddOption(payloadOption);
+
+                foreach (var kvp in request.Arguments) {
+                    var argName = kvp.Key;
+                    var argument = kvp.Value;
+                    argument.Name = argName;
+                    var argType = argument.Type;
+                    var argDescription = argument.Description;
+                    System.CommandLine.ArgumentArity argArity = argument.IsRequired ? System.CommandLine.ArgumentArity.ExactlyOne : System.CommandLine.ArgumentArity.ZeroOrOne;
+
+                    switch (argType) {
+                        case "string":
+                            macroCommand.AddArgument(new Argument<string>(argName, argDescription) { Arity = argArity });
+                            break;
+                        case "number":
+                            macroCommand.AddArgument(new Argument<double>(argName, argDescription) { Arity = argArity });
+                            break;
+                        case "boolean":
+                            macroCommand.AddArgument(new Argument<bool>(argName, argDescription) { Arity = argArity });
+                            break;
+                        case "object":
+                            macroCommand.AddArgument(new Argument<object>(argName, argDescription) { Arity = argArity });
+                            break;
+                        default:
+                            Console.Error.WriteLine($"{ParksComputing.XferKit.Workspace.Constants.ErrorChar} Request {requestName}: Invalid or unsupported argument type {argType} for argument {argName}");
+                            break;
+                    }
+                }
 
                 _rootCommand.AddCommand(macroCommand);
             }

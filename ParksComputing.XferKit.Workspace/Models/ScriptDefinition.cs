@@ -18,7 +18,7 @@ public class ScriptDefinition {
     [XferProperty("script")]
     public string? Script { get; set; }
     [XferProperty("arguments")]
-    public Dictionary<string, KeyValuePair<string, string>> Arguments { get; set; } = [];
+    public Dictionary<string, Argument> Arguments { get; set; } = [];
 
     public void Merge(ScriptDefinition parentScript) {
         if (parentScript is null) {
@@ -30,10 +30,4 @@ public class ScriptDefinition {
         InitScript ??= parentScript.Script;
         Script ??= parentScript.Script;
     }
-}
-
-public class Argument {
-    public string? Name { get; set; }
-    public string? Type { get; set; }
-    public string? Description { get; set; }
 }

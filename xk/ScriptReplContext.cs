@@ -14,12 +14,12 @@ using ParksComputing.XferKit.Scripting.Services;
 namespace ParksComputing.XferKit.Cli;
 
 internal class ScriptReplContext : Cliffer.DefaultReplContext {
-    private readonly IScriptEngine _scriptEngine;
+    private readonly IXferScriptEngine _scriptEngine;
     private readonly ICommandSplitter _commandSplitter;
     private readonly IWorkspaceService _workspaceService;
 
     public ScriptReplContext(
-        IScriptEngine scriptEngine,
+        IXferScriptEngine scriptEngine,
         ICommandSplitter commandSplitter,
         IWorkspaceService workspaceService
         ) 

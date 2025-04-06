@@ -12,6 +12,8 @@ using ParksComputing.XferKit.Scripting.Services;
 
 using ParksComputing.XferKit.Api;
 using ParksComputing.XferKit.Cli.Services;
+using ParksComputing.XferKit.Workspace;
+using ParksComputing.XferKit.Cli.Extensions;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
@@ -22,13 +24,21 @@ namespace ParksComputing.XferKit.Cli.Commands;
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(IEnumerable<string>), "--cookies", "Cookies to include in the request.", new[] { "-c" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-pl" }, Arity = ArgumentArity.ZeroOrOne)]
+[Argument(typeof(IEnumerable<object>), "arguments", "Additional arguments passed with the request", Arity = ArgumentArity.ZeroOrMore)]
 internal class SendCommand {
     private readonly IWorkspaceService _ws;
-    private readonly IScriptEngine _scriptEngine;
+    private readonly IXferScriptEngine _scriptEngine;
+    private readonly IPropertyResolver _propertyResolver;
 
-    public SendCommand(IWorkspaceService workspaceService, IScriptEngine scriptEngine) {
+    public SendCommand(
+        IWorkspaceService workspaceService,
+        IXferScriptEngine scriptEngine,
+        IPropertyResolver propertyResolver
+        ) 
+    {
         _ws = workspaceService;
         _scriptEngine = scriptEngine;
+        _propertyResolver = propertyResolver;
     }
 
     public async Task<int> Execute(
@@ -38,6 +48,7 @@ internal class SendCommand {
         [OptionParam("--payload")] string payload,
         [OptionParam("--headers")] IEnumerable<string> headers,
         [OptionParam("--cookies")] IEnumerable<string> cookies,
+        [ArgumentParam("arguments")] IEnumerable<object> arguments,
         [CommandParam("get")] GetCommand getCommand,
         [CommandParam("post")] PostCommand postCommand
         ) 
@@ -51,18 +62,37 @@ internal class SendCommand {
         }
 
         if (_ws == null || _ws.BaseConfig == null || _ws.BaseConfig.Workspaces == null) {
-            Console.Error.WriteLine($"❌ Workspace name '{workspaceName}' not found in current configuration.");
+            Console.Error.WriteLine($"{Constants.ErrorChar} Workspace name '{workspaceName}' not found in current configuration.");
             return Result.Error;
         }
 
         if (!_ws.BaseConfig.Workspaces.TryGetValue(workspaceName, out WorkspaceConfig? workspace)) {
-            Console.Error.WriteLine($"❌ Workspace name '{workspaceName}' not found in current configuration.");
+            Console.Error.WriteLine($"{Constants.ErrorChar} Workspace name '{workspaceName}' not found in current configuration.");
             return Result.Error;
         }
 
         if (!workspace.Requests.TryGetValue(requestName, out var definition) || definition is null) { 
-            Console.Error.WriteLine($"❌ Request name '{requestName}' not found in current workspace.");
+            Console.Error.WriteLine($"{Constants.ErrorChar} Request name '{requestName}' not found in current workspace.");
             return Result.Error;
+        }
+
+        var request = workspace.Requests[requestName];
+        var argsDict = new Dictionary<string, object?>();
+
+        if (arguments is not null && arguments.Any()) {
+            using var enumerator = arguments.GetEnumerator();
+
+            foreach (var argKvp in request.Arguments) {
+                var arg = argKvp.Value;
+                var argName = argKvp.Key;
+
+                if (!enumerator.MoveNext()) {
+                    break; // No more arguments to consume
+                }
+
+                var argValue = enumerator.Current;
+                argsDict[argName] = argValue;
+            }
         }
 
         if (Console.IsInputRedirected) {
@@ -82,6 +112,10 @@ internal class SendCommand {
             var key = parts[0];
             var value = parts.Length > 1 ? parts[1] : null; // Handle standalone values
 
+            if (value is not null) {
+                value = value.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
+            }
+
             if (!mergedParams.ContainsKey(key))
             {
                 mergedParams[key] = value;
@@ -94,6 +128,10 @@ internal class SendCommand {
                 var parts = parameter.Split('=', 2);
                 var key = parts[0];
                 var value = parts.Length > 1 ? parts[1] : null;
+
+                if (value is not null) {
+                    value = value.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
+                }
 
                 // Always overwrite since command-line parameters take precedence
                 mergedParams[key] = value;
@@ -181,7 +219,7 @@ internal class SendCommand {
                 }
 
             default:
-                Console.Error.WriteLine($"❌ Unknown method {method}");
+                Console.Error.WriteLine($"{Constants.ErrorChar} Unknown method {method}");
                 result = Result.Error;
                 break;
         }

@@ -5,10 +5,11 @@ using System.Net.Http.Headers;
 
 namespace ParksComputing.XferKit.Scripting.Services;
 
-public interface IScriptEngine {
+public interface IXferScriptEngine {
+    public dynamic Script { get; }
     void SetValue(string name, object? value);
     string ExecuteScript(string? script);
-    string? EvaluateScript(string? script);
+    object? EvaluateScript(string? script);
     string ExecuteCommand(string? script);
     void InvokePreRequest(params object[] args);
     void InvokePostResponse(params object?[] args);

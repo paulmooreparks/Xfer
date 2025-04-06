@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cliffer" Version="0.4.11-prerelease" />
+    <ProjectReference Include="..\..\Cliffer\ClifferLib\Cliffer.csproj" />
   </ItemGroup>
 
 </Project>

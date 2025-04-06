@@ -19,11 +19,11 @@ namespace ParksComputing.XferKit.Cli.Commands;
 [Argument(typeof(IEnumerable<string>), "args", "Optional arguments", Arity = ArgumentArity.ZeroOrMore)]
 internal class RunWsScriptCommand {
     private readonly IWorkspaceService _workspaceService;
-    private readonly IScriptEngine _scriptEngine;
+    private readonly IXferScriptEngine _scriptEngine;
 
     public RunWsScriptCommand(
         IWorkspaceService workspaceService,
-        IScriptEngine scriptEngine
+        IXferScriptEngine scriptEngine
         ) { 
         _workspaceService = workspaceService;
         _scriptEngine = scriptEngine;
@@ -82,7 +82,7 @@ internal class RunWsScriptCommand {
                     return Result.Error;
                 }
 
-                var argType = argumentDefinitions[i].Key;
+                var argType = argumentDefinitions[i].Type;
 
                 switch (argType) {
                     case "string":
@@ -115,7 +115,7 @@ internal class RunWsScriptCommand {
 
             if (i < argumentDefinitions.Count && Console.IsInputRedirected) {
                 var argString = Console.In.ReadToEnd().Trim();
-                var argType = argumentDefinitions[i].Key;
+                var argType = argumentDefinitions[i].Name;
 
                 if (argType == "string") {
                     quotedArgs.Add((argString.StartsWith("\"") && argString.EndsWith("\"")) || (argString.StartsWith("'") && argString.EndsWith("'"))

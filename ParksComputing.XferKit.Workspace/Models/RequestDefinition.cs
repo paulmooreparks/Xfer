@@ -11,6 +11,8 @@ public class RequestDefinition {
     public string? Endpoint { get; set; }
     [XferProperty("method")]
     public string? Method { get; set; }
+    [XferProperty("arguments")]
+    public Dictionary<string, Argument> Arguments { get; set; } = [];
     [XferProperty("headers")]
     public Dictionary<string, string> Headers { get; set; } = [];
     [XferProperty("cookies")]
@@ -20,7 +22,7 @@ public class RequestDefinition {
     [XferProperty("payload")]
     public string? Payload { get; set; }
     [XferProperty("properties")]
-    public IDictionary<string, object>? Properties { get; set; }
+    public Dictionary<string, object>? Properties { get; set; } = [];
     [XferProperty("preRequest")]
     public string? PreRequest { get; set; }
     [XferProperty("postResponse")]

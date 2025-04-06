@@ -17,11 +17,11 @@ namespace ParksComputing.XferKit.Cli.Commands;
 [Command("script", "Run JavaScript interactively")]
 [Argument(typeof(IEnumerable<string>), "scriptBody", "Optional script text to execute.", Arity = Cliffer.ArgumentArity.ZeroOrMore)]
 internal class ScriptCommand {
-    private readonly IScriptEngine _scriptEngine;
+    private readonly IXferScriptEngine _scriptEngine;
     private readonly IReplContext _replContext;
 
     public ScriptCommand(
-        IScriptEngine scriptEngine,
+        IXferScriptEngine scriptEngine,
         ICommandSplitter splitter,
         IWorkspaceService workspaceService
         ) 

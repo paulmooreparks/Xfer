@@ -5,6 +5,7 @@ using System.Reflection;
 
 using Cliffer;
 using ParksComputing.XferKit.Cli.Services;
+using ParksComputing.XferKit.Workspace;
 using ParksComputing.XferKit.Workspace.Services;
 
 namespace ParksComputing.XferKit.Cli;
@@ -48,29 +49,34 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
 
 
     public override string[] PreprocessArgs(string[] args, Command command, InvocationContext context) {
-        ParseResult? parseResult = null;
-
-        if (args[0].StartsWith(".")) {
-            args[0] = args[0].Substring(1);
-            parseResult = command.Parse(args);
+        if (args[0].StartsWith('.')) {
+            args[0] = args[0][1..];
         }
         else {
             var tmparg = args[0];
             args[0] = $"{_workspaceService.CurrentWorkspaceName}.{args[0]}";
-            parseResult = command.Parse(args);
 
-            if (parseResult?.Errors.Count > 0) {
+            if (command.Subcommands.Where(x => x.Name.Equals(args[0])).Count() == 0) {
                 args[0] = tmparg;
-                parseResult = command.Parse(args);
             }
         }
 
         var newArgs = new List<string>();
         newArgs.AddRange(args);
 
-        if (parseResult?.Errors.Count == 0 && parseResult?.CommandResult.Command == command) {
+        if (args[0] == command.Name) {
             newArgs.Add(_recursionOption.Aliases.First());
             newArgs.Add("true");
+        }
+
+        var parseResult = command.Parse(args);
+
+        if (parseResult.Errors.Count > 0) {
+            foreach (var error in parseResult.Errors) {
+                var errorMessage = $"{Constants.ErrorChar} {error.Message}";
+                throw new ApplicationException(errorMessage);
+            }
+            return args;
         }
 
         return base.PreprocessArgs(newArgs.ToArray(), command, context);
