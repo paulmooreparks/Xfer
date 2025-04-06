@@ -166,7 +166,7 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     
                     </ Default parameters to be sent with the request unless overridden. />
                     parameters (
-                        'key1={{[file]::c:/users/paul/sample.txt::key1}}'
+                        'key1={{[prop]::reqLevel}}'
                         'key2={{[prop]::../wsLevel::key2}}'
                         'key3={{[prop]::../../baseLevel::key3}}'
                         'key4={{[prop]::/parkscomputing/wsLevel::key4}}'
