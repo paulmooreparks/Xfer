@@ -7,16 +7,59 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
 
     </ activeWorkspace "httpbin" />
 
-    initScript <'file:globalInitScript.js'>
+    </ These are global variables that may be referenced in scripts and configuration. />
+    properties {
+        sampleValue "This is a sample value"
+        startWorkspace "httpbin"
+        baseLevel "global"
+    }
+
+    initScript <'
+        var clr = host.lib('mscorlib', 'System', 'System.Core');
+        var Dictionary = clr.System.Collections.Generic.Dictionary;
+        var Environment = clr.System.Environment;
+
+        var json = host.lib('Newtonsoft.Json');
+        var jsonLinq = json.Newtonsoft.Json.Linq;
+        var jsonConvert = json.JsonConvert;
+        var jObject = jsonLinq.JObject;
+
+        var xferLang = host.lib('ParksComputing.Xfer.Lang');
+
+        var startWorkspace = xk.startWorkspace;
+        // var startWorkspace = xk.store.get("startWorkspace");
+
+        if (startWorkspace != null) {
+            xk.setActiveWorkspace(startWorkspace);
+        }
+
+        function sayHello() {
+            console.log("Hello from globalInitScript.js");
+            return "";
+        }
+    '>
+
+    macros {
+    }
 
     scripts {
         sample {
             description "An example of a top-level named script."
 
             arguments {
-                arg1 string "The first argument."
-                arg2 number "The second argument."
-                arg3 boolean "The third argument."
+                arg1 {
+                    type "string"
+                    description "(string) The first argument."
+                    isRequired ~true
+                }
+                arg2 {
+                    type "number"
+                    description"(number) The second argument."
+                }
+                arg3 {
+                    type "boolean" 
+                    description "(boolean) The third argument."
+                }
             }
 
             script <'
@@ -24,7 +67,12 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                 log("arg1: " + arg1);
                 log("arg2: " + arg2);
                 log("arg3: " + arg3);
-                return arg2 + 123;
+
+                if (typeof arg2 === "number") {
+                    return arg2 + 123;
+                } else {
+                    return null;
+                }            
             '>
         }
 
@@ -32,7 +80,10 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
             description "Another way to do output."
 
             arguments {
-                obj object "The object to echo."
+                obj {
+                    type "object"
+                    description "The object to echo."
+                }
             }
 
             script <'
@@ -50,19 +101,15 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
         log(request.response.body);
     '>
 
-    </ These are global variables that may be referenced in the configuration. />
-    properties {
-        sampleValue "This is a sample value"
-    }
-
-    macros {
-    }
-
     </ A workspace is a collection of related requests and associated configuration. />
     workspaces {
 
         httpbin {
             description "Calling various endpoints in the httpbin.org service."
+
+            properties {
+                wsLevel "httpbin wsLevel"
+            }
 
             macros {
             }
@@ -93,6 +140,25 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     endpoint "/get"
                     method "GET"
 
+                    properties {
+                        reqLevel "gettest reqLevel"
+                    }
+
+                    arguments {
+                        arg1 {
+                            type "string"
+                            description "(string) The first argument."
+                        }
+                        arg2 {
+                            type "number"
+                            description"(number) The second argument."
+                        }
+                        arg3 {
+                            type "boolean" 
+                            description "(boolean) The third argument."
+                        }
+                    }
+
                     </ Default headers to be sent with the request unless overridden. />
                     headers {
                         Accept "application/json"
@@ -100,8 +166,11 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     
                     </ Default parameters to be sent with the request unless overridden. />
                     parameters (
-                        'key1=value1'
-                        'key2=value2'
+                        'key1={{[file]::c:/users/paul/sample.txt::key1}}'
+                        'key2={{[prop]::../wsLevel::key2}}'
+                        'key3={{[prop]::../../baseLevel::key3}}'
+                        'key4={{[prop]::/parkscomputing/wsLevel::key4}}'
+                        'key5={{[prop]::/parkscomputing/about/reqLevel::key5}}'
                     )
 
                     preRequest <'
@@ -115,6 +184,10 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     '>
                 }
                 posttest {
+                    properties {
+                        reqLevel "posttest regLevel"
+                    }
+
                     endpoint "/post"
                     method "POST"
                     headers {
@@ -172,9 +245,17 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
         parkscomputing {
             description "Making calls to the Parks Computing website."
 
+            properties {
+                wsLevel "parkscomputing wsLevel"
+            }
+
             baseUrl "https://parkscomputing.com/"
             requests {
                 about {
+                    properties {
+                        reqLevel "parkscomputing.about regLevel"
+                    }
+
                     endpoint "/content/about.html"
                     method "GET"
                 }
