@@ -46,14 +46,31 @@ public class RequestDefinition {
 
         // Merge headers (child values override parent)
         foreach (var kvp in parentRequest.Headers) {
-            if (!Headers.ContainsKey(kvp.Key)) {
-                Headers[kvp.Key] = kvp.Value;
-            }
+            Headers.TryAdd(kvp.Key, kvp.Value);
         }
 
-        // Merge parameters (avoid duplicates, prioritize child)
-        var paramSet = new HashSet<string>(parentRequest.Parameters);
-        paramSet.UnionWith(Parameters); // Child parameters take precedence
-        Parameters = [.. paramSet];
+        // Merge parameters (child overrides parent if same key)
+        var paramDict = new Dictionary<string, string?>();
+
+        // Add parent parameters first
+        foreach (var param in parentRequest.Parameters) {
+            var split = param.Split('=', 2);
+            var key = split[0];
+            var value = split.Length > 1 ? split[1] : null;
+            paramDict[key] = value;
+        }
+
+        // Then add/override with child parameters
+        foreach (var param in Parameters) {
+            var split = param.Split('=', 2);
+            var key = split[0];
+            var value = split.Length > 1 ? split[1] : null;
+            paramDict[key] = value;
+        }
+
+        // Rebuild Parameters list
+        Parameters = paramDict
+            .Select(kvp => kvp.Value is not null ? $"{kvp.Key}={kvp.Value}" : kvp.Key)
+            .ToList();
     }
 }

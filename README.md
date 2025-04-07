@@ -2,7 +2,26 @@
 
 # The XferKit API-Management CLI Tool
 
-![XferKit CLI Version](https://img.shields.io/badge/XferKit_CLI-0.1.0-green)
+<p>
+  <a href="https://github.com/paulmooreparks/Xfer">
+    <img alt="XferKit CLI Version" src="https://img.shields.io/badge/XferKit_CLI-0.1.0-green">
+  </a>
+  <a href="https://github.com/paulmooreparks/Xfer">
+    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/paulmooreparks/Xfer">
+  </a>
+  <a href="https://github.com/yourusername/xferkit">
+    <img alt="GitHub issues" src="https://img.shields.io/github/issues/paulmooreparks/Xfer">
+  </a>
+  <a href="https://opensource.org/licenses/MIT">
+    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg">
+  </a>
+  <!--
+  <a href="https://www.nuget.org/packages/XferKit">
+    <img alt="NuGet" src="https://img.shields.io/nuget/v/XferKit.svg">
+  </a>
+  -->
+</p>
+
 
 The XferKit CLI tool provides a command-line interface (CLI) for making HTTP requests, scripting workflows, and easily interacting with APIs from the command line.
 

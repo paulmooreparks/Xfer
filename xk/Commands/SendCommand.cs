@@ -17,7 +17,7 @@ using ParksComputing.XferKit.Cli.Extensions;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
-[Command("send", "Send a request defined in the current workspace.")]
+[Command("send", "Send a request defined in the current workspace.", IsHidden = true)]
 [Argument(typeof(string), "requestName", "The name of the request to send.")]
 [Option(typeof(string), "--baseurl", "The base URL of the API to send HTTP requests to.", new[] { "-b" }, IsRequired = false)]
 [Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
@@ -103,6 +103,8 @@ internal class SendCommand {
         var method = definition.Method?.ToUpper() ?? string.Empty;
         var endpoint = definition.Endpoint ?? string.Empty;
 
+        endpoint = endpoint.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
+
         var cfgParameters = definition.Parameters ?? Enumerable.Empty<string>();
         var mergedParams = new Dictionary<string, string?>();
 
@@ -116,10 +118,7 @@ internal class SendCommand {
                 value = value.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
             }
 
-            if (!mergedParams.ContainsKey(key))
-            {
-                mergedParams[key] = value;
-            }
+            mergedParams.TryAdd(key, value);
         }
 
         // Override with command-line parameters (higher precedence)
@@ -145,14 +144,19 @@ internal class SendCommand {
         var configHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var kvp in definition.Headers) {
-            configHeaders[kvp.Key] = kvp.Value?.ToString() ?? string.Empty; // Add default headers
+            var configValue = kvp.Value?.ToString() ?? string.Empty;
+            configValue = configValue.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
+            configHeaders[kvp.Key] = configValue;
         }
 
         if (headers is not null) {
             foreach (var header in headers) {
                 var parts = header.Split(':', 2);
                 if (parts.Length == 2) {
-                    configHeaders[parts[0].Trim()] = parts[1].Trim(); // Override
+                    var configKey = parts[0].Trim();
+                    var configValue = parts[1]?.Trim() ?? string.Empty;
+                    configValue = configValue.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
+                    configHeaders[configKey] = configValue;
                 }
             }
         }
@@ -160,14 +164,20 @@ internal class SendCommand {
         var configCookies = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var kvp in definition.Cookies) {
-            configCookies[kvp.Key] = kvp.Value; // Add default cookies
+            var configKey = kvp.Key;
+            var configValue = kvp.Value ?? string.Empty;
+            configValue = configValue.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
+            configCookies[configKey] = configValue;
         }
 
         if (cookies is not null) {
             foreach (var cookie in cookies) {
                 var parts = cookie.Split('=', 2);
                 if (parts.Length == 2) {
-                    configCookies[parts[0].Trim()] = parts[1].Trim(); // Override
+                    var configKey = parts[0].Trim();
+                    var configValue = parts[1]?.Trim() ?? string.Empty;
+                    configValue = configValue.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
+                    configCookies[configKey] = configValue;
                 }
             }
         }
@@ -207,6 +217,7 @@ internal class SendCommand {
 
             case "POST": {
                     var finalPayload = payload ?? definition.Payload ?? string.Empty;
+                    finalPayload = finalPayload.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
                     result = await postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
                     _scriptEngine.InvokePostResponse(
                         workspaceName,

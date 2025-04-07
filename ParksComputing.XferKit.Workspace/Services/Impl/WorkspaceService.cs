@@ -57,7 +57,7 @@ internal class WorkspaceService : IWorkspaceService
     public void SetActiveWorkspace(string workspaceName) {
         if (!string.IsNullOrEmpty(workspaceName)) {
             if (BaseConfig.Workspaces is not null) {
-                if (string.Equals(workspaceName, ".")) {
+                if (string.Equals(workspaceName, "/")) {
                     ActiveWorkspace = new WorkspaceConfig();
                     BaseConfig.ActiveWorkspace = string.Empty;
                 }
