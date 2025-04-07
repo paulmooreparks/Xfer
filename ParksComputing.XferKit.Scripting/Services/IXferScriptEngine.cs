@@ -11,6 +11,6 @@ public interface IXferScriptEngine {
     string ExecuteScript(string? script);
     object? EvaluateScript(string? script);
     string ExecuteCommand(string? script);
-    void InvokePreRequest(params object[] args);
+    void InvokePreRequest(params object?[] args);
     void InvokePostResponse(params object?[] args);
 }

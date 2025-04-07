@@ -175,16 +175,24 @@ function __postResponse__{workspaceName}(workspace, request) {{
 
                     var requestDef = request.Value;
 
+                    var argsBuilder = new StringBuilder();
+
+                    foreach (var arg in requestDef.Arguments) {
+                        argsBuilder.Append($", {arg.Key}");
+                    }
+
+                    var extraArgs = argsBuilder.ToString();
+
                     _engine.Execute($@"
-function __preRequest__{workspaceName}__{requestName} (workspace, request) {{
+function __preRequest__{workspaceName}__{requestName} (workspace, request{extraArgs}) {{
     var nextHandler = function() {{ __preRequest__{workspaceName}(workspace, request); }};
-    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspace.Extend) ? "" : $"__preRequest__{workspace.Extend}__{requestName}(workspace, request);")} }};
+    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspace.Extend) ? "" : $"__preRequest__{workspace.Extend}__{requestName}(workspace, request{extraArgs});")} }};
     {(requestDef.PreRequest == null ? $"__preRequest__{workspaceName}(workspace, request)" : GetScriptContent(requestDef.PreRequest))}
 }}
 
-function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
+function __postResponse__{workspaceName}__{requestName} (workspace, request{extraArgs}) {{
     var nextHandler = function() {{ __postResponse__{workspaceName}(workspace, request); }};
-    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspace.Extend) ? "" : $"__postResponse__{workspace.Extend}__{requestName}(workspace, request);")} }};
+    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspace.Extend) ? "" : $"__postResponse__{workspace.Extend}__{requestName}(workspace, request{extraArgs});")} }};
     {(requestDef.PostResponse == null ? $"__postResponse__{workspaceName}(workspace, request)" : GetScriptContent(requestDef.PostResponse))}
 }}
 
@@ -240,13 +248,15 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
         }
     }
 
-    public void InvokePreRequest(params object[] args) {
+    public void InvokePreRequest(params object?[] args) {
         /*
         workspaceName = args[0]
         requestName = args[1]
         configHeaders = args[2]
         parameters = args[3]
         payload = args[4]
+        cookies = args[5]
+        extraArgs = args[6]
         */
 
         var workspaceName = args[0] as string ?? string.Empty;
@@ -288,10 +298,16 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
         var srcPayload = args[4] as string;
         request.payload = srcPayload;
 
+        var extraArgs = args[6] as IEnumerable<object>;
+        var invokeArgs = new List<object> { workspace, request };
+
+        if (extraArgs is not null) {
+            invokeArgs.AddRange(extraArgs);
+        }
+
         var preRequestResult = _engine.Invoke(
             $"__preRequest__{workspaceName}__{requestName}",
-            workspace,
-            request
+            invokeArgs.ToArray()
             );
 
         // Copy headers back to original dictionary
@@ -320,6 +336,7 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
         statusCode = args[2]
         headers = args[3]
         responseContent = args[4]
+        extraArgs = args[5]
         */
 
         var workspaceName = args[0] as string ?? string.Empty;
@@ -327,6 +344,7 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
         var statusCode = args[2] as int? ?? 0;
         var headers = args[3] as HttpResponseHeaders;
         var responseContent = args[4] as string ?? string.Empty;
+        var extraArgs = args[5] as IEnumerable<object>;
 
         var workspace = _workspaceCache[workspaceName];
         var requests = workspace.requests as IDictionary<string, object>;
@@ -343,10 +361,15 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request) {{
         request.response.headers = headers ?? default;
         request.response.body = responseContent;
 
+        var invokeArgs = new List<object> { workspace, request };
+
+        if (extraArgs is not null) {
+            invokeArgs.AddRange(extraArgs);
+        }
+
         var postResponseResult = _engine.Invoke(
             $"__postResponse__{workspaceName}__{requestName}",
-            workspace,
-            request
+            invokeArgs.ToArray()
             );
 
 

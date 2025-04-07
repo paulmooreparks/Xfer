@@ -48,7 +48,7 @@ internal class SendCommand {
         [OptionParam("--payload")] string payload,
         [OptionParam("--headers")] IEnumerable<string> headers,
         [OptionParam("--cookies")] IEnumerable<string> cookies,
-        [ArgumentParam("arguments")] IEnumerable<object> arguments,
+        [ArgumentParam("arguments")] List<System.CommandLine.Parsing.Token> arguments,
         [CommandParam("get")] GetCommand getCommand,
         [CommandParam("post")] PostCommand postCommand
         ) 
@@ -78,6 +78,7 @@ internal class SendCommand {
 
         var request = workspace.Requests[requestName];
         var argsDict = new Dictionary<string, object?>();
+        var extraArgs = new List<object>();
 
         if (arguments is not null && arguments.Any()) {
             using var enumerator = arguments.GetEnumerator();
@@ -90,8 +91,9 @@ internal class SendCommand {
                     break; // No more arguments to consume
                 }
 
-                var argValue = enumerator.Current;
+                var argValue = enumerator.Current.Value;
                 argsDict[argName] = argValue;
+                extraArgs.Add(argValue);
             }
         }
 
@@ -188,7 +190,8 @@ internal class SendCommand {
             configHeaders,
             finalParameters,
             payload,
-            configCookies
+            configCookies,
+            extraArgs.ToArray()
             );
 
 
@@ -210,7 +213,8 @@ internal class SendCommand {
                         requestName, 
                         getCommand.StatusCode, 
                         getCommand.Headers,
-                        getCommand.ResponseContent
+                        getCommand.ResponseContent,
+                        extraArgs.ToArray()
                         );
                     break;
                 }
@@ -224,7 +228,8 @@ internal class SendCommand {
                         requestName,
                         postCommand.StatusCode,
                         postCommand.Headers,
-                        postCommand.ResponseContent
+                        postCommand.ResponseContent,
+                        extraArgs.ToArray()
                         );
                     break;
                 }
