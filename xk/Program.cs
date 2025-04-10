@@ -15,6 +15,7 @@ using ParksComputing.XferKit.Cli;
 using System.Diagnostics;
 using System.Reflection;
 using ParksComputing.XferKit.Workspace.Services;
+using ParksComputing.XferKit.Cli.Commands;
 
 namespace ParksComputing.Xfer.Cli;
 
@@ -34,12 +35,18 @@ internal class Program {
                 services.AddXferKitScriptingServices();
                 services.AddXferKitDiagnosticsServices("XferKit");
                 services.AddSingleton<ICommandSplitter, CommandSplitter>();
+                services.AddSingleton<IScriptCliBridge, ScriptCliBridge>();
             })
             .Build();
 
         Cliffer.Macro.CustomMacroArgumentProcessor += CustomMacroArgumentProcessor;
 
         Utility.SetServiceProvider(cli.ServiceProvider);
+        var rootCommand = cli.Commands["xk"] as RootCommand;
+
+        if (rootCommand is not null) {
+            rootCommand.ConfigureWorkspaces(cli);
+        }
 
         ClifferEventHandler.OnExit += () => {
             var persistenceService = Utility.GetService<PersistenceService>()!;

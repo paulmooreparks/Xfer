@@ -12,5 +12,7 @@ public interface IXferScriptEngine {
     object? EvaluateScript(string? script);
     string ExecuteCommand(string? script);
     void InvokePreRequest(params object?[] args);
-    void InvokePostResponse(params object?[] args);
+    object? InvokePostResponse(params object?[] args);
+    object? Invoke(string script, params object?[] args);
+    void AddHostObject(string itemName, object target);
 }

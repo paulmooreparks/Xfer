@@ -24,11 +24,13 @@ namespace ParksComputing.XferKit.Cli.Commands;
 [Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(IEnumerable<string>), "--cookies", "Cookies to include in the request.", new[] { "-c" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
 [Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-pl" }, Arity = ArgumentArity.ZeroOrOne)]
-[Argument(typeof(IEnumerable<object>), "arguments", "Additional arguments passed with the request", Arity = ArgumentArity.ZeroOrMore)]
+[Argument(typeof(IEnumerable<System.CommandLine.Parsing.Token>), "tokenArguments", "Additional arguments passed with the request", Arity = ArgumentArity.ZeroOrMore)]
 internal class SendCommand {
     private readonly IWorkspaceService _ws;
     private readonly IXferScriptEngine _scriptEngine;
     private readonly IPropertyResolver _propertyResolver;
+
+    public object? CommandResult { get; private set; } = null;
 
     public SendCommand(
         IWorkspaceService workspaceService,
@@ -44,15 +46,16 @@ internal class SendCommand {
     public async Task<int> Execute(
         [ArgumentParam("requestName")] string requestName,
         [OptionParam("--baseurl")] string? baseUrl,
-        [OptionParam("--parameters")] IEnumerable<string> parameters,
-        [OptionParam("--payload")] string payload,
-        [OptionParam("--headers")] IEnumerable<string> headers,
-        [OptionParam("--cookies")] IEnumerable<string> cookies,
-        [ArgumentParam("arguments")] List<System.CommandLine.Parsing.Token> arguments,
-        [CommandParam("get")] GetCommand getCommand,
-        [CommandParam("post")] PostCommand postCommand
+        [OptionParam("--parameters")] IEnumerable<string>? parameters,
+        [OptionParam("--payload")] string? payload,
+        [OptionParam("--headers")] IEnumerable<string>? headers,
+        [OptionParam("--cookies")] IEnumerable<string>? cookies,
+        [ArgumentParam("tokenArguments")] List<System.CommandLine.Parsing.Token>? tokenArguments,
+        object?[]? objArguments,
+        IClifferCli cli
         ) 
     {
+        bool isConsoleRedirected = Console.IsInputRedirected;
         var reqSplit = requestName.Split('.');
         var workspaceName = _ws.CurrentWorkspaceName;
 
@@ -78,10 +81,10 @@ internal class SendCommand {
 
         var request = workspace.Requests[requestName];
         var argsDict = new Dictionary<string, object?>();
-        var extraArgs = new List<object>();
+        var extraArgs = new List<object?>();
 
-        if (arguments is not null && arguments.Any()) {
-            using var enumerator = arguments.GetEnumerator();
+        if (tokenArguments is not null && tokenArguments.Any()) {
+            using var enumerator = tokenArguments.GetEnumerator();
 
             foreach (var argKvp in request.Arguments) {
                 var arg = argKvp.Value;
@@ -96,10 +99,27 @@ internal class SendCommand {
                 extraArgs.Add(argValue);
             }
         }
+        else if (objArguments is not null && objArguments.Length > 0) {
+            int i = 0;
+            foreach (var argKvp in request.Arguments) {
+                var arg = argKvp.Value;
+                var argName = argKvp.Key;
 
-        if (Console.IsInputRedirected) {
+                if (i >= objArguments.Length) {
+                    break; // No more arguments to consume
+                }
+
+                var argValue = objArguments[i];
+                argsDict[argName] = argValue;
+                extraArgs.Add(argValue);
+                i++;
+            }
+        }
+
+        if (payload is null && isConsoleRedirected) {
             var payloadString = Console.In.ReadToEnd();
             payload = payloadString.Trim();
+            isConsoleRedirected = false;
         }
 
         var method = definition.Method?.ToUpper() ?? string.Empty;
@@ -207,32 +227,47 @@ internal class SendCommand {
 
         switch (method) {
             case "GET": {
-                    result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders, finalCookies, isQuiet: true);
-                    _scriptEngine.InvokePostResponse(
-                        workspaceName, 
-                        requestName, 
-                        getCommand.StatusCode, 
-                        getCommand.Headers,
-                        getCommand.ResponseContent,
-                        extraArgs.ToArray()
-                        );
-                    break;
+                var getCommand = cli.Commands["get"] as GetCommand;
+                    
+                if (getCommand is null) {
+                    Console.Error.WriteLine($"{Constants.ErrorChar} Error: Unable to find GET command.");
+                    return Result.Error;
                 }
+                result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders, finalCookies, isQuiet: true);
+
+                CommandResult =_scriptEngine.InvokePostResponse(
+                    workspaceName, 
+                    requestName, 
+                    getCommand.StatusCode, 
+                    getCommand.Headers,
+                    getCommand.ResponseContent,
+                    extraArgs.ToArray()
+                    );
+                break;
+            }
 
             case "POST": {
-                    var finalPayload = payload ?? definition.Payload ?? string.Empty;
-                    finalPayload = finalPayload.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
-                    result = await postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
-                    _scriptEngine.InvokePostResponse(
-                        workspaceName,
-                        requestName,
-                        postCommand.StatusCode,
-                        postCommand.Headers,
-                        postCommand.ResponseContent,
-                        extraArgs.ToArray()
-                        );
-                    break;
+                var postCommand = cli.Commands["post"] as PostCommand;
+
+                if (postCommand is null) {
+                    Console.Error.WriteLine($"{Constants.ErrorChar} Error: Unable to find POST command.");
+                    return Result.Error;
                 }
+
+                var finalPayload = payload ?? definition.Payload ?? string.Empty;
+                finalPayload = finalPayload.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
+                result = await postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
+                
+                CommandResult = _scriptEngine.InvokePostResponse(
+                    workspaceName,
+                    requestName,
+                    postCommand.StatusCode,
+                    postCommand.Headers,
+                    postCommand.ResponseContent,
+                    extraArgs.ToArray()
+                    );
+                break;
+            }
 
             default:
                 Console.Error.WriteLine($"{Constants.ErrorChar} Unknown method {method}");

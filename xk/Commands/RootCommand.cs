@@ -22,6 +22,7 @@ internal class RootCommand {
     private readonly System.CommandLine.RootCommand _rootCommand;
     private readonly IXferScriptEngine _scriptEngine;
     private readonly XferKitApi _xk;
+    private readonly IScriptCliBridge _scriptCliBridge;
 
     private string _currentWorkspaceName = string.Empty;
 
@@ -32,9 +33,9 @@ internal class RootCommand {
         ICommandSplitter splitter,
         IXferScriptEngine scriptEngine,
         XferKitApi xferKitApi,
+        IScriptCliBridge scriptCliBridge,
         [OptionParam("--recursive")] Option recursionOption
-        ) 
-    { 
+        ) {
         _serviceProvider = serviceProvider;
         _workspaceService = workspaceService;
         _rootCommand = rootCommand;
@@ -42,6 +43,8 @@ internal class RootCommand {
         _xk = xferKitApi;
         _recursionOption = recursionOption;
         _replContext = new XferReplContext(_serviceProvider, _workspaceService, splitter, _recursionOption);
+        _scriptCliBridge = scriptCliBridge;
+        _scriptCliBridge.RootCommand = rootCommand;
 
 #if false
         string functionScript = $@"
@@ -61,6 +64,15 @@ function myFunction(baseUrl, page) {{
         _scriptEngine.Script["myFunction"](baseUrl, page);
 #endif
 
+        string cliScript = $@"
+function myFunction(baseUrl, page) {{
+    log(baseUrl);
+    return page;
+}}
+";
+    }
+
+    public void ConfigureWorkspaces(IClifferCli cli) {
         if (_workspaceService.BaseConfig is not null) {
             foreach (var macro in _workspaceService.BaseConfig.Macros) {
                 var macroCommand = new Macro($"{macro.Key}", $"[macro] {macro.Value.Description}", macro.Value.Command);
@@ -105,10 +117,13 @@ function myFunction(baseUrl, page) {{
                     paramList.Add(argument.Name);
                 }
 
+                macroCommand.AddArgument(new Argument<IEnumerable<string>>("params", "Additional arguments.") { Arity = System.CommandLine.ArgumentArity.ZeroOrMore, IsHidden = true });
+                paramList.Add("params");
+
                 _rootCommand.AddCommand(macroCommand);
                 var paramString = string.Join(", ", paramList);
 
-                _scriptEngine.ExecuteScript($@"
+                _scriptEngine.EvaluateScript($@"
 function __script__{scriptName}({paramString}) {{
 {scriptBody}
 }};
@@ -118,9 +133,12 @@ xk.{scriptName} = __script__{scriptName};
             }
         }
 
+        var workspaceColl = _xk.workspaces as IDictionary<string, object>;
+
         foreach (var workspaceKvp in _workspaceService.BaseConfig?.Workspaces ?? new Dictionary<string, Workspace.Models.WorkspaceConfig>()) {
             var workspaceName = workspaceKvp.Key;
             var workspaceConfig = workspaceKvp.Value;
+            var workspace = workspaceColl![workspaceName] as dynamic;
 
             foreach (var script in workspaceConfig.Scripts) {
                 var description = script.Value.Description ?? string.Empty;
@@ -129,6 +147,7 @@ xk.{scriptName} = __script__{scriptName};
                 var arguments = script.Value.Arguments;
                 var paramList = new List<string>();
                 var macroCommand = new Macro($"{workspaceName}.{scriptName}", $"[script] {description}", $"runwsscript --workspaceName {workspaceName} --scriptName {scriptName}");
+                macroCommand.IsHidden = workspaceConfig.IsHidden;
 
                 foreach (var kvp in arguments) {
                     var argument = kvp.Value;
@@ -149,7 +168,6 @@ xk.{scriptName} = __script__{scriptName};
                             macroCommand.AddArgument(new Argument<bool>(argName, argDescription) { Arity = argArity });
                             break;
                         case "object":
-                            macroCommand.AddArgument(new Argument<object>(argName, argDescription) { Arity = argArity });
                             break;
                         default:
                             Console.Error.WriteLine($"{ParksComputing.XferKit.Workspace.Constants.ErrorChar} Script {scriptName}: Invalid or unsupported argument type {argType} for argument {argName}");
@@ -159,18 +177,22 @@ xk.{scriptName} = __script__{scriptName};
                     paramList.Add(argument.Name);
                 }
 
+                macroCommand.AddArgument(new Argument<IEnumerable<string>>("params", "Additional arguments.") { Arity = System.CommandLine.ArgumentArity.ZeroOrOne, IsHidden = true });
+                paramList.Add("params");
+
                 _rootCommand.AddCommand(macroCommand);
                 var paramString = string.Join(", ", paramList);
 
-                _scriptEngine.ExecuteScript($@"
-function __script__{workspaceName}__{scriptName}({paramString}) {{
+                _scriptEngine.EvaluateScript($@"
+function __script__{workspaceName}__{scriptName}(workspace, {paramString}) {{
 {scriptBody}
 }};
 
 xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptName};
-
 ");
             }
+
+            var requests = workspace.requests as IDictionary<string, object>;
 
             foreach (var requestKvp in workspaceConfig.Requests) {
                 var request = requestKvp.Value;
@@ -178,6 +200,14 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
                 request.Name = requestName;
                 var description = request.Description ?? $"{request.Method} {request.Endpoint}";
                 var macroCommand = new Macro($"{workspaceName}.{requestName}", $"[request] {description}", $"send {workspaceName}.{requestName} --baseurl {workspaceKvp.Value.BaseUrl}");
+                macroCommand.IsHidden = workspaceConfig.IsHidden;
+
+                var requestObj = requests![requestName] as IDictionary<string, object>;
+                var requestCaller = new RequestCaller(cli, requestName, workspaceKvp.Value.BaseUrl);
+#pragma warning disable CS8974 // Converting method group to non-delegate type
+                requestObj!["execute"] = requestCaller.RunRequest;
+                // _scriptEngine.AddHostObject($"reqTest_{workspaceName}_{requestName}", requestCaller.RunRequest);
+#pragma warning restore CS8974 // Converting method group to non-delegate type
 
                 var baseurlOption = new Option<string>(["--baseurl", "-b"], "The base URL of the API to send HTTP requests to.");
                 baseurlOption.IsRequired = false;
@@ -229,6 +259,7 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
 
             foreach (var macro in workspaceConfig.Macros) {
                 var macroCommand = new Macro($"{workspaceName}.{macro.Key}", $"[macro] {macro.Value.Description}", macro.Value.Command);
+                macroCommand.IsHidden = workspaceConfig.IsHidden;
 
                 _rootCommand.AddCommand(macroCommand);
             }
@@ -261,5 +292,34 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
             );
 
         return result;
+    }
+}
+
+public class RequestCaller {
+    private readonly IClifferCli? _cli;
+
+    public string RequestName { get; set; }
+    public string BaseUrl { get; set; }
+
+    public RequestCaller(
+        IClifferCli? cli,
+        string requestName,
+        string? baseUrl
+        ) 
+    {
+        _cli = cli;
+        RequestName = requestName;
+        BaseUrl = baseUrl!;
+    }
+
+    public async Task<object?> RunRequest(params object?[]? args) {
+        if (_cli is not null && _cli.Commands.TryGetValue("send", out object? commandObject)) {
+            if (commandObject is SendCommand sendCommand) {
+                await sendCommand.Execute(RequestName, BaseUrl, null, null, null, null, null, args, _cli);
+                return sendCommand.CommandResult;
+            }
+        }
+
+        return null;
     }
 }

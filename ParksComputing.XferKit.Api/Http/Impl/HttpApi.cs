@@ -62,7 +62,7 @@ internal class HttpApi : IHttpApi
 
     public async Task<HttpResponseMessage?> postAsync(
         string baseUrl,
-        string payload,
+        string? payload,
         IEnumerable<string>? headers
         )
     {
@@ -90,7 +90,7 @@ internal class HttpApi : IHttpApi
 
     public HttpResponseMessage? post(
         string baseUrl,
-        string payload,
+        string? payload,
         IEnumerable<string>? headers
         )
     {
@@ -100,7 +100,7 @@ internal class HttpApi : IHttpApi
     public async Task<HttpResponseMessage?> putAsync(
         string baseUrl,
         string endpoint,
-        string payload,
+        string? payload,
         IEnumerable<string>? headers
         )
     {
@@ -130,7 +130,7 @@ internal class HttpApi : IHttpApi
     public HttpResponseMessage? put(
         string baseUrl,
         string endpoint,
-        string payload,
+        string? payload,
         IEnumerable<string>? headers
         )
     {

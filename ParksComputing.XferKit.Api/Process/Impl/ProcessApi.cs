@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace ParksComputing.XferKit.Api.Process.Impl;
 internal class ProcessApi : IProcessApi {
-    public void run(string? command, string? workingDirectory, string[]? args) {
+    public void run(string? command, string? workingDirectory, params string[]? args) {
         var arguments = string.Empty;
 
         if (args is not null) {

@@ -56,6 +56,29 @@ public class XferKitApi : DynamicObject {
         process = processApi;
     }
 
+
+    public object? this[string key] {
+        get {
+            if (string.IsNullOrEmpty(key)) {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (_properties.TryGetValue(key, out object? value)) {
+                return value;
+            }
+
+            return default;
+        }
+        set {
+            if (value is null) {
+                _properties.Remove(key);
+            }
+            else {
+                _properties[key] = value;
+            }
+        }
+    }
+
     public void setActiveWorkspace(string workspaceName) {
         _workspaceService.SetActiveWorkspace(workspaceName);
     }

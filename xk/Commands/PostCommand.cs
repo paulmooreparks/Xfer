@@ -35,8 +35,8 @@ internal class PostCommand {
 
     public async Task<int> Execute(
         [OptionParam("--baseurl")] string? baseUrl,
-        [ArgumentParam("endpoint")] string endpoint,
-        [OptionParam("--payload")] string payload,
+        [ArgumentParam("endpoint")] string? endpoint,
+        [OptionParam("--payload")] string? payload,
         [OptionParam("--headers")] IEnumerable<string> headers
         ) 
     {
@@ -52,7 +52,7 @@ internal class PostCommand {
 
         baseUrl = baseUri.ToString();
 
-        if (Console.IsInputRedirected) {
+        if (string.IsNullOrEmpty(payload) && Console.IsInputRedirected) {
             var payloadString = Console.In.ReadToEnd();
             payload = payloadString.Trim();
         }

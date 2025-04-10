@@ -63,8 +63,7 @@ internal class GetCommand {
         if (parameters is not null) { 
             paramList.AddRange(parameters!);
         }
-
-        if (Console.IsInputRedirected) {
+        else if (Console.IsInputRedirected) {
             var paramString = Console.In.ReadToEnd();
             paramString = paramString.Trim();
             var inputParams = paramString.Split(' ', StringSplitOptions.None);

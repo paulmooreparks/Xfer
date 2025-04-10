@@ -28,7 +28,7 @@ internal class ClearScriptEngine : IXferScriptEngine {
     private readonly XferKitApi _xk;
 
     // private Engine _engine = new Engine(options => options.AllowClr());
-    private V8ScriptEngine _engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDebugging);
+    private V8ScriptEngine _engine = new V8ScriptEngine(V8ScriptEngineFlags.EnableDebugging | V8ScriptEngineFlags.UseCaseInsensitiveMemberBinding);
 
     public ClearScriptEngine(
         IPackageService packageService,
@@ -121,9 +121,17 @@ function __postResponse(workspace, request) {{
 }};
 ");
 
+            if (_workspaceService.BaseConfig.InitScript is not null) {
+                ExecuteScript(_workspaceService.BaseConfig.InitScript);
+            }
+
             foreach (var workspaceKvp in _workspaceService.BaseConfig.Workspaces) {
                 var workspaceName = workspaceKvp.Key;
                 var workspace = workspaceKvp.Value;
+
+                if (!string.IsNullOrEmpty(workspace.Extend) && _workspaceService.BaseConfig.Workspaces.TryGetValue(workspace.Extend, out var baseWorkspace)) {
+                    workspace.Base = baseWorkspace;
+                }
 
                 var workspaceObj = new ExpandoObject() as dynamic;
                 workspaceObj.name = workspace.Name ?? workspaceName;
@@ -163,8 +171,8 @@ function __preRequest__{workspaceName}(workspace, request) {{
 }};
 
 function __postResponse__{workspaceName}(workspace, request) {{
-    var nextHandler = function() {{ __postResponse(workspace, request); }};
-    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspace.Extend) ? "" : $"__postResponse__{workspace.Extend}(workspace, request);")} }};
+    var nextHandler = function() {{ return __postResponse(workspace, request); }};
+    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspace.Extend) ? "" : $"return __postResponse__{workspace.Extend}(workspace, request);")} }};
     {(workspace.PostResponse == null ? $"__postResponse(workspace, request)" : GetScriptContent(workspace.PostResponse))}
 }};
 
@@ -191,8 +199,8 @@ function __preRequest__{workspaceName}__{requestName} (workspace, request{extraA
 }}
 
 function __postResponse__{workspaceName}__{requestName} (workspace, request{extraArgs}) {{
-    var nextHandler = function() {{ __postResponse__{workspaceName}(workspace, request); }};
-    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspace.Extend) ? "" : $"__postResponse__{workspace.Extend}__{requestName}(workspace, request{extraArgs});")} }};
+    var nextHandler = function() {{ return __postResponse__{workspaceName}(workspace, request); }};
+    var baseHandler = function() {{ {(string.IsNullOrEmpty(workspace.Extend) ? "" : $"return __postResponse__{workspace.Extend}__{requestName}(workspace, request{extraArgs});")} }};
     {(requestDef.PostResponse == null ? $"__postResponse__{workspaceName}(workspace, request)" : GetScriptContent(requestDef.PostResponse))}
 }}
 
@@ -208,43 +216,60 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
                     requestObj.payload = requestDef.Payload ?? string.Empty;
                     requestObj.response = new ResponseDefinition();
 
-                    foreach (var kvp in requestDef.Properties) {
-                        var requestDict = requestObj as IDictionary<string, object>;
+                    if (requestDef.Properties is not null) {
+                        foreach (var kvp in requestDef.Properties) {
+                            var requestDict = requestObj as IDictionary<string, object>;
 
-                        if (requestDict == null) {
-                            throw new InvalidOperationException("Failed to cast requestObj to IDictionary<string, object>");
-                        }
+                            if (requestDict == null) {
+                                throw new InvalidOperationException("Failed to cast requestObj to IDictionary<string, object>");
+                            }
 
-                        if (requestDict.ContainsKey(kvp.Key)) {
-                            _diags.Emit(
-                                nameof(ClearScriptEngine),
-                                new {
-                                    Message = $"Failed to set property {kvp.Key} to {kvp.Value} in request {workspaceName}.{requestName}"
-                                }
-                            );
-                        }
-                        else {
-                            requestDict.Add(kvp.Key, kvp.Value);
+                            if (requestDict.ContainsKey(kvp.Key)) {
+                                _diags.Emit(
+                                    nameof(ClearScriptEngine),
+                                    new {
+                                        Message = $"Failed to set property {kvp.Key} to {kvp.Value} in request {workspaceName}.{requestName}"
+                                    }
+                                );
+                            }
+                            else {
+                                requestDict.Add(kvp.Key, kvp.Value);
+                            }
                         }
                     }
+
 
                     var requests = workspaceObj.requests as IDictionary<string, object>;
                     requests?.Add(requestName, requestObj);
                     _requestCache.Add($"{workspaceName}.{requestName}", requestObj);
                 }
-            }
 
-            if (_workspaceService.BaseConfig.InitScript is not null) {
-                ExecuteScript(_workspaceService.BaseConfig.InitScript);
+                DefineInitScript(workspace, workspaceObj);
+                CallInitScript(workspace, workspaceObj);
             }
+        }
+    }
 
-            foreach (var workspaceKvp in _workspaceService.BaseConfig.Workspaces) {
-                var workspace = workspaceKvp.Value;
+    public void AddHostObject(string itemName, object target) {
+        _engine.AddHostObject(itemName, HostItemFlags.None, target);
+    }
 
-                if (workspace.InitScript is not null) {
-                    ExecuteScript(workspace.InitScript);
-                }
-            }
+    protected void DefineInitScript(WorkspaceConfig workspace, dynamic workspaceObj) {
+        if (workspace.InitScript is not null) {
+            var scriptCode = GetScriptContent(workspace.InitScript);
+            var scriptBody = $@"function __initScript__{workspace.Name}(workspace) {{ {scriptCode} }}";
+            _engine.Execute(scriptBody);
+        }
+    }
+
+    protected void CallInitScript(WorkspaceConfig workspace, dynamic workspaceObj) {
+        if (workspace.InitScript is not null) {
+            var scriptCall = $@"__initScript__{workspace.Name}";
+            Invoke(scriptCall, workspaceObj);
+        }
+
+        if (workspace.Base != null) {
+            CallInitScript(workspace.Base, workspaceObj);
         }
     }
 
@@ -329,7 +354,11 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
         srcPayload = request.payload;
     }
 
-    public void InvokePostResponse(params object?[] args) {
+    public object? Invoke(string script, params object?[] args) {
+        return _engine.Invoke(script, args);
+    }
+
+    public object? InvokePostResponse(params object?[] args) {
         /*
         workspaceName = args[0]
         requestName = args[1]
@@ -350,7 +379,7 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
         var requests = workspace.requests as IDictionary<string, object>;
 
         if (requests is null) {
-            return;
+            return null;
         }
 
         var request = requests[requestName] as dynamic; 
@@ -372,7 +401,7 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
             invokeArgs.ToArray()
             );
 
-
+        return postResponseResult;
     }
 
     public void SetValue(string name, object? value) {

@@ -65,7 +65,7 @@ public class HttpService : IHttpService {
         return await _httpClient.SendAsync(request);
     }
 
-    public async Task<HttpResponseMessage> PostAsync(string baseUrl, string payload, IEnumerable<string>? headers) {
+    public async Task<HttpResponseMessage> PostAsync(string baseUrl, string? payload, IEnumerable<string>? headers) {
         if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
             throw new HttpRequestException($"Error: Invalid base URL: {baseUrl}");
         }
@@ -88,7 +88,7 @@ public class HttpService : IHttpService {
         return response;
     }
 
-    public async Task<HttpResponseMessage> PutAsync(string baseUrl, string endpoint, string payload, IEnumerable<string>? headers) {
+    public async Task<HttpResponseMessage> PutAsync(string baseUrl, string endpoint, string? payload, IEnumerable<string>? headers) {
         if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
             throw new HttpRequestException($"Error: Invalid base URL: {baseUrl}");
         }

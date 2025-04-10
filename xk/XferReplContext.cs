@@ -82,8 +82,8 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
         return base.PreprocessArgs(newArgs.ToArray(), command, context);
     }
 
-    public override Task<int> RunAsync(Command command, string[] args) {
-        return base.RunAsync(command, args);
+    public override async Task<int> RunAsync(Command command, string[] args) {
+        return await base.RunAsync(command, args);
     }
 
     public override string[] SplitCommandLine(string input) {

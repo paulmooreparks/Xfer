@@ -10,13 +10,14 @@ using ParksComputing.XferKit.Workspace;
 using ParksComputing.XferKit.Workspace.Models;
 using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Scripting.Services;
+using Microsoft.ClearScript;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
 [Command("runwsscript", "Internal command to run workspace scripts.", IsHidden = true)]
 [Option(typeof(string), "--scriptName", "The name of the script to run.", Arity = ArgumentArity.ExactlyOne)]
 [Option(typeof(string), "--workspaceName", "The name of the workspace in which the script is contained.", Arity = ArgumentArity.ZeroOrOne)]
-[Argument(typeof(IEnumerable<string>), "args", "Optional arguments", Arity = ArgumentArity.ZeroOrMore)]
+[Argument(typeof(IEnumerable<string>), "params", "Optional arguments", Arity = ArgumentArity.ZeroOrMore)]
 internal class RunWsScriptCommand {
     private readonly IWorkspaceService _workspaceService;
     private readonly IXferScriptEngine _scriptEngine;
@@ -29,10 +30,10 @@ internal class RunWsScriptCommand {
         _scriptEngine = scriptEngine;
     }
 
-    public int Execute(
+    public async Task<int> Execute(
         string scriptName,
         string? workspaceName,
-        IEnumerable<string>? args
+        [ArgumentParam("params")] IEnumerable<object>? args
         ) 
     {
         if (scriptName is null) {
@@ -71,43 +72,51 @@ internal class RunWsScriptCommand {
 
         var argumentDefinitions = scriptDefinition.Arguments.Values.ToList();
         var paramList = string.Empty;
+        var scriptParams = new List<object?>();
+        
+        if (!string.IsNullOrEmpty(workspaceName)) {
+            var workspaces = _scriptEngine.Script.xk.workspaces as IDictionary<string, object?>;
+            if (workspaces is not null) {
+                var workspaceObj = workspaces[workspaceName];
+                scriptParams.Add(workspaceObj);
+            }
+        }
 
         if (args is not null) {
-            var quotedArgs = new List<string>();
             int i = 0;
 
             foreach (var arg in args) {
                 if (i >= argumentDefinitions.Count()) {
-                    Console.Error.WriteLine($"{Constants.ErrorChar} Too many arguments provided for script '{scriptName}'.");
-                    return Result.Error;
+                    scriptParams.Add(arg);
                 }
+                else {
+                    var argType = argumentDefinitions[i].Type;
 
-                var argType = argumentDefinitions[i].Type;
+                    switch (argType) {
+                        case "string":
+                            scriptParams.Add(arg);
+                            break;
 
-                switch (argType) {
-                    case "string":
-                        quotedArgs.Add((arg.StartsWith("\"") && arg.EndsWith("\"")) || (arg.StartsWith("'") && arg.EndsWith("'"))
-                            ? arg
-                            : $"\"{arg}\"");
-                        break;
+                        case "stringArray":
+                            scriptParams.Add(arg);
+                            break;
 
-                    case "stringArray":
-                        var stringArray = arg.Split(',').Select(a =>
-                            (a.StartsWith("\"") && a.EndsWith("\"")) || (a.StartsWith("'") && a.EndsWith("'"))
-                            ? a
-                            : $"\"{a}\"");
-                        quotedArgs.Add($"[{string.Join(", ", stringArray)}]");
-                        break;
+                        case "number":
+                            scriptParams.Add(Convert.ToDouble(arg));
+                            break;
 
-                    case "number":
-                    case "boolean":
-                    case "object":
-                        quotedArgs.Add(arg);
-                        break;
+                        case "boolean":
+                            scriptParams.Add(Convert.ToBoolean(arg));
+                            break;
 
-                    default:
-                        Console.Error.WriteLine($"{Constants.ErrorChar} Unsupported argument type '{argType}' in script '{scriptName}'.");
-                        return Result.Error;
+                        case "object":
+                            scriptParams.Add(arg);
+                            break;
+
+                        default:
+                            Console.Error.WriteLine($"{Constants.ErrorChar} Unsupported argument type '{argType}' in script '{scriptName}'.");
+                            return Result.Error;
+                    }
                 }
 
                 i++;
@@ -118,23 +127,24 @@ internal class RunWsScriptCommand {
                 var argType = argumentDefinitions[i].Name;
 
                 if (argType == "string") {
-                    quotedArgs.Add((argString.StartsWith("\"") && argString.EndsWith("\"")) || (argString.StartsWith("'") && argString.EndsWith("'"))
-                        ? argString
-                        : $"\"{argString}\"");
+                    scriptParams.Add(argString);
                 }
                 else if (argType == "stringArray") {
-                    var stringArray = argString.Split(',').Select(a =>
-                        (a.StartsWith("\"") && a.EndsWith("\"")) || (a.StartsWith("'") && a.EndsWith("'"))
-                        ? a
-                        : $"\"{a}\"");
-                    quotedArgs.Add($"[{string.Join(", ", stringArray)}]");
+                    scriptParams.Add(argString);
+                }
+                else if (argType == "number") {
+                    scriptParams.Add(Convert.ToDouble(argString));
+                }
+                else if (argType == "boolean") {
+                    scriptParams.Add(Convert.ToBoolean(argString));
+                }
+                else if (argType == "object") {
+                    scriptParams.Add(argString);
                 }
                 else {
-                    quotedArgs.Add(argString);
+                    scriptParams.Add(argString);
                 }
             }
-
-            paramList = string.Join(", ", quotedArgs);
         }
 
         string scriptBody = string.Empty;
@@ -147,7 +157,7 @@ internal class RunWsScriptCommand {
                 return Result.Error;
             }
 
-            scriptBody = $"__script__{scriptName} ({paramList})";
+            scriptBody = $"__script__{scriptName}";
         }
         else {
             if (_workspaceService.BaseConfig.Workspaces.TryGetValue(workspaceName, out var workspace)) {
@@ -158,7 +168,7 @@ internal class RunWsScriptCommand {
                     return Result.Error;
                 }
 
-                scriptBody = $"__script__{workspaceName}__{scriptName} ({paramList})";
+                scriptBody = $"__script__{workspaceName}__{scriptName}";
             }
             else {
                 Console.Error.WriteLine($"{Constants.ErrorChar} Workspace '{workspaceName}' not found.");
@@ -166,11 +176,31 @@ internal class RunWsScriptCommand {
             }
         }
 
-        var output = _scriptEngine.EvaluateScript(scriptBody);
-        
-        if (output != null) {
-            Console.WriteLine(output);
+        // var output = _scriptEngine.Script[$"{scriptBody}"](scriptParams.ToArray());
+        var result = _scriptEngine.Invoke(scriptBody, scriptParams.ToArray());
+
+        if (result is Task taskResult) {
+            await taskResult.ConfigureAwait(false);
+
+            // Check if it's a Task<T> with a result
+            var taskType = taskResult.GetType();
+            if (taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>)) {
+                var property = taskType.GetProperty("Result");
+                var taskResultValue = property?.GetValue(taskResult);
+                if (taskResultValue is not null) {
+                    Console.WriteLine(taskResultValue);
+                }
+            }
         }
+        else if (result is ValueTask valueTaskResult) {
+            await valueTaskResult.ConfigureAwait(false);
+        }
+        else {
+            if (result is not null) {
+                Console.WriteLine(result.ToString());
+            }
+        }
+
         return Result.Success;
     }
 }

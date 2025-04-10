@@ -45,21 +45,40 @@ internal class ScriptReplContext : Cliffer.DefaultReplContext {
         return _commandSplitter.Split(input).ToArray();
     }
 
-    public override Task<int> RunAsync(Command command, string[] args) {
+    public override async Task<int> RunAsync(Command command, string[] args) {
         var helpCommands = GetHelpCommands();
         var isHelp = helpCommands.Contains(args[0]);
 
         if (args.Length > 0 && !isHelp) {
             var script = string.Join(' ', args);
-            var output = _scriptEngine.ExecuteCommand(script);
+            var result = _scriptEngine.EvaluateScript(script);
 
-            if (!string.IsNullOrEmpty(output)) {
-                Console.WriteLine(output);
+            if (result is Task taskResult) {
+                await taskResult.ConfigureAwait(false);
+
+                // Check if it's a Task<T> with a result
+                var taskType = taskResult.GetType();
+                if (taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>)) {
+                    var property = taskType.GetProperty("Result");
+                    var taskResultValue = property?.GetValue(taskResult);
+                    if (taskResultValue is not null) {
+                        Console.WriteLine(taskResultValue);
+                    }
+                }
             }
-            return Task.FromResult(Result.Success);
+            else if (result is ValueTask valueTaskResult) {
+                await valueTaskResult.ConfigureAwait(false);
+            }
+            else {
+                if (result is not null) {
+                    Console.WriteLine(result.ToString());
+                }
+            }
+            
+            return Result.Success;
         }
 
         ClifferEventHandler.PreprocessArgs(args);
-        return base.RunAsync(command, args);
+        return await base.RunAsync(command, args);
     }
 }

@@ -10,8 +10,10 @@ public class WorkspaceConfig {
     public string? Description { get; set; }
     [XferProperty("extend")]
     public string? Extend { get; set; }
+    [XferProperty("isHidden")]
+    public bool IsHidden { get; set; } = false;
     [XferProperty("base")]
-    public WorkspaceConfig? Base { get; protected set; }
+    public WorkspaceConfig? Base { get; set; }
     [XferProperty("baseUrl")]
     public string? BaseUrl { get; set; }
     [XferProperty("initScript")]
@@ -40,7 +42,7 @@ public class WorkspaceConfig {
         Base ??= parentWorkspace.Base;
 
         BaseUrl ??= parentWorkspace.BaseUrl;
-        InitScript ??= parentWorkspace.InitScript;
+        // InitScript ??= parentWorkspace.InitScript;
         PreRequest ??= parentWorkspace.PreRequest;
         PostResponse ??= parentWorkspace.PostResponse;
 
@@ -68,6 +70,12 @@ public class WorkspaceConfig {
             }
             else {
                 Macros[kvp.Key].Merge(kvp.Value);
+            }
+        }
+
+        foreach (var kvp in parentWorkspace.Properties) {
+            if (!Properties.ContainsKey(kvp.Key)) {
+                Properties[kvp.Key] = kvp.Value;
             }
         }
     }
