@@ -120,9 +120,18 @@ $@"
 function __preRequest(workspace, request) {{
     {GetScriptContent(_workspaceService.BaseConfig.PreRequest)}
 }};
+");
 
+            var postResponseScriptContent = _workspaceService.BaseConfig.PostResponse;
+
+            if (string.IsNullOrEmpty(_workspaceService.BaseConfig.PostResponse)) {
+                postResponseScriptContent = "return request.response.body;";
+            }
+
+            _engine.Execute(
+$@"
 function __postResponse(workspace, request) {{
-    {GetScriptContent(_workspaceService.BaseConfig.PostResponse)}
+    {postResponseScriptContent}
 }};
 ");
 
