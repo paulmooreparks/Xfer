@@ -36,6 +36,35 @@ public class HttpService : IHttpService {
         }
     }
 
+    public HttpResponseMessage Get(string baseUrl, IEnumerable<string>? queryParameters, IEnumerable<string>? headers) {
+        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
+            throw new HttpRequestException($"Error: Invalid base URL: {baseUrl}");
+        }
+
+        var uriBuilder = new UriBuilder(baseUri);
+        var query = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
+
+        if (queryParameters is not null) {
+            foreach (var param in queryParameters) {
+                if (param.Contains("=")) {
+                    var parts = param.Split(['='], 2);
+                    query[parts[0]] = parts.Length == 2 ? parts[1] : "";
+                }
+                else {
+                    query[param] = "";
+                }
+            }
+        }
+
+        uriBuilder.Query = query.ToString();
+        var finalUrl = uriBuilder.ToString();
+
+        using var request = new HttpRequestMessage(HttpMethod.Get, finalUrl);
+        AddHeaders(request, headers);
+
+        return _httpClient.Send(request);
+    }
+
     public async Task<HttpResponseMessage> GetAsync(string baseUrl, IEnumerable<string>? queryParameters, IEnumerable<string>? headers) {
         if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
             throw new HttpRequestException($"Error: Invalid base URL: {baseUrl}");
@@ -63,6 +92,29 @@ public class HttpService : IHttpService {
         AddHeaders(request, headers);
 
         return await _httpClient.SendAsync(request);
+    }
+
+    public HttpResponseMessage Post(string baseUrl, string? payload, IEnumerable<string>? headers) {
+        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var baseUri) || string.IsNullOrWhiteSpace(baseUri.Scheme)) {
+            throw new HttpRequestException($"Error: Invalid base URL: {baseUrl}");
+        }
+
+        string? contentType = headers?
+            .FirstOrDefault(h => h.StartsWith("Content-Type:", StringComparison.OrdinalIgnoreCase))
+            ?.Split(':', 2)[1]
+            .Trim();
+
+        if (string.IsNullOrEmpty(contentType) && !string.IsNullOrEmpty(payload)) {
+            contentType = "application/octet-stream";
+        }
+        using var request = new HttpRequestMessage(HttpMethod.Post, baseUri) {
+            Content = new StringContent(payload ?? "", Encoding.UTF8, contentType ?? "text/plain")
+        };
+
+        AddHeaders(request, headers);
+
+        var response = _httpClient.Send(request);
+        return response;
     }
 
     public async Task<HttpResponseMessage> PostAsync(string baseUrl, string? payload, IEnumerable<string>? headers) {

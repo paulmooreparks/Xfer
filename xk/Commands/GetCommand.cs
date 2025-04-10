@@ -38,7 +38,7 @@ internal class GetCommand {
         _xk = xk;
     }
 
-    public async Task<int> Execute(
+    public int Execute(
         [OptionParam("--baseurl")] string? baseUrl,
         [ArgumentParam("endpoint")] string endpoint,
         [OptionParam("--parameters")] IEnumerable<string> parameters,
@@ -76,7 +76,7 @@ internal class GetCommand {
         int result = Result.Success;
 
         try {
-            var response = await _xk.http.getAsync(baseUrl, paramList, headers);
+            var response = _xk.http.get(baseUrl, paramList, headers);
 
             if (response is null) {
                 Console.Error.WriteLine($"{Constants.ErrorChar} Error: No response received from {baseUrl}");

@@ -57,7 +57,29 @@ internal class HttpApi : IHttpApi
         IEnumerable<string>? headers
         )
     {
-        return getAsync(baseUrl, queryParameters, headers).GetAwaiter().GetResult();
+        var cookieContainer = new CookieContainer();
+        var handler = new HttpClientHandler() {
+            CookieContainer = cookieContainer,
+            UseCookies = true
+        };
+
+        var response = _httpService.Get(
+            baseUrl,
+            queryParameters,
+            headers
+            );
+
+        if (response != null) {
+            this.headers = response.Headers;
+            using (var stream = response.Content.ReadAsStream())
+            using (var reader = new StreamReader(stream)) {
+                responseContent = reader.ReadToEnd();
+            }
+            statusCode = (int)response.StatusCode;
+            // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
+        }
+
+        return response;
     }
 
     public async Task<HttpResponseMessage?> postAsync(
@@ -94,7 +116,29 @@ internal class HttpApi : IHttpApi
         IEnumerable<string>? headers
         )
     {
-        return postAsync(baseUrl, payload, headers).GetAwaiter().GetResult();
+        var cookieContainer = new CookieContainer();
+        var handler = new HttpClientHandler() {
+            CookieContainer = cookieContainer,
+            UseCookies = true
+        };
+
+        var response = _httpService.Post(
+            baseUrl,
+            payload,
+            headers
+            );
+
+        if (response != null) {
+            this.headers = response.Headers;
+            using (var stream = response.Content.ReadAsStream())
+            using (var reader = new StreamReader(stream)) {
+                responseContent = reader.ReadToEnd();
+            }
+            statusCode = (int)response.StatusCode;
+            // List<Cookie> responseCookies = cookieContainer.GetCookies(baseUri).Cast<Cookie>().ToList();
+        }
+
+        return response;
     }
 
     public async Task<HttpResponseMessage?> putAsync(

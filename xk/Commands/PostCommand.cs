@@ -33,7 +33,7 @@ internal class PostCommand {
         _xk = xk;
     }
 
-    public async Task<int> Execute(
+    public int Execute(
         [OptionParam("--baseurl")] string? baseUrl,
         [ArgumentParam("endpoint")] string? endpoint,
         [OptionParam("--payload")] string? payload,
@@ -60,7 +60,7 @@ internal class PostCommand {
         int result = Result.Success;
 
         try {
-            var response = await _xk.http.postAsync(baseUrl, payload, headers);
+            var response = _xk.http.post(baseUrl, payload, headers);
 
             if (response is null) {
                 Console.Error.WriteLine($"{Constants.ErrorChar} Error: No response received from {baseUrl}");

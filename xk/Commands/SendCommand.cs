@@ -14,10 +14,12 @@ using ParksComputing.XferKit.Api;
 using ParksComputing.XferKit.Cli.Services;
 using ParksComputing.XferKit.Workspace;
 using ParksComputing.XferKit.Cli.Extensions;
+using Microsoft.ClearScript;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
 [Command("send", "Send a request defined in the current workspace.", IsHidden = true)]
+[Argument(typeof(string), "workspaceName", "The name of the workspace.")]
 [Argument(typeof(string), "requestName", "The name of the request to send.")]
 [Option(typeof(string), "--baseurl", "The base URL of the API to send HTTP requests to.", new[] { "-b" }, IsRequired = false)]
 [Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
@@ -43,7 +45,8 @@ internal class SendCommand {
         _propertyResolver = propertyResolver;
     }
 
-    public async Task<int> Execute(
+    public int Execute(
+        [ArgumentParam("workspaceName")] string workspaceName,
         [ArgumentParam("requestName")] string requestName,
         [OptionParam("--baseurl")] string? baseUrl,
         [OptionParam("--parameters")] IEnumerable<string>? parameters,
@@ -55,14 +58,30 @@ internal class SendCommand {
         IClifferCli cli
         ) 
     {
+        var result = DoCommand(workspaceName, requestName, baseUrl, parameters, payload, headers, cookies, tokenArguments, objArguments, cli);
+
+        if (CommandResult is not null && !CommandResult.Equals(Undefined.Value)) {
+            Console.WriteLine(CommandResult);
+        }
+
+        return result;
+    }
+
+    public int DoCommand(
+        string workspaceName,
+        string requestName,
+        string? baseUrl,
+        IEnumerable<string>? parameters,
+        string? payload,
+        IEnumerable<string>? headers,
+        IEnumerable<string>? cookies,
+        List<System.CommandLine.Parsing.Token>? tokenArguments,
+        object?[]? objArguments,
+        IClifferCli cli
+        ) 
+    {
         bool isConsoleRedirected = Console.IsInputRedirected;
         var reqSplit = requestName.Split('.');
-        var workspaceName = _ws.CurrentWorkspaceName;
-
-        if (reqSplit.Length > 1) {
-            workspaceName = reqSplit[0];
-            requestName = reqSplit[1];
-        }
 
         if (_ws == null || _ws.BaseConfig == null || _ws.BaseConfig.Workspaces == null) {
             Console.Error.WriteLine($"{Constants.ErrorChar} Workspace name '{workspaceName}' not found in current configuration.");
@@ -74,7 +93,7 @@ internal class SendCommand {
             return Result.Error;
         }
 
-        if (!workspace.Requests.TryGetValue(requestName, out var definition) || definition is null) { 
+        if (!workspace.Requests.TryGetValue(requestName, out var definition) || definition is null) {
             Console.Error.WriteLine($"{Constants.ErrorChar} Request name '{requestName}' not found in current workspace.");
             return Result.Error;
         }
@@ -205,7 +224,7 @@ internal class SendCommand {
         }
 
         _scriptEngine.InvokePreRequest(
-            workspaceName, 
+            workspaceName,
             requestName,
             configHeaders,
             finalParameters,
@@ -227,47 +246,47 @@ internal class SendCommand {
 
         switch (method) {
             case "GET": {
-                var getCommand = cli.Commands["get"] as GetCommand;
-                    
-                if (getCommand is null) {
-                    Console.Error.WriteLine($"{Constants.ErrorChar} Error: Unable to find GET command.");
-                    return Result.Error;
-                }
-                result = await getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders, finalCookies, isQuiet: true);
+                    var getCommand = cli.Commands["get"] as GetCommand;
 
-                CommandResult =_scriptEngine.InvokePostResponse(
-                    workspaceName, 
-                    requestName, 
-                    getCommand.StatusCode, 
-                    getCommand.Headers,
-                    getCommand.ResponseContent,
-                    extraArgs.ToArray()
-                    );
-                break;
-            }
+                    if (getCommand is null) {
+                        Console.Error.WriteLine($"{Constants.ErrorChar} Error: Unable to find GET command.");
+                        return Result.Error;
+                    }
+                    result = getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders, finalCookies, isQuiet: true);
+
+                    CommandResult = _scriptEngine.InvokePostResponse(
+                        workspaceName,
+                        requestName,
+                        getCommand.StatusCode,
+                        getCommand.Headers,
+                        getCommand.ResponseContent,
+                        extraArgs.ToArray()
+                        );
+                    break;
+                }
 
             case "POST": {
-                var postCommand = cli.Commands["post"] as PostCommand;
+                    var postCommand = cli.Commands["post"] as PostCommand;
 
-                if (postCommand is null) {
-                    Console.Error.WriteLine($"{Constants.ErrorChar} Error: Unable to find POST command.");
-                    return Result.Error;
+                    if (postCommand is null) {
+                        Console.Error.WriteLine($"{Constants.ErrorChar} Error: Unable to find POST command.");
+                        return Result.Error;
+                    }
+
+                    var finalPayload = payload ?? definition.Payload ?? string.Empty;
+                    finalPayload = finalPayload.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
+                    result = postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
+
+                    CommandResult = _scriptEngine.InvokePostResponse(
+                        workspaceName,
+                        requestName,
+                        postCommand.StatusCode,
+                        postCommand.Headers,
+                        postCommand.ResponseContent,
+                        extraArgs.ToArray()
+                        );
+                    break;
                 }
-
-                var finalPayload = payload ?? definition.Payload ?? string.Empty;
-                finalPayload = finalPayload.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
-                result = await postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
-                
-                CommandResult = _scriptEngine.InvokePostResponse(
-                    workspaceName,
-                    requestName,
-                    postCommand.StatusCode,
-                    postCommand.Headers,
-                    postCommand.ResponseContent,
-                    extraArgs.ToArray()
-                    );
-                break;
-            }
 
             default:
                 Console.Error.WriteLine($"{Constants.ErrorChar} Unknown method {method}");

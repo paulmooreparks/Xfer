@@ -22,6 +22,8 @@ internal class RunWsScriptCommand {
     private readonly IWorkspaceService _workspaceService;
     private readonly IXferScriptEngine _scriptEngine;
 
+    public object? CommandResult { get; private set; } = null;
+
     public RunWsScriptCommand(
         IWorkspaceService workspaceService,
         IXferScriptEngine scriptEngine
@@ -30,7 +32,22 @@ internal class RunWsScriptCommand {
         _scriptEngine = scriptEngine;
     }
 
-    public async Task<int> Execute(
+    public int Execute(
+        string scriptName,
+        string? workspaceName,
+        [ArgumentParam("params")] IEnumerable<object>? args
+        ) 
+    {
+        var result = DoCommand( scriptName, workspaceName, args );
+
+        if (CommandResult is not null && !CommandResult.Equals(Undefined.Value)) {
+            Console.WriteLine(CommandResult);
+        }
+
+        return result;
+    }
+
+    public int DoCommand(
         string scriptName,
         string? workspaceName,
         [ArgumentParam("params")] IEnumerable<object>? args
@@ -176,31 +193,7 @@ internal class RunWsScriptCommand {
             }
         }
 
-        // var output = _scriptEngine.Script[$"{scriptBody}"](scriptParams.ToArray());
-        var result = _scriptEngine.Invoke(scriptBody, scriptParams.ToArray());
-
-        if (result is Task taskResult) {
-            await taskResult.ConfigureAwait(false);
-
-            // Check if it's a Task<T> with a result
-            var taskType = taskResult.GetType();
-            if (taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>)) {
-                var property = taskType.GetProperty("Result");
-                var taskResultValue = property?.GetValue(taskResult);
-                if (taskResultValue is not null) {
-                    Console.WriteLine(taskResultValue);
-                }
-            }
-        }
-        else if (result is ValueTask valueTaskResult) {
-            await valueTaskResult.ConfigureAwait(false);
-        }
-        else {
-            if (result is not null) {
-                Console.WriteLine(result.ToString());
-            }
-        }
-
+        CommandResult = _scriptEngine.Invoke(scriptBody, scriptParams.ToArray());
         return Result.Success;
     }
 }

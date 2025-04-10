@@ -63,13 +63,6 @@ function myFunction(baseUrl, page) {{
         // Call it with your values
         _scriptEngine.Script["myFunction"](baseUrl, page);
 #endif
-
-        string cliScript = $@"
-function myFunction(baseUrl, page) {{
-    log(baseUrl);
-    return page;
-}}
-";
     }
 
     public void ConfigureWorkspaces(IClifferCli cli) {
@@ -81,12 +74,13 @@ function myFunction(baseUrl, page) {{
             }
 
             foreach (var script in _workspaceService.BaseConfig.Scripts) {
-                var description = script.Value.Description ?? string.Empty;
                 var scriptName = script.Key;
                 var scriptBody = script.Value.Script;
+                var scriptCall = $"runwsscript --scriptName {scriptName}";
+                var description = script.Value.Description ?? scriptCall;
                 var arguments = script.Value.Arguments;
                 var paramList = new List<string>();
-                var macroCommand = new Macro($"{scriptName}", $"[script] {description}", $"runwsscript --scriptName {scriptName}");
+                var macroCommand = new Macro($"{scriptName}", $"[script] {description}", scriptCall);
 
                 foreach (var kvp in arguments) {
                     var argument = kvp.Value;
@@ -141,12 +135,13 @@ xk.{scriptName} = __script__{scriptName};
             var workspace = workspaceColl![workspaceName] as dynamic;
 
             foreach (var script in workspaceConfig.Scripts) {
-                var description = script.Value.Description ?? string.Empty;
                 var scriptName = script.Key;
                 var scriptBody = script.Value.Script;
+                var scriptCall = $"runwsscript --workspaceName {workspaceName} --scriptName {scriptName}";
+                var description = script.Value.Description ?? scriptCall;
                 var arguments = script.Value.Arguments;
                 var paramList = new List<string>();
-                var macroCommand = new Macro($"{workspaceName}.{scriptName}", $"[script] {description}", $"runwsscript --workspaceName {workspaceName} --scriptName {scriptName}");
+                var macroCommand = new Macro($"{workspaceName}.{scriptName}", $"[script] {description}", scriptCall);
                 macroCommand.IsHidden = workspaceConfig.IsHidden;
 
                 foreach (var kvp in arguments) {
@@ -199,14 +194,18 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
                 var requestName = requestKvp.Key;
                 request.Name = requestName;
                 var description = request.Description ?? $"{request.Method} {request.Endpoint}";
-                var macroCommand = new Macro($"{workspaceName}.{requestName}", $"[request] {description}", $"send {workspaceName}.{requestName} --baseurl {workspaceKvp.Value.BaseUrl}");
+                var scriptCall = $"send {workspaceName} {requestName} --baseurl {workspaceKvp.Value.BaseUrl}";
+                var macroCommand = new Macro($"{workspaceName}.{requestName}", $"[request] {description}", scriptCall);
                 macroCommand.IsHidden = workspaceConfig.IsHidden;
 
                 var requestObj = requests![requestName] as IDictionary<string, object>;
-                var requestCaller = new RequestCaller(cli, requestName, workspaceKvp.Value.BaseUrl);
+                var requestCaller = new RequestCaller(cli, workspaceName, requestName, workspaceKvp.Value.BaseUrl);
 #pragma warning disable CS8974 // Converting method group to non-delegate type
                 requestObj!["execute"] = requestCaller.RunRequest;
-                // _scriptEngine.AddHostObject($"reqTest_{workspaceName}_{requestName}", requestCaller.RunRequest);
+                // requestObj!["execute"] = new Func<object?[], Task<object?>>(requestCaller.RunRequest);
+                _scriptEngine.AddHostObject($"reqTest_{workspaceName}_{requestName}", requestCaller.RunRequest);
+                // _scriptEngine.AddHostObject($"reqTest_{workspaceName}_{requestName}", new Func<object?[], Task<object?>>(requestCaller.RunRequest));
+
 #pragma warning restore CS8974 // Converting method group to non-delegate type
 
                 var baseurlOption = new Option<string>(["--baseurl", "-b"], "The base URL of the API to send HTTP requests to.");
@@ -298,24 +297,31 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
 public class RequestCaller {
     private readonly IClifferCli? _cli;
 
+    public string WorkspaceName { get; set; }
     public string RequestName { get; set; }
     public string BaseUrl { get; set; }
 
     public RequestCaller(
         IClifferCli? cli,
+        string workspaceName,
         string requestName,
         string? baseUrl
         ) 
     {
         _cli = cli;
+        WorkspaceName = workspaceName;
         RequestName = requestName;
         BaseUrl = baseUrl!;
     }
 
-    public async Task<object?> RunRequest(params object?[]? args) {
-        if (_cli is not null && _cli.Commands.TryGetValue("send", out object? commandObject)) {
+    public object? RunRequest(params object?[]? args) {
+        if (_cli is null) {
+            return null;
+        }
+
+        if (_cli.Commands.TryGetValue("send", out object? commandObject)) {
             if (commandObject is SendCommand sendCommand) {
-                await sendCommand.Execute(RequestName, BaseUrl, null, null, null, null, null, args, _cli);
+                var result = sendCommand.DoCommand(WorkspaceName, RequestName, BaseUrl, null, null, null, null, null, args, _cli);
                 return sendCommand.CommandResult;
             }
         }
