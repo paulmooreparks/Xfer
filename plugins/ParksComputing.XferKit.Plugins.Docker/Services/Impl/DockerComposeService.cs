@@ -78,6 +78,11 @@ internal class DockerComposeService : IDockerComposeService {
         return !string.IsNullOrWhiteSpace(output) && output.Split('\n').Length > 2; // Adjust the condition based on actual output parsing needs
     }
 
+    /*
+using System.Diagnostics;
+using System.Net.Sockets;
+using System.Net;
+    */
     public static string GetLocalIPAddress() {
         var host = Dns.GetHostEntry(Dns.GetHostName());
         foreach (var ip in host.AddressList) {

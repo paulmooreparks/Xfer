@@ -31,4 +31,40 @@ internal class ProcessApi : IProcessApi {
     public void run(string? command) {
         run(command, null, null);
     }
+
+    public string runCommand(bool captureOutput, string? workingDirectory, string command, params string[]? args) {
+        var arguments = string.Empty;
+
+        if (args is not null) {
+            arguments = string.Join(" ", args);
+        }
+
+        var processStartInfo = new ProcessStartInfo {
+            FileName = command,
+            Arguments = arguments,
+            UseShellExecute = false,
+            RedirectStandardOutput = captureOutput,
+            CreateNoWindow = false,
+            WorkingDirectory = workingDirectory
+        };
+
+        if (!string.IsNullOrEmpty(workingDirectory)) {
+            processStartInfo.WorkingDirectory = workingDirectory;
+        }
+
+        using var process = new System.Diagnostics.Process {
+            StartInfo = processStartInfo
+        };
+
+        process.Start();
+
+        string output = "";
+
+        if (captureOutput) {
+            output = process.StandardOutput.ReadToEnd();
+        }
+
+        process.WaitForExit();
+        return output;
+    }
 }

@@ -1,13 +1,14 @@
 ﻿using Cliffer;
 using ParksComputing.XferKit.Cli.Services;
-using ParksComputing.XferKit.Workspace;
 using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Scripting.Services;
 using ParksComputing.XferKit.Api;
-using Microsoft.ClearScript;
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+
+using System.Diagnostics;
+
 
 namespace ParksComputing.XferKit.Cli.Commands;
 [RootCommand("Xfer CLI Application")]
@@ -202,10 +203,6 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
                 var requestCaller = new RequestCaller(cli, workspaceName, requestName, workspaceKvp.Value.BaseUrl);
 #pragma warning disable CS8974 // Converting method group to non-delegate type
                 requestObj!["execute"] = requestCaller.RunRequest;
-                // requestObj!["execute"] = new Func<object?[], Task<object?>>(requestCaller.RunRequest);
-                _scriptEngine.AddHostObject($"reqTest_{workspaceName}_{requestName}", requestCaller.RunRequest);
-                // _scriptEngine.AddHostObject($"reqTest_{workspaceName}_{requestName}", new Func<object?[], Task<object?>>(requestCaller.RunRequest));
-
 #pragma warning restore CS8974 // Converting method group to non-delegate type
 
                 var baseurlOption = new Option<string>(["--baseurl", "-b"], "The base URL of the API to send HTTP requests to.");
@@ -291,6 +288,40 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
             );
 
         return result;
+    }
+
+    public void RunCommand(string command, string? workingDirectory, string[] arguments, bool captureOutput = false) {
+        var argumentList = new List<string>(arguments);
+
+        var argumentsString = string.Join(' ', argumentList);
+
+        var processStartInfo = new ProcessStartInfo {
+            FileName = command,
+            Arguments = argumentsString,
+            UseShellExecute = false,
+            RedirectStandardOutput = captureOutput,
+            CreateNoWindow = false,
+            WorkingDirectory = workingDirectory
+        };
+
+        if (!string.IsNullOrEmpty(workingDirectory)) {
+            processStartInfo.WorkingDirectory = workingDirectory;
+        }
+
+        using var process = new Process {
+            StartInfo = processStartInfo
+        };
+
+        process.Start();
+
+        string output = "";
+
+        if (captureOutput) {
+            output = process.StandardOutput.ReadToEnd();
+        }
+
+        process.WaitForExit();
+        Console.WriteLine(output);
     }
 }
 
