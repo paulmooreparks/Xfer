@@ -115,12 +115,17 @@ internal class ClearScriptEngine : IXferScriptEngine {
                 }
             }
 
-            _engine.Execute(
-$@"
+            try {
+                _engine.Execute(
+    $@"
 function __preRequest(workspace, request) {{
     {GetScriptContent(_workspaceService.BaseConfig.PreRequest)}
 }};
 ");
+            }
+            catch (ScriptEngineException ex) {
+                Console.Error.WriteLine(ex.ErrorDetails);
+            }
 
             var postResponseScriptContent = _workspaceService.BaseConfig.PostResponse;
 
@@ -128,12 +133,17 @@ function __preRequest(workspace, request) {{
                 postResponseScriptContent = "return request.response.body;";
             }
 
-            _engine.Execute(
-$@"
+            try {
+                _engine.Execute(
+    $@"
 function __postResponse(workspace, request) {{
     {postResponseScriptContent}
 }};
 ");
+            }
+            catch (ScriptEngineException ex) {
+                Console.Error.WriteLine(ex.ErrorDetails);
+            }
 
             if (_workspaceService.BaseConfig.InitScript is not null) {
                 ExecuteScript(_workspaceService.BaseConfig.InitScript);
@@ -177,7 +187,8 @@ function __postResponse(workspace, request) {{
                 _workspaceCache.Add(workspaceName, workspaceObj);
                 (_xk.workspaces as IDictionary<string, object?>)!.Add(workspaceName, workspaceObj);
 
-                _engine.Execute($@"
+                try {
+                    _engine.Execute($@"
 function __preRequest__{workspaceName}(workspace, request) {{
     let nextHandler = function() {{ __preRequest(workspace, request); }};
     let baseHandler = function() {{ {(string.IsNullOrEmpty(workspace.Extend) ? "" : $"__preRequest__{workspace.Extend}(workspace, request);")} }};
@@ -191,6 +202,11 @@ function __postResponse__{workspaceName}(workspace, request) {{
 }};
 
 ");
+                }
+                catch (ScriptEngineException ex) {
+                    Console.Error.WriteLine(ex.ErrorDetails);
+                }
+
                 // Populate requests within workspaceKvp
                 foreach (var request in workspace.Requests) {
                     var requestName = request.Key;
@@ -205,7 +221,8 @@ function __postResponse__{workspaceName}(workspace, request) {{
 
                     var extraArgs = argsBuilder.ToString();
 
-                    _engine.Execute($@"
+                    try {
+                        _engine.Execute($@"
 function __preRequest__{workspaceName}__{requestName} (workspace, request{extraArgs}) {{
     let nextHandler = function() {{ __preRequest__{workspaceName}(workspace, request); }};
     let baseHandler = function() {{ {(string.IsNullOrEmpty(workspace.Extend) ? ";" : $"__preRequest__{workspace.Extend}__{requestName}(workspace, request{extraArgs});")} }};
@@ -219,6 +236,10 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
 }}
 
 ");
+                    }
+                    catch (ScriptEngineException ex) {
+                        Console.Error.WriteLine(ex.ErrorDetails);
+                    }
 
                     dynamic requestObj = new ExpandoObject {} as dynamic;
 
@@ -272,7 +293,12 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
         if (workspace.InitScript is not null) {
             var scriptCode = GetScriptContent(workspace.InitScript);
             var scriptBody = $@"function __initScript__{workspace.Name}(workspace) {{ {scriptCode} }}";
-            _engine.Execute(scriptBody);
+            try {
+                _engine.Execute(scriptBody);
+            }
+            catch (ScriptEngineException ex) {
+                Console.Error.WriteLine(ex.ErrorDetails);
+            }
         }
     }
 
@@ -344,10 +370,15 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
             invokeArgs.AddRange(extraArgs);
         }
 
-        var preRequestResult = _engine.Invoke(
-            $"__preRequest__{workspaceName}__{requestName}",
-            invokeArgs.ToArray()
-            );
+        try {
+            var preRequestResult = _engine.Invoke(
+                $"__preRequest__{workspaceName}__{requestName}",
+                invokeArgs.ToArray()
+                );
+        }
+        catch (ScriptEngineException ex) {
+            Console.Error.WriteLine(ex.ErrorDetails);
+        }
 
         // Copy headers back to original dictionary
         // I think this can be done better.
@@ -369,7 +400,14 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
     }
 
     public object? Invoke(string script, params object?[] args) {
-        return _engine.Invoke(script, args);
+        try {
+            return _engine.Invoke(script, args);
+        }
+        catch (ScriptEngineException ex) {
+            Console.Error.WriteLine(ex.ErrorDetails);
+        }
+
+        return null;
     }
 
     public object? InvokePostResponse(params object?[] args) {
@@ -410,12 +448,18 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
             invokeArgs.AddRange(extraArgs);
         }
 
-        var postResponseResult = _engine.Invoke(
-            $"__postResponse__{workspaceName}__{requestName}",
-            invokeArgs.ToArray()
-            );
+        try {
+            var postResponseResult = _engine.Invoke(
+                $"__postResponse__{workspaceName}__{requestName}",
+                invokeArgs.ToArray()
+                );
+            return postResponseResult;
+        }
+        catch (ScriptEngineException ex) {
+            Console.Error.WriteLine(ex.ErrorDetails);
+        }
 
-        return postResponseResult;
+        return null;
     }
 
     public void SetValue(string name, object? value) {
@@ -439,10 +483,14 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
             _engine.Execute(scriptCode);
             return string.Empty;
         }
-        catch (Exception ex) {
-            var result = $"{Constants.ErrorChar} Error executing script: {ex.Message}";
-            return result;
+        catch (ScriptEngineException ex) {
+            Console.Error.WriteLine(ex.ErrorDetails);
         }
+        catch (Exception ex) {
+            Console.Error.WriteLine($"{Constants.ErrorChar} Error executing script: {ex.Message}");
+        }
+
+        return string.Empty;
     }
 
     public object? EvaluateScript(string? script) {
@@ -454,25 +502,33 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
             }
 
             var result = _engine.Evaluate(scriptCode);
-            if (result != null && result != Undefined.Value) {
+
+            if (result is not null && result is not Undefined && result is not VoidResult ) {
                 return result;
             }
-
-            return null;
+        }
+        catch (ScriptEngineException ex) {
+            Console.Error.WriteLine(ex.ErrorDetails);
         }
         catch (Exception ex) {
-            return $"{Constants.ErrorChar} Error executing script: {ex.Message}";
+            Console.Error.WriteLine($"{Constants.ErrorChar} Error executing script: {ex.Message}");
         }
+
+        return null;
     }
 
     public string ExecuteCommand(string? script) {
         try {
             return _engine.ExecuteCommand(script);
         }
-        catch (Exception ex) {
-            var result = $"{Constants.ErrorChar} Error executing script: {ex.Message}";
-            return result;
+        catch (ScriptEngineException ex) {
+            Console.Error.WriteLine(ex.ErrorDetails);
         }
+        catch (Exception ex) {
+            Console.Error.WriteLine($"{Constants.ErrorChar} Error executing script: {ex.Message}");
+        }
+
+        return string.Empty;
     }
 
 

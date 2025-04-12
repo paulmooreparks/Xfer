@@ -10,6 +10,7 @@ using System.CommandLine.Invocation;
 using ParksComputing.XferKit.Cli.Services;
 using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Scripting.Services;
+using Microsoft.ClearScript;
 
 namespace ParksComputing.XferKit.Cli;
 
@@ -70,8 +71,8 @@ internal class ScriptReplContext : Cliffer.DefaultReplContext {
                 await valueTaskResult.ConfigureAwait(false);
             }
             else {
-                if (result is not null) {
-                    Console.WriteLine(result.ToString());
+                if (result is not null && !result.Equals(Undefined.Value)) {
+                    Console.WriteLine(result);
                 }
             }
             

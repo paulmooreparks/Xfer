@@ -7,21 +7,46 @@ public class ConsoleScriptObject {
     private static string GetIndent() => new string(' ', _groupDepth * 2);
 
     // public static void log(string s) => Console.WriteLine(GetIndent() + s);
-    public static void log(object o) => Console.WriteLine(GetIndent() + o.ToString());
-    public static void log(params object[] args) => Console.WriteLine(GetIndent() + string.Join(" ", args));
-    public static void info(params object[] args) => Console.WriteLine(GetIndent() + "[INFO] " + string.Join(" ", args));
-    public static void warn(params object[] args) => Console.WriteLine(GetIndent() + "[WARN] " + string.Join(" ", args));
-    public static void error(params object[] args) => Console.Error.WriteLine(GetIndent() + "[ERROR] " + string.Join(" ", args));
-    public static void debug(params object[] args) => Console.WriteLine(GetIndent() + "[DEBUG] " + string.Join(" ", args));
+    public static void log(object o) {
+        Console.Write(GetIndent());
+        Console.WriteLine(o);
+    }
+
+    public static void log(params object[] args) {
+        Console.Write(GetIndent());
+        Console.WriteLine(string.Join(" ", args));
+    }
+
+    public static void info(params object[] args) {
+        Console.Write(GetIndent());
+        Console.WriteLine("[INFO] " + string.Join(" ", args));
+    }
+
+    public static void warn(params object[] args) {
+        Console.Write(GetIndent());
+        Console.WriteLine("[WARN] " + string.Join(" ", args));
+    }
+
+    public static void error(params object[] args) {
+        Console.Error.Write(GetIndent());
+        Console.Error.WriteLine("[ERROR] " + string.Join(" ", args));
+    }
+
+    public static void debug(params object[] args) {
+        Console.Write(GetIndent());
+        Console.WriteLine("[DEBUG] " + string.Join(" ", args));
+    }
 
     public static void trace(params object[] args) {
-        Console.WriteLine(GetIndent() + "[TRACE] " + string.Join(" ", args));
+        Console.Write(GetIndent());
+        Console.WriteLine("[TRACE] " + string.Join(" ", args));
         Console.WriteLine(Environment.StackTrace);
     }
 
     public static void assert(bool condition, params object[] args) {
         if (!condition) {
-            Console.Error.WriteLine(GetIndent() + "[ASSERT] " + (args.Length > 0 ? string.Join(" ", args) : "Assertion failed"));
+            Console.Error.Write(GetIndent());
+            Console.Error.WriteLine("[ASSERT] " + (args.Length > 0 ? string.Join(" ", args) : "Assertion failed"));
         }
     }
 
@@ -30,7 +55,8 @@ public class ConsoleScriptObject {
             _counts[label] = 0;
         }
         _counts[label]++;
-        Console.WriteLine(GetIndent() + $"{label}: {_counts[label]}");
+        Console.Write(GetIndent());
+        Console.WriteLine($"{label}: {_counts[label]}");
     }
 
     public static void countReset(string label = "default") {
@@ -40,7 +66,8 @@ public class ConsoleScriptObject {
     }
 
     public static void group(string label = "") {
-        Console.WriteLine(GetIndent() + (string.IsNullOrEmpty(label) ? "[Group]" : $"[Group: {label}]"));
+        Console.Write(GetIndent());
+        Console.WriteLine((string.IsNullOrEmpty(label) ? "[Group]" : $"[Group: {label}]"));
         _groupDepth++;
     }
 
@@ -51,49 +78,59 @@ public class ConsoleScriptObject {
 
     public static void table(IEnumerable<object> data) {
         if (data == null || !data.Any()) {
-            Console.WriteLine(GetIndent() + "(empty table)");
+            Console.Write(GetIndent());
+            Console.WriteLine("(empty table)");
             return;
         }
 
         var properties = data.First().GetType().GetProperties();
         if (properties.Length == 0) {
-            Console.WriteLine(GetIndent() + "(No properties found)");
+            Console.Write(GetIndent());
+            Console.WriteLine("(No properties found)");
             return;
         }
 
         // Print header
         var headers = properties.Select(p => p.Name).ToList();
-        Console.WriteLine(GetIndent() + string.Join(" | ", headers));
-        Console.WriteLine(GetIndent() + new string('-', headers.Sum(h => h.Length + 3)));
+        Console.Write(GetIndent());
+        Console.WriteLine(string.Join(" | ", headers));
+        Console.Write(GetIndent());
+        Console.WriteLine(new string('-', headers.Sum(h => h.Length + 3)));
 
         // Print rows
         foreach (var row in data) {
             var values = properties.Select(p => p.GetValue(row, null)?.ToString() ?? "").ToList();
-            Console.WriteLine(GetIndent() + string.Join(" | ", values));
+            Console.Write(GetIndent());
+            Console.WriteLine(string.Join(" | ", values));
         }
     }
 
     public static void dump(object? data, string label = "Dump", int depth = 0) {
         if (depth > 10) {
-            Console.WriteLine(GetIndent() + "[ERROR] Maximum recursion depth reached.");
+            Console.Write(GetIndent());
+            Console.WriteLine("[ERROR] Maximum recursion depth reached.");
             return;
         }
 
-        Console.WriteLine(GetIndent() + $"[{label}]");
-        Console.WriteLine(GetIndent() + new string('-', label.Length + 2));
+        Console.Write(GetIndent());
+        Console.WriteLine($"[{label}]");
+        Console.Write(GetIndent());
+        Console.WriteLine(new string('-', label.Length + 2));
 
         dumpRecursive(data, depth);
     }
 
     private static void dumpRecursive(object? data, int depth) {
         if (data == null) {
-            Console.WriteLine(GetIndent() + "null");
+            Console.Write(GetIndent());
+            Console.WriteLine("null");
             return;
         }
 
         if (data is IDictionary<string, object> dict) {
             foreach (var kvp in dict) {
-                Console.Write(GetIndent() + $"{kvp.Key}: ");
+                Console.Write(GetIndent());
+                Console.Write($"{kvp.Key}: ");
 
                 if (kvp.Value is IDictionary<string, object> subDict) {
                     Console.WriteLine();

@@ -19,11 +19,6 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
         var Dictionary = clr.System.Collections.Generic.Dictionary;
         var Environment = clr.System.Environment;
 
-        var json = host.lib('Newtonsoft.Json');
-        var jsonLinq = json.Newtonsoft.Json.Linq;
-        var jsonConvert = json.JsonConvert;
-        var jObject = jsonLinq.JObject;
-
         var xferLang = host.lib('ParksComputing.Xfer.Lang');
 
         var startWorkspace = xk.startWorkspace;
@@ -31,6 +26,11 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
 
         if (startWorkspace != null) {
             xk.setActiveWorkspace(startWorkspace);
+        }
+
+        function formatJson(rawJson) {
+            let obj = JSON.parse(rawJson);
+            return JSON.stringify(obj, null, 2); // 2 = indentation spaces
         }
 
         function sayHello() {
@@ -90,6 +90,15 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                 log(obj.toString())
             '>
         }
+
+        notepad {
+            description "Start notepad."
+
+            script <'
+                let path = `c:/users/paul`;
+                xk.process.run("notepad.exe", path, "test.xfer");
+            '>
+        }
     }
 
     </ This is a global pre-request script that will be executed before each request. />
@@ -98,7 +107,7 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
 
     </ This is a global post-request script that will be executed after each request completes. />
     postResponse <'
-        log(request.response.body);
+        return request.response.body;
     '>
 
     </ A workspace is a collection of related requests and associated configuration. />
@@ -107,14 +116,38 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
         httpbin {
             description "Calling various endpoints in the httpbin.org service."
 
+            initScript <'
+            '>
+
             properties {
                 wsLevel "httpbin wsLevel"
+                foo "bar"
             }
 
             macros {
             }
 
             baseUrl "https://httpbin.org/"
+
+            scripts {
+                test {
+                    description "An example of a script that can be executed from the command line."
+
+                    arguments {
+                        arg1 {
+                            type "string"
+                            description "(string) The first argument."
+                        }
+                    }
+
+                    script <'
+                        log(workspace.name);
+                        // log(workspace.requests.gettest.name);
+                        let result = workspace.requests.gettest.execute(arg1);
+                        return result;
+                    '>
+                }
+            }
 
             </ These are requests that may be executed by name from the command line. />
             requests {
@@ -166,21 +199,23 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     
                     </ Default parameters to be sent with the request unless overridden. />
                     parameters (
-                        'key1={{[prop]::reqLevel}}'
-                        'key2={{[prop]::../wsLevel::key2}}'
+                        'key1={{[arg]::arg1::key1}}'
+                        'key1={{[file]::c:/users/paul/sample.txt::key2}}'
                         'key3={{[prop]::../../baseLevel::key3}}'
                         'key4={{[prop]::/parkscomputing/wsLevel::key4}}'
                         'key5={{[prop]::/parkscomputing/about/reqLevel::key5}}'
+                        'boo'
                     )
 
                     preRequest <'
+                        log("This is the httpbin.gettest pre-request handler");
                         // Delegate to upstream pre-request handler
                         nextHandler();
                         '>
 
                     postResponse <'
                         // Delegate to upstream post-request handler
-                        nextHandler();
+                        return nextHandler();
                     '>
                 }
                 posttest {
@@ -197,12 +232,8 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                 }
 
                 basic {
-                    endpoint '/basic-auth/<|httpBinBasicAuthUser|>/<|httpBinBasicAuthPassword|>'
+                    endpoint '/basic-auth/{{[env]::httpBinBasicAuthUser}}/{{[env]::httpBinBasicAuthPassword}}'
                     method "GET"
-                    headers {
-                        </ The httpBinBearerToken environment variable is set in the .xk/.env file. />
-                        Authorization 'Bearer <|httpBinBearerToken|>'
-                    }
 
                     preRequest <'
                         var basicAuth = btoa("<|httpBinBasicAuthUser|>:<|httpBinBasicAuthPassword|>");
@@ -216,28 +247,37 @@ https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/READ
                     method "GET"
                     headers {
                         </ The httpBinBearerToken environment variable is set in the .xk/.env file. />
-                        Authorization 'Bearer <|httpBinBearerToken|>'
+                        Authorization 'Bearer {{[env]::httpBinBearerToken}}'
                     }
                 }
             }
         }
 
         foo {
+            extend "httpbin"
             description "An example of extending an existing workspace, in this case the httpbin workspace."
 
-            extend "httpbin"
+            properties {
+                foo "baz"
+            }
+
             requests {
                 gettest {
                     parameters (
                         'key3=value1'
                         'key4=value2'
+                        'yah'
                     )
 
                     preRequest <'
                         log("This is the foo.gettest pre-request handler");
                         // Delegate to base pre-request handler
                         baseHandler();
-                        '>
+                    '>
+
+                    postResponse <'
+                        return request.response.body;
+                    '>
                 }
             }
         }

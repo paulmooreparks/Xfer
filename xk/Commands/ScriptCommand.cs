@@ -11,6 +11,7 @@ using System.CommandLine.Invocation;
 using ParksComputing.XferKit.Cli.Services;
 using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Scripting.Services;
+using Microsoft.ClearScript;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
@@ -40,9 +41,11 @@ internal class ScriptCommand {
         if (scriptBody is not null && scriptBody.Any()) {
             var script = string.Join(' ', scriptBody);
             var output = _scriptEngine.ExecuteCommand(script);
-            if (!string.IsNullOrEmpty(output)) {
+
+            if (output is not null && !output.Equals(Undefined.Value)) {
                 Console.WriteLine(output);
             }
+
             return Result.Success;
         }
 
