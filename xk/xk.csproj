@@ -10,7 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Cliffer\ClifferLib\Cliffer.csproj" />
+    <PackageReference Include="Cliffer" Version="0.4.12-prerelease" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj" />
     <ProjectReference Include="..\ParksComputing.XferKit.Api\ParksComputing.XferKit.Api.csproj" />
     <ProjectReference Include="..\ParksComputing.XferKit.CliCommands\ParksComputing.XferKit.CliCommands.csproj" />

@@ -9,7 +9,7 @@ public interface IHttpApi {
 
     HttpResponseMessage? get(string baseUrl, IEnumerable<string>? queryParameters, IEnumerable<string>? headers);
     Task<HttpResponseMessage?> getAsync(string baseUrl, IEnumerable<string>? queryParameters, IEnumerable<string>? headers);
-    HttpResponseMessage? post(string baseUrl, string payload, IEnumerable<string>? headers);
+    HttpResponseMessage? post(string baseUrl, string? payload, IEnumerable<string>? headers);
     Task<HttpResponseMessage?> postAsync(string baseUrl, string? payload, IEnumerable<string>? headers);
     HttpResponseMessage? put(string baseUrl, string endpoint, string? payload, IEnumerable<string>? headers);
     Task<HttpResponseMessage?> putAsync(string baseUrl, string endpoint, string? payload, IEnumerable<string>? headers);
