@@ -146,7 +146,15 @@ function __postResponse(workspace, request) {{
             }
 
             if (_workspaceService.BaseConfig.InitScript is not null) {
-                ExecuteScript(_workspaceService.BaseConfig.InitScript);
+                try {
+                    ExecuteScript(_workspaceService.BaseConfig.InitScript);
+                }
+                catch (ScriptEngineException ex) {
+                    Console.Error.WriteLine(ex.ErrorDetails);
+                }
+                catch (Exception ex) {
+                    Console.Error.WriteLine($"{Constants.ErrorChar} Error executing script: {ex.Message}");
+                }
             }
 
             foreach (var workspaceKvp in _workspaceService.BaseConfig.Workspaces) {
@@ -377,7 +385,7 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
                 );
         }
         catch (ScriptEngineException ex) {
-            Console.Error.WriteLine(ex.ErrorDetails);
+            throw new Exception(ex.ErrorDetails);
         }
 
         // Copy headers back to original dictionary
@@ -456,10 +464,8 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
             return postResponseResult;
         }
         catch (ScriptEngineException ex) {
-            Console.Error.WriteLine(ex.ErrorDetails);
+            throw new Exception(ex.ErrorDetails);
         }
-
-        return null;
     }
 
     public void SetValue(string name, object? value) {
@@ -473,62 +479,34 @@ function __postResponse__{workspaceName}__{requestName} (workspace, request{extr
     }
 
     public string ExecuteScript(string? script) {
-        try {
-            var scriptCode = GetScriptContent(script);
+        var scriptCode = GetScriptContent(script);
 
-            if (string.IsNullOrEmpty(scriptCode)) {
-                return string.Empty;
-            }
-
-            _engine.Execute(scriptCode);
+        if (string.IsNullOrEmpty(scriptCode)) {
             return string.Empty;
         }
-        catch (ScriptEngineException ex) {
-            Console.Error.WriteLine(ex.ErrorDetails);
-        }
-        catch (Exception ex) {
-            Console.Error.WriteLine($"{Constants.ErrorChar} Error executing script: {ex.Message}");
-        }
 
+        _engine.Execute(scriptCode);
         return string.Empty;
     }
 
     public object? EvaluateScript(string? script) {
-        try {
-            var scriptCode = GetScriptContent(script);
+        var scriptCode = GetScriptContent(script);
 
-            if (string.IsNullOrEmpty(scriptCode)) {
-                return string.Empty;
-            }
-
-            var result = _engine.Evaluate(scriptCode);
-
-            if (result is not null && result is not Undefined && result is not VoidResult ) {
-                return result;
-            }
-        }
-        catch (ScriptEngineException ex) {
-            Console.Error.WriteLine(ex.ErrorDetails);
-        }
-        catch (Exception ex) {
-            Console.Error.WriteLine($"{Constants.ErrorChar} Error executing script: {ex.Message}");
+        if (string.IsNullOrEmpty(scriptCode)) {
+            return string.Empty;
         }
 
-        return null;
+        var result = _engine.Evaluate(scriptCode);
+
+        if (result is null || result is Undefined || result is VoidResult ) {
+            return null;
+        }
+
+        return result;
     }
 
     public string ExecuteCommand(string? script) {
-        try {
-            return _engine.ExecuteCommand(script);
-        }
-        catch (ScriptEngineException ex) {
-            Console.Error.WriteLine(ex.ErrorDetails);
-        }
-        catch (Exception ex) {
-            Console.Error.WriteLine($"{Constants.ErrorChar} Error executing script: {ex.Message}");
-        }
-
-        return string.Empty;
+        return _engine.ExecuteCommand(script);
     }
 
 

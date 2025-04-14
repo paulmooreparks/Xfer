@@ -40,13 +40,21 @@ internal class ScriptCommand {
     {
         if (scriptBody is not null && scriptBody.Any()) {
             var script = string.Join(' ', scriptBody);
-            var output = _scriptEngine.ExecuteCommand(script);
 
-            if (output is not null && !output.Equals(Undefined.Value)) {
-                Console.WriteLine(output);
+            try {
+                var output = _scriptEngine.ExecuteCommand(script);
+
+                if (output is not null && !output.Equals(Undefined.Value)) {
+                    Console.WriteLine(output);
+                }
+
+                return Result.Success;
+            }
+            catch (Exception ex) {
+                Console.Error.WriteLine($"{Workspace.Constants.ErrorChar} Error executing script: {ex.Message}");
             }
 
-            return Result.Success;
+            return Result.Error;
         }
 
         return await command.Repl(serviceProvider, context, _replContext);

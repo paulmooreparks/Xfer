@@ -11,13 +11,11 @@ using ParksComputing.XferKit.Workspace.Models;
 using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Scripting.Services;
 using Microsoft.ClearScript;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
-[Command("runwsscript", "Internal command to run workspace scripts.", IsHidden = true)]
-[Option(typeof(string), "--scriptName", "The name of the script to run.", Arity = ArgumentArity.ExactlyOne)]
-[Option(typeof(string), "--workspaceName", "The name of the workspace in which the script is contained.", Arity = ArgumentArity.ZeroOrOne)]
-[Argument(typeof(IEnumerable<string>), "params", "Optional arguments", Arity = ArgumentArity.ZeroOrMore)]
 internal class RunWsScriptCommand {
     private readonly IWorkspaceService _workspaceService;
     private readonly IXferScriptEngine _scriptEngine;
@@ -27,18 +25,31 @@ internal class RunWsScriptCommand {
     public RunWsScriptCommand(
         IWorkspaceService workspaceService,
         IXferScriptEngine scriptEngine
-        ) { 
+        ) 
+    { 
         _workspaceService = workspaceService;
         _scriptEngine = scriptEngine;
     }
 
-    public int Execute(
+    public int Handler(
+        InvocationContext invocationContext,
         string scriptName,
-        string? workspaceName,
-        [ArgumentParam("params")] IEnumerable<object>? args
+        string? workspaceName
         ) 
     {
-        var result = DoCommand( scriptName, workspaceName, args );
+        var parseResult = invocationContext.ParseResult;
+        return Execute(invocationContext, scriptName, workspaceName, [], parseResult.CommandResult.Tokens);
+    }
+
+    public int Execute(
+        InvocationContext invocationContext,
+        string scriptName,
+        string? workspaceName,
+        IEnumerable<object>? args,
+        IReadOnlyList<System.CommandLine.Parsing.Token>? tokenArguments
+        ) 
+    {
+        var result = DoCommand(invocationContext, scriptName, workspaceName, args, tokenArguments);
 
         if (CommandResult is not null && !CommandResult.Equals(Undefined.Value)) {
             Console.WriteLine(CommandResult);
@@ -48,9 +59,11 @@ internal class RunWsScriptCommand {
     }
 
     public int DoCommand(
+        InvocationContext invocationContext,
         string scriptName,
         string? workspaceName,
-        [ArgumentParam("params")] IEnumerable<object>? args
+        IEnumerable<object>? args,
+        IReadOnlyList<System.CommandLine.Parsing.Token>? tokenArguments
         ) 
     {
         if (scriptName is null) {
@@ -58,6 +71,8 @@ internal class RunWsScriptCommand {
             return Result.Error;
         }
 
+        var paramList = string.Empty;
+        var scriptParams = new List<object?>();
         ScriptDefinition? scriptDefinition = null;
         bool found = false;
 
@@ -88,8 +103,6 @@ internal class RunWsScriptCommand {
         }
 
         var argumentDefinitions = scriptDefinition.Arguments.Values.ToList();
-        var paramList = string.Empty;
-        var scriptParams = new List<object?>();
         
         if (!string.IsNullOrEmpty(workspaceName)) {
             var workspaces = _scriptEngine.Script.xk.workspaces as IDictionary<string, object?>;
@@ -99,7 +112,50 @@ internal class RunWsScriptCommand {
             }
         }
 
-        if (args is not null) {
+        if (tokenArguments is not null && tokenArguments.Any()) {
+            int i = 0;
+            using var enumerator = tokenArguments.GetEnumerator();
+
+            foreach (var token in tokenArguments) {
+                var arg = token.Value;
+
+                if (i >= argumentDefinitions.Count()) {
+                    scriptParams.Add(arg);
+                }
+                else {
+                    var argType = argumentDefinitions[i].Type;
+
+                    switch (argType) {
+                        case "string":
+                            scriptParams.Add(arg);
+                            break;
+
+                        case "stringArray":
+                            scriptParams.Add(arg);
+                            break;
+
+                        case "number":
+                            scriptParams.Add(Convert.ToDouble(arg));
+                            break;
+
+                        case "boolean":
+                            scriptParams.Add(Convert.ToBoolean(arg));
+                            break;
+
+                        case "object":
+                            scriptParams.Add(arg);
+                            break;
+
+                        default:
+                            Console.Error.WriteLine($"{Constants.ErrorChar} Unsupported argument type '{argType}' in script '{scriptName}'.");
+                            return Result.Error;
+                    }
+                }
+
+                i++;
+            }
+        }
+        else if (args is not null) {
             int i = 0;
 
             foreach (var arg in args) {

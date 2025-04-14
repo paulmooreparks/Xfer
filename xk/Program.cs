@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.Reflection;
 using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Cli.Commands;
+using ParksComputing.XferKit.Scripting.Services;
 
 namespace ParksComputing.Xfer.Cli;
 
@@ -42,7 +43,7 @@ internal class Program {
         Cliffer.Macro.CustomMacroArgumentProcessor += CustomMacroArgumentProcessor;
 
         Utility.SetServiceProvider(cli.ServiceProvider);
-        var rootCommand = cli.Commands["xk"] as RootCommand;
+        var rootCommand = cli.Commands["xk"] as XkRootCommand;
 
         if (rootCommand is not null) {
             rootCommand.ConfigureWorkspaces(cli);

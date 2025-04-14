@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cliffer" Version="0.4.12-prerelease" />
+    <PackageReference Include="Cliffer" Version="0.4.13-prerelease" />
   </ItemGroup>
 
 </Project>

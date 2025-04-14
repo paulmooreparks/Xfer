@@ -6,8 +6,10 @@ using ParksComputing.XferKit.Api;
 
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.NamingConventionBinder;
 
 using System.Diagnostics;
+using ParksComputing.XferKit.Cli.Services.Impl;
 
 
 namespace ParksComputing.XferKit.Cli.Commands;
@@ -15,7 +17,7 @@ namespace ParksComputing.XferKit.Cli.Commands;
 [Option(typeof(string), "--baseurl", "The base URL of the API to send HTTP requests to.", new[] { "-b" }, IsRequired = false)]
 [Option(typeof(string), "--workspace", "Path to a workspace file to use, other than the default.", new[] { "-w" }, IsRequired = false)]
 [Option(typeof(bool), "--recursive", "Indicates if this is a recursive call.", IsHidden = true, IsRequired = false)]
-internal class RootCommand {
+internal class XkRootCommand {
     private readonly Option _recursionOption;
     private readonly IServiceProvider _serviceProvider;
     private readonly IWorkspaceService _workspaceService;
@@ -27,7 +29,7 @@ internal class RootCommand {
 
     private string _currentWorkspaceName = string.Empty;
 
-    public RootCommand(
+    public XkRootCommand(
         IServiceProvider serviceProvider,
         IWorkspaceService workspaceService,
         System.CommandLine.RootCommand rootCommand,
@@ -43,7 +45,7 @@ internal class RootCommand {
         _scriptEngine = scriptEngine;
         _xk = xferKitApi;
         _recursionOption = recursionOption;
-        _replContext = new XferReplContext(_serviceProvider, _workspaceService, splitter, _recursionOption);
+        _replContext = new XkReplContext(_serviceProvider, _workspaceService, splitter, _recursionOption);
         _scriptCliBridge = scriptCliBridge;
         _scriptCliBridge.RootCommand = rootCommand;
 
@@ -77,11 +79,12 @@ function myFunction(baseUrl, page) {{
             foreach (var script in _workspaceService.BaseConfig.Scripts) {
                 var scriptName = script.Key;
                 var scriptBody = script.Value.Script;
-                var scriptCall = $"runwsscript --scriptName {scriptName}";
-                var description = script.Value.Description ?? scriptCall;
+                var description = script.Value.Description ?? string.Empty;
                 var arguments = script.Value.Arguments;
                 var paramList = new List<string>();
-                var macroCommand = new Macro($"{scriptName}", $"[script] {description}", scriptCall);
+
+                var scriptCommand = new Command(scriptName, $"[script] {description}");
+                var scriptHandler = new RunWsScriptCommand(_workspaceService, _scriptEngine);
 
                 foreach (var kvp in arguments) {
                     var argument = kvp.Value;
@@ -93,16 +96,16 @@ function myFunction(baseUrl, page) {{
 
                     switch (argType) {
                         case "string":
-                            macroCommand.AddArgument(new Argument<string>(argName, argDescription) { Arity = argArity });
+                            scriptCommand.AddArgument(new Argument<string>(argName, argDescription) { Arity = argArity });
                             break;
                         case "number":
-                            macroCommand.AddArgument(new Argument<double>(argName, argDescription) { Arity = argArity });
+                            scriptCommand.AddArgument(new Argument<double>(argName, argDescription) { Arity = argArity });
                             break;
                         case "boolean":
-                            macroCommand.AddArgument(new Argument<bool>(argName, argDescription) { Arity = argArity });
+                            scriptCommand.AddArgument(new Argument<bool>(argName, argDescription) { Arity = argArity });
                             break;
                         case "object":
-                            macroCommand.AddArgument(new Argument<object>(argName, argDescription) { Arity = argArity });
+                            scriptCommand.AddArgument(new Argument<object>(argName, argDescription) { Arity = argArity });
                             break;
                         default:
                             Console.Error.WriteLine($"{ParksComputing.XferKit.Workspace.Constants.ErrorChar} Script {scriptName}: Invalid or unsupported argument type {argType} for argument {argName}");
@@ -112,19 +115,26 @@ function myFunction(baseUrl, page) {{
                     paramList.Add(argument.Name);
                 }
 
-                macroCommand.AddArgument(new Argument<IEnumerable<string>>("params", "Additional arguments.") { Arity = System.CommandLine.ArgumentArity.ZeroOrMore, IsHidden = true });
-                paramList.Add("params");
+                scriptCommand.AddArgument(new Argument<IEnumerable<string>>("params", "Additional arguments.") { Arity = System.CommandLine.ArgumentArity.ZeroOrMore, IsHidden = true });
+                scriptCommand.Handler = CommandHandler.Create(int (InvocationContext invocationContext) => {
+                    return scriptHandler.Handler(invocationContext, scriptName, null);
+                });
 
-                _rootCommand.AddCommand(macroCommand);
+                _rootCommand.AddCommand(scriptCommand);
                 var paramString = string.Join(", ", paramList);
 
-                _scriptEngine.EvaluateScript($@"
+                try {
+                    _scriptEngine.EvaluateScript($@"
 function __script__{scriptName}({paramString}) {{
 {scriptBody}
 }};
 
 xk.{scriptName} = __script__{scriptName};
 ");
+                }
+                catch (Exception ex) {
+                    Console.Error.WriteLine($"{Workspace.Constants.ErrorChar} Error: {ex.Message}");
+                }
             }
         }
 
@@ -135,15 +145,26 @@ xk.{scriptName} = __script__{scriptName};
             var workspaceConfig = workspaceKvp.Value;
             var workspace = workspaceColl![workspaceName] as dynamic;
 
+            var workspaceCommand = new Command(workspaceName, $"[workspace] {workspaceConfig.Description}");
+            workspaceCommand.IsHidden = workspaceConfig.IsHidden;
+            var workspaceHandler = new WorkspaceCommand(workspaceName, _serviceProvider, _workspaceService);
+
+            workspaceCommand.Handler = CommandHandler.Create(async Task<int> (InvocationContext invocationContext) => {
+                return await workspaceHandler.Execute(workspaceCommand, _rootCommand, invocationContext);
+            });
+
+            _rootCommand.AddCommand(workspaceCommand);
+
             foreach (var script in workspaceConfig.Scripts) {
                 var scriptName = script.Key;
                 var scriptBody = script.Value.Script;
-                var scriptCall = $"runwsscript --workspaceName {workspaceName} --scriptName {scriptName}";
-                var description = script.Value.Description ?? scriptCall;
+                var description = script.Value.Description ?? string.Empty;
                 var arguments = script.Value.Arguments;
                 var paramList = new List<string>();
-                var macroCommand = new Macro($"{workspaceName}.{scriptName}", $"[script] {description}", scriptCall);
-                macroCommand.IsHidden = workspaceConfig.IsHidden;
+
+                var scriptCommand = new Command(scriptName, $"[script] {description}");
+                scriptCommand.IsHidden = workspaceConfig.IsHidden;
+                var scriptHandler = new RunWsScriptCommand(_workspaceService, _scriptEngine);
 
                 foreach (var kvp in arguments) {
                     var argument = kvp.Value;
@@ -155,13 +176,13 @@ xk.{scriptName} = __script__{scriptName};
 
                     switch (argType) {
                         case "string":
-                            macroCommand.AddArgument(new Argument<string>(argName, argDescription) { Arity = argArity });
+                            scriptCommand.AddArgument(new Argument<string>(argName, argDescription) { Arity = argArity });
                             break;
                         case "number":
-                            macroCommand.AddArgument(new Argument<double>(argName, argDescription) { Arity = argArity });
+                            scriptCommand.AddArgument(new Argument<double>(argName, argDescription) { Arity = argArity });
                             break;
                         case "boolean":
-                            macroCommand.AddArgument(new Argument<bool>(argName, argDescription) { Arity = argArity });
+                            scriptCommand.AddArgument(new Argument<bool>(argName, argDescription) { Arity = argArity });
                             break;
                         case "object":
                             break;
@@ -173,19 +194,28 @@ xk.{scriptName} = __script__{scriptName};
                     paramList.Add(argument.Name);
                 }
 
-                macroCommand.AddArgument(new Argument<IEnumerable<string>>("params", "Additional arguments.") { Arity = System.CommandLine.ArgumentArity.ZeroOrOne, IsHidden = true });
+                scriptCommand.Handler = CommandHandler.Create(int (InvocationContext invocationContext) => {
+                    return scriptHandler.Handler(invocationContext, scriptName, workspaceName);
+                });
+
+                workspaceCommand.AddCommand(scriptCommand);
+
                 paramList.Add("params");
 
-                _rootCommand.AddCommand(macroCommand);
                 var paramString = string.Join(", ", paramList);
 
-                _scriptEngine.EvaluateScript($@"
+                try {
+                    _scriptEngine.EvaluateScript($@"
 function __script__{workspaceName}__{scriptName}(workspace, {paramString}) {{
 {scriptBody}
 }};
 
 xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptName};
 ");
+                }
+                catch (Exception ex) {
+                    Console.Error.WriteLine($"{Workspace.Constants.ErrorChar} Error: {ex.Message}");
+                }
             }
 
             var requests = workspace.requests as IDictionary<string, object>;
@@ -196,32 +226,34 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
                 request.Name = requestName;
                 var description = request.Description ?? $"{request.Method} {request.Endpoint}";
                 var scriptCall = $"send {workspaceName} {requestName} --baseurl {workspaceKvp.Value.BaseUrl}";
-                var macroCommand = new Macro($"{workspaceName}.{requestName}", $"[request] {description}", scriptCall);
-                macroCommand.IsHidden = workspaceConfig.IsHidden;
+                
 
+                var requestCommand = new Command(requestName, $"[request] {description}");
+                requestCommand.IsHidden = workspaceConfig.IsHidden;
+                var requestHandler = new SendCommand(_workspaceService, _scriptEngine, Utility.GetService<IPropertyResolver>());
                 var requestObj = requests![requestName] as IDictionary<string, object>;
-                var requestCaller = new RequestCaller(cli, workspaceName, requestName, workspaceKvp.Value.BaseUrl);
+                var requestCaller = new RequestCaller(cli, _rootCommand, requestHandler, workspaceName, requestName, workspaceKvp.Value.BaseUrl);
 #pragma warning disable CS8974 // Converting method group to non-delegate type
                 requestObj!["execute"] = requestCaller.RunRequest;
 #pragma warning restore CS8974 // Converting method group to non-delegate type
 
                 var baseurlOption = new Option<string>(["--baseurl", "-b"], "The base URL of the API to send HTTP requests to.");
                 baseurlOption.IsRequired = false;
-                macroCommand.AddOption(baseurlOption);
+                requestCommand.AddOption(baseurlOption);
 
                 var parameterOption = new Option<IEnumerable<string>>(["--parameters", "-p"], "Query parameters to include in the request. If input is redirected, parameters can also be read from standard input.");
                 parameterOption.AllowMultipleArgumentsPerToken = true;
                 parameterOption.Arity = System.CommandLine.ArgumentArity.ZeroOrMore;
-                macroCommand.AddOption(parameterOption);
+                requestCommand.AddOption(parameterOption);
 
                 var headersOption = new Option<IEnumerable<string>>(["--headers", "-h"], "Headers to include in the request.");
                 headersOption.AllowMultipleArgumentsPerToken = true;
                 headersOption.Arity = System.CommandLine.ArgumentArity.ZeroOrMore;
-                macroCommand.AddOption(headersOption);
+                requestCommand.AddOption(headersOption);
 
                 var payloadOption = new Option<string>(["--payload", "-pl"], "Content to send with the request. If input is redirected, content can also be read from standard input.");
                 payloadOption.Arity = System.CommandLine.ArgumentArity.ZeroOrOne;
-                macroCommand.AddOption(payloadOption);
+                requestCommand.AddOption(payloadOption);
 
                 foreach (var kvp in request.Arguments) {
                     var argName = kvp.Key;
@@ -233,16 +265,16 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
 
                     switch (argType) {
                         case "string":
-                            macroCommand.AddArgument(new Argument<string>(argName, argDescription) { Arity = argArity });
+                            requestCommand.AddArgument(new Argument<string>(argName, argDescription) { Arity = argArity });
                             break;
                         case "number":
-                            macroCommand.AddArgument(new Argument<double>(argName, argDescription) { Arity = argArity });
+                            requestCommand.AddArgument(new Argument<double>(argName, argDescription) { Arity = argArity });
                             break;
                         case "boolean":
-                            macroCommand.AddArgument(new Argument<bool>(argName, argDescription) { Arity = argArity });
+                            requestCommand.AddArgument(new Argument<bool>(argName, argDescription) { Arity = argArity });
                             break;
                         case "object":
-                            macroCommand.AddArgument(new Argument<object>(argName, argDescription) { Arity = argArity });
+                            requestCommand.AddArgument(new Argument<object>(argName, argDescription) { Arity = argArity });
                             break;
                         default:
                             Console.Error.WriteLine($"{ParksComputing.XferKit.Workspace.Constants.ErrorChar} Request {requestName}: Invalid or unsupported argument type {argType} for argument {argName}");
@@ -250,14 +282,18 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
                     }
                 }
 
-                _rootCommand.AddCommand(macroCommand);
+                requestCommand.Handler = CommandHandler.Create(int (InvocationContext invocationContext) => {
+                    return requestHandler.Handler(invocationContext, workspaceName, requestName, workspaceConfig.BaseUrl, null, null, null, null, null, null, cli);
+                });
+
+                workspaceCommand.AddCommand(requestCommand);
             }
 
             foreach (var macro in workspaceConfig.Macros) {
                 var macroCommand = new Macro($"{workspaceName}.{macro.Key}", $"[macro] {macro.Value.Description}", macro.Value.Command);
                 macroCommand.IsHidden = workspaceConfig.IsHidden;
 
-                _rootCommand.AddCommand(macroCommand);
+                workspaceCommand.AddCommand(macroCommand);
             }
         }
     }
@@ -288,75 +324,5 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
             );
 
         return result;
-    }
-
-    public void RunCommand(string command, string? workingDirectory, string[] arguments, bool captureOutput = false) {
-        var argumentList = new List<string>(arguments);
-
-        var argumentsString = string.Join(' ', argumentList);
-
-        var processStartInfo = new ProcessStartInfo {
-            FileName = command,
-            Arguments = argumentsString,
-            UseShellExecute = false,
-            RedirectStandardOutput = captureOutput,
-            CreateNoWindow = false,
-            WorkingDirectory = workingDirectory
-        };
-
-        if (!string.IsNullOrEmpty(workingDirectory)) {
-            processStartInfo.WorkingDirectory = workingDirectory;
-        }
-
-        using var process = new Process {
-            StartInfo = processStartInfo
-        };
-
-        process.Start();
-
-        string output = "";
-
-        if (captureOutput) {
-            output = process.StandardOutput.ReadToEnd();
-        }
-
-        process.WaitForExit();
-        Console.WriteLine(output);
-    }
-}
-
-public class RequestCaller {
-    private readonly IClifferCli? _cli;
-
-    public string WorkspaceName { get; set; }
-    public string RequestName { get; set; }
-    public string BaseUrl { get; set; }
-
-    public RequestCaller(
-        IClifferCli? cli,
-        string workspaceName,
-        string requestName,
-        string? baseUrl
-        ) 
-    {
-        _cli = cli;
-        WorkspaceName = workspaceName;
-        RequestName = requestName;
-        BaseUrl = baseUrl!;
-    }
-
-    public object? RunRequest(params object?[]? args) {
-        if (_cli is null) {
-            return null;
-        }
-
-        if (_cli.Commands.TryGetValue("send", out object? commandObject)) {
-            if (commandObject is SendCommand sendCommand) {
-                var result = sendCommand.DoCommand(WorkspaceName, RequestName, BaseUrl, null, null, null, null, null, args, _cli);
-                return sendCommand.CommandResult;
-            }
-        }
-
-        return null;
     }
 }

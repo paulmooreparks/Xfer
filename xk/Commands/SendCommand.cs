@@ -15,19 +15,12 @@ using ParksComputing.XferKit.Cli.Services;
 using ParksComputing.XferKit.Workspace;
 using ParksComputing.XferKit.Cli.Extensions;
 using Microsoft.ClearScript;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
-[Command("send", "Send a request defined in the current workspace.", IsHidden = true)]
-[Argument(typeof(string), "workspaceName", "The name of the workspace.")]
-[Argument(typeof(string), "requestName", "The name of the request to send.")]
-[Option(typeof(string), "--baseurl", "The base URL of the API to send HTTP requests to.", new[] { "-b" }, IsRequired = false)]
-[Option(typeof(IEnumerable<string>), "--parameters", "Query parameters to include in the request.", new[] { "-p" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
-[Option(typeof(IEnumerable<string>), "--headers", "Headers to include in the request.", new[] { "-h" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
-[Option(typeof(IEnumerable<string>), "--cookies", "Cookies to include in the request.", new[] { "-c" }, AllowMultipleArgumentsPerToken = true, Arity = ArgumentArity.ZeroOrMore)]
-[Option(typeof(string), "--payload", "Content to send with the request. If input is redirected, content can also be read from standard input.", new[] { "-pl" }, Arity = ArgumentArity.ZeroOrOne)]
-[Argument(typeof(IEnumerable<System.CommandLine.Parsing.Token>), "tokenArguments", "Additional arguments passed with the request", Arity = ArgumentArity.ZeroOrMore)]
-internal class SendCommand {
+public class SendCommand {
     private readonly IWorkspaceService _ws;
     private readonly IXferScriptEngine _scriptEngine;
     private readonly IPropertyResolver _propertyResolver;
@@ -37,23 +30,46 @@ internal class SendCommand {
     public SendCommand(
         IWorkspaceService workspaceService,
         IXferScriptEngine scriptEngine,
-        IPropertyResolver propertyResolver
+        IPropertyResolver? propertyResolver
         ) 
     {
         _ws = workspaceService;
         _scriptEngine = scriptEngine;
+
+        if (propertyResolver is null) {
+            throw new ArgumentNullException(nameof(propertyResolver), "Property resolver cannot be null.");
+        }
+
         _propertyResolver = propertyResolver;
     }
 
+    public int Handler(
+        InvocationContext invocationContext,
+        string workspaceName,
+        string requestName,
+        string? baseUrl,
+        IEnumerable<string>? parameters,
+        string? payload,
+        IEnumerable<string>? headers,
+        IEnumerable<string>? cookies,
+        List<System.CommandLine.Parsing.Token>? tokenArguments,
+        object?[]? objArguments,
+        IClifferCli cli
+        ) 
+    {
+        var parseResult = invocationContext.ParseResult;
+        return Execute(workspaceName, requestName, baseUrl, null, null, null, null, parseResult.CommandResult.Tokens, null, cli);
+    }
+
     public int Execute(
-        [ArgumentParam("workspaceName")] string workspaceName,
-        [ArgumentParam("requestName")] string requestName,
-        [OptionParam("--baseurl")] string? baseUrl,
-        [OptionParam("--parameters")] IEnumerable<string>? parameters,
-        [OptionParam("--payload")] string? payload,
-        [OptionParam("--headers")] IEnumerable<string>? headers,
-        [OptionParam("--cookies")] IEnumerable<string>? cookies,
-        [ArgumentParam("tokenArguments")] List<System.CommandLine.Parsing.Token>? tokenArguments,
+        string workspaceName,
+        string requestName,
+        string? baseUrl,
+        IEnumerable<string>? parameters,
+        string? payload,
+        IEnumerable<string>? headers,
+        IEnumerable<string>? cookies,
+        IReadOnlyList<System.CommandLine.Parsing.Token>? tokenArguments,
         object?[]? objArguments,
         IClifferCli cli
         ) 
@@ -75,7 +91,7 @@ internal class SendCommand {
         string? payload,
         IEnumerable<string>? headers,
         IEnumerable<string>? cookies,
-        List<System.CommandLine.Parsing.Token>? tokenArguments,
+        IReadOnlyList<System.CommandLine.Parsing.Token>? tokenArguments,
         object?[]? objArguments,
         IClifferCli cli
         ) 
@@ -223,16 +239,20 @@ internal class SendCommand {
             }
         }
 
-        _scriptEngine.InvokePreRequest(
-            workspaceName,
-            requestName,
-            configHeaders,
-            finalParameters,
-            payload,
-            configCookies,
-            extraArgs.ToArray()
-            );
-
+        try {
+            _scriptEngine.InvokePreRequest(
+                workspaceName,
+                requestName,
+                configHeaders,
+                finalParameters,
+                payload,
+                configCookies,
+                extraArgs.ToArray()
+                );
+        }
+        catch (Exception ex) {
+            Console.Error.WriteLine($"{Constants.ErrorChar} Error executing preRequest script: {ex.Message}");
+        }
 
         var finalHeaders = configHeaders
             .Select(kvp => $"{kvp.Key}: {kvp.Value}")
@@ -254,14 +274,20 @@ internal class SendCommand {
                     }
                     result = getCommand.Execute(baseUrl, endpoint, finalParameters, finalHeaders, finalCookies, isQuiet: true);
 
-                    CommandResult = _scriptEngine.InvokePostResponse(
-                        workspaceName,
-                        requestName,
-                        getCommand.StatusCode,
-                        getCommand.Headers,
-                        getCommand.ResponseContent,
-                        extraArgs.ToArray()
-                        );
+                    try {
+                        CommandResult = _scriptEngine.InvokePostResponse(
+                            workspaceName,
+                            requestName,
+                            getCommand.StatusCode,
+                            getCommand.Headers,
+                            getCommand.ResponseContent,
+                            extraArgs.ToArray()
+                            );
+                    }
+                    catch (Exception ex) {
+                        Console.Error.WriteLine($"{Constants.ErrorChar} Error executing preRequest script: {ex.Message}");
+                    }
+
                     break;
                 }
 
@@ -277,14 +303,20 @@ internal class SendCommand {
                     finalPayload = finalPayload.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
                     result = postCommand.Execute(baseUrl, endpoint, finalPayload, finalHeaders);
 
-                    CommandResult = _scriptEngine.InvokePostResponse(
-                        workspaceName,
-                        requestName,
-                        postCommand.StatusCode,
-                        postCommand.Headers,
-                        postCommand.ResponseContent,
-                        extraArgs.ToArray()
-                        );
+                    try {
+                        CommandResult = _scriptEngine.InvokePostResponse(
+                            workspaceName,
+                            requestName,
+                            postCommand.StatusCode,
+                            postCommand.Headers,
+                            postCommand.ResponseContent,
+                            extraArgs.ToArray()
+                            );
+                    }
+                    catch (Exception ex) {
+                        Console.Error.WriteLine($"{Constants.ErrorChar} Error executing preRequest script: {ex.Message}");
+                    }
+
                     break;
                 }
 

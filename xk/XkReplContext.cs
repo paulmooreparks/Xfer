@@ -10,7 +10,7 @@ using ParksComputing.XferKit.Workspace.Services;
 
 namespace ParksComputing.XferKit.Cli;
 
-internal class XferReplContext : Cliffer.DefaultReplContext {
+internal class XkReplContext : Cliffer.DefaultReplContext {
     private readonly IServiceProvider _serviceProvider;
     private readonly IWorkspaceService _workspaceService;
     private readonly ICommandSplitter _commandSplitter;
@@ -19,7 +19,7 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
     public string Title => "Xfer CLI Application";
     public override string[] GetPopCommands() => [];
 
-    public XferReplContext(
+    public XkReplContext(
         IServiceProvider serviceProvider,
         IWorkspaceService workspaceService,
         ICommandSplitter commandSplitter,
@@ -40,43 +40,17 @@ internal class XferReplContext : Cliffer.DefaultReplContext {
     }
 
     override public string GetPrompt(Command command, InvocationContext context) {
-        if (string.IsNullOrEmpty(_workspaceService.CurrentWorkspaceName)) {
-            return $"{command.Name}> ";
-        }
-
-        return $"{command.Name}:{_workspaceService.CurrentWorkspaceName}> ";
+        return $"{command.Name}> ";
     }
 
 
     public override string[] PreprocessArgs(string[] args, Command command, InvocationContext context) {
-        if (args[0].StartsWith('.')) {
-            args[0] = args[0][1..];
-        }
-        else {
-            var tmparg = args[0];
-            args[0] = $"{_workspaceService.CurrentWorkspaceName}.{args[0]}";
-
-            if (command.Subcommands.Where(x => x.Name.Equals(args[0])).Count() == 0) {
-                args[0] = tmparg;
-            }
-        }
-
         var newArgs = new List<string>();
         newArgs.AddRange(args);
 
         if (args[0] == command.Name) {
             newArgs.Add(_recursionOption.Aliases.First());
             newArgs.Add("true");
-        }
-
-        var parseResult = command.Parse(args);
-
-        if (parseResult.Errors.Count > 0) {
-            foreach (var error in parseResult.Errors) {
-                var errorMessage = $"{Constants.ErrorChar} {error.Message}";
-                throw new ApplicationException(errorMessage);
-            }
-            return args;
         }
 
         return base.PreprocessArgs(newArgs.ToArray(), command, context);
