@@ -157,6 +157,10 @@ public class SendCommand {
             isConsoleRedirected = false;
         }
 
+        if (payload != null) {
+            payload = payload.ReplaceXferKitPlaceholders(_scriptEngine, _propertyResolver, workspaceName, requestName, argsDict);
+        }
+
         var method = definition.Method?.ToUpper() ?? string.Empty;
         var endpoint = definition.Endpoint ?? string.Empty;
 

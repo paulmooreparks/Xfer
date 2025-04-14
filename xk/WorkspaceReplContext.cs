@@ -80,8 +80,7 @@ internal class WorkspaceReplContext : Cliffer.DefaultReplContext {
             return await matchedSubCommand.InvokeAsync(args);
         }
 
-        Console.Error.WriteLine($"{Constants.ErrorChar} Unknown command: {args[0]}");
-        return Result.ErrorInvalidArgument;
+        return await base.RunAsync(workspaceCommand, args);
     }
 
     public override string[] SplitCommandLine(string input) {
