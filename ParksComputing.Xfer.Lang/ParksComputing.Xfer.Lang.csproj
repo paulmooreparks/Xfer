@@ -4,10 +4,39 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Xfer Data-Transfer Language</Title>
+    <Company>Paul M. Parks</Company>
+    <Description>XferLang is a language for data transfer and data storage. It's similar to JSON, but has explicit typing and better support for embedding complex text data.</Description>
+    <Copyright>Copyright © 2025 Paul M. Parks</Copyright>
+    <PackageProjectUrl>https://github.com/paulmooreparks/Xfer</PackageProjectUrl>
+    <PackageIcon></PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/paulmooreparks/Xfer</RepositoryUrl>
+    <PackageTags>xfer;language;data transfer;data;json</PackageTags>
+    <PackAsTool>False</PackAsTool>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <Version>0.9.0-prerelease</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="Models\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="logo\XferLang.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
