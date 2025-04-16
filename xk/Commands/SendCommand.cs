@@ -17,10 +17,13 @@ using ParksComputing.XferKit.Cli.Extensions;
 using Microsoft.ClearScript;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using ParksComputing.XferKit.Http.Services;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
 public class SendCommand {
+    private readonly IHttpService _httpService;
+    private readonly XferKitApi _xk;
     private readonly IWorkspaceService _ws;
     private readonly IXferScriptEngine _scriptEngine;
     private readonly IPropertyResolver _propertyResolver;
@@ -28,11 +31,18 @@ public class SendCommand {
     public object? CommandResult { get; private set; } = null;
 
     public SendCommand(
+        IHttpService httpService,
+        XferKitApi xk,
         IWorkspaceService workspaceService,
         IXferScriptEngine scriptEngine,
         IPropertyResolver? propertyResolver
         ) 
     {
+        if (httpService is null) {
+            throw new ArgumentNullException(nameof(httpService), "HTTP service cannot be null.");
+        }
+        _httpService = httpService;
+        _xk = xk;
         _ws = workspaceService;
         _scriptEngine = scriptEngine;
 
@@ -53,12 +63,11 @@ public class SendCommand {
         IEnumerable<string>? headers,
         IEnumerable<string>? cookies,
         List<System.CommandLine.Parsing.Token>? tokenArguments,
-        object?[]? objArguments,
-        IClifferCli cli
+        object?[]? objArguments
         ) 
     {
         var parseResult = invocationContext.ParseResult;
-        return Execute(workspaceName, requestName, baseUrl, null, null, null, null, parseResult.CommandResult.Tokens, null, cli);
+        return Execute(workspaceName, requestName, baseUrl, null, null, null, null, parseResult.CommandResult.Tokens, null);
     }
 
     public int Execute(
@@ -70,11 +79,10 @@ public class SendCommand {
         IEnumerable<string>? headers,
         IEnumerable<string>? cookies,
         IReadOnlyList<System.CommandLine.Parsing.Token>? tokenArguments,
-        object?[]? objArguments,
-        IClifferCli cli
+        object?[]? objArguments
         ) 
     {
-        var result = DoCommand(workspaceName, requestName, baseUrl, parameters, payload, headers, cookies, tokenArguments, objArguments, cli);
+        var result = DoCommand(workspaceName, requestName, baseUrl, parameters, payload, headers, cookies, tokenArguments, objArguments);
 
         if (CommandResult is not null && !CommandResult.Equals(Undefined.Value)) {
             Console.WriteLine(CommandResult);
@@ -92,8 +100,7 @@ public class SendCommand {
         IEnumerable<string>? headers,
         IEnumerable<string>? cookies,
         IReadOnlyList<System.CommandLine.Parsing.Token>? tokenArguments,
-        object?[]? objArguments,
-        IClifferCli cli
+        object?[]? objArguments
         ) 
     {
         bool isConsoleRedirected = Console.IsInputRedirected;
@@ -270,7 +277,7 @@ public class SendCommand {
 
         switch (method) {
             case "GET": {
-                    var getCommand = cli.Commands["get"] as GetCommand;
+                    var getCommand = new GetCommand(_xk);
 
                     if (getCommand is null) {
                         Console.Error.WriteLine($"{Constants.ErrorChar} Error: Unable to find GET command.");
@@ -296,7 +303,7 @@ public class SendCommand {
                 }
 
             case "POST": {
-                    var postCommand = cli.Commands["post"] as PostCommand;
+                    var postCommand = new PostCommand(_xk);
 
                     if (postCommand is null) {
                         Console.Error.WriteLine($"{Constants.ErrorChar} Error: Unable to find POST command.");

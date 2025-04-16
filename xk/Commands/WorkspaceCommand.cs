@@ -16,6 +16,7 @@ using System.CommandLine.Invocation;
 
 using System.Diagnostics;
 using ParksComputing.XferKit.Cli.Services.Impl;
+using ParksComputing.XferKit.Cli.Repl;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 
@@ -38,13 +39,12 @@ internal class WorkspaceCommand {
 
     public async Task<int> Execute(
         Command command,
-        RootCommand rootCommand,
         InvocationContext context
         ) 
     {
         _workspaceService.SetActiveWorkspace(WorkspaceName);
+
         var replContext = new WorkspaceReplContext(
-            rootCommand,
             new CommandSplitter(),
             _workspaceService
             );

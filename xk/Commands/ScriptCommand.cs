@@ -12,6 +12,7 @@ using ParksComputing.XferKit.Cli.Services;
 using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Scripting.Services;
 using Microsoft.ClearScript;
+using ParksComputing.XferKit.Cli.Repl;
 
 namespace ParksComputing.XferKit.Cli.Commands;
 

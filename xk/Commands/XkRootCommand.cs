@@ -10,6 +10,8 @@ using System.CommandLine.NamingConventionBinder;
 
 using System.Diagnostics;
 using ParksComputing.XferKit.Cli.Services.Impl;
+using ParksComputing.XferKit.Cli.Repl;
+using ParksComputing.XferKit.Http.Services;
 
 
 namespace ParksComputing.XferKit.Cli.Commands;
@@ -68,7 +70,7 @@ function myFunction(baseUrl, page) {{
 #endif
     }
 
-    public void ConfigureWorkspaces(IClifferCli cli) {
+    public void ConfigureWorkspaces() {
         if (_workspaceService.BaseConfig is not null) {
             foreach (var macro in _workspaceService.BaseConfig.Macros) {
                 var macroCommand = new Macro($"{macro.Key}", $"[macro] {macro.Value.Description}", macro.Value.Command);
@@ -150,7 +152,7 @@ xk.{scriptName} = __script__{scriptName};
             var workspaceHandler = new WorkspaceCommand(workspaceName, _serviceProvider, _workspaceService);
 
             workspaceCommand.Handler = CommandHandler.Create(async Task<int> (InvocationContext invocationContext) => {
-                return await workspaceHandler.Execute(workspaceCommand, _rootCommand, invocationContext);
+                return await workspaceHandler.Execute(workspaceCommand, invocationContext);
             });
 
             _rootCommand.AddCommand(workspaceCommand);
@@ -230,9 +232,9 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
 
                 var requestCommand = new Command(requestName, $"[request] {description}");
                 requestCommand.IsHidden = workspaceConfig.IsHidden;
-                var requestHandler = new SendCommand(_workspaceService, _scriptEngine, Utility.GetService<IPropertyResolver>());
+                var requestHandler = new SendCommand(Utility.GetService<IHttpService>()!, _xk, _workspaceService, Utility.GetService<IXferScriptEngine>()!, Utility.GetService<IPropertyResolver>());
                 var requestObj = requests![requestName] as IDictionary<string, object>;
-                var requestCaller = new RequestCaller(cli, _rootCommand, requestHandler, workspaceName, requestName, workspaceKvp.Value.BaseUrl);
+                var requestCaller = new RequestCaller(_rootCommand, requestHandler, workspaceName, requestName, workspaceKvp.Value.BaseUrl);
 #pragma warning disable CS8974 // Converting method group to non-delegate type
                 requestObj!["execute"] = requestCaller.RunRequest;
 #pragma warning restore CS8974 // Converting method group to non-delegate type
@@ -283,7 +285,7 @@ xk.workspaces.{workspaceName}.{scriptName} = __script__{workspaceName}__{scriptN
                 }
 
                 requestCommand.Handler = CommandHandler.Create(int (InvocationContext invocationContext) => {
-                    return requestHandler.Handler(invocationContext, workspaceName, requestName, workspaceConfig.BaseUrl, null, null, null, null, null, null, cli);
+                    return requestHandler.Handler(invocationContext, workspaceName, requestName, workspaceConfig.BaseUrl, null, null, null, null, null, null);
                 });
 
                 workspaceCommand.AddCommand(requestCommand);

@@ -30,8 +30,6 @@ internal class GetCommand {
     public System.Net.Http.Headers.HttpResponseHeaders? Headers { get; protected set; } = default;
 
     public GetCommand(
-        IHttpService httpService,
-        IWorkspaceService workspaceService,
         XferKitApi xk
         ) 
     { 

@@ -14,7 +14,7 @@ public static class ServiceCollectionExtensions {
     public static IServiceCollection AddXferKitWorkspaceServices(this IServiceCollection services) {
         services.TryAddSingleton<ISettingsService, SettingsService>();
         services.TryAddSingleton<IPackageService, PackageService>();
-        services.TryAddSingleton<IStoreService, StoreService>();
+        services.TryAddSingleton<IStoreService, SqliteStoreService>();
         services.TryAddSingleton<IWorkspaceService, WorkspaceService>();
         return services;
     }

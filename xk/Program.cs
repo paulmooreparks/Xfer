@@ -17,6 +17,7 @@ using System.Reflection;
 using ParksComputing.XferKit.Workspace.Services;
 using ParksComputing.XferKit.Cli.Commands;
 using ParksComputing.XferKit.Scripting.Services;
+using ParksComputing.XferKit.DataStore;
 
 namespace ParksComputing.Xfer.Cli;
 
@@ -29,7 +30,6 @@ internal class Program {
 
         var cli = new ClifferBuilder()
             .ConfigureServices(services => {
-                services.AddSingleton<PersistenceService>();
                 services.AddXferKitWorkspaceServices();
                 services.AddXferKitHttpServices();
                 services.AddXferKitApiServices();
@@ -37,20 +37,32 @@ internal class Program {
                 services.AddXferKitDiagnosticsServices("XferKit");
                 services.AddSingleton<ICommandSplitter, CommandSplitter>();
                 services.AddSingleton<IScriptCliBridge, ScriptCliBridge>();
+
+                string databasePath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    Constants.XferDirectoryName,
+                    Constants.StoreFileName
+                );
+                
+                if (!Directory.Exists(Path.GetDirectoryName(databasePath))) {
+                    Directory.CreateDirectory(Path.GetDirectoryName(databasePath)!);
+                }
+
+                services.AddXferKitDataStore(databasePath);
             })
             .Build();
 
         Cliffer.Macro.CustomMacroArgumentProcessor += CustomMacroArgumentProcessor;
 
         Utility.SetServiceProvider(cli.ServiceProvider);
-        var rootCommand = cli.Commands["xk"] as XkRootCommand;
+
+        var rootCommand = cli.RootCommandInstance as XkRootCommand;
 
         if (rootCommand is not null) {
-            rootCommand.ConfigureWorkspaces(cli);
+            rootCommand.ConfigureWorkspaces();
         }
 
         ClifferEventHandler.OnExit += () => {
-            var persistenceService = Utility.GetService<PersistenceService>()!;
         };
 
         Console.OutputEncoding = Encoding.UTF8;

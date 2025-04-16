@@ -12,5 +12,5 @@ public interface IStoreApi {
     void delete(string key);
     void clear();
     string[] keys { get; }
-    object[] values { get; }
+    object[]? values { get; }
 }

@@ -1,30 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using ParksComputing.XferKit.Workspace.Services;
+using ParksComputing.XferKit.DataStore;
+using ParksComputing.XferKit.DataStore.Services;
 
 namespace ParksComputing.XferKit.Api.Store.Impl;
-internal class StoreApi : IStoreApi {
-    private readonly IStoreService _storeService;
 
-    public StoreApi(
-        IStoreService storeService
-        ) 
-    {
-        _storeService = storeService;
+internal class StoreApi : IStoreApi {
+    private readonly IKeyValueStore _store;
+
+    public StoreApi(IKeyValueStore store) {
+        _store = store;
     }
 
-    public void clear() => _storeService.Clear();
+    public object? get(string key) => _store.TryGetValue(key, out var value) ? value : null;
 
-    public void delete(string key) => _storeService.Delete(key);
+    public void set(string key, object value) => _store[key] = value;
 
-    public object? get(string key) => _storeService.Get(key);
+    public void delete(string key) => _store.Remove(key);
 
-    public void set(string key, object value) => _storeService.Set(key, value);
+    public void clear() => _store.Clear();
 
-    public string[] keys => _storeService.Keys.ToArray();
-    public object[] values => _storeService.Values.ToArray();
+    public string[] keys => [.. _store.Keys];
+
+    public object[]? values {
+        get {
+            return [.. _store.Values];
+        }
+    }
 }

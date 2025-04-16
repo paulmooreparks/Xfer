@@ -10,7 +10,7 @@ public static class Constants {
     public const string XferDiagnosticsName = "XferKit";
     public const string XferDirectoryName = ".xk";
     public const string WorkspacesFileName = "workspaces.xfer";
-    public const string StoreFileName = "store.xfer";
+    public const string StoreFileName = "store.sqlite";
     public const string EnvironmentFileName = ".env";
     public const string PackageDirName = "packages";
     public const string ScriptFilePrefix = "file:";
