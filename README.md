@@ -2,7 +2,23 @@
 
 # The XferLang Data-Interchange Format
 
-![Version](https://img.shields.io/badge/version-0.9.0-blue)
+<p>
+  <a href="https://github.com/paulmooreparks/Xfer">
+    <img alt="Xfer Version" src="https://img.shields.io/badge/Xfer-0.9.0-green">
+  </a>
+  <a href="https://github.com/paulmooreparks/Xfer">
+    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/paulmooreparks/Xfer">
+  </a>
+  <a href="https://github.com/paulmooreparks/Xfer">
+    <img alt="GitHub issues" src="https://img.shields.io/github/issues/paulmooreparks/Xfer">
+  </a>
+  <a href="https://opensource.org/licenses/MIT">
+    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg">
+  </a>
+  <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang">
+    <img alt="NuGet" src="https://img.shields.io/nuget/v/ParksComputing.Xfer.Lang.svg">
+  </a>
+</p>
 
 _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.com/item?id=42114543). Thank you so much for all the great input and discussion!_
 
