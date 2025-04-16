@@ -1,6 +1,6 @@
-﻿using ParksComputing.Xfer;
-using ParksComputing.Xfer.Elements;
-using ParksComputing.Xfer.Services;
+﻿using ParksComputing.Xfer.Lang;
+using ParksComputing.Xfer.Lang.Elements;
+using ParksComputing.Xfer.Lang.Services;
 using Xfer.Data;
 
 using System.Net.Http.Headers;

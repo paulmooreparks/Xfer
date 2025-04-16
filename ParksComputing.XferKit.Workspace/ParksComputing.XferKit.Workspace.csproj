@@ -15,10 +15,4 @@
     <PackageReference Include="NuGet.Protocol" Version="6.13.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj" />
-    <ProjectReference Include="..\ParksComputing.XferKit.DataStore\ParksComputing.XferKit.DataStore.csproj" />
-    <ProjectReference Include="..\ParksComputing.XferKit.Diagnostics\ParksComputing.XferKit.Diagnostics.csproj" />
-  </ItemGroup>
-
 </Project>

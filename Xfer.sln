@@ -23,29 +23,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "schemas", "schemas", "{99E4
 		schemas\user_profile.xfer = schemas\user_profile.xfer
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.Xfer.Lang", "ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj", "{F729B59A-A1D0-4308-A2F6-9B8FE2BF790D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.Xfer.Lang", "ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj", "{636E1065-4C9D-4037-BDF1-57E3139EDCAF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".xk", ".xk", "{93AE49E2-9F10-4BFD-B83E-B6FA00834823}"
-	ProjectSection(SolutionItems) = preProject
-		.xk\.env = .xk\.env
-		.xk\globalInitScript.js = .xk\globalInitScript.js
-		.xk\store.xfer = .xk\store.xfer
-		.xk\workspaces.xfer = .xk\workspaces.xfer
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XferTest", "XferTest\XferTest.csproj", "{C2F8A38A-F405-46A4-8132-FF054ED55DFC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.XferKit.Http", "ParksComputing.XferKit.Http\ParksComputing.XferKit.Http.csproj", "{99D380E9-8EC4-4138-BAF3-F625A6C10825}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "xferc", "xferc\xferc.csproj", "{B3146D5B-7DCD-4DD3-B680-5A7F5B3EF5B2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.XferKit.Workspace", "ParksComputing.XferKit.Workspace\ParksComputing.XferKit.Workspace.csproj", "{93F5B016-B85F-4358-9182-17E1D628F518}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xfer.Data", "XferService\Xfer.Data\Xfer.Data.csproj", "{2ADAEF07-B433-480D-801C-E32A958EF4E9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "xk", "xk\xk.csproj", "{FCD5852D-F983-4142-BF48-EF464712AC65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xfer.Service", "XferService\Xfer.Service\Xfer.Service.csproj", "{667703CF-5FF9-43DB-9D12-FBB9B6B4D7FE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.XferKit.Api", "ParksComputing.XferKit.Api\ParksComputing.XferKit.Api.csproj", "{5E5CCC28-8FA7-4E82-8149-6BB56134E9D3}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.XferKit.Scripting", "ParksComputing.XferKit.Scripting\ParksComputing.XferKit.Scripting.csproj", "{C4E1572D-3874-4AC7-BB2D-E8F3A586443D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.XferKit.Diagnostics", "ParksComputing.XferKit.Diagnostics\ParksComputing.XferKit.Diagnostics.csproj", "{43E05EE2-E51A-40BE-A931-6AB4DA8E4364}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParksComputing.XferKit.DataStore", "ParksComputing.XferKit.DataStore\ParksComputing.XferKit.DataStore.csproj", "{91DD6F3D-8BD7-488B-9D14-378B7F5A741E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xfer.Client", "XferService\Xfer.Client\Xfer.Client.csproj", "{CBFDB958-3722-4A7B-B8D4-A03CE06A0653}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,45 +41,36 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F729B59A-A1D0-4308-A2F6-9B8FE2BF790D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F729B59A-A1D0-4308-A2F6-9B8FE2BF790D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F729B59A-A1D0-4308-A2F6-9B8FE2BF790D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F729B59A-A1D0-4308-A2F6-9B8FE2BF790D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{99D380E9-8EC4-4138-BAF3-F625A6C10825}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{99D380E9-8EC4-4138-BAF3-F625A6C10825}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{99D380E9-8EC4-4138-BAF3-F625A6C10825}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{99D380E9-8EC4-4138-BAF3-F625A6C10825}.Release|Any CPU.Build.0 = Release|Any CPU
-		{93F5B016-B85F-4358-9182-17E1D628F518}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{93F5B016-B85F-4358-9182-17E1D628F518}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{93F5B016-B85F-4358-9182-17E1D628F518}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{93F5B016-B85F-4358-9182-17E1D628F518}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FCD5852D-F983-4142-BF48-EF464712AC65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FCD5852D-F983-4142-BF48-EF464712AC65}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FCD5852D-F983-4142-BF48-EF464712AC65}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FCD5852D-F983-4142-BF48-EF464712AC65}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5E5CCC28-8FA7-4E82-8149-6BB56134E9D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5E5CCC28-8FA7-4E82-8149-6BB56134E9D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5E5CCC28-8FA7-4E82-8149-6BB56134E9D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5E5CCC28-8FA7-4E82-8149-6BB56134E9D3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C4E1572D-3874-4AC7-BB2D-E8F3A586443D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C4E1572D-3874-4AC7-BB2D-E8F3A586443D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C4E1572D-3874-4AC7-BB2D-E8F3A586443D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C4E1572D-3874-4AC7-BB2D-E8F3A586443D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{43E05EE2-E51A-40BE-A931-6AB4DA8E4364}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{43E05EE2-E51A-40BE-A931-6AB4DA8E4364}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{43E05EE2-E51A-40BE-A931-6AB4DA8E4364}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{43E05EE2-E51A-40BE-A931-6AB4DA8E4364}.Release|Any CPU.Build.0 = Release|Any CPU
-		{91DD6F3D-8BD7-488B-9D14-378B7F5A741E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{91DD6F3D-8BD7-488B-9D14-378B7F5A741E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{91DD6F3D-8BD7-488B-9D14-378B7F5A741E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{91DD6F3D-8BD7-488B-9D14-378B7F5A741E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{636E1065-4C9D-4037-BDF1-57E3139EDCAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{636E1065-4C9D-4037-BDF1-57E3139EDCAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{636E1065-4C9D-4037-BDF1-57E3139EDCAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{636E1065-4C9D-4037-BDF1-57E3139EDCAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2F8A38A-F405-46A4-8132-FF054ED55DFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2F8A38A-F405-46A4-8132-FF054ED55DFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2F8A38A-F405-46A4-8132-FF054ED55DFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2F8A38A-F405-46A4-8132-FF054ED55DFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3146D5B-7DCD-4DD3-B680-5A7F5B3EF5B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3146D5B-7DCD-4DD3-B680-5A7F5B3EF5B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3146D5B-7DCD-4DD3-B680-5A7F5B3EF5B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3146D5B-7DCD-4DD3-B680-5A7F5B3EF5B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2ADAEF07-B433-480D-801C-E32A958EF4E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2ADAEF07-B433-480D-801C-E32A958EF4E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2ADAEF07-B433-480D-801C-E32A958EF4E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2ADAEF07-B433-480D-801C-E32A958EF4E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{667703CF-5FF9-43DB-9D12-FBB9B6B4D7FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{667703CF-5FF9-43DB-9D12-FBB9B6B4D7FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{667703CF-5FF9-43DB-9D12-FBB9B6B4D7FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{667703CF-5FF9-43DB-9D12-FBB9B6B4D7FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBFDB958-3722-4A7B-B8D4-A03CE06A0653}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBFDB958-3722-4A7B-B8D4-A03CE06A0653}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBFDB958-3722-4A7B-B8D4-A03CE06A0653}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBFDB958-3722-4A7B-B8D4-A03CE06A0653}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{99E409EE-BBEC-406C-ACB0-7B4DD2F0B711} = {47A4F442-5258-4AC2-83D0-7D4063BB4A7D}
-		{93AE49E2-9F10-4BFD-B83E-B6FA00834823} = {47A4F442-5258-4AC2-83D0-7D4063BB4A7D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {598DCE09-FB2A-4599-94B4-4F3FA1B81884}

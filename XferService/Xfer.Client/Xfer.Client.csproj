@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\xfer\ParksComputing.Xfer\ParksComputing.Xfer.csproj" />
+    <ProjectReference Include="..\..\ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj" />
     <ProjectReference Include="..\Xfer.Data\Xfer.Data.csproj" />
   </ItemGroup>
 
