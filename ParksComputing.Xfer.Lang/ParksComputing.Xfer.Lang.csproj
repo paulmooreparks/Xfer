@@ -17,7 +17,7 @@
     <PackAsTool>False</PackAsTool>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <Version>0.9.0-prerelease</Version>
+    <Version>0.9.1-prerelease</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +30,10 @@
       <PackagePath>\</PackagePath>
     </None>
     <None Update="logo\XferLang.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

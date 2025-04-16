@@ -1,4 +1,0 @@
-{
-  test <"testValue">
-  startWorkspace <"httpbin">
-}
