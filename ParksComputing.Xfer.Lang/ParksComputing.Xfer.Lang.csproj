@@ -17,7 +17,7 @@
     <PackAsTool>False</PackAsTool>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <Version>0.9.1-prerelease</Version>
+    <Version>0.9.2-prerelease</Version>
   </PropertyGroup>
 
   <ItemGroup>

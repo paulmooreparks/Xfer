@@ -12,8 +12,8 @@ namespace ParksComputing.Xfer.Lang.Services;
 /* This parser is ROUGH. I'm trying out a lot of ideas, some of them supported in parallel. Once I 
 settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
 
-public class Parser {
-    public static readonly string Version = "0.7.2";
+public class Parser : IXferParser {
+    public static readonly string Version = "0.9.2";
 
     public Parser() : this(Encoding.UTF8) { }
 
@@ -331,7 +331,7 @@ public class Parser {
         if (style == ElementStyle.Compact && (
                CurrentChar.IsWhiteSpace()
             || CurrentChar.IsKeywordChar()
-            || CurrentChar.IsIntegerLeadingChar() 
+            || CurrentChar.IsIntegerLeadingChar()
             || CurrentChar.IsElementOpeningCharacter()
             || CurrentChar.IsElementOpeningSpecifier()
             || CurrentChar.IsCollectionClosingSpecifier()
@@ -383,7 +383,7 @@ public class Parser {
                 return true;
             }
 
-            if (   CurrentChar.IsElementOpeningCharacter()
+            if (CurrentChar.IsElementOpeningCharacter()
                 || CurrentChar.IsElementOpeningSpecifier()
                 || CurrentChar.IsCollectionClosingSpecifier()
                 ) {
@@ -434,8 +434,7 @@ public class Parser {
             || CurrentChar.IsElementOpeningCharacter()
             || CurrentChar.IsElementOpeningSpecifier()
             || CurrentChar.IsCollectionClosingSpecifier()
-            ))
-        {
+            )) {
             _delimStack.Pop();
             return true;
         }
@@ -505,10 +504,10 @@ public class Parser {
 
     private bool IsCharAvailable() => CurrentChar != '\0';
 
-    private bool IsNumericChar(char c) => 
-        char.IsNumber(c) || 
-        char.IsBetween(c, 'A', 'F') || 
-        char.IsBetween(c, 'a', 'f') || 
+    private bool IsNumericChar(char c) =>
+        char.IsNumber(c) ||
+        char.IsBetween(c, 'A', 'F') ||
+        char.IsBetween(c, 'a', 'f') ||
         c == '$' || c == '%' || c == '.' || c == ',';
 
     private bool IsKeywordChar(char c) {
@@ -1134,8 +1133,7 @@ public class Parser {
                         ["O", "s"],
                         CultureInfo.InvariantCulture,
                         DateTimeStyles.AdjustToUniversal,
-                        out var dateTime)) 
-                    {
+                        out var dateTime)) {
                         return new DateTimeElement(dateTime, DateTimeHandling.RoundTrip, specifierCount, style);
                     }
 
@@ -1312,8 +1310,8 @@ public class Parser {
 
         throw new InvalidOperationException($"Unexpected end of {BooleanElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
 
-    /* "Goto Considered Harmful" considered harmful. */
-    ReturnElement:
+/* "Goto Considered Harmful" considered harmful. */
+ReturnElement:
         valueString = valueBuilder.ToString().ToLower();
         value = false;
 
@@ -1352,39 +1350,39 @@ public class Parser {
         try {
             switch (numberBase) {
                 case 10: {
-                    if (typeof(T) == typeof(float)) {
-                        return (T)Convert.ChangeType(float.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                        if (typeof(T) == typeof(float)) {
+                            return (T)Convert.ChangeType(float.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                        }
+                        else if (typeof(T) == typeof(double)) {
+                            return (T)Convert.ChangeType(double.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                        }
+                        else if (typeof(T) == typeof(short)) {
+                            return (T)Convert.ChangeType(short.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                        }
+                        else if (typeof(T) == typeof(int)) {
+                            return (T)Convert.ChangeType(int.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                        }
+                        else if (typeof(T) == typeof(long)) {
+                            return (T)Convert.ChangeType(long.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                        }
+                        else if (typeof(T) == typeof(decimal)) {
+                            return (T)Convert.ChangeType(decimal.Parse(valueString, CultureInfo.InvariantCulture), typeof(T));
+                        }
+                        else {
+                            throw new InvalidOperationException($"Unsupported type '{typeof(T)}' for decimal value parsing at row {CurrentRow}, column {CurrentColumn}.");
+                        }
                     }
-                    else if (typeof(T) == typeof(double)) {
-                        return (T)Convert.ChangeType(double.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
-                    }
-                    else if (typeof(T) == typeof(short)) {
-                        return (T)Convert.ChangeType(short.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
-                    }
-                    else if (typeof(T) == typeof(int)) {
-                        return (T)Convert.ChangeType(int.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
-                    }
-                    else if (typeof(T) == typeof(long)) {
-                        return (T)Convert.ChangeType(long.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
-                    }
-                    else if (typeof(T) == typeof(decimal)) {
-                        return (T)Convert.ChangeType(decimal.Parse(valueString, CultureInfo.InvariantCulture), typeof(T));
-                    }
-                    else {
-                        throw new InvalidOperationException($"Unsupported type '{typeof(T)}' for decimal value parsing at row {CurrentRow}, column {CurrentColumn}.");
-                    }
-                }
                 case 16: {
-                    long hexValue = long.Parse(numberString, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-                    return (T)Convert.ChangeType(hexValue, typeof(T));
-                }
+                        long hexValue = long.Parse(numberString, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                        return (T)Convert.ChangeType(hexValue, typeof(T));
+                    }
                 case 2: {
-                    long binaryValue = long.Parse(numberString, NumberStyles.BinaryNumber, CultureInfo.InvariantCulture);
-                    return (T)Convert.ChangeType(binaryValue, typeof(T));
-                }
+                        long binaryValue = long.Parse(numberString, NumberStyles.BinaryNumber, CultureInfo.InvariantCulture);
+                        return (T)Convert.ChangeType(binaryValue, typeof(T));
+                    }
                 default: {
-                    throw new InvalidOperationException($"Unsupported numeric base '{numberBase}' at row {CurrentRow}, column {CurrentColumn}.");
-                }
+                        throw new InvalidOperationException($"Unsupported numeric base '{numberBase}' at row {CurrentRow}, column {CurrentColumn}.");
+                    }
             }
         }
         catch (Exception ex) {

@@ -157,6 +157,8 @@ class Program {
     }
 }
 
+</ These are some ideas about how I might create a programming language using XferLang. />
+
 xfer :interface {
     if :static :method {
         params [
@@ -173,6 +175,38 @@ xfer :interface {
         ]
     }
 }
+
+function hello (
+    console.write( "Hello, " )
+)
+
+function world (
+    console.writeLine( "World!" )
+)
+
+hello() world()
+
+sayMyName :function {
+    name :string {
+        required ~true
+    }
+}
+(
+    console.writeLine( "My name is " + name )
+)
+
+if (~true) (
+        console.writeLine ( "Condition is true!" )
+    )
+    (eq (1 2)) (
+        console.writeLine ( "Whoa!" )
+        console.writeLine ( "Stop the world; I want to get off!" )
+    )
+    else (
+        console.writeLine ( "Condition is false!" )
+    )
+    else console.writeLine ( "Condition is false!" )
+
 
 console :object {
     width :static :property {

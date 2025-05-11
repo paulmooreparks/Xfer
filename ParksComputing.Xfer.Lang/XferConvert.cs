@@ -147,15 +147,97 @@ public class XferConvert {
         return element;
     }
 
-    public static object Deserialize(string xfer, Type targetType) {
+    public static T Deserialize<T>(string xfer) where T : new() {
+        var document = XferParser.Parse(xfer);
+
+        if (document is null) {
+            throw new InvalidOperationException($"Failed to parse Xfer document.");
+        }
+
+        return Deserialize<T>(document);
+    }
+
+    public static T Deserialize<T>(XferDocument document) where T : new() {
+        var instance = new T();
+        var type = typeof(T);
+
+        if (instance == null) {
+            throw new InvalidOperationException($"Could not create an instance of type {type.Name}.");
+        }
+
+        var properties = type.GetProperties();
+        var propertyMap = new Dictionary<string, PropertyInfo>();
+
+        foreach (var property in properties) {
+            var attribute = property.GetCustomAttribute<XferPropertyAttribute>();
+            var name = attribute?.Name ?? property.Name;
+            propertyMap[name] = property;
+        }
+
+        var first = document.Root.Values.First();
+
+        if (first is ObjectElement objectElement) {
+            if (instance is not null && IsGenericDictionary(instance.GetType())) {
+                IDictionary? dictionary = instance as IDictionary;
+                if (dictionary is not null) {
+                    foreach (var element in objectElement.Values) {
+                        string value = DeserializeValue(element.Value.Value, typeof(string)) as string ?? string.Empty;
+                        dictionary.Add(element.Key, value);
+                    }
+
+                    return instance;
+                }
+            }
+
+            foreach (var element in objectElement.Values) {
+                if (propertyMap.TryGetValue(element.Key, out var property)) {
+                    object? value = DeserializeValue(element.Value.Value, property.PropertyType);
+                    property.SetValue(instance, value);
+                }
+            }
+        }
+#if false
+        else if (first is PropertyBagElement propertyBagElement) {
+            foreach (var element in propertyBagElement.Values) {
+                if (propertyMap.TryGetValue(element, out var property)) {
+                    object? value = DeserializeValue(element, property.PropertyType);
+                    property.SetValue(instance, value);
+                }
+            }
+        }
+#endif
+        return instance;
+    }
+
+    public static object Deserialize(XferDocument document, Type targetType) {
         // Use reflection to create an instance of the generic method
-        var method = typeof(XferConvert).GetMethod(nameof(Deserialize), new[] { typeof(string) });
+        var method = typeof(XferConvert).GetMethod(nameof(Deserialize), [typeof(string)]);
         if (method == null) {
             throw new InvalidOperationException("Could not find the generic Deserialize method.");
         }
 
         var genericMethod = method.MakeGenericMethod(targetType);
-        return genericMethod.Invoke(null, new object[] { xfer }) ?? throw new InvalidOperationException($"Failed to deserialize content into type {targetType.Name}.");
+        return genericMethod.Invoke(null, [document]) ?? throw new InvalidOperationException($"Failed to deserialize content into type {targetType.Name}.");
+    }
+
+    public static object Deserialize(string xfer, Type targetType) {
+        // Use reflection to create an instance of the generic method
+        var method = typeof(XferConvert).GetMethod(nameof(Deserialize), [typeof(string)]);
+        if (method == null) {
+            throw new InvalidOperationException("Could not find the generic Deserialize method.");
+        }
+
+        var genericMethod = method.MakeGenericMethod(targetType);
+        return genericMethod.Invoke(null, [xfer]) ?? throw new InvalidOperationException($"Failed to deserialize content into type {targetType.Name}.");
+    }
+
+    public static T? Deserialize<T>(Element element) {
+        if (element is null) {
+            throw new NullReferenceException($"Xfer element is null.");
+        }
+
+        var type = typeof(T);
+        return (T?)DeserializeValue(element, type);
     }
 
     private static object? DeserializeValue(Element element, Type targetType) {
@@ -429,62 +511,6 @@ public class XferConvert {
         return Enum.Parse<TEnum>(textElement.Value);
     }
 
-
-    public static T Deserialize<T>(string xfer) where T : new() {
-        var instance = new T();
-        var type = typeof(T);
-
-        if (instance == null) {
-            throw new InvalidOperationException($"Could not create an instance of type {type.Name}.");
-        }
-
-        var properties = type.GetProperties();
-        var propertyMap = new Dictionary<string, PropertyInfo>();
-
-        foreach (var property in properties) {
-            var attribute = property.GetCustomAttribute<XferPropertyAttribute>();
-            var name = attribute?.Name ?? property.Name;
-            propertyMap[name] = property;
-        }
-
-        var parser = new Parser();
-        var document = parser.Parse(xfer);
-
-        var first = document.Root.Values.First();
-
-        if (first is ObjectElement objectElement) {
-            if (instance is not null && IsGenericDictionary(instance.GetType())) {
-                IDictionary? dictionary = instance as IDictionary;
-                if (dictionary is not null) {
-                    foreach (var element in objectElement.Values) {
-                        string value = DeserializeValue(element.Value.Value, typeof(string)) as string ?? string.Empty;
-                        dictionary.Add(element.Key, value);
-                    }
-
-                    return instance;
-                }
-            }
-
-            foreach (var element in objectElement.Values) {
-                if (propertyMap.TryGetValue(element.Key, out var property)) {
-                    object? value = DeserializeValue(element.Value.Value, property.PropertyType);
-                    property.SetValue(instance, value);
-                }
-            }
-        }
-#if false
-        else if (first is PropertyBagElement propertyBagElement) {
-            foreach (var element in propertyBagElement.Values) {
-                if (propertyMap.TryGetValue(element, out var property)) {
-                    object? value = DeserializeValue(element, property.PropertyType);
-                    property.SetValue(instance, value);
-                }
-            }
-        }
-#endif
-
-        return instance;
-    }
 
     private static object DeserializeArray(ArrayElement arrayElement, Type targetType) {
         Type? elementType;
