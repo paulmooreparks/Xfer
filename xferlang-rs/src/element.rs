@@ -13,4 +13,3 @@ pub enum Element {
 pub struct Document {
     pub root: Element,
 }
-
