@@ -5,3 +5,10 @@ version = 4
 [[package]]
 name = "read_file"
 version = "0.1.0"
+dependencies = [
+ "xferlang-rs",
+]
+
+[[package]]
+name = "xferlang-rs"
+version = "0.1.0"
