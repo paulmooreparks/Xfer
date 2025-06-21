@@ -281,7 +281,7 @@ For non-text elements, the element begins with the specifier and ends with white
 ### Implicit Syntax
 When using implicit syntax, certain elements may be used without any enclosing delimiters if the type of the element can be inferred from the contents and the surrounding elements.
 
-Integers generally do not require any enclosing delimiters. They must be followed by whitespace or the closing delimiter of an enclosing object, array, or property bag.
+Integers generally do not require any enclosing delimiters. They must be followed by whitespace or the closing delimiter of an enclosing object, array, or tuple.
 
 ```xfer
 123
@@ -399,7 +399,7 @@ The Integer element is used to represent a 32-bit signed integer value.
 * **Specifier:** `#` (Number Sign, U+0023)
 * **Explicit Syntax:** Enclose the content in `<#` and `#>` delimiters.
 * **Compact Syntax:** Follow the specifier with the content.
-* **Implicit Syntax:** The integer value may be used without any enclosing delimiters. The value must be followed by whitespace, the opening delimiter of another element, or the closing delimiter of an enclosing object, array, or property bag.
+* **Implicit Syntax:** The integer value may be used without any enclosing delimiters. The value must be followed by whitespace, the opening delimiter of another element, or the closing delimiter of an enclosing object, array, or tuple.
 
 Integer values are decimal by default, but they may also be hexadecimal when the value is preceded by `$` or binary when the value is preceded by `%`.
 
@@ -625,9 +625,9 @@ The Array element is used to represent a collection of elements of the same type
 [ "1" "2" "3" ]> </ String array />
 ```
 
-### Property Bag Element
+### Tuple Element
 
-The Property Bag element is used to represent a collection of values of any type.
+The Tuple element is used to represent a collection of values of any type.
 
 * **Specifiers:** `(` (Left Parenthesis, U+0028) and `)` (Right Parenthesis, U+0029)
 * **Explicit Syntax:** Enclose the content in `<(` and `)>` delimiters.
@@ -635,7 +635,7 @@ The Property Bag element is used to represent a collection of values of any type
 * **Implicit Syntax:** Not supported
 
 ```xfer
-</ Property bags are a collection of values of any type, analogous to JSON arrays. />
+</ Tuples are a collection of values of any type, analogous to JSON arrays. />
 (
     "value"
     123
@@ -701,15 +701,15 @@ Comment elements may appear anywhere in an XferLang document and are ignored by 
 
 An XferLang document begins with a metadata element. If the element is not provided explicitly, an implicit metadata element is added to the document with a default version number assigned. A metadata element may not appear after any non-comment elements.
 
-The root content element of an XferLang document is an implicit [property bag](#property-bag-element) element. This element may contain any number of other elements.
+The root content element of an XferLang document is an implicit [tuple](#tuple-element) element. This element may contain any number of other elements.
 
-In the document below, the string value with the content `Hello, World!` is the first element in the root property bag, the integer with the value `42` is the second element in the root property bag, and the array element containing three string values is the third element in the root property bag.
+In the document below, the string value with the content `Hello, World!` is the first element in the root tuple, the integer with the value `42` is the second element in the root tuple, and the array element containing three string values is the third element in the root tuple.
 
 ```xfer
 !xfer "1.0.0"!
 "Hello, World!"
 42
-["abc""def""ghi"]
+["abc" "def" "ghi"]
 ```
 
 ## XferLang Object Model
@@ -750,7 +750,7 @@ This grammar is also [in the repository](xfer.bnf).
     | <null_element>
     | <object_element>
     | <array_element>
-    | <property_bag_element>
+    | <tuple_element>
     | <comment_element>
     | <placeholder_element>
     | <eval_text_element>
@@ -820,9 +820,9 @@ This grammar is also [in the repository](xfer.bnf).
 <array_element_explicit> ::= <element_open> <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close> <element_close>
 <array_element_compact> ::= <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close>
 
-<property_bag_element> ::= <property_bag_element_explicit> | <property_bag_element_compact>
-<property_bag_element_explicit> ::= <element_open> <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close> <element_close>
-<property_bag_element_compact> ::= <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close>
+<tuple_element> ::= <tuple_element_explicit> | <tuple_element_compact>
+<tuple_element_explicit> ::= <element_open> <tuple_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <tuple_specifier_close> <element_close>
+<tuple_element_compact> ::= <tuple_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <tuple_specifier_close>
 
 <element_open> ::= "<"
 <element_close> ::= ">"
@@ -842,14 +842,14 @@ This grammar is also [in the repository](xfer.bnf).
 <object_specifier_close> ::= "}"+
 <array_specifier_open> ::= "["+
 <array_specifier_close> ::= "]"+
-<property_bag_specifier_open> ::= "("+
-<property_bag_specifier_close> ::= ")"+
+<tuple_specifier_open> ::= "("+
+<tuple_specifier_close> ::= ")"+
 <comment_specifier> ::= "/"+
 <placeholder_specifier> ::= "|"+
 <eval_text_specifier> ::= "'"+
 
-<collection_open> ::= <object_specifier_open> | <array_specifier_open> | <property_bag_specifier_open>
-<collection_close> ::= <object_specifier_close> | <array_specifier_close> | <property_bag_specifier_close>
+<collection_open> ::= <object_specifier_open> | <array_specifier_open> | <tuple_specifier_open>
+<collection_close> ::= <object_specifier_close> | <array_specifier_close> | <tuple_specifier_close>
 
 <character_value> ::= <positive_integer>
     | <hexadecimal> | <binary>

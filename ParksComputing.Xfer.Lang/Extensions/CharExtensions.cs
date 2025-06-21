@@ -37,7 +37,7 @@ public static class CharExtensions {
             || c == StringElement.OpeningSpecifier
             || c == ArrayElement.OpeningSpecifier
             || c == ObjectElement.OpeningSpecifier
-            || c == PropertyBagElement.OpeningSpecifier
+            || c == TupleElement.OpeningSpecifier
             ;
     }
 
@@ -58,7 +58,7 @@ public static class CharExtensions {
             || c == StringElement.ClosingSpecifier
             || c == ArrayElement.ClosingSpecifier
             || c == ObjectElement.ClosingSpecifier
-            || c == PropertyBagElement.ClosingSpecifier
+            || c == TupleElement.ClosingSpecifier
             ;
     }
 
@@ -66,7 +66,7 @@ public static class CharExtensions {
         return  
                c == ObjectElement.OpeningSpecifier
             || c == ArrayElement.OpeningSpecifier
-            || c == PropertyBagElement.OpeningSpecifier
+            || c == TupleElement.OpeningSpecifier
             ;
     }
 
@@ -74,7 +74,7 @@ public static class CharExtensions {
         return  
                c == ObjectElement.ClosingSpecifier
             || c == ArrayElement.ClosingSpecifier
-            || c == PropertyBagElement.ClosingSpecifier
+            || c == TupleElement.ClosingSpecifier
             ;
     }
 

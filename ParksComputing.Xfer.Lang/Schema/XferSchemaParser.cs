@@ -15,7 +15,7 @@ public class XferSchemaParser {
 
         var schemaObjects = new Dictionary<string, SchemaObject>();
 
-        if (schemaObjectElement.TryGetElement("definition", out PropertyBagElement? definitionElement) && definitionElement is { }) {
+        if (schemaObjectElement.TryGetElement("definition", out TupleElement? definitionElement) && definitionElement is { }) {
             foreach (var element in definitionElement.Values) {
 #if false
                 if (element is KeyValuePairElement schemaKvp) {

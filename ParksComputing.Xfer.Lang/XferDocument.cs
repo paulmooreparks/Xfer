@@ -6,12 +6,12 @@ namespace ParksComputing.Xfer.Lang;
 public class XferDocument
 {
     public MetadataElement Metadata { get; set; } = new();
-    public PropertyBagElement Root { get; set; } = new();
+    public TupleElement Root { get; set; } = new();
 
     public XferDocument() {
     }
 
-    public XferDocument(MetadataElement metadata, PropertyBagElement root) {
+    public XferDocument(MetadataElement metadata, TupleElement root) {
         Metadata = metadata;
         Root = root;
     }
@@ -20,7 +20,7 @@ public class XferDocument
         Metadata = metadata;
     }
 
-    public XferDocument(PropertyBagElement root) {
+    public XferDocument(TupleElement root) {
         Root = root;
     }
 

@@ -312,8 +312,8 @@ public class Parser : IXferParser {
         return ElementClosing();
     }
 
-    internal bool PropertyBagElementClosing() {
-        Debug.Assert(_delimStack.Peek().ClosingSpecifier == PropertyBagElement.ClosingSpecifier);
+    internal bool TupleElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == TupleElement.ClosingSpecifier);
         return ElementClosing();
     }
 
@@ -599,10 +599,10 @@ public class Parser : IXferParser {
                 return characterElement;
             }
 
-            if (ElementOpening(PropertyBagElement.ElementDelimiter, out int propSpecifierCount)) {
-                var propertyBagElement = ParsePropertyBagElement(propSpecifierCount);
+            if (ElementOpening(TupleElement.ElementDelimiter, out int propSpecifierCount)) {
+                var tupleElement = ParseTupleElement(propSpecifierCount);
                 SkipWhitespace();
-                return propertyBagElement;
+                return tupleElement;
             }
 
             if (ElementOpening(MetadataElement.ElementDelimiter, out int metaSpecifierCount)) {
@@ -762,6 +762,7 @@ public class Parser : IXferParser {
                 KeyValuePairElement => new TypedArrayElement<KeyValuePairElement>(style: style),
                 ObjectElement => new TypedArrayElement<ObjectElement>(style: style),
                 MetadataElement => new TypedArrayElement<MetadataElement>(style: style),
+                TupleElement => new TypedArrayElement<TupleElement>(style: style),
                 PropertyBagElement => new TypedArrayElement<PropertyBagElement>(style: style),
                 _ => new TypedArrayElement<NullElement>(style: style)
             };
@@ -818,21 +819,21 @@ public class Parser : IXferParser {
         throw new InvalidOperationException($"Unexpected end of {ObjectElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private PropertyBagElement ParsePropertyBagElement(int specifierCount = 1) {
+    private TupleElement ParseTupleElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
         SkipWhitespace();
-        var propBagElement = new PropertyBagElement(style);
+        var tupleElement = new TupleElement(style);
 
         while (IsCharAvailable()) {
-            if (PropertyBagElementClosing()) {
-                return propBagElement;
+            if (TupleElementClosing()) {
+                return tupleElement;
             }
 
             var element = ParseElement();
-            propBagElement.Add(element);
+            tupleElement.Add(element);
         }
 
-        throw new InvalidOperationException($"Unexpected end of {PropertyBagElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+        throw new InvalidOperationException($"Unexpected end of {TupleElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
     private PlaceholderElement ParsePlaceholderElement(int specifierCount = 1) {

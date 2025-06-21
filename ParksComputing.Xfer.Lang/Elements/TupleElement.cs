@@ -6,48 +6,39 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
-[Obsolete("This class is obsolete and will be removed in the future. Please use TupleElement instead.")]
-public class PropertyBagElement : ListElement {
-    public static readonly string ElementName = "propertyBag";
+public class TupleElement : ListElement {
+    public static readonly string ElementName = "tuple";
     public const char OpeningSpecifier = '(';
     public const char ClosingSpecifier = ')';
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact);
 
-    public List<object> TypedValue
-    {
-        get
-        {
+    public List<object> TypedValue {
+        get {
             List<object> values = new(_items.Count);
-            for (int i = 0; i < _items.Count; i++)
-            {
+            for (int i = 0; i < _items.Count; i++) {
                 values[i] = _items[i];
             }
             return values;
         }
     }
 
-    public PropertyBagElement(ElementStyle style = ElementStyle.Compact)
-        : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, style))
-    {
+    public TupleElement(ElementStyle style = ElementStyle.Compact)
+        : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, style)) {
     }
 
-    public PropertyBagElement(IEnumerable<Element> values) : this()
-    {
+    public TupleElement(IEnumerable<Element> values) : this() {
         _items.AddRange(values);
     }
 
-    public PropertyBagElement(params Element[] values) : this()
-    {
+    public TupleElement(params Element[] values) : this() {
         _items.AddRange(values);
     }
 
-    public override string ToXfer()
-    {
+    public override string ToXfer() {
         return ToXfer(Formatting.None);
     }
 
-    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
-    {
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
         bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
         bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
         string rootIndent = string.Empty;
@@ -55,14 +46,12 @@ public class PropertyBagElement : ListElement {
 
         var sb = new StringBuilder();
 
-        if (isIndented)
-        {
+        if (isIndented) {
             rootIndent = new string(indentChar, indentation * depth);
             nestIndent = new string(indentChar, indentation * (depth + 1));
         }
 
-        switch (Delimiter.Style)
-        {
+        switch (Delimiter.Style) {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Opening);
                 break;
@@ -71,37 +60,30 @@ public class PropertyBagElement : ListElement {
                 break;
         }
 
-        if (isIndented)
-        {
+        if (isIndented) {
             sb.Append(Environment.NewLine);
         }
 
         /* TODO: Whitespace between elements can be removed in a few situations by examining the delimiter style of the surrounding elements. */
-        for (var i = 0; i < _items.Count(); ++i)
-        {
+        for (var i = 0; i < _items.Count(); ++i) {
             var item = _items[i];
-            if (isIndented)
-            {
+            if (isIndented) {
                 sb.Append(nestIndent);
             }
             sb.Append(item.ToXfer(formatting, indentChar, indentation, depth + 1));
-            if (!isIndented && item.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i < _items.Count())
-            {
+            if (!isIndented && item.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i < _items.Count()) {
                 sb.Append(' ');
             }
-            if (isIndented)
-            {
+            if (isIndented) {
                 sb.Append(Environment.NewLine);
             }
         }
 
-        if (isIndented)
-        {
+        if (isIndented) {
             sb.Append(rootIndent);
         }
 
-        switch (Delimiter.Style)
-        {
+        switch (Delimiter.Style) {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Closing);
                 break;
@@ -113,8 +95,7 @@ public class PropertyBagElement : ListElement {
         return sb.ToString();
     }
 
-    public override string ToString()
-    {
+    public override string ToString() {
         return ToXfer();
     }
 }

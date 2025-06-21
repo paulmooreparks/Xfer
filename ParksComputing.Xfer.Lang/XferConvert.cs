@@ -46,7 +46,7 @@ public class XferConvert {
             TimeSpan[] timeSpanArray => SerializeTimeSpanArray(timeSpanArray),
             string[] stringArray => SerializeStringArray(stringArray),
             byte[] byteArray => new StringElement(Convert.ToBase64String(byteArray), style: ElementStyle.Explicit),
-            object[] objectArray => new PropertyBagElement(objectArray.Select(SerializeValue)),
+            object[] objectArray => new TupleElement(objectArray.Select(SerializeValue)),
             IDictionary dictionary when IsGenericDictionary(dictionary.GetType()) => SerializeDictionary(dictionary),
             IEnumerable enumerable when IsGenericEnumerable(enumerable.GetType()) => SerializeEnumerable(enumerable),
             System.Runtime.CompilerServices.ITuple tuple when IsGenericTuple(tuple.GetType()) => SerializeTuple(tuple),
@@ -60,8 +60,8 @@ public class XferConvert {
                     new KeyValuePairElement(SerializeValue(kvp.Key), SerializeValue(kvp.Value)))
             ),
 #endif
-            IEnumerable<object> list => new PropertyBagElement(list.Select(SerializeValue)),
-            IEnumerable enumerable => new PropertyBagElement(
+            IEnumerable<object> list => new TupleElement(list.Select(SerializeValue)),
+            IEnumerable enumerable => new TupleElement(
                 enumerable.Cast<object>().Select(SerializeValue)
             ),
             object objectValue => SerializeObject(objectValue)
@@ -113,8 +113,8 @@ public class XferConvert {
         }
     }
 
-    private static PropertyBagElement SerializeEnumerable(IEnumerable enumerable) {
-        var objElement = new PropertyBagElement();
+    private static TupleElement SerializeEnumerable(IEnumerable enumerable) {
+        var objElement = new TupleElement();
 
         foreach (var value in enumerable) {
             var valueElement = SerializeValue(value);
@@ -136,8 +136,8 @@ public class XferConvert {
         return objElement;
     }
 
-    private static PropertyBagElement SerializeTuple(ITuple tuple) {
-        var element = new PropertyBagElement();
+    private static TupleElement SerializeTuple(ITuple tuple) {
+        var element = new TupleElement();
 
         for (int i = 0; i < tuple.Length; ++i) {
             var valueElement = SerializeValue(tuple[i]);
@@ -197,10 +197,10 @@ public class XferConvert {
             }
         }
 #if false
-        else if (first is PropertyBagElement propertyBagElement) {
-            foreach (var element in propertyBagElement.Values) {
-                if (propertyMap.TryGetValue(element, out var property)) {
-                    object? value = DeserializeValue(element, property.PropertyType);
+        else if (first is TupleElement tupleElement) {
+            foreach (var element in tupleElement.Values {
+                if (propertyMap.TryGetValue(element.Key, out var property)) {
+                    object? value = DeserializeValue(element.Value, property.PropertyType);
                     property.SetValue(instance, value);
                 }
             }
@@ -269,15 +269,15 @@ public class XferConvert {
             else if (genericType == typeof(List<>)) {
                 var valueType = targetType.GetGenericArguments()[0];
 
-                if (element is PropertyBagElement propBagElement) {
-                    return DeserializeEnumerable(propBagElement, valueType);
+                if (element is TupleElement tupleElement) {
+                    return DeserializeEnumerable(tupleElement, valueType);
                 }
             }
             else if (genericType == typeof(Tuple<>)) {
                 var valueType = targetType.GetGenericArguments()[0];
 
-                if (element is PropertyBagElement propBagElement) {
-                    return DeserializeTuple(propBagElement, valueType);
+                if (element is TupleElement tupleElement) {
+                    return DeserializeTuple(tupleElement, valueType);
                 }
             }
             else if (genericType == typeof(KeyValuePair<,>)) {
@@ -324,6 +324,7 @@ public class XferConvert {
             PlaceholderElement phElement when targetType == typeof(string) => phElement.Value,
             PlaceholderElement phElement when targetType == typeof(object) => phElement.Value,
             ArrayElement arrayElement => DeserializeArray(arrayElement, targetType),
+            TupleElement tupleElement => DeserializeTuple(tupleElement, targetType),
             PropertyBagElement propertyBagElement => DeserializePropertyBag(propertyBagElement, targetType),
             ObjectElement objectElement => DeserializeObject(objectElement, targetType),
             _ => throw new NotSupportedException($"Type '{targetType.Name}' is not supported for deserialization")
@@ -343,20 +344,16 @@ public class XferConvert {
         return dictionary;
     }
 
-    private static object DeserializeEnumerable(PropertyBagElement propBagElement, Type valueType) {
+    private static object DeserializeEnumerable(TupleElement tupleElement, Type valueType) {
         var listType = typeof(List<>).MakeGenericType(valueType);
         var list = (IList)Activator.CreateInstance(listType)!; 
 
-        foreach (var element in propBagElement.Values) {
+        foreach (var element in tupleElement.Values) {
             var value = DeserializeValue(element, valueType);
             list.Add(value); 
         }
 
         return list;
-    }
-
-    private static object DeserializeTuple(PropertyBagElement propBagElement, Type valueType) {
-        throw new NotSupportedException();
     }
 
     private static object DeserializeKeyValuePair(KeyValuePairElement kvpElement, Type valueType) {
@@ -539,6 +536,14 @@ public class XferConvert {
         }
 
         return array;
+    }
+
+    private static object DeserializeTuple(TupleElement tupleElement, Type targetType) {
+        var values = new List<object?>();
+        foreach (var item in tupleElement.Values) {
+            values.Add(DeserializeValue(item, typeof(object)));
+        }
+        return values;
     }
 
     private static object DeserializePropertyBag(PropertyBagElement propertyBagElement, Type targetType) {

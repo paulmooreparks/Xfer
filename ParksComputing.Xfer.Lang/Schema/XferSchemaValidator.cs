@@ -15,7 +15,7 @@ public class XferSchemaValidator {
         _schemaObjects = schemaObjects;
     }
 
-    public void Validate(PropertyBagElement document) {
+    public void Validate(TupleElement document) {
 #if false
         if (!_schemaObjects.TryGetValue(schemaName, out var schemaObject)) {
             throw new InvalidOperationException($"Schema '{schemaName}' not found.");
