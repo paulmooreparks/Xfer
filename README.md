@@ -28,7 +28,7 @@ This project is still in its infancy and is quite experimental, even exploratory
 
 Please [let me know](mailto:paul@parkscomputing.com) what you think about the ideas you see here. I'm always open to feedback.
 
-I do plan to make the code professional-grade in the future, and I want to add implementations in other languages (Java, Rust, C++, JavaScript, and TypeScript are on my list). If you want to contribute, please [let me know](mailto:paul@parkscomputing.com). I'd love to have your help.
+I am in the process of making the code professional-grade, and I want to add implementations in other languages (Rust, C++, Java, JavaScript, and TypeScript are on my list). If you want to contribute, please [let me know](mailto:paul@parkscomputing.com). I'd love to have your help.
 
 ## Design Goals
 * **Explicit Types**: All values are explicitly typed.
