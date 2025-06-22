@@ -4,7 +4,7 @@
 
 <p>
   <a href="https://github.com/paulmooreparks/Xfer">
-    <img alt="Xfer Version" src="https://img.shields.io/badge/Xfer-0.9.3-green">
+    <img alt="Xfer Version" src="https://img.shields.io/badge/Xfer-0.10.0-green">
   </a>
   <a href="https://github.com/paulmooreparks/Xfer">
     <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/paulmooreparks/Xfer">
