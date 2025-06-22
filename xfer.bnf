@@ -17,7 +17,6 @@
     | <null_element>
     | <object_element>
     | <array_element>
-    | <property_bag_element>
     | <comment_element>
     | <placeholder_element>
     | <eval_text_element>
@@ -87,9 +86,6 @@
 <array_element_explicit> ::= <element_open> <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close> <element_close>
 <array_element_compact> ::= <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close>
 
-<property_bag_element> ::= <property_bag_element_explicit> | <property_bag_element_compact>
-<property_bag_element_explicit> ::= <element_open> <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close> <element_close>
-<property_bag_element_compact> ::= <property_bag_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <property_bag_specifier_close>
 
 <element_open> ::= "<"
 <element_close> ::= ">"
@@ -109,14 +105,14 @@
 <object_specifier_close> ::= "}"+
 <array_specifier_open> ::= "["+
 <array_specifier_close> ::= "]"+
-<property_bag_specifier_open> ::= "("+
-<property_bag_specifier_close> ::= ")"+
+<tuple_specifier_open> ::= "("+
+<tuple_specifier_close> ::= ")"+
 <comment_specifier> ::= "/"+
 <placeholder_specifier> ::= "|"+
 <eval_text_specifier> ::= "'"+
 
-<collection_open> ::= <object_specifier_open> | <array_specifier_open> | <property_bag_specifier_open>
-<collection_close> ::= <object_specifier_close> | <array_specifier_close> | <property_bag_specifier_close>
+<collection_open> ::= <object_specifier_open> | <array_specifier_open> | <tuple_specifier_open>
+<collection_close> ::= <object_specifier_close> | <array_specifier_close> | <tuple_specifier_close>
 
 <character_value> ::= <positive_integer>
     | <hexadecimal> | <binary>
@@ -146,5 +142,5 @@
 
 <identifier> ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
 
-/* The following rule isn't correct, but it's the best I can do with the tool I'm using for BNF validation. Consult the documentation for more. */
-<text> ::= ([A-Z] | [a-z] | [0-9] | "_" | <whitespace> | "!" | "\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "\\" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "/" | "]" | "^" | "`" | "{" | "|" | "}" | "~")*
+<text> ::= <character>*
+<character> ::= /* any Unicode character except the sequence that matches the closing delimiter of the current element */

@@ -726,7 +726,9 @@ The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer
 
 ## XferLang Grammar
 
-This grammar is not 100% accurate, but it's close enough to give you an idea of how XferLang is structured. It doesn't capture that the counts of opening and closing specifiers should be balanced, and it doesn't capture all the characters that are legal for `<text>` (bascially, ".*").
+The grammar below mirrors the current parser implementation. Opening and closing
+specifier counts must match, and `<text>` accepts any Unicode characters except
+the sequence that matches the closing delimiter of the enclosing element.
 
 This grammar is also [in the repository](xfer.bnf).
 
@@ -879,6 +881,6 @@ This grammar is also [in the repository](xfer.bnf).
 
 <identifier> ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
 
-/* The following rule isn't correct, but it's the best I can do with the tool I'm using for BNF validation. Consult the documentation for more. */
-<text> ::= ([A-Z] | [a-z] | [0-9] | "_" | <whitespace> | "!" | "\"" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "\\" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "/" | "]" | "^" | "`" | "{" | "|" | "}" | "~")*
+<text> ::= <character>*
+<character> ::= /* any Unicode character except the sequence that matches the closing delimiter of the current element */
 ```
