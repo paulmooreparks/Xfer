@@ -2,11 +2,11 @@
 
 <metadata_element> ::= <metadata_element_explicit> | <metadata_element_compact> 
 <metadata_element_explicit> ::= <element_open> <metadata_specifier> <key_value_pair>+ <metadata_specifier> <element_close>
-<metadata_element_compact> ::= <metadata_specifier> <key_value_pair> <metadata_specifier>
+<metadata_element_compact> ::= <metadata_specifier> <key_value_pair>* <metadata_specifier>
 
 <body_element> ::= <opt_whitespace> (
       <key_value_pair> 
-	| <string_element> 
+    | <string_element> 
     | <character_element> 
     | <integer_element>
     | <long_element>
@@ -17,10 +17,11 @@
     | <null_element>
     | <object_element>
     | <array_element>
+    | <tuple_element>
     | <comment_element>
     | <placeholder_element>
     | <eval_text_element>
-	) <opt_whitespace>
+    ) <opt_whitespace>
 
 <string_element> ::= <string_element_explicit> | <string_element_compact> 
 <string_element_explicit> ::= <element_open> <string_specifier> <text> <string_specifier> <element_close>
@@ -35,28 +36,28 @@
 
 <character_element> ::= <character_element_explicit> | <character_element_compact>
 <character_element_explicit> ::= <element_open> <character_specifier> <opt_whitespace> <character_value> <opt_whitespace> <character_specifier> <element_close>
-<character_element_compact> ::= <character_specifier> <character_value> (<body_element> | <whitespace>?)
+<character_element_compact> ::= <character_specifier> <character_value>
 
 <integer_element> ::= <integer_element_explicit> | <integer_element_compact> | <integer_element_implicit>
 <integer_element_explicit> ::= <element_open> <integer_specifier> <opt_whitespace> <integer_value> <opt_whitespace> <integer_specifier> <element_close>
-<integer_element_compact> ::= <integer_specifier> <integer_value> (<body_element> | <whitespace>?)
+<integer_element_compact> ::= <integer_specifier> <integer_value>
 <integer_element_implicit> ::= <integer_value>
 
 <long_element> ::= <long_element_explicit> | <long_element_compact>
 <long_element_explicit> ::= <element_open> <long_specifier> <opt_whitespace> <integer_value> <opt_whitespace> <long_specifier> <element_close>
-<long_element_compact> ::= <long_specifier> <integer_value> (<body_element> | <whitespace>?)
+<long_element_compact> ::= <long_specifier> <integer_value>
 
-<double_element> ::= <double_element_explicit> | <double_element_compact>
+double_element ::= <double_element_explicit> | <double_element_compact>
 <double_element_explicit> ::= <element_open> <opt_whitespace> <double_specifier> <opt_whitespace> <decimal_value> <double_specifier> <element_close>
-<double_element_compact> ::= <double_specifier> <decimal_value> (<body_element> | <whitespace>?)
+<double_element_compact> ::= <double_specifier> <decimal_value>
 
 <decimal_element> ::= <decimal_element_explicit> | <decimal_element_compact>
 <decimal_element_explicit> ::= <element_open> <decimal_specifier> <opt_whitespace> <decimal_value> <opt_whitespace> <decimal_specifier> <element_close>
-<decimal_element_compact> ::= <decimal_specifier> <decimal_value> (<body_element> | <whitespace>?)
+<decimal_element_compact> ::= <decimal_specifier> <decimal_value>
 
 <boolean_element> ::= <boolean_element_explicit> | <boolean_element_compact>
 <boolean_element_explicit> ::= <element_open> <boolean_specifier> <opt_whitespace> <boolean> <opt_whitespace> <boolean_specifier> <element_close>
-<boolean_element_compact> ::= <boolean_specifier> <boolean> (<body_element> | <whitespace>?)
+<boolean_element_compact> ::= <boolean_specifier> <boolean>
 
 <datetime_element> ::= <datetime_element_explicit> | <datetime_element_compact>
 <datetime_element_explicit> ::= <element_open> <datetime_specifier> <opt_whitespace> <datetime> <opt_whitespace> <datetime_specifier> <element_close>
@@ -68,7 +69,7 @@
 
 <placeholder_element> ::= <placeholder_element_explicit> | <placeholder_element_compact>
 <placeholder_element_explicit> ::= <element_open> <placeholder_specifier> <opt_whitespace> <identifier> <opt_whitespace> <placeholder_specifier> <element_close>
-<placeholder_element_compact> ::= <placeholder_specifier> <opt_whitespace> <identifier> <opt_whitespace> <placeholder_specifier>
+<placeholder_element_compact> ::= <placeholder_specifier> <identifier>
 
 <comment_element> ::= <element_open> <comment_specifier> <text> <comment_specifier> <element_close>
 
@@ -76,7 +77,10 @@
 <eval_text_element_explicit> ::= <element_open> <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier> <element_close>
 <eval_text_element_compact> ::= <eval_text_specifier> <opt_whitespace> <eval_content> <opt_whitespace> <eval_text_specifier>
 
-<eval_content> ::= (<text> | <string_element_explicit> | <character_element_explicit> | <integer_element_explicit> | <long_element_explicit> | <double_element_explicit> | <decimal_element_explicit> | <boolean_element_explicit> | <datetime_element_explicit> | <placeholder_element_explicit> | <eval_text_element_explicit>)
+<eval_content> ::= (<text> | <string_element_explicit> | <character_element_explicit> | <integer_element_explicit> 
+                 | <long_element_explicit> | <double_element_explicit> | <decimal_element_explicit> 
+                 | <boolean_element_explicit> | <datetime_element_explicit> | <placeholder_element_explicit> 
+                 | <eval_text_element_explicit>)*
 
 <object_element> ::= <object_element_explicit> | <object_element_compact>
 <object_element_explicit> ::= <element_open> <object_specifier_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_specifier_close> <element_close>
@@ -86,6 +90,9 @@
 <array_element_explicit> ::= <element_open> <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close> <element_close>
 <array_element_compact> ::= <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close>
 
+tuple_element ::= <tuple_element_explicit> | <tuple_element_compact>
+<tuple_element_explicit> ::= <element_open> <tuple_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <tuple_specifier_close> <element_close>
+<tuple_element_compact> ::= <tuple_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <tuple_specifier_close>
 
 <element_open> ::= "<"
 <element_close> ::= ">"
@@ -111,9 +118,6 @@
 <placeholder_specifier> ::= "|"+
 <eval_text_specifier> ::= "'"+
 
-<collection_open> ::= <object_specifier_open> | <array_specifier_open> | <tuple_specifier_open>
-<collection_close> ::= <object_specifier_close> | <array_specifier_close> | <tuple_specifier_close>
-
 <character_value> ::= <positive_integer>
     | <hexadecimal> | <binary>
     | "nul" | "cr" | "lf" | "nl" | "tab" | "vtab"
@@ -128,7 +132,7 @@
 <decimal_value> ::= <signed_decimal> | <placeholder_element>
 
 <signed_integer> ::= ("+" | "-")? [0-9]+
-<signed_decimal> ::= ("+" | "-")? [0-9]+ "."* [0-9]*
+<signed_decimal> ::= ("+" | "-")? [0-9]+ "." [0-9]*
 <positive_integer> ::= [0-9]+
 <hexadecimal> ::= "$" ([0-9] | [A-F] | [a-f])+
 <binary> ::= "%" [0-1]+
@@ -138,7 +142,7 @@
 
 <boolean> ::= "true" | "false"
 
-<datetime> ::= [0-9]+ "-" [0-9]+ "-" [0-9]+ (("T" | "t") [0-9]+ ":" [0-9]+ (":" [0-9]+)?)? | <placeholder_element>
+<datetime> ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} ("T" [0-9]{2} ":" [0-9]{2} (":" [0-9]{2})?)? | <placeholder_element>
 
 <identifier> ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
 
