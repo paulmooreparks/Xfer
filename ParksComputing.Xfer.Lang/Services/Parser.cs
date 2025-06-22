@@ -13,7 +13,7 @@ namespace ParksComputing.Xfer.Lang.Services;
 settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
 
 public class Parser : IXferParser {
-    public static readonly string Version = "0.9.2";
+    public static readonly string Version = "0.10.0";
 
     public Parser() : this(Encoding.UTF8) { }
 
