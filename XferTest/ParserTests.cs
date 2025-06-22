@@ -27,6 +27,59 @@ public class ParserTests {
     }
 
     [TestMethod]
+    [DeploymentItem("Valid/sample.xfer")]
+    public void Parse_UnderLoad_ShouldRemainConsistent() {
+        var filePath = Path.Combine(TestContext!.DeploymentDirectory!, "sample.xfer");
+        string xferText = File.ReadAllText(filePath);
+
+        const int iterations = 1000;
+        var parser = new Parser();
+
+        for (int i = 0; i < iterations; i++) {
+            var document = parser.Parse(xferText);
+            Assert.IsNotNull(document);
+            Assert.IsNotNull(document.Root);
+            Assert.IsTrue(document.Root.Count > 0, $"Document root empty on iteration {i}");
+        }
+    }
+
+    [TestMethod]
+    [DeploymentItem("Valid/sample.xfer")]
+    public void Parse_MultiThreaded_ShouldRemainIsolated() {
+        var filePath = Path.Combine(TestContext!.DeploymentDirectory!, "sample.xfer");
+        string xferText = File.ReadAllText(filePath);
+
+        int numThreads = 10;
+        int iterationsPerThread = 100;
+
+        Parallel.For(0, numThreads, i => {
+            var parser = new Parser();
+            for (int j = 0; j < iterationsPerThread; j++) {
+                var doc = parser.Parse(xferText);
+                Assert.IsNotNull(doc);
+                Assert.IsTrue(doc.Root.Count > 0);
+            }
+        });
+    }
+
+    [TestMethod]
+    [DeploymentItem("Valid/sample.xfer")]
+    public void Parse_PerformanceBenchmark() {
+        var filePath = Path.Combine(TestContext!.DeploymentDirectory!, "sample.xfer");
+        string xferText = File.ReadAllText(filePath);
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var parser = new Parser();
+
+        for (int i = 0; i < 1000; i++) {
+            var doc = parser.Parse(xferText);
+        }
+
+        sw.Stop();
+        Console.WriteLine($"Total time: {sw.ElapsedMilliseconds}ms");
+    }
+
+    [TestMethod]
     public void Serialize() {
         var data = new SampleData {
             Person = new Person { Name = null, Age = 42 },

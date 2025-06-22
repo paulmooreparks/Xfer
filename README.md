@@ -24,15 +24,17 @@ _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.c
 
 XferLang is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. 
 
-This project is still in its infancy and is quite experimental, even exploratory. The code you'll find in this repository is also experimental. So far, I've built an [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang/Elements), a [parser](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/Services/Parser.cs), and a [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/XferConvert.cs) as part of my [.NET XferLang Library](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang), but at the moment this code is completely not ready for prime time. It can now be used safely from multiple threads. About once a week I'll completely refactor everything, so don't get terribly attached to code you see here. However, if you do like some of the ideas, please [let me know](mailto:paul@parkscomputing.com). I'm always open to feedback.
+This project is still in its infancy and is quite experimental, even exploratory. The code you'll find in this repository is also experimental. So far, I've built an [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang/Elements), a [parser](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/Services/Parser.cs), and a [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/XferConvert.cs) as part of my [.NET XferLang Library](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang), but at the moment this code is completely not ready for prime time. It can now be used safely from multiple threads. 
 
-That said, I do plan to make the code professional-grade in the future, and I want to add implementations in other languages (Java, Rust, C++, JavaScript, and TypeScript are on my list). If you want to contribute, please [let me know](mailto:paul@parkscomputing.com). I'd love to have your help.
+Please [let me know](mailto:paul@parkscomputing.com) what you think about the ideas you see here. I'm always open to feedback.
+
+I do plan to make the code professional-grade in the future, and I want to add implementations in other languages (Java, Rust, C++, JavaScript, and TypeScript are on my list). If you want to contribute, please [let me know](mailto:paul@parkscomputing.com). I'd love to have your help.
 
 ## Design Goals
 * **Explicit Types**: All values are explicitly typed.
 * **No Commas**: XferLang allows for objects and arrays to be defined without any separator characters between elements.
 * **No Escaping**: XferLang does not require escaping of special characters in values. Instead, values are enclosed in unique delimiters that eliminate the need for escaping.
-* **Nullable Values**: ~~XferLang supports null values only for types that are defined as nullable.~~ This idea is on hold for now. Stay tuned for updates.
+* **Safer Embedding**: XferLang allows for embedding of elements without the need for escaping special characters. If a collision occurs, the specifier character can be repeated as many times as necessary to disambiguate the data.
 
 ## XferLang and JSON Compared
 
@@ -723,17 +725,11 @@ _Coming soon..._
 ## Serialization
 
 
-The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/XferConvert.cs) makes use of the [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang/Elements) to write object contents out to a stream or read object contents from a stream. The class is thread safe, and it is not yet optimized for performance, but it is already useful for demonstrating XferLang's capabilities.
-
-### Thread Safety
-
-`XferConvert`, `XferParser`, and the underlying `Parser` class can be safely used from multiple threads. Each thread maintains its own parser instance behind the scenes so concurrent serialization and deserialization operations do not interfere with one another.
+The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/XferConvert.cs) makes use of the [object model](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang/Elements) to write object contents out to a stream or read object contents from a stream. The class is thread safe, and although it is not yet optimized for performance, it is already useful for demonstrating XferLang's capabilities.
 
 ## XferLang Grammar
 
-The grammar below mirrors the current parser implementation. Opening and closing
-specifier counts must match, and `<text>` accepts any Unicode characters except
-the sequence that matches the closing delimiter of the enclosing element.
+The grammar below mirrors the current parser implementation. Opening and closing specifier counts must match, and `<text>` accepts any Unicode characters except the sequence that matches the closing delimiter of the enclosing element.
 
 This grammar is also [in the repository](xfer.bnf).
 
