@@ -30,7 +30,7 @@ public static class CharExtensions {
             || c == BooleanElement.OpeningSpecifier
             || c == DateTimeElement.OpeningSpecifier
             || c == CharacterElement.OpeningSpecifier
-            || c == EvaluatedElement.OpeningSpecifier
+            || c == InterpolatedElement.OpeningSpecifier
             || c == PlaceholderElement.OpeningSpecifier
             || c == NullElement.OpeningSpecifier
             || c == CommentElement.OpeningSpecifier
@@ -51,7 +51,7 @@ public static class CharExtensions {
             || c == BooleanElement.ClosingSpecifier
             || c == DateTimeElement.ClosingSpecifier
             || c == CharacterElement.ClosingSpecifier
-            || c == EvaluatedElement.ClosingSpecifier
+            || c == InterpolatedElement.ClosingSpecifier
             || c == PlaceholderElement.ClosingSpecifier
             || c == NullElement.ClosingSpecifier
             || c == CommentElement.ClosingSpecifier

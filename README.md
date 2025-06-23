@@ -4,7 +4,7 @@
 
 <p>
   <a href="https://github.com/paulmooreparks/Xfer">
-    <img alt="Xfer Version" src="https://img.shields.io/badge/Xfer-0.10.0-green">
+    <img alt="Xfer Version" src="https://img.shields.io/badge/Xfer-0.10.2-green">
   </a>
   <a href="https://github.com/paulmooreparks/Xfer">
     <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/paulmooreparks/Xfer">
@@ -153,10 +153,10 @@ One of the design goals of XferLang is to eliminate the requirement to escape sp
 <"""""Specifiers may be repeated as many times as necessary.""""">
 ```
 
-This does not mean that escaping is not supported. There is a text element, the Evaluated Element (or eval element), that will evaluate any embedded elements and include their resulting values in the text value of the element. Using this feature and embedding character elements, it is possible to escape any character sequence.
+This does not mean that escaping is not supported. There is a text element, the InterpolatedElement, that will evaluate any embedded elements and include their resulting values in the text value of the element. Using this feature and embedding character elements, it is possible to escape any character sequence.
 
 ```xfer
-</ The following evaluated-text element will render as " I ❤︎ XferLang 😀 ". />
+</ The following interpolated-text element will render as " I ❤︎ XferLang 😀 ". />
 ' I <\$2764\><\$fe0e\> XferLang <\$1F600\> '
 ```
 
@@ -342,16 +342,16 @@ A String element may also contain embedded elements, which will be rendered as e
 ' I <\$2764\><\$fe0e\> XferLang <\$1F600\> '
 ```
 
-### Evaluated Text Element
+### Interpolated Text Element
 
-The Evaluated Text element is used to evaluate embedded elements and include their resulting values in the text value of the element.
+The Interpolated Text element is used to evaluate embedded elements and include their resulting values in the text value of the element.
 
 * **Specifier:** `'` (Apostrophe, U+0027)
 * **Explicit Syntax:** Enclose the content in `<'` and `'>` delimiters.
 * **Compact Syntax:** Enclose the content in opening and closing apostrophes.
 * **Implicit Syntax:** Not supported
 
-Elements which may be embedded within an evaluated text element are as follows:
+Elements which may be embedded within an interpolated text element are as follows:
 
 * string
 * character
@@ -364,12 +364,12 @@ Elements which may be embedded within an evaluated text element are as follows:
 * placeholder
 * other evaluated text elements
 
-An Evaluated Text element may contain the same text content as a String element, but it may also contain embedded elements.
+An InterpolatedText element may contain the same text content as a String element, but it may also contain embedded elements.
 
-All elements embedded in an evaluated-text element which are intended to be evaluated must use [explicit syntax](#explicit-syntax).
+All elements embedded in an InterpolatedText element which are intended to be evaluated must use [explicit syntax](#explicit-syntax).
 
 ```xfer
-</ Evaluated (or eval) element. The element below will render as 
+</ Interpolated element. The element below will render as 
 "Inner elements are evaluated 1 at a time and rendered as is." />
 
 <'Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><''as<\$20\>is''>.'>
@@ -473,7 +473,7 @@ The Decimal element is used to represent a 128-bit decimal value.
 
 ### Character Element
 
-The Character element is used to represent a character. These may be stand-alone elements, or they may be embedded in an [evaluated text element](#evaluated-text-element).
+The Character element is used to represent a character. These may be stand-alone elements, or they may be embedded in an [interpolated text element](#interpolated-text-element).
 
 * **Specifier:** `\` (Reverse Solidus, or less formally, backslash, U+005C)
 * **Explicit Syntax:** Enclose the content in `<\` and `\>` delimiters.

@@ -319,13 +319,12 @@ public class XferConvert {
             CharacterElement charElement when targetType == typeof(object) => charElement.Value,
             NullElement nullElement when targetType == typeof(string) => nullElement.Value,
             NullElement nullElement when targetType == typeof(object) => nullElement.Value,
-            EvaluatedElement evalElement when targetType == typeof(string) => evalElement.Value,
-            EvaluatedElement evalElement when targetType == typeof(object) => evalElement.Value,
+            InterpolatedElement evalElement when targetType == typeof(string) => evalElement.Value,
+            InterpolatedElement evalElement when targetType == typeof(object) => evalElement.Value,
             PlaceholderElement phElement when targetType == typeof(string) => phElement.Value,
             PlaceholderElement phElement when targetType == typeof(object) => phElement.Value,
             ArrayElement arrayElement => DeserializeArray(arrayElement, targetType),
             TupleElement tupleElement => DeserializeTuple(tupleElement, targetType),
-            PropertyBagElement propertyBagElement => DeserializePropertyBag(propertyBagElement, targetType),
             ObjectElement objectElement => DeserializeObject(objectElement, targetType),
             _ => throw new NotSupportedException($"Type '{targetType.Name}' is not supported for deserialization")
         };
@@ -384,7 +383,7 @@ public class XferConvert {
                     element = new NullElement();
                 }
                 else {
-                    element = new EvaluatedElement(value.ToString() ?? string.Empty);
+                    element = new InterpolatedElement(value.ToString() ?? string.Empty);
                 }
 
                 objElement.AddOrUpdate(new KeyValuePairElement(new IdentifierElement(name), element));
@@ -541,14 +540,6 @@ public class XferConvert {
     private static object DeserializeTuple(TupleElement tupleElement, Type targetType) {
         var values = new List<object?>();
         foreach (var item in tupleElement.Values) {
-            values.Add(DeserializeValue(item, typeof(object)));
-        }
-        return values;
-    }
-
-    private static object DeserializePropertyBag(PropertyBagElement propertyBagElement, Type targetType) {
-        var values = new List<object?>();
-        foreach (var item in propertyBagElement.Values) {
             values.Add(DeserializeValue(item, typeof(object)));
         }
         return values;

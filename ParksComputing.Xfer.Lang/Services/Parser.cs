@@ -293,7 +293,7 @@ public class Parser : IXferParser {
     }
 
     internal bool EvaluatedElementClosing() {
-        Debug.Assert(_delimStack.Peek().ClosingSpecifier == EvaluatedElement.ClosingSpecifier);
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == InterpolatedElement.ClosingSpecifier);
         return ElementCompactClosing();
     }
 
@@ -587,7 +587,7 @@ public class Parser : IXferParser {
                 return stringElement;
             }
 
-            if (ElementOpening(EvaluatedElement.ElementDelimiter, out int evalSpecifierCount)) {
+            if (ElementOpening(InterpolatedElement.ElementDelimiter, out int evalSpecifierCount)) {
                 var literalElement = ParseEvaluatedElement(evalSpecifierCount);
                 SkipWhitespace();
                 return literalElement;
@@ -763,7 +763,6 @@ public class Parser : IXferParser {
                 ObjectElement => new TypedArrayElement<ObjectElement>(style: style),
                 MetadataElement => new TypedArrayElement<MetadataElement>(style: style),
                 TupleElement => new TypedArrayElement<TupleElement>(style: style),
-                PropertyBagElement => new TypedArrayElement<PropertyBagElement>(style: style),
                 _ => new TypedArrayElement<NullElement>(style: style)
             };
 
@@ -1002,7 +1001,7 @@ public class Parser : IXferParser {
         return new CharacterElement(codePoint, specifierCount, style: style);
     }
 
-    private EvaluatedElement ParseEvaluatedElement(int specifierCount = 1) {
+    private InterpolatedElement ParseEvaluatedElement(int specifierCount = 1) {
         StringBuilder valueBuilder = new StringBuilder();
         var style = _delimStack.Peek().Style;
 
@@ -1064,8 +1063,8 @@ public class Parser : IXferParser {
                 continue;
             }
 
-            if (ElementExplicitOpening(EvaluatedElement.ElementDelimiter, out int evalSpecifierCount)) {
-                EvaluatedElement evaluatedElement = ParseEvaluatedElement(evalSpecifierCount);
+            if (ElementExplicitOpening(InterpolatedElement.ElementDelimiter, out int evalSpecifierCount)) {
+                InterpolatedElement evaluatedElement = ParseEvaluatedElement(evalSpecifierCount);
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
@@ -1082,14 +1081,14 @@ public class Parser : IXferParser {
             }
 
             if (ElementClosing()) {
-                return new EvaluatedElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount, style);
+                return new InterpolatedElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount, style);
             }
 
             valueBuilder.Append(CurrentChar);
             Expand();
         }
 
-        throw new InvalidOperationException($"Unexpected end of {EvaluatedElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+        throw new InvalidOperationException($"Unexpected end of {InterpolatedElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
     private StringElement ParseStringElement(int specifierCount = 1) {

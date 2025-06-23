@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
-public class EvaluatedElement : TextElement
+public class InterpolatedElement : TextElement
 {
     public static readonly string ElementName = "eval";
     public const char OpeningSpecifier = '\'';
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public EvaluatedElement(string text, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
+    public InterpolatedElement(string text, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
         : base(text, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
     {
     }
