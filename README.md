@@ -729,4 +729,4 @@ The [serialization/deserialization class](https://github.com/paulmooreparks/Xfer
 
 ## XferLang Grammar
 
-The BNF grammar may be found [in the repository](xfer.bnf). It mirrors the current parser implementation and the description in this document.
+The BNF grammar may be found [in the repository](https://github.com/paulmooreparks/Xfer/blob/master/xfer.bnf). It mirrors the current parser implementation and the description in this document.
