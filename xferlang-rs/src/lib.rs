@@ -138,7 +138,10 @@ pub unsafe extern "C" fn xfer_document_to_json(ptr: *const XferDocument) -> *mut
     if ptr.is_null() { return std::ptr::null_mut(); }
     let doc = unsafe { &*ptr };
     match serde_json::to_string(doc) {
-        Ok(json) => CString::new(json).unwrap().into_raw(),
+        Ok(json) => match CString::new(json) {
+            Ok(c_string) => c_string.into_raw(),
+            Err(_) => std::ptr::null_mut(),
+        },
         Err(_) => std::ptr::null_mut(),
     }
 }
