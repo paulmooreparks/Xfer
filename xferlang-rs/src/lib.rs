@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::iter::Peekable;
@@ -151,6 +152,15 @@ pub unsafe extern "C" fn xfer_string_free(ptr: *mut c_char) {
     if !ptr.is_null() {
         unsafe { drop(CString::from_raw(ptr)); }
     }
+=======
+mod element;
+mod parser;
+
+pub use element::{Document, Element};
+
+pub fn parse(input: &str) -> Result<Document, String> {
+    parser::parse(input)
+>>>>>>> origin/codex/port-xferlang-library-to-rust
 }
 
 #[cfg(test)]
@@ -158,9 +168,21 @@ mod tests {
     use super::*;
 
     #[test]
+<<<<<<< HEAD
     fn parse_basic() {
         let doc = parse_document("\"hello\" 42 ~true [1 2]").unwrap();
         assert_eq!(doc.values.len(), 4);
     }
 }
 
+=======
+    fn parse_simple_example() {
+        let input = "{name\"Alice\"age 30 isMember~true scores[*85 *90 *78.5]}";
+        let doc = parse(input).expect("parse failed");
+        match doc.root {
+            Element::Object(ref pairs) => assert_eq!(pairs.len(), 4),
+            _ => panic!("not object"),
+        }
+    }
+}
+>>>>>>> origin/codex/port-xferlang-library-to-rust
