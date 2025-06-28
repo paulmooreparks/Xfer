@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /xferc/Properties/launchSettings.json
 /xferc/Properties/launchSettings.json
+xferlang-rs/target/
