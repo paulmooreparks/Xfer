@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XferLang.NET Documentation</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="highlightjs/styles/github.min.css">
+    <script src="highlightjs/highlight.min.js"></script>
+    <script src="highlightjs/languages/xfer.min.js"></script>
+</head>
+<body>
+    <div class="mobile-nav-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2>XferLang.NET</h2>
+        </div>
+        <ul>
+            <li><a href="#introduction">Introduction to XferLang</a></li>
+            <li><a href="#philosophy">Design Philosophy</a></li>
+            <li><a href="#basic-syntax">Basic Syntax</a></li>
+            <li><a href="#syntax-variations">Syntax Variations</a></li>
+            <li><a href="#data-types">Data Types</a></li>
+            <li><a href="#complex-structures">Complex Structures</a></li>
+            <li><a href="#metadata">Metadata</a></li>
+            <li><a href="#examples">Complete Examples</a></li>
+            <li><a href="#grammar">Grammar Reference</a></li>
+            <li><a href="#getting-started">Getting Started with .NET</a></li>
+            <li><a href="#serialization">Serialization</a></li>
+            <li><a href="#deserialization">Deserialization</a></li>
+            <li><a href="#settings">Serializer Settings</a></li>
+            <li><a href="#property-attributes">Property Attributes</a></li>
+            <li><a href="#numeric-formatting">Numeric Formatting Attributes</a></li>
+            <li><a href="#contract-resolver">Contract Resolvers</a></li>
+            <li><a href="#custom-converters">Custom Converters</a></li>
+        </ul>
+    </nav>
+    <main class="content">
+        <header>
+            <h1>XferLang Documentation</h1>
+            <p>Your complete guide to the XferLang data-interchange format and the .NET library.</p>
+        </header>
+
+        <section id="introduction">
+            <h2>Introduction to XferLang</h2>
+            <p>XferLang is a modern data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. Unlike JSON or XML, XferLang is designed with explicit typing, human readability, and safe data embedding at its core.</p>
+
+            <p>Here's a quick comparison to show XferLang in action:</p>
+
+            <h3>JSON Example:</h3>
+            <pre><code class="json">{
+  "name": "John Doe",
+  "age": 30,
+  "isActive": true,
+  "addresses": [
+    {
+      "type": "home",
+      "street": "123 Main St",
+      "city": "Anytown"
+    }
+  ],
+  "metadata": null
+}</code></pre>
+
+            <h3>XferLang Equivalent:</h3>
+            <pre><code class="xfer">{
+    name "John Doe"
+    age #30
+    isActive ~true
+    addresses [
+        {
+            type "home"
+            street "123 Main St"
+            city "Anytown"
+        }
+    ]
+    metadata ?
+}</code></pre>
+
+            <p>Notice how XferLang eliminates commas, uses explicit type prefixes (#30 for integers, ~true for booleans, ? for null), and maintains excellent readability.</p>
+
+            <p>Because whitespace is flexible, the same document can be made extremely compact:</p>
+
+<pre><code class="xfer">{name"Alice"age 30 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00@}}</code></pre>
+        </section>
+
+        <section id="philosophy">
+            <h2>Design Philosophy</h2>
+            <p>XferLang is built around four core principles:</p>
+
+            <h3>1. Clarity and Readability</h3>
+            <p>The syntax is designed to be human-readable without requiring separators like commas. Whitespace naturally delimits elements, making documents easier to scan and understand.</p>
+
+            <h3>2. Explicit Typing</h3>
+            <p>All values are explicitly typed using prefixes. This eliminates the type ambiguity that can occur in formats like JSON, leading to more predictable parsing and less defensive coding.</p>
+
+            <h3>3. Elimination of Escaping</h3>
+            <p>XferLang doesn't require escaping special characters in values. Instead, values use unique delimiters that can be repeated as needed to avoid conflicts.</p>
+
+            <h3>4. Safety in Embedding</h3>
+            <p>The delimiter-repetition strategy allows safe embedding of complex data without risk of delimiter collision, making it perfect for configuration files and data transmission.</p>
+        </section>
+
+        <section id="basic-syntax">
+            <h2>Basic Syntax</h2>
+            <p>XferLang documents consist of elements separated by whitespace. Each element can be a simple value or a complex structure. XferLang supports three different <a href="#syntax-variations">syntax variations</a> for writing elements.</p>
+
+            <h3>Comments</h3>
+            <p>Comments start with <code>&lt;/</code> and end with <code>/&gt;</code>:</p>
+            <pre><code class="xfer">&lt;/ This is a comment /&gt;
+name "John Doe"  &lt;/ This is also a comment /&gt;</code></pre>
+
+            <h3>Whitespace</h3>
+            <p>XferLang uses whitespace (spaces, tabs, newlines) to separate elements. Multiple whitespace characters are treated as a single separator:</p>
+            <pre><code class="xfer">&lt;/ These are equivalent /&gt;
+name "John" age #30
+name "John"    age    #30
+name "John"
+age #30</code></pre>
+        </section>
+
+        <section id="syntax-variations">
+            <h2>Syntax Variations</h2>
+            <p>XferLang supports three different syntax styles for writing elements, providing flexibility for different use cases:</p>
+
+            <h3 id="implicit-syntax">Implicit Syntax</h3>
+            <p>For the most common types, like integers and simple keywords, no special characters are needed at all. The parser infers the type from the content.</p>
+            <pre><code class="xfer">123                 &lt;/ An integer /&gt;
+name "Alice"        &lt;/ A key/value pair of a keyword 'name' and a string value /&gt;</code></pre>
+
+            <h3 id="compact-syntax">Compact Syntax</h3>
+            <p>For most other types, a single specifier character (or a pair for collections) denotes the type. This is the most common syntax.</p>
+            <pre><code class="xfer">~true               &lt;/ A boolean /&gt;
+*123.45             &lt;/ A decimal /&gt;
+"Hello, World!"     &lt;/ A string /&gt;
+[ 1 2 3 ]           &lt;/ An array of integers /&gt;</code></pre>
+
+            <h3 id="explicit-syntax">Explicit Syntax</h3>
+            <p>When an element's content might be ambiguous (e.g., a string containing a quote), you can wrap the compact form in angle brackets (<code>&lt;</code> and <code>&gt;</code>). This is the most verbose but also the most powerful form, as it allows for delimiter repetition to avoid any collision.</p>
+            <pre><code class="xfer">&lt;"Alice said, "Boo!""&gt;
+&lt;// A comment containing &lt;/another comment/&gt; //&gt;</code></pre>
+        </section>
+
+        <section id="data-types">
+            <h2>Data Types</h2>
+            <p>XferLang supports a rich set of data types with explicit type indicators:</p>
+
+            <h3>Strings</h3>
+            <p>Strings are enclosed in double quotes. No escaping is needed - if your string contains quotes, use multiple quote characters. You can use <a href="#compact-syntax">compact syntax</a> for simple strings or <a href="#explicit-syntax">explicit syntax</a> for complex content:</p>
+            <pre><code class="xfer">simple "Hello, World!"
+withQuotes ""She said "Hello" to me""
+multipleQuotes """This string contains "" quotes"""</code></pre>
+
+            <p>For complex strings that might contain multiple quote sequences, you can use the explicit string syntax:</p>
+            <pre><code class="xfer">complexString &lt;"This can contain "quotes" and ""multiple"" quotes"&gt;</code></pre>
+
+            <h3>Numbers</h3>
+            <p>Numbers use explicit type prefixes in <a href="#compact-syntax">compact syntax</a> or can be written without prefixes using <a href="#implicit-syntax">implicit syntax</a> when unambiguous:</p>
+            <pre><code class="xfer">integer #42
+negative #-123
+hexInteger #$FF
+binaryInteger #%10101010
+long &123456789
+hexLong &$DEADBEEF
+binaryLong &%1001010100000010111110010000000000
+decimal *3.14159
+scientific *1.23e-4
+double ^2.71828</code></pre>
+
+            <p>You can also write integers without the prefix when the context is clear (implicit syntax):</p>
+            <pre><code class="xfer">simpleNumber 42</code></pre>
+
+            <p><strong>Hexadecimal and Binary Formatting:</strong> Integer and Long elements support alternative numeric representations using <code>#$</code> for hexadecimal and <code>#%</code> for binary (Integer) or <code>&$</code>/<code>&%</code> for Long values. These formats are ideal for memory addresses, color values, bitmasks, and low-level programming contexts.</p>
+
+            <h3>Booleans</h3>
+            <p>Booleans use the <code>~</code> prefix in <a href="#compact-syntax">compact syntax</a>:</p>
+            <pre><code class="xfer">isActive ~true
+isDeleted ~false</code></pre>
+
+            <h3>Null Values</h3>
+            <p>Null values use the <code>?</code> (question mark) specifier in <a href="#compact-syntax">compact syntax</a>:</p>
+            <pre><code class="xfer">optionalValue ?
+explicitNull &lt;??&gt;</code></pre>
+
+            <h3>Characters</h3>
+            <p>Single characters use the backslash prefix and can be specified as ASCII values or Unicode:</p>
+            <pre><code class="xfer">letter \A
+space \32
+unicode \$1F600  &lt;/ 😀 emoji /&gt;</code></pre>
+
+            <h3>Dates and Times</h3>
+            <p>Dates and times use the <code>@</code> prefix with ISO 8601 format and closing <code>@</code>:</p>
+            <pre><code class="xfer">birthDate @2023-12-25@
+meetingTime @2023-12-25T14:30:00@
+timestamp @2023-12-25T14:30:00.123Z@</code></pre>
+
+            <h3>Evaluated Elements</h3>
+            <p>XferLang supports evaluated elements that can contain expressions and other elements. These always require <a href="#explicit-syntax">explicit syntax</a> for complex content:</p>
+            <pre><code class="xfer">greeting 'Hello, <"World">&lt;/ This is a comment inside an eval /&gt;!'
+emoji 'I &lt;\$2764\&gt; Xfer &lt;\$1F600\&gt;'  &lt;/ I ❤︎ Xfer 😀 /&gt;</code></pre>
+        </section>
+
+        <section id="complex-structures">
+            <h2>Complex Structures</h2>
+
+            <h3>Objects</h3>
+            <p>Objects are enclosed in curly braces and contain key-value pairs:</p>
+            <pre><code class="xfer">{
+    name "John Doe"
+    age #30
+    address {
+        street "123 Main St"
+        city "Anytown"
+        zipCode "12345"
+    }
+}</code></pre>
+
+            <h3>Arrays</h3>
+            <p>Arrays are enclosed in square brackets and contain elements of the <strong>same type</strong>:</p>
+            <pre><code class="xfer">numbers [#1 #2 #3 #4 #5]
+names ["Alice" "Bob" "Charlie"]
+decimals [*85.0 *90.0 *78.5]</code></pre>
+
+            <h3>Tuples</h3>
+            <p>Tuples are enclosed in parentheses and represent collections of elements of <strong>any type</strong> (similar to JSON arrays):</p>
+            <pre><code class="xfer">coordinates (*42.3601 *-71.0589)
+nameAge ("John Doe" #30)
+mixed (#1 "hello" ~true ?)</code></pre>
+
+            <h3>Nested Structures</h3>
+            <p>Objects, arrays, and tuples can be freely nested:</p>
+            <pre><code class="xfer">users [
+    {
+        name "Alice"
+        age #25
+        roles ["admin" "user"]
+    }
+    {
+        name "Bob"
+        age #30
+        roles ["user"]
+    }
+]
+
+&lt;/ Tuple with mixed types /&gt;
+userInfo ("Alice" #25 ["admin" "user"] ~true)</code></pre>
+
+            <h3>Tuples vs Arrays</h3>
+            <p>Remember the key difference:</p>
+            <ul>
+                <li><strong>Arrays</strong> <code>[...]</code>: Elements of the same type</li>
+                <li><strong>Tuples</strong> <code>(...)</code>: Elements of any type (like JSON arrays)</li>
+            </ul>
+        </section>
+
+        <section id="metadata">
+            <h2>Metadata</h2>
+            <p>XferLang supports metadata at the document level using special delimiters <code>&lt;!</code> and <code>!&gt;</code>:</p>
+
+            <h3>Document Metadata</h3>
+            <pre><code class="xfer">&lt;! xfer "0.7.2"
+   author "John Doe"
+   created @2023-12-25T10:00:00Z@
+!&gt;
+
+{
+    name "Document content"
+    value #42
+}</code></pre>
+        </section>
+
+        <section id="examples">
+            <h2>Complete Examples</h2>
+
+            <h3>Configuration File</h3>
+            <pre><code class="xfer">&lt;! xfer "0.7.2"
+   name "Application Configuration"
+   version "1.2.3"
+!&gt;
+
+database {
+    host "localhost"
+    port #5432
+    name "myapp"
+    credentials {
+        username "dbuser"
+        password "secret123"
+    }
+    connectionPool {
+        minSize #5
+        maxSize #20
+        timeout *30.0
+    }
+}
+
+logging {
+    level "INFO"
+    outputs ["console" "file"]
+    file {
+        path "/var/log/myapp.log"
+        maxSize "10MB"
+        rotate ~true
+    }
+}
+
+features {
+    enableCache ~true
+    enableMetrics ~true
+    experimentalFeatures ~false
+}</code></pre>
+
+            <h3>User Profile Data</h3>
+            <pre><code class="xfer">{
+    id #12345
+    profile {
+        firstName "Jane"
+        lastName "Smith"
+        email "jane.smith@example.com"
+        birthDate @1990-05-15@
+        verified ~true
+    }
+
+    preferences {
+        theme "dark"
+        language "en-US"
+        notifications {
+            email ~true
+            push ~false
+            sms ~true
+        }
+    }
+
+    addresses [
+        {
+            type "home"
+            street "456 Oak Avenue"
+            city "Springfield"
+            state "IL"
+            zipCode "62701"
+            country "US"
+            isPrimary ~true
+        }
+        {
+            type "work"
+            street "789 Business Blvd"
+            city "Springfield"
+            state "IL"
+            zipCode "62702"
+            country "US"
+            isPrimary ~false
+        }
+    ]
+
+    lastLogin @2023-12-25T09:30:00Z@
+    loginCount #247
+}
+
+&lt;/ Example using evaluated elements for dynamic content /&gt;
+welcomeMessage 'Welcome, &lt;"Jane"&gt;! You have &lt;#5#&gt; new messages.'</code></pre>
+
+            <h3>Real-World Example from the Repository</h3>
+            <pre><code class="xfer">{
+    name "Alice"
+    age #30
+    isMember ~true
+    scores [*85 *90 *78.5]
+    profile {
+        email "alice@example.com"
+        joinedDate @2023-05-05T20:00:00@
+    }
+}</code></pre>
+        </section>
+
+        <section id="grammar">
+            <h2>Grammar Reference</h2>
+            <p>For those who want to implement parsers or need the complete technical specification, here's the formal grammar for XferLang:</p>
+            <pre><code class="bnf">&lt;document&gt; ::= &lt;opt_whitespace&gt; &lt;metadata_element&gt;? &lt;opt_whitespace&gt; &lt;body_element&gt;* &lt;opt_whitespace&gt;
+
+&lt;metadata_element&gt; ::= &lt;metadata_element_explicit&gt; | &lt;metadata_element_compact&gt;
+&lt;metadata_element_explicit&gt; ::= &lt;element_open&gt; &lt;metadata_specifier&gt; &lt;key_value_pair&gt;+ &lt;metadata_specifier&gt; &lt;element_close&gt;
+&lt;metadata_element_compact&gt; ::= &lt;metadata_specifier&gt; &lt;key_value_pair&gt;* &lt;metadata_specifier&gt;
+
+&lt;body_element&gt; ::= &lt;opt_whitespace&gt; (
+      &lt;key_value_pair&gt;
+    | &lt;string_element&gt;
+    | &lt;character_element&gt;
+    | &lt;integer_element&gt;
+    | &lt;long_element&gt;
+    | &lt;double_element&gt;
+    | &lt;decimal_element&gt;
+    | &lt;boolean_element&gt;
+    | &lt;datetime_element&gt;
+    | &lt;date_element&gt;
+    | &lt;time_element&gt;
+    | &lt;timespan_element&gt;
+    | &lt;null_element&gt;
+    | &lt;object_element&gt;
+    | &lt;array_element&gt;
+    | &lt;tuple_element&gt;
+    | &lt;comment_element&gt;
+    | &lt;placeholder_element&gt;
+    | &lt;interpolated_element&gt;
+    ) &lt;opt_whitespace&gt;
+
+&lt;string_element&gt; ::= &lt;string_element_explicit&gt; | &lt;string_element_compact&gt;
+&lt;string_element_explicit&gt; ::= &lt;element_open&gt; &lt;string_specifier&gt; &lt;text&gt; &lt;string_specifier&gt; &lt;element_close&gt;
+&lt;string_element_compact&gt; ::= &lt;string_specifier&gt; &lt;text&gt; &lt;string_specifier&gt;
+
+&lt;key_value_pair&gt; ::= &lt;keyword_element&gt; &lt;opt_whitespace&gt; &lt;body_element&gt;
+
+&lt;keyword_element&gt; ::= &lt;keyword_element_explicit&gt; | &lt;keyword_element_compact&gt; | &lt;keyword_element_implicit&gt;
+&lt;keyword_element_explicit&gt; ::= &lt;element_open&gt; &lt;keyword_specifier&gt; &lt;text&gt; &lt;keyword_specifier&gt; &lt;element_close&gt;
+&lt;keyword_element_compact&gt; ::= &lt;keyword_specifier&gt; &lt;text&gt; &lt;keyword_specifier&gt;
+&lt;keyword_element_implicit&gt; ::= &lt;identifier&gt;
+
+&lt;character_element&gt; ::= &lt;character_element_explicit&gt; | &lt;character_element_compact&gt;
+&lt;character_element_explicit&gt; ::= &lt;element_open&gt; &lt;character_specifier&gt; &lt;opt_whitespace&gt; &lt;character_value&gt; &lt;opt_whitespace&gt; &lt;character_specifier&gt; &lt;element_close&gt;
+&lt;character_element_compact&gt; ::= &lt;character_specifier&gt; &lt;character_value&gt;
+
+&lt;integer_element&gt; ::= &lt;integer_element_explicit&gt; | &lt;integer_element_compact&gt; | &lt;integer_element_implicit&gt;
+&lt;integer_element_explicit&gt; ::= &lt;element_open&gt; &lt;integer_specifier&gt; &lt;opt_whitespace&gt; &lt;integer_value&gt; &lt;opt_whitespace&gt; &lt;integer_specifier&gt; &lt;element_close&gt;
+&lt;integer_element_compact&gt; ::= &lt;integer_specifier&gt; &lt;integer_value&gt;
+&lt;integer_element_implicit&gt; ::= &lt;integer_value&gt;
+
+&lt;long_element&gt; ::= &lt;long_element_explicit&gt; | &lt;long_element_compact&gt;
+&lt;long_element_explicit&gt; ::= &lt;element_open&gt; &lt;long_specifier&gt; &lt;opt_whitespace&gt; &lt;long_value&gt; &lt;opt_whitespace&gt; &lt;long_specifier&gt; &lt;element_close&gt;
+&lt;long_element_compact&gt; ::= &lt;long_specifier&gt; &lt;long_value&gt;
+
+&lt;double_element&gt; ::= &lt;double_element_explicit&gt; | &lt;double_element_compact&gt;
+&lt;double_element_explicit&gt; ::= &lt;element_open&gt; &lt;opt_whitespace&gt; &lt;double_specifier&gt; &lt;opt_whitespace&gt; &lt;decimal_value&gt; &lt;double_specifier&gt; &lt;element_close&gt;
+&lt;double_element_compact&gt; ::= &lt;double_specifier&gt; &lt;decimal_value&gt;
+
+&lt;decimal_element&gt; ::= &lt;decimal_element_explicit&gt; | &lt;decimal_element_compact&gt;
+&lt;decimal_element_explicit&gt; ::= &lt;element_open&gt; &lt;decimal_specifier&gt; &lt;opt_whitespace&gt; &lt;decimal_value&gt; &lt;opt_whitespace&gt; &lt;decimal_specifier&gt; &lt;element_close&gt;
+&lt;decimal_element_compact&gt; ::= &lt;decimal_specifier&gt; &lt;decimal_value&gt;
+
+&lt;boolean_element&gt; ::= &lt;boolean_element_explicit&gt; | &lt;boolean_element_compact&gt;
+&lt;boolean_element_explicit&gt; ::= &lt;element_open&gt; &lt;boolean_specifier&gt; &lt;opt_whitespace&gt; &lt;boolean&gt; &lt;opt_whitespace&gt; &lt;boolean_specifier&gt; &lt;element_close&gt;
+&lt;boolean_element_compact&gt; ::= &lt;boolean_specifier&gt; &lt;boolean&gt;
+
+&lt;datetime_element&gt; ::= &lt;datetime_element_explicit&gt; | &lt;datetime_element_compact&gt;
+&lt;datetime_element_explicit&gt; ::= &lt;element_open&gt; &lt;datetime_specifier&gt; &lt;opt_whitespace&gt; &lt;datetime&gt; &lt;opt_whitespace&gt; &lt;datetime_specifier&gt; &lt;element_close&gt;
+&lt;datetime_element_compact&gt; ::= &lt;datetime_specifier&gt; &lt;datetime&gt; &lt;datetime_specifier&gt;
+
+&lt;date_element&gt; ::= &lt;date_element_explicit&gt; | &lt;date_element_compact&gt;
+&lt;date_element_explicit&gt; ::= &lt;element_open&gt; &lt;date_specifier&gt; &lt;opt_whitespace&gt; &lt;date&gt; &lt;opt_whitespace&gt; &lt;date_specifier&gt; &lt;element_close&gt;
+&lt;date_element_compact&gt; ::= &lt;date_specifier&gt; &lt;date&gt; &lt;date_specifier&gt;
+
+&lt;time_element&gt; ::= &lt;time_element_explicit&gt; | &lt;time_element_compact&gt;
+&lt;time_element_explicit&gt; ::= &lt;element_open&gt; &lt;time_specifier&gt; &lt;opt_whitespace&gt; &lt;time&gt; &lt;opt_whitespace&gt; &lt;time_specifier&gt; &lt;element_close&gt;
+&lt;time_element_compact&gt; ::= &lt;time_specifier&gt; &lt;time&gt; &lt;time_specifier&gt;
+
+&lt;timespan_element&gt; ::= &lt;timespan_element_explicit&gt; | &lt;timespan_element_compact&gt;
+&lt;timespan_element_explicit&gt; ::= &lt;element_open&gt; &lt;timespan_specifier&gt; &lt;opt_whitespace&gt; &lt;timespan&gt; &lt;opt_whitespace&gt; &lt;timespan_specifier&gt; &lt;element_close&gt;
+&lt;timespan_element_compact&gt; ::= &lt;timespan_specifier&gt; &lt;timespan&gt; &lt;timespan_specifier&gt;
+
+&lt;null_element&gt; ::= &lt;null_element_explicit&gt; | &lt;null_element_compact&gt;
+&lt;null_element_explicit&gt; ::= &lt;element_open&gt; &lt;null_specifier&gt; &lt;null_specifier&gt; &lt;element_close&gt;
+&lt;null_element_compact&gt; ::= &lt;null_specifier&gt;
+
+&lt;placeholder_element&gt; ::= &lt;placeholder_element_explicit&gt; | &lt;placeholder_element_compact&gt;
+&lt;placeholder_element_explicit&gt; ::= &lt;element_open&gt; &lt;placeholder_specifier&gt; &lt;opt_whitespace&gt; &lt;identifier&gt; &lt;opt_whitespace&gt; &lt;placeholder_specifier&gt; &lt;element_close&gt;
+&lt;placeholder_element_compact&gt; ::= &lt;placeholder_specifier&gt; &lt;identifier&gt;
+
+&lt;comment_element&gt; ::= &lt;element_open&gt; &lt;comment_specifier&gt; &lt;text&gt; &lt;comment_specifier&gt; &lt;element_close&gt;
+
+&lt;interpolated_element&gt; ::= &lt;interpolated_element_explicit&gt; | &lt;interpolated_element_compact&gt;
+&lt;interpolated_element_explicit&gt; ::= &lt;element_open&gt; &lt;interpolated_specifier&gt; &lt;opt_whitespace&gt; &lt;interpolated_content&gt; &lt;opt_whitespace&gt; &lt;interpolated_specifier&gt; &lt;element_close&gt;
+&lt;interpolated_element_compact&gt; ::= &lt;interpolated_specifier&gt; &lt;opt_whitespace&gt; &lt;interpolated_content&gt; &lt;opt_whitespace&gt; &lt;interpolated_specifier&gt;
+
+&lt;interpolated_content&gt; ::= (&lt;text&gt; | &lt;string_element_explicit&gt; | &lt;character_element_explicit&gt; | &lt;integer_element_explicit&gt;
+                 | &lt;long_element_explicit&gt; | &lt;double_element_explicit&gt; | &lt;decimal_element_explicit&gt;
+                 | &lt;boolean_element_explicit&gt; | &lt;datetime_element_explicit&gt; | &lt;placeholder_element_explicit&gt;
+                 | &lt;interpolated_element_explicit&gt;)*
+
+&lt;object_element&gt; ::= &lt;object_element_explicit&gt; | &lt;object_element_compact&gt;
+&lt;object_element_explicit&gt; ::= &lt;element_open&gt; &lt;object_specifier_open&gt; &lt;opt_whitespace&gt; &lt;key_value_pair&gt;* &lt;opt_whitespace&gt; &lt;object_specifier_close&gt; &lt;element_close&gt;
+&lt;object_element_compact&gt; ::= &lt;object_specifier_open&gt; &lt;opt_whitespace&gt; &lt;key_value_pair&gt;* &lt;opt_whitespace&gt; &lt;object_specifier_close&gt;
+
+&lt;array_element&gt; ::= &lt;array_element_explicit&gt; | &lt;array_element_compact&gt;
+&lt;array_element_explicit&gt; ::= &lt;element_open&gt; &lt;array_specifier_open&gt; &lt;opt_whitespace&gt; &lt;body_element&gt;* &lt;opt_whitespace&gt; &lt;array_specifier_close&gt; &lt;element_close&gt;
+&lt;array_element_compact&gt; ::= &lt;array_specifier_open&gt; &lt;opt_whitespace&gt; &lt;body_element&gt;* &lt;opt_whitespace&gt; &lt;array_specifier_close&gt;
+
+&lt;tuple_element&gt; ::= &lt;tuple_element_explicit&gt; | &lt;tuple_element_compact&gt;
+&lt;tuple_element_explicit&gt; ::= &lt;element_open&gt; &lt;tuple_specifier_open&gt; &lt;opt_whitespace&gt; &lt;body_element&gt;* &lt;opt_whitespace&gt; &lt;tuple_specifier_close&gt; &lt;element_close&gt;
+&lt;tuple_element_compact&gt; ::= &lt;tuple_specifier_open&gt; &lt;opt_whitespace&gt; &lt;body_element&gt;* &lt;opt_whitespace&gt; &lt;tuple_specifier_close&gt;
+
+&lt;element_open&gt; ::= "&lt;"
+&lt;element_close&gt; ::= "&gt;"
+
+&lt;metadata_specifier&gt; ::= "!"+
+&lt;string_specifier&gt; ::= "\""+
+&lt;keyword_specifier&gt; ::= "="+
+&lt;character_specifier&gt; ::= "\\"+
+&lt;integer_specifier&gt; ::= "#"+
+&lt;long_specifier&gt; ::= "&amp;"+
+&lt;double_specifier&gt; ::= "^"+
+&lt;decimal_specifier&gt; ::= "*"+
+&lt;boolean_specifier&gt; ::= "~"+
+&lt;datetime_specifier&gt; ::= "@"+
+&lt;date_specifier&gt; ::= "@"+
+&lt;time_specifier&gt; ::= "@"+
+&lt;timespan_specifier&gt; ::= "@"+
+&lt;null_specifier&gt; ::= "?"+
+&lt;object_specifier_open&gt; ::= "{"+
+&lt;object_specifier_close&gt; ::= "}"+
+&lt;array_specifier_open&gt; ::= "["+
+&lt;array_specifier_close&gt; ::= "]"+
+&lt;tuple_specifier_open&gt; ::= "("+
+&lt;tuple_specifier_close&gt; ::= ")"+
+&lt;comment_specifier&gt; ::= "/"+
+&lt;placeholder_specifier&gt; ::= "|"+
+&lt;interpolated_specifier&gt; ::= "'"+
+
+&lt;character_value&gt; ::= &lt;positive_integer&gt;
+    | &lt;hexadecimal&gt; | &lt;binary&gt;
+    | "nul" | "cr" | "lf" | "nl" | "tab" | "vtab"
+    | "bksp" | "ff" | "bel" | "quote" | "apos"
+    | "backslash" | "lt" | "gt"
+
+&lt;integer_value&gt; ::= &lt;signed_integer&gt;
+    | &lt;hexadecimal&gt;
+    | &lt;binary&gt;
+    | &lt;hex_integer&gt;
+    | &lt;binary_integer&gt;
+    | &lt;placeholder_element&gt;
+
+&lt;long_value&gt; ::= &lt;signed_integer&gt;
+    | &lt;hexadecimal&gt;
+    | &lt;binary&gt;
+    | &lt;hex_long&gt;
+    | &lt;binary_long&gt;
+    | &lt;placeholder_element&gt;
+
+&lt;decimal_value&gt; ::= &lt;signed_decimal&gt; | &lt;placeholder_element&gt;
+
+&lt;signed_integer&gt; ::= ("+" | "-")? [0-9]+
+&lt;signed_decimal&gt; ::= ("+" | "-")? [0-9]+ "." [0-9]*
+&lt;positive_integer&gt; ::= [0-9]+
+&lt;hexadecimal&gt; ::= "$" ([0-9] | [A-F] | [a-f])+
+&lt;binary&gt; ::= "%" [0-1]+
+&lt;hex_integer&gt; ::= "#$" ([0-9] | [A-F] | [a-f])+
+&lt;binary_integer&gt; ::= "#%" [0-1]+
+&lt;hex_long&gt; ::= "&amp;$" ([0-9] | [A-F] | [a-f])+
+&lt;binary_long&gt; ::= "&amp;%" [0-1]+
+
+&lt;opt_whitespace&gt; ::= &lt;whitespace&gt;*
+&lt;whitespace&gt; ::= (" " | "\t" | "\n" | "\r")
+
+&lt;boolean&gt; ::= "true" | "false"
+
+&lt;datetime&gt; ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} ("T" [0-9]{2} ":" [0-9]{2} (":" [0-9]{2} ("." [0-9]+)?)?)? ("Z" | ("+" | "-") [0-9]{2} ":" [0-9]{2})? | &lt;placeholder_element&gt;
+
+&lt;date&gt; ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} | &lt;placeholder_element&gt;
+
+&lt;time&gt; ::= [0-9]{2} ":" [0-9]{2} (":" [0-9]{2} ("." [0-9]+)?)? | &lt;placeholder_element&gt;
+
+&lt;timespan&gt; ::= ("-")?([0-9]+".")[0-9]{2}":"[0-9]{2}":"[0-9]{2}("."[0-9]+)? | &lt;placeholder_element&gt;
+
+&lt;identifier&gt; ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
+
+&lt;text&gt; ::= &lt;character&gt;*
+&lt;character&gt; ::= /* any Unicode character except the sequence that matches the closing delimiter of the current element */</code></pre>
+
+            <p>The complete grammar specification is available in the <a href="https://github.com/paulmooreparks/Xfer/blob/master/xfer.bnf">xfer.bnf</a> file in the repository.</p>
+        </section>
+
+        <section id="getting-started">
+            <h2>Getting Started with .NET</h2>
+            <p><em>Now that you understand the XferLang format, let's explore how to use it in .NET applications.</em></p>
+
+            <p>The ParksComputing.Xfer.Lang library provides a powerful and flexible set of tools for working with XferLang in .NET. To get started, install the package from NuGet:</p>
+            <pre><code class="bash">dotnet add package ParksComputing.Xfer.Lang</code></pre>
+
+            <p>The library provides similar functionality to popular JSON libraries like Newtonsoft.Json, but for the XferLang format. You can serialize .NET objects to XferLang and deserialize XferLang documents back to .NET objects.</p>
+        </section>
+
+        <section id="serialization">
+            <h2>Serialization</h2>
+            <p>Serializing a .NET object to an Xfer string is straightforward using the static <code>XferConvert.Serialize</code> method.</p>
+            <pre><code class="csharp">
+public class User
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    public bool IsActive { get; set; }
+}
+
+var user = new User { Name = "John Doe", Age = 30, IsActive = true };
+
+// Serialize the object to an Xfer string
+string xferString = XferConvert.Serialize(user, Formatting.Indented);
+
+// Console.WriteLine(xferString);
+// {
+//     Name "John Doe"
+//     Age 30
+//     IsActive ~true
+// }
+            </code></pre>
+        </section>
+
+        <section id="deserialization">
+            <h2>Deserialization</h2>
+            <p>To deserialize an Xfer string back into a .NET object, use the generic <code>XferConvert.Deserialize&lt;T&gt;</code> method.</p>
+            <pre><code class="csharp">
+string xferString = @"{ Name ""Jane Doe"" Age 28 IsActive ~false }";
+
+var user = XferConvert.Deserialize&lt;User&gt;(xferString);
+
+// user.Name will be "Jane Doe"
+// user.Age will be 28
+// user.IsActive will be false
+            </code></pre>
+        </section>
+
+        <section id="settings">
+            <h2>Serializer Settings</h2>
+            <p>For more control over serialization and deserialization, you can use the <code>XferSerializerSettings</code> class. This allows you to configure element styles, null handling, contract resolvers, and custom converters.</p>
+
+            <h3>Element Style Preferences</h3>
+            <p>Control how elements are serialized using the <code>StylePreference</code> property:</p>
+            <ul>
+                <li><strong>Explicit</strong> - Maximum safety, uses angle brackets: <code>&lt;"value"&gt;</code></li>
+                <li><strong>CompactWhenSafe</strong> - Compact when safe, explicit when necessary: <code>"value"</code> (default)</li>
+                <li><strong>MinimalWhenSafe</strong> - Most compact form, including implicit syntax for integers</li>
+                <li><strong>ForceCompact</strong> - Always compact (use with caution)</li>
+            </ul>
+
+            <h3>Configuration Example</h3>
+            <pre><code class="csharp">
+var settings = new XferSerializerSettings
+{
+    StylePreference = ElementStylePreference.CompactWhenSafe,
+    PreferImplicitSyntax = true,  // Use implicit syntax for integers when safe
+    NullValueHandling = NullValueHandling.Ignore,
+    ContractResolver = new CustomContractResolver(),
+    // ... other settings
+};
+
+string xferString = XferConvert.Serialize(user, Formatting.None, settings);
+            </code></pre>
+
+            <h3>Available Settings</h3>
+            <ul>
+                <li><code>StylePreference</code> - Controls element serialization style</li>
+                <li><code>PreferImplicitSyntax</code> - Use implicit syntax for integers when possible</li>
+                <li><code>NullValueHandling</code> - How to handle null values (Include/Ignore)</li>
+                <li><code>ContractResolver</code> - Custom property name resolution</li>
+                <li><code>Converters</code> - Collection of custom type converters</li>
+            </ul>
+        </section>
+
+        <section id="property-attributes">
+            <h2>Property Attributes</h2>
+            <p>The library provides several attributes to control how properties are serialized and deserialized.</p>
+
+            <h3>XferPropertyAttribute</h3>
+            <p>The <code>XferPropertyAttribute</code> allows you to customize the property name used in the Xfer document, similar to <code>JsonPropertyName</code> in System.Text.Json.</p>
+            <pre><code class="csharp">
+public class User
+{
+    [XferProperty("user_name")]
+    public string UserName { get; set; }
+
+    [XferProperty("is_active")]
+    public bool IsActive { get; set; }
+
+    // This property will use the default name "Age"
+    public int Age { get; set; }
+}
+            </code></pre>
+            <p>This will produce Xfer like: <code>{user_name "Alice" is_active ~true Age 25}</code></p>
+
+            <h3>XferEvaluatedAttribute</h3>
+            <p>The <code>XferEvaluatedAttribute</code> is used internally to mark properties that have been processed during deserialization. This is typically not used by end users but may be relevant for advanced serialization scenarios.</p>
+            <pre><code class="csharp">
+public class MyClass
+{
+    [XferEvaluated]
+    public string ProcessedProperty { get; set; }
+}
+            </code></pre>
+        </section>
+
+        <section id="numeric-formatting">
+            <h2>Numeric Formatting Attributes</h2>
+            <p>The library supports custom numeric formatting for integer and long properties using the <code>XferNumericFormatAttribute</code>. This allows you to control how numeric values are serialized in hexadecimal or binary formats.</p>
+
+            <h3>Available Formats</h3>
+            <ul>
+                <li><code>XferNumericFormat.Decimal</code> - Standard decimal representation (default)</li>
+                <li><code>XferNumericFormat.Hexadecimal</code> - Hexadecimal with <code>#$</code> prefix for integers, <code>&$</code> for longs</li>
+                <li><code>XferNumericFormat.Binary</code> - Binary with <code>#%</code> prefix for integers, <code>&%</code> for longs</li>
+            </ul>
+
+            <h3>Padding Options</h3>
+            <ul>
+                <li><code>MinDigits</code> - For hexadecimal, pads with leading zeros to minimum digit count</li>
+                <li><code>MinBits</code> - For binary, pads with leading zeros to minimum bit count</li>
+            </ul>
+
+            <h3>Example Usage</h3>
+            <pre><code class="csharp">
+public class ConfigurationData
+{
+    [XferNumericFormat(XferNumericFormat.Decimal)]
+    public int Port { get; set; } = 8080;
+
+    [XferNumericFormat(XferNumericFormat.Hexadecimal)]
+    public int ColorValue { get; set; } = 0xFF5733;
+
+    [XferNumericFormat(XferNumericFormat.Binary, MinBits = 8)]
+    public int Flags { get; set; } = 42;
+
+    [XferNumericFormat(XferNumericFormat.Hexadecimal, MinDigits = 8)]
+    public long MemoryAddress { get; set; } = 0x7FF6C2E40000;
+}
+
+var config = new ConfigurationData();
+string xfer = XferConvert.Serialize(config);
+// Result: {Port 8080 ColorValue #$FF5733 Flags #%00101010 MemoryAddress &$7FF6C2E40000}
+            </code></pre>
+
+            <h3>Safety Notes</h3>
+            <ul>
+                <li>Numeric formatting attributes are only applied to <code>int</code> and <code>long</code> properties</li>
+                <li><code>decimal</code> and <code>double</code> types ignore formatting attributes to preserve fractional precision</li>
+                <li>Custom formatting respects the configured <code>ElementStylePreference</code> for syntax style</li>
+            </ul>
+        </section>
+
+        <section id="contract-resolver">
+            <h2>Contract Resolvers</h2>
+            <p>A contract resolver allows you to customize how property names are mapped between your .NET objects and the Xfer document. For example, you can easily convert property names to camelCase.</p>
+            <pre><code class="csharp">
+public class CamelCaseContractResolver : DefaultContractResolver
+{
+    public override string ResolvePropertyName(string propertyName)
+    {
+        if (string.IsNullOrEmpty(propertyName) || !char.IsUpper(propertyName[0]))
+        {
+            return propertyName;
+        }
+        return char.ToLowerInvariant(propertyName[0]) + propertyName.Substring(1);
+    }
+}
+
+var settings = new XferSerializerSettings
+{
+    ContractResolver = new CamelCaseContractResolver()
+};
+
+var user = new User { Name = "John Doe", Age = 30, IsActive = true };
+string xferString = XferConvert.Serialize(user, Formatting.Indented, settings);
+
+// Console.WriteLine(xferString);
+// {
+//     name "John Doe"
+//     age 30
+//     isActive ~true
+// }
+            </code></pre>
+        </section>
+
+        <section id="custom-converters">
+            <h2>Custom Converters</h2>
+            <p>For complex types or when you need a custom representation, you can create your own converter by inheriting from <code>XferConverter&lt;T&gt;</code>. This gives you full control over the serialization and deserialization process for a specific type.</p>
+            <pre><code class="csharp">
+// A custom converter for the Person class
+public class PersonConverter : XferConverter&lt;Person&gt;
+{
+    public override Element WriteXfer(Person value, XferSerializerSettings settings)
+    {
+        // Serialize to a compact string: "John Doe,42"
+        return new StringElement($"{value.Name},{value.Age}");
+    }
+
+    public override Person ReadXfer(Element element, XferSerializerSettings settings)
+    {
+        if (element is StringElement stringElement)
+        {
+            var parts = stringElement.Value.Split(',');
+            if (parts.Length == 2 && int.TryParse(parts[1], out int age))
+            {
+                return new Person { Name = parts[0], Age = age };
+            }
+        }
+        throw new InvalidOperationException("Cannot convert element to Person.");
+    }
+}
+
+// Add the converter to your settings
+var settings = new XferSerializerSettings();
+settings.Converters.Add(new PersonConverter());
+
+var person = new Person { Name = "John Doe", Age = 42 };
+string xfer = XferConvert.Serialize(person, settings); // Result: "John Doe,42"
+
+var deserializedPerson = XferConvert.Deserialize&lt;Person&gt;(xfer, settings);
+            </code></pre>
+        </section>
+
+        <footer>
+            <p>&copy; 2025 Paul Moore Parks. All rights reserved.</p>
+        </footer>
+    </main>
+    <script src="script.js"></script>
+    <script>hljs.highlightAll();</script>
+</body>
+</html>

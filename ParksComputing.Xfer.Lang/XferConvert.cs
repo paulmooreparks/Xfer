@@ -5,6 +5,7 @@ using System.Reflection;
 using ParksComputing.Xfer.Lang.Attributes;
 using ParksComputing.Xfer.Lang.Services;
 using ParksComputing.Xfer.Lang.Elements;
+using ParksComputing.Xfer.Lang.Helpers;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using ParksComputing.Xfer.Lang.Configuration;
@@ -41,17 +42,22 @@ public class XferConvert {
         return value switch {
             null => new NullElement(),
             DBNull => new NullElement(),
-            int intValue => new IntegerElement(intValue),
-            long longValue => new LongElement(longValue),
+            int intValue => new IntegerElement(intValue,
+                elementStyle: Helpers.ElementStyleHelper.GetIntegerStyle(intValue, settings.StylePreference, settings.PreferImplicitSyntax)),
+            long longValue => new LongElement(longValue,
+                style: Helpers.ElementStyleHelper.GetLongStyle(longValue, settings.StylePreference)),
             bool boolValue => new BooleanElement(boolValue),
-            double doubleValue => new DoubleElement(doubleValue),
-            decimal decimalValue => new DecimalElement(decimalValue),
+            double doubleValue => new DoubleElement(doubleValue,
+                style: Helpers.ElementStyleHelper.GetDoubleStyle(doubleValue, settings.StylePreference)),
+            decimal decimalValue => new DecimalElement(decimalValue,
+                style: Helpers.ElementStyleHelper.GetDecimalStyle(decimalValue, settings.StylePreference)),
             DateTime dateTimeValue => new DateTimeElement(dateTimeValue),
             DateOnly dateOnlyValue => new DateElement(dateOnlyValue),
             TimeOnly timeOnlyValue => new TimeElement(timeOnlyValue),
             TimeSpan timeSpanValue => new TimeSpanElement(timeSpanValue),
             DateTimeOffset dateTimeOffsetValue => new DateTimeElement(dateTimeOffsetValue.ToString("o")),
-            string stringValue => new StringElement(stringValue, style: ElementStyle.Explicit),
+            string stringValue => new StringElement(stringValue,
+                style: Helpers.ElementStyleHelper.GetStringStyle(stringValue, settings.StylePreference)),
             char charValue => new CharacterElement(charValue),
             Guid guidValue => new StringElement(guidValue.ToString()),
             Enum enumValue => SerializeEnumValue(enumValue),
@@ -408,7 +414,25 @@ public class XferConvert {
                 objElement.AddOrUpdate(new KeyValuePairElement(new IdentifierElement(name), element));
             }
             else {
-                Element element = SerializeValue(value, settings);
+                Element element;
+
+                // Check for custom numeric formatting attributes
+                if (value is int intValue) {
+                    element = Helpers.ElementStyleHelper.CreateFormattedIntegerElement(intValue, property, settings.StylePreference, settings.PreferImplicitSyntax);
+                }
+                else if (value is long longValue) {
+                    element = Helpers.ElementStyleHelper.CreateFormattedLongElement(longValue, property, settings.StylePreference);
+                }
+                else if (value is decimal decimalValue) {
+                    element = Helpers.ElementStyleHelper.CreateFormattedDecimalElement(decimalValue, property, settings.StylePreference);
+                }
+                else if (value is double doubleValue) {
+                    element = Helpers.ElementStyleHelper.CreateFormattedDoubleElement(doubleValue, property, settings.StylePreference);
+                }
+                else {
+                    element = SerializeValue(value, settings);
+                }
+
                 objElement.AddOrUpdate(new KeyValuePairElement(new IdentifierElement(name), element));
             }
         }

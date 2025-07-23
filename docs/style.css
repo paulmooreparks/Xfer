@@ -1,0 +1,167 @@
+/* General Body Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    background-color: #f8f9fa;
+    color: #343a40;
+    display: flex;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 260px;
+    background-color: #343a40;
+    color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding-top: 20px;
+    transition: transform 0.3s ease;
+}
+
+.sidebar-header {
+    padding: 0 20px 20px 20px;
+    text-align: center;
+    border-bottom: 1px solid #495057;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 20px 0;
+    margin: 0;
+}
+
+.sidebar ul li a {
+    display: block;
+    padding: 12px 20px;
+    color: #adb5bd;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.sidebar ul li a:hover {
+    background-color: #495057;
+    color: #fff;
+}
+
+.sidebar ul li a.active {
+    background-color: #0d6efd;
+    color: #fff;
+    border-left: 3px solid #80bfff;
+}
+
+/* Main Content Styles */
+.content {
+    margin-left: 260px;
+    padding: 40px 60px;
+    width: calc(100% - 260px);
+    box-sizing: border-box; /* Ensures padding is included in width calculation */
+}
+
+header {
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 20px;
+    margin-bottom: 40px;
+}
+
+header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+section {
+    margin-bottom: 40px;
+}
+
+h2 {
+    font-size: 2em;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* Code Block Styles */
+pre, .wp-block-preformatted {
+    background-color: #f8f9fa;
+    color: #333;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin: 10px 0;
+    font-family: "Fira Code", "Courier New", monospace;
+    font-size: 0.9em;
+    line-height: 1.4;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+
+code.csharp, code.bash {
+    font-family: "Fira Code", "Courier New", monospace;
+    font-size: 0.95em;
+}
+
+/* Footer Styles */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    border-top: 1px solid #dee2e6;
+    color: #6c757d;
+}
+
+/* Mobile Navigation */
+.mobile-nav-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.mobile-nav-toggle span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: #343a40;
+    margin: 5px 0;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .content {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .mobile-nav-toggle {
+        display: block;
+    }
+
+    .mobile-nav-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+    .mobile-nav-toggle.active span:nth-child(2) {
+        opacity: 0;
+    }
+    .mobile-nav-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -6px);
+    }
+}

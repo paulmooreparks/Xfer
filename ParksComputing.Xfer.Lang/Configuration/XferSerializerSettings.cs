@@ -7,5 +7,23 @@ namespace ParksComputing.Xfer.Lang.Configuration {
         public NullValueHandling NullValueHandling { get; set; } = NullValueHandling.Include;
         public IContractResolver ContractResolver { get; set; } = new DefaultContractResolver();
         public IList<IXferConverter> Converters { get; } = new List<IXferConverter>();
+
+        /// <summary>
+        /// Controls how elements are serialized for compactness vs safety.
+        /// Default is CompactWhenSafe for optimal balance of safety and readability.
+        /// </summary>
+        public ElementStylePreference StylePreference { get; set; } = ElementStylePreference.CompactWhenSafe;
+
+        /// <summary>
+        /// When StylePreference allows it, prefer implicit syntax for simple values.
+        /// For example, serialize integers as "42" instead of "#42".
+        /// </summary>
+        public bool PreferImplicitSyntax { get; set; } = false;
+
+        /// <summary>
+        /// When true, DateTime values preserve original precision instead of adding microseconds.
+        /// Helps maintain round-trip consistency with original documents.
+        /// </summary>
+        public bool PreserveDateTimePrecision { get; set; } = false;
     }
 }

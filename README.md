@@ -23,18 +23,31 @@
 _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.com/item?id=42114543). Thank you so much for all the great input and discussion!_
 
 ## Table of Contents
-1. [Introduction & Philosophy](#1-introduction--philosophy)
-2. [XferLang by Example](#2-xferlang-by-example)
-3. [Language Specification](#3-language-specification)
+- [The XferLang Data-Interchange Format](#the-xferlang-data-interchange-format)
+  - [Table of Contents](#table-of-contents)
+  - [1. Introduction \& Philosophy](#1-introduction--philosophy)
+  - [2. XferLang by Example](#2-xferlang-by-example)
+  - [3. Language Specification](#3-language-specification)
     - [3.1. Document Structure](#31-document-structure)
     - [3.2. Element Syntax Variations](#32-element-syntax-variations)
+      - [3.2.1. Implicit Syntax](#321-implicit-syntax)
+      - [3.2.2. Compact Syntax](#322-compact-syntax)
+      - [3.2.3. Explicit Syntax](#323-explicit-syntax)
     - [3.3. Element Reference](#33-element-reference)
-4. [The .NET XferLang Library](#4-the-net-xferlang-library)
-    - [4.1. Basic Serialization & Deserialization](#41-basic-serialization--deserialization)
+      - [3.3.1. Primitive Types](#331-primitive-types)
+        - [3.3.1.1. Hexadecimal and Binary Formatting](#3311-hexadecimal-and-binary-formatting)
+      - [3.3.2. Structural Types](#332-structural-types)
+      - [3.3.3. Special-Purpose Types](#333-special-purpose-types)
+  - [4. The `.NET XferLang Library`](#4-the-net-xferlang-library)
+    - [4.1. Basic Serialization \& Deserialization](#41-basic-serialization--deserialization)
     - [4.2. Advanced Usage with `XferSerializerSettings`](#42-advanced-usage-with-xferserializersettings)
-5. [Project Status & Roadmap](#5-project-status--roadmap)
-6. [Contributing](#6-contributing)
-7. [Grammar](#7-grammar)
+      - [4.2.1. Null Value Handling](#421-null-value-handling)
+      - [4.2.2. Customizing Property Names with `IContractResolver`](#422-customizing-property-names-with-icontractresolver)
+      - [4.2.3. Custom Type Converters with `IXferConverter`](#423-custom-type-converters-with-ixferconverter)
+      - [4.2.4. Numeric Formatting with Attributes](#424-numeric-formatting-with-attributes)
+  - [5. Project Status \& Roadmap](#5-project-status--roadmap)
+  - [6. Contributing](#6-contributing)
+  - [7. Grammar](#7-grammar)
 
 ## 1. Introduction & Philosophy
 
@@ -96,7 +109,7 @@ An XferLang document consists of two main parts: an optional **Metadata Element*
 
 ```xfer
 </ A metadata element is optional, but if present, comes first. />
-! xfer "1.0.0" !
+<! xfer "1.0.0" !>
 
 </ The rest of the document is a sequence of elements in the root tuple. />
 "Hello, World!"
@@ -158,12 +171,12 @@ This section provides a detailed reference for each XferLang element type.
 **Integer Element**
 *   **Specifier:** `#` (Number Sign)
 *   **Description:** A 32-bit signed integer. Can be written in decimal, hex (`$`), or binary (`%`). The specifier is optional if the syntax is unambiguous (implicit syntax).
-*   **Example:** `42`, `#$2A`, `%00101010`
+*   **Example:** `42`, `#$2A`, `#%00101010`
 
 **Long Element**
 *   **Specifier:** `&` (Ampersand)
-*   **Description:** A 64-bit signed integer.
-*   **Example:** `&5000000000`
+*   **Description:** A 64-bit signed integer. Can be written in decimal, hex (`$`), or binary (`%`).
+*   **Example:** `&5000000000`, `&$12A05F200`, `&%1001010100000010111110010000000000`
 
 **Double Element**
 *   **Specifier:** `^` (Caret)
@@ -189,6 +202,33 @@ This section provides a detailed reference for each XferLang element type.
 *   **Specifier:** `?` (Question Mark)
 *   **Description:** Represents a null value.
 *   **Example:** `?`, `<??>`
+
+#### 3.3.1.1. Hexadecimal and Binary Formatting
+
+Integer and Long elements support alternative numeric representations for improved readability in specific contexts:
+
+**Hexadecimal Format**
+*   **Syntax:** `#$` prefix followed by hexadecimal digits (e.g., `#$2A`, `&$12A05F200`)
+*   **Use Cases:** Memory addresses, color values, bitmasks, low-level programming
+*   **Parsing:** Case-insensitive (`#$2A` equals `#$2a`)
+*   **Attributes:** Use `[XferNumericFormat(XferNumericFormat.Hexadecimal, MinDigits = 4)]` for zero-padding
+
+**Binary Format**
+*   **Syntax:** `#%` prefix followed by binary digits (e.g., `#%101010`, `&%1001010100000010111110010000000000`)
+*   **Use Cases:** Bit manipulation, flags, educational purposes, embedded systems
+*   **Attributes:** Use `[XferNumericFormat(XferNumericFormat.Binary, MinBits = 8)]` for zero-padding
+
+**Examples:**
+```xfer
+// Decimal 42 in different formats
+decimal: 42
+hex: #$2A
+binary: #%101010
+padded_hex: #$002A    // MinDigits = 4
+padded_binary: #%00101010  // MinBits = 8
+```
+
+**Safety Note:** Hex and binary formatting are only supported for integer types (`int`, `long`). Decimal and double types preserve fractional precision and do not support these formats.
 
 #### 3.3.2. Structural Types
 
@@ -216,7 +256,7 @@ This section provides a detailed reference for each XferLang element type.
 **Metadata Element**
 *   **Specifiers:** `!` (Exclamation Mark)
 *   **Description:** A special object that can only appear at the start of a document. It contains metadata about the document, such as the `xfer` version.
-*   **Example:** `! xfer "1.0.0" description "Sample document" !`
+*   **Example:** `<! xfer "1.0.0" description "Sample document" !>`
 
 **Comment Element**
 *   **Specifier:** `/` (Slash)
@@ -322,6 +362,46 @@ settings.Converters.Add(new PersonConverter());
 var person = new Person { Name = "John Doe", Age = 42 };
 string xfer = XferConvert.Serialize(person, settings); // Result: "John Doe,42"
 ```
+
+#### 4.2.4. Numeric Formatting with Attributes
+
+The library supports custom numeric formatting for integer and long properties using the `XferNumericFormatAttribute`. This allows you to control how numeric values are serialized in hexadecimal or binary formats.
+
+**Available Formats:**
+- `XferNumericFormat.Decimal` - Standard decimal representation (default)
+- `XferNumericFormat.Hexadecimal` - Hexadecimal with `#$` prefix
+- `XferNumericFormat.Binary` - Binary with `#%` prefix
+
+**Padding Options:**
+- `MinDigits` - For hexadecimal, pads with leading zeros to minimum digit count
+- `MinBits` - For binary, pads with leading zeros to minimum bit count
+
+**Example:**
+
+```csharp
+public class ConfigurationData {
+    [XferNumericFormat(XferNumericFormat.Decimal)]
+    public int Port { get; set; } = 8080;
+
+    [XferNumericFormat(XferNumericFormat.Hexadecimal)]
+    public int ColorValue { get; set; } = 0xFF5733;
+
+    [XferNumericFormat(XferNumericFormat.Binary, MinBits = 8)]
+    public int Flags { get; set; } = 42;
+
+    [XferNumericFormat(XferNumericFormat.Hexadecimal, MinDigits = 8)]
+    public long MemoryAddress { get; set; } = 0x7FF6C2E40000;
+}
+
+var config = new ConfigurationData();
+string xfer = XferConvert.Serialize(config);
+// Result: {Port 8080 ColorValue #$FF5733 Flags #%00101010 MemoryAddress &$7FF6C2E40000}
+```
+
+**Safety Notes:**
+- Numeric formatting attributes are only applied to `int` and `long` properties
+- `decimal` and `double` types ignore formatting attributes to preserve fractional precision
+- Custom formatting respects the configured `ElementStylePreference` for syntax style
 
 ## 5. Project Status & Roadmap
 
