@@ -3,6 +3,11 @@ name: Manual Release to NuGet and GitHub
 on:
   workflow_dispatch:
     inputs:
+      preview_only:
+        description: '🔍 Preview mode: Show version without releasing'
+        required: true
+        type: boolean
+        default: false
       use_current_version:
         description: 'Use auto-generated version from CI? (recommended)'
         required: true
@@ -57,8 +62,19 @@ jobs:
         if [[ "${{ github.event.inputs.use_current_version }}" == "true" ]]; then
           # Use auto-generated version from CI pattern
           BASE_VERSION=$(cat version.txt)
-          RELEASE_VERSION="${BASE_VERSION}.${{ github.run_number }}-prerelease"
-          echo "Using auto-generated version: $RELEASE_VERSION"
+
+          # Get the latest CI workflow run number from the master branch
+          LATEST_CI_RUN=$(gh api repos/${{ github.repository }}/actions/workflows/dotnet.yml/runs \
+            --jq '.workflow_runs[] | select(.head_branch == "master" and .conclusion == "success") | .run_number' \
+            | head -1)
+
+          if [ -z "$LATEST_CI_RUN" ]; then
+            echo "Warning: No successful CI runs found, using current run number"
+            LATEST_CI_RUN=${{ github.run_number }}
+          fi
+
+          RELEASE_VERSION="${BASE_VERSION}.${LATEST_CI_RUN}-prerelease"
+          echo "Using auto-generated version: $RELEASE_VERSION (based on CI run #$LATEST_CI_RUN)"
         else
           # Use custom version
           RELEASE_VERSION="${{ github.event.inputs.custom_version }}"
@@ -70,17 +86,40 @@ jobs:
           fi
         fi
         echo "version=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Version Preview & Summary
+      run: |
+        echo "## 🎯 Release Version Preview" >> $GITHUB_STEP_SUMMARY
+        echo "**Version**: \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "**Pre-release**: ${{ github.event.inputs.prerelease }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Publish to NuGet**: ${{ github.event.inputs.publish_to_nuget }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Preview mode**: ${{ github.event.inputs.preview_only }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [[ "${{ github.event.inputs.preview_only }}" == "true" ]]; then
+          echo "🔍 **PREVIEW MODE** - No release will be created" >> $GITHUB_STEP_SUMMARY
+          echo "To create the actual release, run again with 'Preview mode' unchecked" >> $GITHUB_STEP_SUMMARY
+          exit 0
+        else
+          echo "✅ **RELEASE MODE** - Will create release and publish" >> $GITHUB_STEP_SUMMARY
+        fi
 
     - name: Restore dependencies
+      if: github.event.inputs.preview_only != 'true'
       run: dotnet restore
 
     - name: Build solution
+      if: github.event.inputs.preview_only != 'true'
       run: dotnet build --configuration Release --no-restore -p:Version=${{ steps.version.outputs.version }}
 
     - name: Run tests
+      if: github.event.inputs.preview_only != 'true'
       run: dotnet test --configuration Release --no-build --verbosity normal
 
     - name: Pack NuGet packages
+      if: github.event.inputs.preview_only != 'true'
       run: |
         dotnet pack ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj \
           --configuration Release \
@@ -90,9 +129,11 @@ jobs:
           -p:Version=${{ steps.version.outputs.version }}
 
     - name: List generated packages
+      if: github.event.inputs.preview_only != 'true'
       run: ls -la ./nupkg/
 
     - name: Create additional release assets
+      if: github.event.inputs.preview_only != 'true'
       run: |
         # Create directories for additional assets
         mkdir -p ./release-assets
@@ -124,6 +165,7 @@ jobs:
         ls -la ./release-assets/
 
     - name: Create Git tag
+      if: github.event.inputs.preview_only != 'true'
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -131,6 +173,7 @@ jobs:
         git push origin "v${{ steps.version.outputs.version }}"
 
     - name: Generate release notes
+      if: github.event.inputs.preview_only != 'true'
       id: generate_notes
       run: |
         if [ -n "${{ github.event.inputs.release_notes }}" ]; then
@@ -152,7 +195,7 @@ jobs:
           - Bug fixes and performance improvements
 
           ### Resources
-          - 📖 [Documentation](https://paulmooreparks.github.io/Xfer/)
+          - 📖 [Documentation](https://parkscomputing.com/xferlang/index.html)
           - 🐛 [Report Issues](https://github.com/paulmooreparks/Xfer/issues)
           - 💬 [Discussions](https://github.com/paulmooreparks/Xfer/discussions)
 
