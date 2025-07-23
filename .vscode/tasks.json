@@ -2,16 +2,91 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"command": "dotnet build",
+			"label": "build",
+			"command": "dotnet",
+			"type": "shell",
+			"args": [
+				"build",
+				"Xfer.sln",
+				"--configuration",
+				"Release"
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
 			},
-			"label": "build",
-			"problemMatcher": [
-				"$msCompile"
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "clean",
+			"command": "dotnet",
+			"type": "shell",
+			"args": [
+				"clean",
+				"Xfer.sln",
+				"--configuration",
+				"Release"
 			],
-			"type": "shell"
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "restore",
+			"command": "dotnet",
+			"type": "shell",
+			"args": [
+				"restore",
+				"Xfer.sln"
+			],
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "silent",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "test",
+			"command": "dotnet",
+			"type": "shell",
+			"args": [
+				"test",
+				"Xfer.sln",
+				"--configuration",
+				"Release",
+				"--no-build"
+			],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": "$msCompile",
+			"dependsOn": "build"
 		}
 	]
 }

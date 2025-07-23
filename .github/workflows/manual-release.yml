@@ -3,11 +3,16 @@ name: Manual Release to NuGet and GitHub
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Release version (e.g., 0.10.9-prerelease, 1.0.0)'
+      use_current_version:
+        description: 'Use auto-generated version from CI? (recommended)'
         required: true
+        type: boolean
+        default: true
+      custom_version:
+        description: 'Custom version (only if not using auto-generated)'
+        required: false
         type: string
-        default: '0.10.9-prerelease'
+        default: ''
       prerelease:
         description: 'Is this a pre-release?'
         required: true
@@ -46,18 +51,31 @@ jobs:
           6.0.x
           8.0.x
 
-    - name: Validate version format
+    - name: Determine release version
+      id: version
       run: |
-        if [[ ! "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
-          echo "Error: Version must be in format X.Y.Z or X.Y.Z-suffix"
-          exit 1
+        if [[ "${{ github.event.inputs.use_current_version }}" == "true" ]]; then
+          # Use auto-generated version from CI pattern
+          BASE_VERSION=$(cat version.txt)
+          RELEASE_VERSION="${BASE_VERSION}.${{ github.run_number }}-prerelease"
+          echo "Using auto-generated version: $RELEASE_VERSION"
+        else
+          # Use custom version
+          RELEASE_VERSION="${{ github.event.inputs.custom_version }}"
+          echo "Using custom version: $RELEASE_VERSION"
+          # Validate custom version format
+          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+            echo "Error: Custom version must be in format X.Y.Z or X.Y.Z-suffix"
+            exit 1
+          fi
         fi
+        echo "version=$RELEASE_VERSION" >> $GITHUB_OUTPUT
 
     - name: Restore dependencies
       run: dotnet restore
 
     - name: Build solution
-      run: dotnet build --configuration Release --no-restore -p:Version=${{ github.event.inputs.version }}
+      run: dotnet build --configuration Release --no-restore -p:Version=${{ steps.version.outputs.version }}
 
     - name: Run tests
       run: dotnet test --configuration Release --no-build --verbosity normal
@@ -68,18 +86,49 @@ jobs:
           --configuration Release \
           --no-build \
           --output ./nupkg \
-          -p:PackageVersion=${{ github.event.inputs.version }} \
-          -p:Version=${{ github.event.inputs.version }}
+          -p:PackageVersion=${{ steps.version.outputs.version }} \
+          -p:Version=${{ steps.version.outputs.version }}
 
     - name: List generated packages
       run: ls -la ./nupkg/
+
+    - name: Create additional release assets
+      run: |
+        # Create directories for additional assets
+        mkdir -p ./release-assets
+
+        # Create DLL bundle for non-NuGet scenarios (.NET 8.0)
+        mkdir -p ./dll-bundle
+        cp ./ParksComputing.Xfer.Lang/bin/Release/net8.0/*.dll ./dll-bundle/
+        cp ./ParksComputing.Xfer.Lang/bin/Release/net8.0/*.pdb ./dll-bundle/ || true
+        cd dll-bundle && zip -r ../release-assets/XferLang-net8.0-dlls.zip . && cd ..
+
+        # Create examples bundle
+        mkdir -p ./examples-bundle
+        cp -r ./schemas/*.xfer ./examples-bundle/ 2>/dev/null || true
+        cp ./*.xfer ./examples-bundle/ 2>/dev/null || true
+        if [ "$(ls -A ./examples-bundle 2>/dev/null)" ]; then
+          cd examples-bundle && zip -r ../release-assets/XferLang-examples.zip . && cd ..
+        fi
+
+        # Create syntax files bundle
+        mkdir -p ./syntax-bundle
+        cp ./docs/highlightjs/languages/xfer.js ./syntax-bundle/ 2>/dev/null || true
+        cp ./docs/highlightjs/languages/xfer.min.js ./syntax-bundle/ 2>/dev/null || true
+        cp ./xfer.bnf ./syntax-bundle/ 2>/dev/null || true
+        if [ "$(ls -A ./syntax-bundle 2>/dev/null)" ]; then
+          cd syntax-bundle && zip -r ../release-assets/XferLang-syntax-files.zip . && cd ..
+        fi
+
+        # List what we created
+        ls -la ./release-assets/
 
     - name: Create Git tag
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git tag -a "v${{ github.event.inputs.version }}" -m "Release v${{ github.event.inputs.version }}"
-        git push origin "v${{ github.event.inputs.version }}"
+        git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
+        git push origin "v${{ steps.version.outputs.version }}"
 
     - name: Generate release notes
       id: generate_notes
@@ -88,13 +137,13 @@ jobs:
           echo "notes=${{ github.event.inputs.release_notes }}" >> $GITHUB_OUTPUT
         else
           # Auto-generate release notes
-          NOTES="## XferLang v${{ github.event.inputs.version }}
+          NOTES="## XferLang v${{ steps.version.outputs.version }}
 
           ${{ github.event.inputs.prerelease == 'true' && '⚠️ **This is a pre-release version** - Not recommended for production use.' || '🎉 **Stable release** - Ready for production use.' }}
 
           ### Installation
           \`\`\`bash
-          dotnet add package ParksComputing.Xfer.Lang --version ${{ github.event.inputs.version }}
+          dotnet add package ParksComputing.Xfer.Lang --version ${{ steps.version.outputs.version }}
           \`\`\`
 
           ### What's New
@@ -120,8 +169,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ github.event.inputs.version }}
-        release_name: XferLang v${{ github.event.inputs.version }}
+        tag_name: v${{ steps.version.outputs.version }}
+        release_name: XferLang v${{ steps.version.outputs.version }}
         body: ${{ steps.generate_notes.outputs.notes }}
         draft: false
         prerelease: ${{ github.event.inputs.prerelease }}
@@ -132,8 +181,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./nupkg/ParksComputing.Xfer.Lang.${{ github.event.inputs.version }}.nupkg
-        asset_name: ParksComputing.Xfer.Lang.${{ github.event.inputs.version }}.nupkg
+        asset_path: ./nupkg/ParksComputing.Xfer.Lang.${{ steps.version.outputs.version }}.nupkg
+        asset_name: ParksComputing.Xfer.Lang.${{ steps.version.outputs.version }}.nupkg
         asset_content_type: application/zip
 
     - name: Upload symbols package to GitHub Release (if exists)
@@ -143,14 +192,47 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./nupkg/ParksComputing.Xfer.Lang.${{ github.event.inputs.version }}.snupkg
-        asset_name: ParksComputing.Xfer.Lang.${{ github.event.inputs.version }}.snupkg
+        asset_path: ./nupkg/ParksComputing.Xfer.Lang.${{ steps.version.outputs.version }}.snupkg
+        asset_name: ParksComputing.Xfer.Lang.${{ steps.version.outputs.version }}.snupkg
+        asset_content_type: application/zip
+
+    - name: Upload .NET 8.0 DLL bundle (if exists)
+      continue-on-error: true
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release-assets/XferLang-net8.0-dlls.zip
+        asset_name: XferLang-net8.0-dlls.zip
+        asset_content_type: application/zip
+
+    - name: Upload examples bundle (if exists)
+      continue-on-error: true
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release-assets/XferLang-examples.zip
+        asset_name: XferLang-examples.zip
+        asset_content_type: application/zip
+
+    - name: Upload syntax files bundle (if exists)
+      continue-on-error: true
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./release-assets/XferLang-syntax-files.zip
+        asset_name: XferLang-syntax-files.zip
         asset_content_type: application/zip
 
     - name: Publish to NuGet
       if: github.event.inputs.publish_to_nuget == 'true'
       run: |
-        dotnet nuget push ./nupkg/ParksComputing.Xfer.Lang.${{ github.event.inputs.version }}.nupkg \
+        dotnet nuget push ./nupkg/ParksComputing.Xfer.Lang.${{ steps.version.outputs.version }}.nupkg \
           --api-key ${{ secrets.NUGET_API_KEY }} \
           --source https://api.nuget.org/v3/index.json \
           --skip-duplicate
@@ -158,9 +240,9 @@ jobs:
     - name: Create summary
       run: |
         echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Version: v${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Version: v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ GitHub Release: Created" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ Git Tag: Pushed" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ NuGet Package: ${{ github.event.inputs.publish_to_nuget == 'true' && 'Published' || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
-        echo "- 🔗 [View Release](https://github.com/${{ github.repository }}/releases/tag/v${{ github.event.inputs.version }})" >> $GITHUB_STEP_SUMMARY
-        echo "- 🔗 [View on NuGet](https://www.nuget.org/packages/ParksComputing.Xfer.Lang/${{ github.event.inputs.version }})" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔗 [View Release](https://github.com/${{ github.repository }}/releases/tag/v${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔗 [View on NuGet](https://www.nuget.org/packages/ParksComputing.Xfer.Lang/${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY

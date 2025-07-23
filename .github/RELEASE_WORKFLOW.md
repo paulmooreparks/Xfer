@@ -1,8 +1,27 @@
-# XferLang Release Workflow Setup
+# XferLang Release Workflow
 
-This repository includes an automated release workflow that publishes to both NuGet and GitHub releases simultaneously.
+## Versioning System
 
-**Note**: Automatic NuGet publishing on push to master has been disabled. All releases are now controlled exclusively through the manual release workflow to ensure version consistency and control.
+XferLang uses a hybrid versioning approach that combines manual control with automatic build increments:
+
+**Version Format**: `X.Y.BUILD-prerelease` (e.g., `0.10.123-prerelease`)
+
+- **X.Y** (Base Version): Manually controlled in `version.txt` (e.g., `0.10`, `0.11`, `1.0`)
+- **BUILD**: Auto-increments with each master branch merge
+- **Suffix**: `-prerelease` for development, removed for stable releases
+
+### Updating Base Version (X.Y)
+When you want to bump the major/minor version:
+
+1. Edit the `version.txt` file in the repository root
+2. Change from `0.10` to `0.11` (or `1.0` for major release)
+3. Commit and push to master
+4. Next CI build will use the new base version
+
+### Automatic Build Increment
+- Every push to master auto-increments the build number
+- CI builds packages like `0.10.456-prerelease` (not published to NuGet)
+- Build number resets when you change the base version
 
 ## Setup Required
 
@@ -28,8 +47,9 @@ The workflow uses `GITHUB_TOKEN` which is automatically provided by GitHub Actio
 3. Select "Manual Release to NuGet and GitHub" workflow
 4. Click "Run workflow"
 5. Fill in the parameters:
-   - **Version**: e.g., `0.10.9-prerelease` or `1.0.0` (matches your current versioning)
-   - **Pre-release**: Check if this is a pre-release
+   - **✅ Use auto-generated version** (recommended): Uses current `X.Y.BUILD-prerelease`
+   - **Custom version**: Override with your own version string
+   - **Pre-release**: Check for development releases, uncheck for stable
    - **Release notes**: Optional custom notes (auto-generated if empty)
    - **Publish to NuGet**: Usually checked
 

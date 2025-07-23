@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "master" ]
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   build:
     strategy:
@@ -37,10 +41,18 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+    - name: Read base version
+      id: version
+      run: |
+        BASE_VERSION=$(cat version.txt)
+        FULL_VERSION="${BASE_VERSION}.${{ github.run_number }}-prerelease"
+        echo "base=$BASE_VERSION" >> $GITHUB_OUTPUT
+        echo "full=$FULL_VERSION" >> $GITHUB_OUTPUT
+        echo "📦 Building version: $FULL_VERSION"
     - name: Build
-      run: dotnet build ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release
+      run: dotnet build ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release -p:Version=${{ steps.version.outputs.full }}
     - name: Pack with auto-increment version (CI validation only)
-      run: dotnet pack ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release -p:Version=0.10.${{ github.run_number }}-prerelease -o ./nupkgs --no-build
+      run: dotnet pack ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release -p:Version=${{ steps.version.outputs.full }} -o ./nupkgs --no-build
     - name: List generated packages (not published)
       run: ls -la ./nupkgs/
 
