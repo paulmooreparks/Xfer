@@ -25,3 +25,19 @@ jobs:
       run: dotnet build --no-restore --configuration Release Xfer.sln
     - name: Test
       run: dotnet test --no-build --configuration Release Xfer.sln
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Pack
+      run: dotnet pack ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release -p:Version=0.10.${{ github.run_number }}-prerelease -o ./nupkgs
+    - name: Publish to NuGet
+      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+
