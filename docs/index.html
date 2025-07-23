@@ -37,17 +37,52 @@
             <li><a href="#numeric-formatting">Numeric Formatting Attributes</a></li>
             <li><a href="#contract-resolver">Contract Resolvers</a></li>
             <li><a href="#custom-converters">Custom Converters</a></li>
+            <li><a href="#github-repository">GitHub Repository</a></li>
+            <li><a href="#building-xferlang">Building XferLang</a></li>
+            <li><a href="#community-resources">Community & Resources</a></li>
         </ul>
     </nav>
     <main class="content">
         <header>
             <h1>XferLang Documentation</h1>
             <p>Your complete guide to the XferLang data-interchange format and the .NET library.</p>
+
+            <div class="project-badges" style="margin: 20px 0; text-align: center;">
+                <a href="https://github.com/paulmooreparks/Xfer" target="_blank">
+                    <img src="https://img.shields.io/github/stars/paulmooreparks/Xfer?style=social" alt="GitHub Stars">
+                </a>
+                <a href="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml" target="_blank">
+                    <img src="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml/badge.svg" alt=".NET Build Status">
+                </a>
+                <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang" target="_blank">
+                    <img src="https://img.shields.io/nuget/vpre/ParksComputing.Xfer.Lang.svg" alt="NuGet Version">
+                </a>
+                <a href="https://github.com/paulmooreparks/Xfer" target="_blank">
+                    <img src="https://img.shields.io/github/last-commit/paulmooreparks/Xfer" alt="Last Commit">
+                </a>
+                <a href="https://opensource.org/licenses/MIT" target="_blank">
+                    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+                </a>
+            </div>
+
+            <div style="text-align: center; margin: 15px 0;">
+                <a href="https://github.com/paulmooreparks/Xfer" target="_blank" style="background: #333; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 0 10px;">
+                    📁 View on GitHub
+                </a>
+                <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang" target="_blank" style="background: #004880; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 0 10px;">
+                    📦 NuGet Package
+                </a>
+                <a href="https://github.com/paulmooreparks/Xfer/releases" target="_blank" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 0 10px;">
+                    🔖 Releases
+                </a>
+            </div>
         </header>
 
         <section id="introduction">
             <h2>Introduction to XferLang</h2>
             <p>XferLang is a modern data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. Unlike JSON or XML, XferLang is designed with explicit typing, human readability, and safe data embedding at its core.</p>
+
+            <p>XferLang is an <strong>open-source project</strong> hosted on GitHub at <a href="https://github.com/paulmooreparks/Xfer" target="_blank">github.com/paulmooreparks/Xfer</a>. The project includes the complete language specification, a production-ready .NET library, comprehensive documentation, and development tools.</p>
 
             <p>Here's a quick comparison to show XferLang in action:</p>
 
@@ -573,10 +608,20 @@ welcomeMessage 'Welcome, &lt;"Jane"&gt;! You have &lt;#5#&gt; new messages.'</co
             <h2>Getting Started with .NET</h2>
             <p><em>Now that you understand the XferLang format, let's explore how to use it in .NET applications.</em></p>
 
+            <h3>Install from NuGet (Recommended)</h3>
             <p>The ParksComputing.Xfer.Lang library provides a powerful and flexible set of tools for working with XferLang in .NET. To get started, install the package from NuGet:</p>
             <pre><code class="bash">dotnet add package ParksComputing.Xfer.Lang</code></pre>
 
+            <h3>Build from Source</h3>
+            <p>Alternatively, you can build XferLang from source by cloning the <a href="https://github.com/paulmooreparks/Xfer" target="_blank">GitHub repository</a>:</p>
+            <pre><code class="bash">git clone https://github.com/paulmooreparks/Xfer.git
+cd Xfer
+dotnet build
+dotnet test</code></pre>
+
             <p>The library provides similar functionality to popular JSON libraries like Newtonsoft.Json, but for the XferLang format. You can serialize .NET objects to XferLang and deserialize XferLang documents back to .NET objects.</p>
+
+            <p>For detailed build instructions, development setup, and contribution guidelines, see the <a href="#building-xferlang">Building XferLang</a> section.</p>
         </section>
 
         <section id="serialization">
@@ -803,6 +848,223 @@ string xfer = XferConvert.Serialize(person, settings); // Result: "John Doe,42"
 
 var deserializedPerson = XferConvert.Deserialize&lt;Person&gt;(xfer, settings);
             </code></pre>
+        </section>
+
+        <section id="github-repository">
+            <h2>GitHub Repository</h2>
+            <p>XferLang is an open-source project hosted on GitHub. The repository contains the complete source code, documentation, examples, and development tools.</p>
+
+            <h3>Repository Overview</h3>
+            <ul>
+                <li><strong>Main Repository:</strong> <a href="https://github.com/paulmooreparks/Xfer" target="_blank">https://github.com/paulmooreparks/Xfer</a></li>
+                <li><strong>Language:</strong> C# (.NET)</li>
+                <li><strong>License:</strong> <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a></li>
+                <li><strong>Build Status:</strong> <a href="https://github.com/paulmooreparks/Xfer/actions" target="_blank">GitHub Actions CI/CD</a></li>
+                <li><strong>Issues & Feature Requests:</strong> <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank">GitHub Issues</a></li>
+            </ul>
+
+            <h3>Key Repository Contents</h3>
+            <ul>
+                <li><code>ParksComputing.Xfer.Lang/</code> - Main .NET library source code</li>
+                <li><code>XferTest/</code> - Comprehensive unit tests and examples</li>
+                <li><code>xferc/</code> - Command-line XferLang tools and REPL</li>
+                <li><code>docs/</code> - Documentation and examples</li>
+                <li><code>schemas/</code> - XferLang schema examples</li>
+                <li><code>xfer.bnf</code> - Complete grammar specification</li>
+                <li><code>*.xfer</code> - Sample XferLang documents</li>
+            </ul>
+
+            <h3>Getting Involved</h3>
+            <p>XferLang welcomes contributions! Here's how you can get involved:</p>
+            <ul>
+                <li>⭐ <strong>Star the repository</strong> to show your support</li>
+                <li>🐛 <strong>Report bugs</strong> or request features via <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank">GitHub Issues</a></li>
+                <li>💡 <strong>Contribute code</strong> by submitting pull requests</li>
+                <li>📖 <strong>Improve documentation</strong> and examples</li>
+                <li>🗣️ <strong>Join discussions</strong> in the community</li>
+            </ul>
+
+            <h3>Alternative Implementations</h3>
+            <p>The repository also includes experimental implementations in other languages:</p>
+            <ul>
+                <li><code>xferlang-rs/</code> - Rust implementation (experimental)</li>
+                <li>More language implementations planned for future releases</li>
+            </ul>
+        </section>
+
+        <section id="building-xferlang">
+            <h2>Building XferLang</h2>
+            <p>XferLang is built using standard .NET development tools. Follow these instructions to build the project from source.</p>
+
+            <h3>Prerequisites</h3>
+            <ul>
+                <li><strong>.NET SDK 6.0 or later</strong> - <a href="https://dotnet.microsoft.com/download" target="_blank">Download from Microsoft</a></li>
+                <li><strong>Git</strong> - For cloning the repository</li>
+                <li><strong>IDE (Optional):</strong> Visual Studio, VS Code, or Rider</li>
+            </ul>
+
+            <h3>Quick Start</h3>
+            <pre><code class="bash"># Clone the repository
+git clone https://github.com/paulmooreparks/Xfer.git
+cd Xfer
+
+# Build the entire solution
+dotnet build
+
+# Run the tests
+dotnet test
+
+# Create NuGet packages (optional)
+dotnet pack --configuration Release</code></pre>
+
+            <h3>Project Structure</h3>
+            <p>The XferLang solution contains several projects:</p>
+            <ul>
+                <li><strong>ParksComputing.Xfer.Lang</strong> - Main library (.NET Standard 2.0)</li>
+                <li><strong>XferTest</strong> - Unit tests and integration tests</li>
+                <li><strong>xferc</strong> - Command-line tools and REPL</li>
+                <li><strong>XferService</strong> - Web service implementation (optional)</li>
+            </ul>
+
+            <h3>Development Commands</h3>
+            <pre><code class="bash"># Build in Debug mode
+dotnet build --configuration Debug
+
+# Build in Release mode
+dotnet build --configuration Release
+
+# Run specific test project
+dotnet test XferTest/
+
+# Run with verbose output
+dotnet test --verbosity normal
+
+# Run tests with code coverage
+dotnet test --collect:"XPlat Code Coverage"
+
+# Package for NuGet distribution
+dotnet pack ParksComputing.Xfer.Lang/ --configuration Release --output ./nupkg</code></pre>
+
+            <h3>Using the Command-Line Tools</h3>
+            <p>The <code>xferc</code> project provides command-line tools for working with XferLang:</p>
+            <pre><code class="bash"># Build the CLI tools
+dotnet build xferc/
+
+# Run the XferLang REPL
+dotnet run --project xferc/
+
+# Convert JSON to XferLang
+dotnet run --project xferc/ -- convert input.json output.xfer
+
+# Validate XferLang documents
+dotnet run --project xferc/ -- validate document.xfer</code></pre>
+
+            <h3>IDE Setup</h3>
+            <h4>Visual Studio</h4>
+            <p>Open <code>Xfer.sln</code> in Visual Studio 2022 or later. The solution includes all projects and is ready for development.</p>
+
+            <h4>VS Code</h4>
+            <p>Install the C# extension and open the repository folder. VS Code will automatically detect the .NET projects.</p>
+            <pre><code class="bash"># Install recommended extensions
+code --install-extension ms-dotnettools.csharp
+code --install-extension ms-dotnettools.vscode-dotnet-runtime</code></pre>
+
+            <h3>Contributing Guidelines</h3>
+            <p>When contributing to XferLang:</p>
+            <ul>
+                <li>Follow the existing code style and conventions</li>
+                <li>Add unit tests for new features</li>
+                <li>Update documentation as needed</li>
+                <li>Ensure all tests pass before submitting PRs</li>
+                <li>Consider backward compatibility for API changes</li>
+            </ul>
+        </section>
+
+        <section id="community-resources">
+            <h2>Community & Resources</h2>
+            <p>XferLang has a growing community of developers and users. Here are the key resources for learning, getting help, and staying up to date.</p>
+
+            <h3>Official Resources</h3>
+            <ul>
+                <li>🏠 <strong>Official Website:</strong> <a href="https://paulmooreparks.github.io/Xfer/" target="_blank">XferLang Documentation</a></li>
+                <li>📂 <strong>GitHub Repository:</strong> <a href="https://github.com/paulmooreparks/Xfer" target="_blank">Source Code & Issues</a></li>
+                <li>📦 <strong>NuGet Package:</strong> <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang" target="_blank">ParksComputing.Xfer.Lang</a></li>
+                <li>📋 <strong>Grammar Specification:</strong> <a href="https://github.com/paulmooreparks/Xfer/blob/master/xfer.bnf" target="_blank">xfer.bnf</a></li>
+                <li>🔖 <strong>Releases:</strong> <a href="https://github.com/paulmooreparks/Xfer/releases" target="_blank">Version History & Downloads</a></li>
+            </ul>
+
+            <h3>Documentation & Examples</h3>
+            <ul>
+                <li>📖 <strong>Complete Documentation:</strong> This website covers all aspects of XferLang</li>
+                <li>💡 <strong>Code Examples:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master/XferTest" target="_blank">Unit Tests</a> provide comprehensive usage examples</li>
+                <li>📄 <strong>Sample Documents:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master" target="_blank">*.xfer files</a> in the repository</li>
+                <li>🏗️ <strong>Schema Examples:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master/schemas" target="_blank">Schema definitions</a></li>
+            </ul>
+
+            <h3>Getting Help</h3>
+            <ul>
+                <li>❓ <strong>Questions:</strong> Open a <a href="https://github.com/paulmooreparks/Xfer/discussions" target="_blank">GitHub Discussion</a></li>
+                <li>🐛 <strong>Bug Reports:</strong> Create an <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank">Issue</a> with details</li>
+                <li>💡 <strong>Feature Requests:</strong> Suggest improvements via <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank">GitHub Issues</a></li>
+                <li>📧 <strong>Direct Contact:</strong> Reach out via GitHub for complex questions</li>
+            </ul>
+
+            <h3>Development Status</h3>
+            <p>XferLang is actively developed with regular updates and improvements:</p>
+            <ul>
+                <li>✅ <strong>Stable Core:</strong> Basic serialization/deserialization is production-ready</li>
+                <li>🚧 <strong>Active Development:</strong> Advanced features and optimizations ongoing</li>
+                <li>🔄 <strong>Regular Releases:</strong> Check <a href="https://github.com/paulmooreparks/Xfer/releases" target="_blank">releases</a> for updates</li>
+                <li>📊 <strong>CI/CD:</strong> Automated testing and quality checks via GitHub Actions</li>
+            </ul>
+
+            <h3>Language Comparison</h3>
+            <p>See how XferLang compares to other data formats:</p>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr style="background: #f5f5f5;">
+                    <th style="border: 1px solid #ddd; padding: 8px;">Feature</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">XferLang</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">JSON</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">XML</th>
+                    <th style="border: 1px solid #ddd; padding: 8px;">YAML</th>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px;"><strong>Explicit Types</strong></td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Built-in</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">❌ Limited</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">⚠️ Via attributes</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">⚠️ Via tags</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px;"><strong>Human Readable</strong></td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Yes</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Yes</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">⚠️ Verbose</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Yes</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px;"><strong>Comments</strong></td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Native</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">❌ No</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Native</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Native</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 8px;"><strong>Safety</strong></td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">✅ High</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">⚠️ Medium</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">✅ High</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">⚠️ Medium</td>
+                </tr>
+            </table>
+
+            <h3>Community Recognition</h3>
+            <p>XferLang has been featured and discussed in various developer communities:</p>
+            <ul>
+                <li>🔥 <strong>Hacker News:</strong> <a href="https://news.ycombinator.com/item?id=42114543" target="_blank">Community Discussion</a></li>
+                <li>⭐ <strong>GitHub Stars:</strong> Growing community support</li>
+                <li>📈 <strong>Download Statistics:</strong> Available on <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang" target="_blank">NuGet</a></li>
+            </ul>
         </section>
 
         <footer>

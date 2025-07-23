@@ -1,0 +1,161 @@
+name: Manual Release to NuGet and GitHub
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 10.8.0-preview, 11.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Is this a pre-release?'
+        required: true
+        type: boolean
+        default: true
+      release_notes:
+        description: 'Release notes (optional - will use auto-generated if empty)'
+        required: false
+        type: string
+      publish_to_nuget:
+        description: 'Publish to NuGet?'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          6.0.x
+          8.0.x
+
+    - name: Validate version format
+      run: |
+        if [[ ! "${{ github.event.inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\-\.]+)?$ ]]; then
+          echo "Error: Version must be in format X.Y.Z or X.Y.Z-suffix"
+          exit 1
+        fi
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build solution
+      run: dotnet build --configuration Release --no-restore -p:Version=${{ github.event.inputs.version }}
+
+    - name: Run tests
+      run: dotnet test --configuration Release --no-build --verbosity normal
+
+    - name: Pack NuGet packages
+      run: |
+        dotnet pack ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj \
+          --configuration Release \
+          --no-build \
+          --output ./nupkg \
+          -p:PackageVersion=${{ github.event.inputs.version }} \
+          -p:Version=${{ github.event.inputs.version }}
+
+    - name: List generated packages
+      run: ls -la ./nupkg/
+
+    - name: Create Git tag
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag -a "v${{ github.event.inputs.version }}" -m "Release v${{ github.event.inputs.version }}"
+        git push origin "v${{ github.event.inputs.version }}"
+
+    - name: Generate release notes
+      id: generate_notes
+      run: |
+        if [ -n "${{ github.event.inputs.release_notes }}" ]; then
+          echo "notes=${{ github.event.inputs.release_notes }}" >> $GITHUB_OUTPUT
+        else
+          # Auto-generate release notes
+          NOTES="## XferLang v${{ github.event.inputs.version }}
+
+          ${{ github.event.inputs.prerelease == 'true' && '⚠️ **This is a pre-release version** - Not recommended for production use.' || '🎉 **Stable release** - Ready for production use.' }}
+
+          ### Installation
+          \`\`\`bash
+          dotnet add package ParksComputing.Xfer.Lang --version ${{ github.event.inputs.version }}
+          \`\`\`
+
+          ### What's New
+          - Updates and improvements to XferLang
+          - Enhanced .NET library functionality
+          - Bug fixes and performance improvements
+
+          ### Resources
+          - 📖 [Documentation](https://paulmooreparks.github.io/Xfer/)
+          - 🐛 [Report Issues](https://github.com/paulmooreparks/Xfer/issues)
+          - 💬 [Discussions](https://github.com/paulmooreparks/Xfer/discussions)
+
+          For detailed changes, see the commit history since the last release."
+
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.event.inputs.version }}
+        release_name: XferLang v${{ github.event.inputs.version }}
+        body: ${{ steps.generate_notes.outputs.notes }}
+        draft: false
+        prerelease: ${{ github.event.inputs.prerelease }}
+
+    - name: Upload NuGet package to GitHub Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./nupkg/ParksComputing.Xfer.Lang.${{ github.event.inputs.version }}.nupkg
+        asset_name: ParksComputing.Xfer.Lang.${{ github.event.inputs.version }}.nupkg
+        asset_content_type: application/zip
+
+    - name: Upload symbols package to GitHub Release (if exists)
+      continue-on-error: true
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./nupkg/ParksComputing.Xfer.Lang.${{ github.event.inputs.version }}.snupkg
+        asset_name: ParksComputing.Xfer.Lang.${{ github.event.inputs.version }}.snupkg
+        asset_content_type: application/zip
+
+    - name: Publish to NuGet
+      if: github.event.inputs.publish_to_nuget == 'true'
+      run: |
+        dotnet nuget push ./nupkg/ParksComputing.Xfer.Lang.${{ github.event.inputs.version }}.nupkg \
+          --api-key ${{ secrets.NUGET_API_KEY }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
+
+    - name: Create summary
+      run: |
+        echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Version: v${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ GitHub Release: Created" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ Git Tag: Pushed" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ NuGet Package: ${{ github.event.inputs.publish_to_nuget == 'true' && 'Published' || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔗 [View Release](https://github.com/${{ github.repository }}/releases/tag/v${{ github.event.inputs.version }})" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔗 [View on NuGet](https://www.nuget.org/packages/ParksComputing.Xfer.Lang/${{ github.event.inputs.version }})" >> $GITHUB_STEP_SUMMARY
