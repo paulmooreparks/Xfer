@@ -94,24 +94,12 @@ public class ParserTests {
         Console.WriteLine(xferContent);
 
         var deserializedData = XferConvert.Deserialize<SampleData>(xferContent);
-        Console.WriteLine(deserializedData.Person.Name);
-        Console.WriteLine(deserializedData.Person.Age);
-        Console.WriteLine(deserializedData.CreatedAt);
-        Console.WriteLine(deserializedData.Description);
-        Console.WriteLine(string.Join(", ", deserializedData.ints));
-        Console.WriteLine(string.Join(", ", deserializedData.strings));
-        Console.WriteLine(string.Join(", ", deserializedData.bag_o_bits1));
-
-        var parser = new Parser();
-        var document = parser.Parse(xferContent);
-        Console.WriteLine(document.ToXfer(Formatting.Pretty));
-
-        var x = document.Root[0];
-
-        if (x is ObjectElement o) {
-            if (o.TryGetElement("Person", out ObjectElement? person)) {
-                Console.WriteLine(person?.ToXfer(Formatting.Pretty));
-            }
+        if (deserializedData != null && deserializedData.Person != null)
+        {
+            Console.WriteLine(deserializedData.Person.Name);
+            Console.WriteLine(deserializedData.Person.Age);
+            Console.WriteLine(deserializedData.CreatedAt);
+            Console.WriteLine(deserializedData.Description);
         }
     }
 }

@@ -7,16 +7,37 @@ using ParksComputing.Xfer.Lang.Services;
 using ParksComputing.Xfer.Lang.Elements;
 using System.Collections;
 using System.Runtime.CompilerServices;
+using ParksComputing.Xfer.Lang.Configuration;
+using ParksComputing.Xfer.Lang.Converters;
+using System.Linq;
 
 namespace ParksComputing.Xfer.Lang;
 
 public class XferConvert {
+    private static readonly XferSerializerSettings DefaultSettings = new();
+
     public static string Serialize(object? o, Formatting formatting = Formatting.None, char indentChar = ' ', int indentation = 2, int depth = 0) {
-        Element element = SerializeValue(o);
+        return Serialize(o, DefaultSettings, formatting, indentChar, indentation, depth);
+    }
+
+    public static string Serialize(object? o, XferSerializerSettings settings, Formatting formatting = Formatting.None, char indentChar = ' ', int indentation = 2, int depth = 0) {
+        Element element = SerializeValue(o, settings);
         return element.ToXfer(formatting, indentChar, indentation, depth);
     }
 
     public static Element SerializeValue(object? value) {
+        return SerializeValue(value, DefaultSettings);
+    }
+
+    public static Element SerializeValue(object? value, XferSerializerSettings settings) {
+        if (value != null) {
+            foreach (var converter in settings.Converters) {
+                if (converter.CanConvert(value.GetType())) {
+                    return converter.WriteXfer(value, settings);
+                }
+            }
+        }
+
         return value switch {
             null => new NullElement(),
             DBNull => new NullElement(),
@@ -46,10 +67,10 @@ public class XferConvert {
             TimeSpan[] timeSpanArray => SerializeTimeSpanArray(timeSpanArray),
             string[] stringArray => SerializeStringArray(stringArray),
             byte[] byteArray => new StringElement(Convert.ToBase64String(byteArray), style: ElementStyle.Explicit),
-            object[] objectArray => new TupleElement(objectArray.Select(SerializeValue)),
-            IDictionary dictionary when IsGenericDictionary(dictionary.GetType()) => SerializeDictionary(dictionary),
-            IEnumerable enumerable when IsGenericEnumerable(enumerable.GetType()) => SerializeEnumerable(enumerable),
-            System.Runtime.CompilerServices.ITuple tuple when IsGenericTuple(tuple.GetType()) => SerializeTuple(tuple),
+            object[] objectArray => new TupleElement(objectArray.Select(o => SerializeValue(o, settings))),
+            IDictionary dictionary when IsGenericDictionary(dictionary.GetType()) => SerializeDictionary(dictionary, settings),
+            IEnumerable enumerable when IsGenericEnumerable(enumerable.GetType()) => SerializeEnumerable(enumerable, settings),
+            System.Runtime.CompilerServices.ITuple tuple when IsGenericTuple(tuple.GetType()) => SerializeTuple(tuple, settings),
 #if false
             IDictionary dictionary => new ObjectElement(
                 dictionary.Cast<dynamic>().Select(kvp =>
@@ -57,41 +78,38 @@ public class XferConvert {
             ),
             System.Dynamic.ExpandoObject expando => new ObjectElement(
                 expando.Select(kvp =>
-                    new KeyValuePairElement(SerializeValue(kvp.Key), SerializeValue(kvp.Value)))
+                    new KeyValuePairElement(SerializeValue(kvp.Key, settings), SerializeValue(kvp.Value, settings)))
             ),
 #endif
-            IEnumerable<object> list => new TupleElement(list.Select(SerializeValue)),
-            IEnumerable enumerable => new TupleElement(
-                enumerable.Cast<object>().Select(SerializeValue)
-            ),
-            object objectValue => SerializeObject(objectValue)
+            object objectValue => SerializeObject(objectValue, settings)
         };
     }
 
     private static bool IsGenericDictionary(Type type) {
-        try {
-            var isGenericType = type.IsGenericType;
-
-            if (isGenericType) {
-                var genericTypeDefinition = type.GetGenericTypeDefinition();
-                var genericArguments = type.GetGenericArguments();
-                var idictType = typeof(IDictionary<,>);
-                var dictType = typeof(Dictionary<,>);
-
-                return isGenericType && (genericTypeDefinition == idictType || genericTypeDefinition == dictType)
-                    && genericArguments[0] == typeof(string);
-            }
-
-            return false;
+        // This is a more robust way to check for dictionary types,
+        // including handling of interfaces and concrete classes.
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IDictionary<,>)) {
+            return true;
         }
-        catch (Exception) {
-            return false;
-        }
+
+        return type.GetInterfaces().Any(i =>
+            i.IsGenericType &&
+            i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
     }
 
     private static bool IsGenericEnumerable(Type type) {
-        return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-            && type.GetGenericArguments()[0] == typeof(string);
+        // We don't want to treat strings as enumerables.
+        if (type == typeof(string))
+        {
+            return false;
+        }
+
+        // This check is more robust for finding any IEnumerable<T> implementation,
+        // while explicitly excluding dictionaries, which we handle separately.
+        return type.GetInterfaces().Any(i =>
+            i.IsGenericType &&
+            i.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            && !IsGenericDictionary(type);
     }
 
     private static bool IsGenericTuple(Type type) {
@@ -113,134 +131,129 @@ public class XferConvert {
         }
     }
 
-    private static TupleElement SerializeEnumerable(IEnumerable enumerable) {
+    private static TupleElement SerializeEnumerable(IEnumerable enumerable, XferSerializerSettings settings) {
         var objElement = new TupleElement();
 
         foreach (var value in enumerable) {
-            var valueElement = SerializeValue(value);
+            var valueElement = SerializeValue(value, settings);
             objElement.Add(valueElement);
         }
 
         return objElement;
     }
 
-    private static ObjectElement SerializeDictionary(IDictionary dictionary) {
+    private static ObjectElement SerializeDictionary(IDictionary dictionary, XferSerializerSettings settings) {
         var objElement = new ObjectElement();
 
         foreach (DictionaryEntry kvp in dictionary) {
             var keyElement = new IdentifierElement(kvp.Key.ToString()!);
-            var valueElement = SerializeValue(kvp.Value);
+            var valueElement = SerializeValue(kvp.Value, settings);
             objElement.AddOrUpdate(new KeyValuePairElement(keyElement, valueElement));
         }
 
         return objElement;
     }
 
-    private static TupleElement SerializeTuple(ITuple tuple) {
+    private static TupleElement SerializeTuple(ITuple tuple, XferSerializerSettings settings) {
         var element = new TupleElement();
 
         for (int i = 0; i < tuple.Length; ++i) {
-            var valueElement = SerializeValue(tuple[i]);
+            var valueElement = SerializeValue(tuple[i], settings);
             element.Add(valueElement);
         }
 
         return element;
     }
 
-    public static T Deserialize<T>(string xfer) where T : new() {
+    public static T? Deserialize<T>(string xfer) {
+        return Deserialize<T>(xfer, DefaultSettings);
+    }
+
+    public static T? Deserialize<T>(string xfer, XferSerializerSettings settings) {
+        if (string.IsNullOrWhiteSpace(xfer))
+        {
+            return default;
+        }
+
         var document = XferParser.Parse(xfer);
 
-        if (document is null) {
-            throw new InvalidOperationException($"Failed to parse Xfer document.");
+        if (document is null || !document.Root.Values.Any())
+        {
+            return default;
         }
 
-        return Deserialize<T>(document);
+        return Deserialize<T>(document, settings);
     }
 
-    public static T Deserialize<T>(XferDocument document) where T : new() {
-        var instance = new T();
-        var type = typeof(T);
-
-        if (instance == null) {
-            throw new InvalidOperationException($"Could not create an instance of type {type.Name}.");
-        }
-
-        var properties = type.GetProperties();
-        var propertyMap = new Dictionary<string, PropertyInfo>();
-
-        foreach (var property in properties) {
-            var attribute = property.GetCustomAttribute<XferPropertyAttribute>();
-            var name = attribute?.Name ?? property.Name;
-            propertyMap[name] = property;
-        }
-
-        var first = document.Root.Values.First();
-
-        if (first is ObjectElement objectElement) {
-            if (instance is not null && IsGenericDictionary(instance.GetType())) {
-                IDictionary? dictionary = instance as IDictionary;
-                if (dictionary is not null) {
-                    foreach (var element in objectElement.Values) {
-                        string value = DeserializeValue(element.Value.Value, typeof(string)) as string ?? string.Empty;
-                        dictionary.Add(element.Key, value);
-                    }
-
-                    return instance;
-                }
-            }
-
-            foreach (var element in objectElement.Values) {
-                if (propertyMap.TryGetValue(element.Key, out var property)) {
-                    object? value = DeserializeValue(element.Value.Value, property.PropertyType);
-                    property.SetValue(instance, value);
-                }
-            }
-        }
-#if false
-        else if (first is TupleElement tupleElement) {
-            foreach (var element in tupleElement.Values {
-                if (propertyMap.TryGetValue(element.Key, out var property)) {
-                    object? value = DeserializeValue(element.Value, property.PropertyType);
-                    property.SetValue(instance, value);
-                }
-            }
-        }
-#endif
-        return instance;
+    public static T? Deserialize<T>(XferDocument document) {
+        return Deserialize<T>(document, DefaultSettings);
     }
 
-    public static object Deserialize(XferDocument document, Type targetType) {
-        // Use reflection to create an instance of the generic method
-        var method = typeof(XferConvert).GetMethod(nameof(Deserialize), [typeof(string)]);
-        if (method == null) {
-            throw new InvalidOperationException("Could not find the generic Deserialize method.");
+    public static T? Deserialize<T>(XferDocument document, XferSerializerSettings settings)
+    {
+        if (document.Root.Values.FirstOrDefault() is not Element first)
+        {
+            return default;
         }
 
-        var genericMethod = method.MakeGenericMethod(targetType);
-        return genericMethod.Invoke(null, [document]) ?? throw new InvalidOperationException($"Failed to deserialize content into type {targetType.Name}.");
+        var result = DeserializeValue(first, typeof(T), settings);
+
+        return (T?)result;
     }
 
-    public static object Deserialize(string xfer, Type targetType) {
-        // Use reflection to create an instance of the generic method
-        var method = typeof(XferConvert).GetMethod(nameof(Deserialize), [typeof(string)]);
-        if (method == null) {
-            throw new InvalidOperationException("Could not find the generic Deserialize method.");
-        }
+    public static object? Deserialize(XferDocument document, Type targetType) {
+        return Deserialize(document, targetType, DefaultSettings);
+    }
 
-        var genericMethod = method.MakeGenericMethod(targetType);
-        return genericMethod.Invoke(null, [xfer]) ?? throw new InvalidOperationException($"Failed to deserialize content into type {targetType.Name}.");
+    public static object? Deserialize(XferDocument document, Type targetType, XferSerializerSettings settings) {
+        if (document.Root.Values.FirstOrDefault() is not Element first)
+        {
+            return default;
+        }
+        return DeserializeValue(first, targetType, settings);
+    }
+
+    public static object? Deserialize(string xfer, Type targetType) {
+        return Deserialize(xfer, targetType, DefaultSettings);
+    }
+
+    public static object? Deserialize(string xfer, Type targetType, XferSerializerSettings settings) {
+        if (string.IsNullOrWhiteSpace(xfer))
+        {
+            return default;
+        }
+        var document = XferParser.Parse(xfer);
+        if (document is null || !document.Root.Values.Any())
+        {
+            return default;
+        }
+        return Deserialize(document, targetType, settings);
     }
 
     public static T? Deserialize<T>(Element element) {
+        return Deserialize<T>(element, DefaultSettings);
+    }
+
+    public static T? Deserialize<T>(Element element, XferSerializerSettings settings) {
         if (element is null) {
             throw new NullReferenceException($"Xfer element is null.");
         }
 
         var type = typeof(T);
-        return (T?)DeserializeValue(element, type);
+        return (T?)DeserializeValue(element, type, settings);
     }
 
     private static object? DeserializeValue(Element element, Type targetType) {
+        return DeserializeValue(element, targetType, DefaultSettings);
+    }
+
+    private static object? DeserializeValue(Element element, Type targetType, XferSerializerSettings settings) {
+        foreach (var converter in settings.Converters) {
+            if (converter.CanConvert(targetType)) {
+                return converter.ReadXfer(element, targetType, settings);
+            }
+        }
+
         if (targetType.IsEnum && element is TextElement textElement) {
             var deserializeEnumMethod = typeof(XferConvert)
                 .GetMethod(nameof(DeserializeEnumValue), BindingFlags.Static | BindingFlags.NonPublic)!
@@ -262,7 +275,7 @@ public class XferConvert {
                 }
 
                 if (element is ObjectElement objectElement) {
-                    return DeserializeDictionary(objectElement, valueType);
+                    return DeserializeDictionary(objectElement, valueType, settings);
                 }
             }
             // Handle List<T>
@@ -270,21 +283,21 @@ public class XferConvert {
                 var valueType = targetType.GetGenericArguments()[0];
 
                 if (element is TupleElement tupleElement) {
-                    return DeserializeEnumerable(tupleElement, valueType);
+                    return DeserializeEnumerable(tupleElement, valueType, settings);
                 }
             }
             else if (genericType == typeof(Tuple<>)) {
                 var valueType = targetType.GetGenericArguments()[0];
 
                 if (element is TupleElement tupleElement) {
-                    return DeserializeTuple(tupleElement, valueType);
+                    return DeserializeTuple(tupleElement, valueType, settings);
                 }
             }
             else if (genericType == typeof(KeyValuePair<,>)) {
                 var valueType = targetType.GetGenericArguments()[0];
 
                 if (element is KeyValuePairElement keyValueElement) {
-                    return DeserializeKeyValuePair(keyValueElement, valueType);
+                    return DeserializeKeyValuePair(keyValueElement, valueType, settings);
                 }
             }
         }
@@ -314,6 +327,7 @@ public class XferConvert {
             DateElement dateElement when targetType == typeof(DateTime) => dateElement.Value.ToDateTime(TimeOnly.MinValue),
             DateElement dateElement when targetType == typeof(object) => dateElement.Value,
             StringElement stringElement when targetType == typeof(string) => stringElement.Value,
+            StringElement stringElement when targetType == typeof(Guid) => Guid.Parse(stringElement.Value),
             StringElement stringElement when targetType == typeof(object) => stringElement.Value,
             CharacterElement charElement when targetType == typeof(string) => charElement.Value,
             CharacterElement charElement when targetType == typeof(object) => charElement.Value,
@@ -323,58 +337,63 @@ public class XferConvert {
             InterpolatedElement evalElement when targetType == typeof(object) => evalElement.Value,
             PlaceholderElement phElement when targetType == typeof(string) => phElement.Value,
             PlaceholderElement phElement when targetType == typeof(object) => phElement.Value,
-            ArrayElement arrayElement => DeserializeArray(arrayElement, targetType),
-            TupleElement tupleElement => DeserializeTuple(tupleElement, targetType),
-            ObjectElement objectElement => DeserializeObject(objectElement, targetType),
+            ArrayElement arrayElement => DeserializeArray(arrayElement, targetType, settings),
+            TupleElement tupleElement => DeserializeTuple(tupleElement, targetType, settings),
+            ObjectElement objectElement => DeserializeObject(objectElement, targetType, settings),
             _ => throw new NotSupportedException($"Type '{targetType.Name}' is not supported for deserialization")
         };
     }
 
-    private static object DeserializeDictionary(ObjectElement objectElement, Type valueType) {
+    private static object DeserializeDictionary(ObjectElement objectElement, Type valueType, XferSerializerSettings settings) {
         var dictionaryType = typeof(Dictionary<,>).MakeGenericType(typeof(string), valueType);
         var dictionary = (IDictionary)Activator.CreateInstance(dictionaryType)!;
 
         foreach (var kvp in objectElement.Values) {
             var key = kvp.Key;
-            var value = DeserializeValue(kvp.Value.Value, valueType);
+            var value = DeserializeValue(kvp.Value.Value, valueType, settings);
             dictionary.Add(key, value);
         }
 
         return dictionary;
     }
 
-    private static object DeserializeEnumerable(TupleElement tupleElement, Type valueType) {
+    private static object DeserializeEnumerable(TupleElement tupleElement, Type valueType, XferSerializerSettings settings) {
         var listType = typeof(List<>).MakeGenericType(valueType);
-        var list = (IList)Activator.CreateInstance(listType)!; 
+        var list = (IList)Activator.CreateInstance(listType)!;
 
         foreach (var element in tupleElement.Values) {
-            var value = DeserializeValue(element, valueType);
-            list.Add(value); 
+            var value = DeserializeValue(element, valueType, settings);
+            list.Add(value);
         }
 
         return list;
     }
 
-    private static object DeserializeKeyValuePair(KeyValuePairElement kvpElement, Type valueType) {
+    private static object DeserializeKeyValuePair(KeyValuePairElement kvpElement, Type valueType, XferSerializerSettings settings) {
         var kvpType = typeof(KeyValuePair<,>).MakeGenericType(typeof(string), valueType);
 
         var key = kvpElement.Key;
-        var value = DeserializeValue(kvpElement.Value, valueType);
+        var value = DeserializeValue(kvpElement.Value, valueType, settings);
 
         return Activator.CreateInstance(kvpType, key, value)!;
     }
 
 
-    private static ObjectElement SerializeObject(object o) {
+    private static ObjectElement SerializeObject(object o, XferSerializerSettings settings) {
         var type = o.GetType();
         var objElement = new ObjectElement();
+        var properties = settings.ContractResolver.ResolveProperties(type);
 
-        foreach (var property in type.GetProperties()) {
+        foreach (var property in properties) {
             var attribute = property.GetCustomAttribute<XferPropertyAttribute>();
             var evalAttribute = property.GetCustomAttribute<XferEvaluatedAttribute>();
 
-            var name = attribute?.Name ?? property.Name;
+            var name = attribute?.Name ?? settings.ContractResolver.ResolvePropertyName(property.Name);
             var value = property.GetValue(o);
+
+            if (value is null && settings.NullValueHandling == NullValueHandling.Ignore) {
+                continue;
+            }
 
             if (evalAttribute != null) {
                 Element element;
@@ -389,7 +408,7 @@ public class XferConvert {
                 objElement.AddOrUpdate(new KeyValuePairElement(new IdentifierElement(name), element));
             }
             else {
-                Element element = SerializeValue(value);
+                Element element = SerializeValue(value, settings);
                 objElement.AddOrUpdate(new KeyValuePairElement(new IdentifierElement(name), element));
             }
         }
@@ -508,7 +527,7 @@ public class XferConvert {
     }
 
 
-    private static object DeserializeArray(ArrayElement arrayElement, Type targetType) {
+    private static object DeserializeArray(ArrayElement arrayElement, Type targetType, XferSerializerSettings settings) {
         Type? elementType;
         var elementTypeArray = targetType.GenericTypeArguments;
 
@@ -525,7 +544,7 @@ public class XferConvert {
 
         var values = new List<object?>();
         foreach (var item in arrayElement.Values) {
-            values.Add(DeserializeValue(item, elementType));
+            values.Add(DeserializeValue(item, elementType, settings));
         }
 
         var array = Array.CreateInstance(elementType, values.Count);
@@ -537,15 +556,15 @@ public class XferConvert {
         return array;
     }
 
-    private static object DeserializeTuple(TupleElement tupleElement, Type targetType) {
+    private static object DeserializeTuple(TupleElement tupleElement, Type targetType, XferSerializerSettings settings) {
         var values = new List<object?>();
         foreach (var item in tupleElement.Values) {
-            values.Add(DeserializeValue(item, typeof(object)));
+            values.Add(DeserializeValue(item, typeof(object), settings));
         }
         return values;
     }
 
-    private static object DeserializeObject(ObjectElement objectElement, Type targetType) {
+    private static object DeserializeObject(ObjectElement objectElement, Type targetType, XferSerializerSettings settings) {
         var instance = Activator.CreateInstance(targetType);
 
         if (instance == null) {
@@ -560,7 +579,7 @@ public class XferConvert {
             var matchingElement = objectElement.Values.FirstOrDefault(kvp => kvp.Key == propName).Value;
 
             if (matchingElement != null) {
-                var propValue = DeserializeValue(matchingElement.Value, prop.PropertyType);
+                var propValue = DeserializeValue(matchingElement.Value, prop.PropertyType, settings);
                 prop.SetValue(instance, propValue);
             }
         }

@@ -10,7 +10,7 @@ public class XferService {
         return xferDocument;
     }
 
-    public static T Deserialize<T>(string xfer) where T : new() {
+    public static T? Deserialize<T>(string xfer) where T : new() {
         return XferConvert.Deserialize<T>(xfer);
     }
 }

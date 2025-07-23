@@ -15,7 +15,9 @@ internal class Program {
 
         // GET request
         var sampleData = await client.GetAsync<SampleData>("api/sampledata");
-        Console.Write($@"
+        if (sampleData != null)
+        {
+            Console.Write($@"
 Name: {sampleData.Name}
 Age: {sampleData.Age}
 TestEmum: {sampleData.TestEnum}
@@ -23,18 +25,23 @@ TimeOnly: {sampleData.TimeOnly}
 TimeSpan: {sampleData.TimeSpan}
 DateTime: {sampleData.DateTime}
 ");
+        }
 
         // POST request
-        sampleData = await client.PostAsync("api/sampledata", new SampleData { 
-            Name = "Bob", 
+        var postData = new SampleData
+        {
+            Name = "Bob",
             Age = 40,
             TimeSpan = new TimeSpan(90, 11, 43, 56),
             TimeOnly = new TimeOnly(23, 45, 56),
-            TestEnum = TestEnum.Spaced, 
-            DateTime = DateTime.Now 
-        });
+            TestEnum = TestEnum.Spaced,
+            DateTime = DateTime.Now
+        };
+        sampleData = await client.PostAsync("api/sampledata", postData);
 
-        Console.Write($@"
+        if (sampleData != null)
+        {
+            Console.Write($@"
 Name: {sampleData.Name}
 Age: {sampleData.Age}
 TestEmum: {sampleData.TestEnum}
@@ -42,6 +49,7 @@ TimeOnly: {sampleData.TimeOnly}
 TimeSpan: {sampleData.TimeSpan}
 DateTime: {sampleData.DateTime}
 ");
+        }
     }
 }
 
@@ -53,14 +61,14 @@ public class XferClient {
         _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xfer"));
     }
 
-    public async Task<T> GetAsync<T>(string endpoint) where T : new() {
+    public async Task<T?> GetAsync<T>(string endpoint) where T : new() {
         var response = await _httpClient.GetAsync(endpoint);
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync();
         return XferConvert.Deserialize<T>(content);
     }
 
-    public async Task<T> PostAsync<T>(string endpoint, T data) where T : new() {
+    public async Task<T?> PostAsync<T>(string endpoint, T data) where T : new() {
         var xferContent = XferConvert.Serialize(data!);
         var content = new StringContent(xferContent, Encoding.UTF8, "application/xfer");
         var response = await _httpClient.PostAsync(endpoint, content);
