@@ -36,8 +36,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+    - name: Build
+      run: dotnet build ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release
     - name: Pack
-      run: dotnet pack ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release -p:Version=0.10.${{ github.run_number }}-prerelease -o ./nupkgs
+      run: dotnet pack ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release -p:Version=0.10.${{ github.run_number }}-prerelease -o ./nupkgs --no-build
     - name: Publish to NuGet
       run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
 

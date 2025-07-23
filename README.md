@@ -1,4 +1,4 @@
-![XferLogo](logo/XferLang-sm.png)
+![XferLogo](https://raw.githubusercontent.com/paulmooreparks/Xfer/master/logo/XferLang-sm.png)
 
 # The XferLang Data-Interchange Format
 
