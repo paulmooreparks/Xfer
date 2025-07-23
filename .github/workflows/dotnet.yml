@@ -1,4 +1,4 @@
-name: .NET
+name: .NET CI
 
 on:
   push:
@@ -26,7 +26,8 @@ jobs:
     - name: Test
       run: dotnet test --no-build --configuration Release Xfer.sln
 
-  publish:
+  # Keep automatic versioning for CI validation (no publishing)
+  package-validation:
     needs: build
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -38,8 +39,8 @@ jobs:
         dotnet-version: 8.0.x
     - name: Build
       run: dotnet build ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release
-    - name: Pack
+    - name: Pack with auto-increment version (CI validation only)
       run: dotnet pack ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release -p:Version=0.10.${{ github.run_number }}-prerelease -o ./nupkgs --no-build
-    - name: Publish to NuGet
-      run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+    - name: List generated packages (not published)
+      run: ls -la ./nupkgs/
 

@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g., 10.8.0-preview, 11.0.0)'
+        description: 'Release version (e.g., 0.10.9-prerelease, 1.0.0)'
         required: true
         type: string
+        default: '0.10.9-prerelease'
       prerelease:
         description: 'Is this a pre-release?'
         required: true

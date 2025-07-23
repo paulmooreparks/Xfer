@@ -2,6 +2,8 @@
 
 This repository includes an automated release workflow that publishes to both NuGet and GitHub releases simultaneously.
 
+**Note**: Automatic NuGet publishing on push to master has been disabled. All releases are now controlled exclusively through the manual release workflow to ensure version consistency and control.
+
 ## Setup Required
 
 ### 1. NuGet API Key (Required for NuGet publishing)
@@ -26,7 +28,7 @@ The workflow uses `GITHUB_TOKEN` which is automatically provided by GitHub Actio
 3. Select "Manual Release to NuGet and GitHub" workflow
 4. Click "Run workflow"
 5. Fill in the parameters:
-   - **Version**: e.g., `10.8.0-preview` or `11.0.0`
+   - **Version**: e.g., `0.10.9-prerelease` or `1.0.0` (matches your current versioning)
    - **Pre-release**: Check if this is a pre-release
    - **Release notes**: Optional custom notes (auto-generated if empty)
    - **Publish to NuGet**: Usually checked
@@ -36,7 +38,7 @@ The workflow uses `GITHUB_TOKEN` which is automatically provided by GitHub Actio
 The workflow will:
 1. ✅ Build and test the solution
 2. ✅ Create NuGet packages
-3. ✅ Create a Git tag (e.g., `v10.8.0-preview`)
+3. ✅ Create a Git tag (e.g., `v0.10.9-prerelease`)
 4. ✅ Create a GitHub release with the tag
 5. ✅ Upload NuGet packages as release assets
 6. ✅ Publish to NuGet.org (if enabled)
@@ -44,9 +46,9 @@ The workflow will:
 
 ### Version Naming
 
-Use semantic versioning:
-- **Stable releases**: `11.0.0`, `11.1.0`, `11.1.1`
-- **Pre-releases**: `11.0.0-alpha`, `11.0.0-beta`, `11.0.0-rc1`, `10.8.0-preview`
+Use the same pattern as your current NuGet versions:
+- **Pre-releases**: `0.10.9-prerelease`, `0.11.0-prerelease`, `1.0.0-prerelease`
+- **Stable releases**: `1.0.0`, `1.1.0`, `1.1.1`
 
 ### Safety Features
 
@@ -58,12 +60,17 @@ Use semantic versioning:
 
 ## Example Usage
 
-To release version `10.8.0-preview`:
-1. Run the workflow with version `10.8.0-preview`
+To release version `10.8.0-prerelease`:
+1. Run the workflow with version `10.8.0-prerelease`
 2. Mark as pre-release: ✅
 3. The workflow creates:
-   - Git tag: `v10.8.0-preview`
-   - GitHub release: "XferLang v10.8.0-preview" (marked as pre-release)
-   - NuGet package: `ParksComputing.Xfer.Lang 10.8.0-preview`
+   - Git tag: `v10.8.0-prerelease`
+   - GitHub release: "XferLang v10.8.0-prerelease" (marked as pre-release)
+   - NuGet package: `ParksComputing.Xfer.Lang 10.8.0-prerelease`
 
 Both GitHub and NuGet will have exactly the same version, keeping them perfectly synchronized!
+
+## CI vs Release Workflows
+
+- **`.NET CI` workflow**: Runs on every push/PR to build, test, and create `10.X.0-prerelease` packages (no publishing)
+- **`Manual Release` workflow**: Only way to publish releases to NuGet and GitHub using the same versioning pattern
