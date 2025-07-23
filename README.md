@@ -3,6 +3,9 @@
 # The XferLang Data-Interchange Format
 
 <p>
+  <a href="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml">
+    <img alt=".NET Build Status" src="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml/badge.svg">
+  </a>
   <a href="https://github.com/paulmooreparks/Xfer">
     <img alt="Xfer Version" src="https://img.shields.io/badge/Xfer-0.10.2-green">
   </a>
