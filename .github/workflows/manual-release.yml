@@ -32,10 +32,16 @@ on:
         required: true
         type: boolean
         default: true
+      publish_to_github_packages:
+        description: 'Publish to GitHub Packages?'
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: write
   actions: read
+  packages: write
 
 jobs:
   release:
@@ -95,6 +101,7 @@ jobs:
         echo "**Version**: \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
         echo "**Pre-release**: ${{ github.event.inputs.prerelease }}" >> $GITHUB_STEP_SUMMARY
         echo "**Publish to NuGet**: ${{ github.event.inputs.publish_to_nuget }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Publish to GitHub Packages**: ${{ github.event.inputs.publish_to_github_packages }}" >> $GITHUB_STEP_SUMMARY
         echo "**Preview mode**: ${{ github.event.inputs.preview_only }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
 
@@ -288,6 +295,12 @@ jobs:
           --source https://api.nuget.org/v3/index.json \
           --skip-duplicate
 
+    - name: Publish to GitHub Packages
+      if: github.event.inputs.publish_to_github_packages == 'true'
+      run: |
+        dotnet nuget add source --username paulmooreparks --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/paulmooreparks/index.json"
+        dotnet nuget push ./nupkg/ParksComputing.Xfer.Lang.${{ steps.version.outputs.version }}.nupkg --source "github" --skip-duplicate
+
     - name: Create summary
       run: |
         echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
@@ -295,5 +308,7 @@ jobs:
         echo "- ✅ GitHub Release: Created" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ Git Tag: Pushed" >> $GITHUB_STEP_SUMMARY
         echo "- ✅ NuGet Package: ${{ github.event.inputs.publish_to_nuget == 'true' && 'Published' || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- ✅ GitHub Packages: ${{ github.event.inputs.publish_to_github_packages == 'true' && 'Published' || 'Skipped' }}" >> $GITHUB_STEP_SUMMARY
         echo "- 🔗 [View Release](https://github.com/${{ github.repository }}/releases/tag/v${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
         echo "- 🔗 [View on NuGet](https://www.nuget.org/packages/ParksComputing.Xfer.Lang/${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔗 [View on GitHub Packages](https://github.com/paulmooreparks/Xfer/packages)" >> $GITHUB_STEP_SUMMARY
