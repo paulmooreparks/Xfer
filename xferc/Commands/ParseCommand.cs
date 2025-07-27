@@ -5,6 +5,7 @@ using System.Text;
 using ParksComputing.Xfer.Lang;
 using ParksComputing.Xfer.Lang.Services;
 using ParksComputing.Xfer.Lang.Extensions;
+using ParksComputing.Xfer.Lang.Elements;
 
 namespace ParksComputing.Xferc;
 
@@ -19,7 +20,12 @@ internal class ParseCommand {
         var parser = new Parser();
         var document = parser.Parse(inputBytes);
 
-        Console.WriteLine($"Document uses Xfer version {document.Metadata.Xfer}");
+        // Find Xfer version from MetadataCollection
+        var xferVersion = document.MetadataCollection
+            .OfType<MetadataElement>()
+            .SelectMany(m => m.Values.Values)
+            .FirstOrDefault(kvp => kvp.Key.Equals("xfer", StringComparison.OrdinalIgnoreCase))?.Value?.ToString();
+        Console.WriteLine($"Document uses Xfer version {xferVersion}");
         // Console.WriteLine($"Message ID is {document.Metadata.MessageId}");
         Console.WriteLine();
 
@@ -40,7 +46,7 @@ internal class ParseCommand {
 internal abstract class XElement<T> {
     internal T Value { get; set; }
 
-    internal XElement(T value) { Value = value; } 
+    internal XElement(T value) { Value = value; }
 }
 
 internal class IntegerXElement : XElement<int> {

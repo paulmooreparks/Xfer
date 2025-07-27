@@ -35,7 +35,7 @@ _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.c
       - [3.2.3. Explicit Syntax](#323-explicit-syntax)
     - [3.3. Element Reference](#33-element-reference)
       - [3.3.1. Primitive Types](#331-primitive-types)
-        - [3.3.1.1. Hexadecimal and Binary Formatting](#3311-hexadecimal-and-binary-formatting)
+      - [3.3.1.1. Hexadecimal and Binary Formatting](#3311-hexadecimal-and-binary-formatting)
       - [3.3.2. Structural Types](#332-structural-types)
       - [3.3.3. Special-Purpose Types](#333-special-purpose-types)
   - [4. The `.NET XferLang Library`](#4-the-net-xferlang-library)
@@ -45,6 +45,10 @@ _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.c
       - [4.2.2. Customizing Property Names with `IContractResolver`](#422-customizing-property-names-with-icontractresolver)
       - [4.2.3. Custom Type Converters with `IXferConverter`](#423-custom-type-converters-with-ixferconverter)
       - [4.2.4. Numeric Formatting with Attributes](#424-numeric-formatting-with-attributes)
+    - [4.3 DynamicSource PI Override: Powerful and Flexible](#43-dynamicsource-pi-override-powerful-and-flexible)
+      - [How it works](#how-it-works)
+      - [Example](#example)
+      - [Why this matters](#why-this-matters)
   - [5. Project Status \& Roadmap](#5-project-status--roadmap)
   - [6. Contributing](#6-contributing)
   - [7. Grammar](#7-grammar)
@@ -263,9 +267,9 @@ padded_binary: #%00101010  // MinBits = 8
 *   **Description:** A comment that is ignored by the parser. It always requires explicit syntax.
 *   **Example:** `</ This is a comment. />`, `<// Nested </comment/> //>`
 
-**Placeholder Element**
+**Dynamic Element**
 *   **Specifier:** `|` (Pipe)
-*   **Description:** Represents a value to be substituted at runtime, typically from an environment variable.
+*   **Description:** Represents a value to be substituted at runtime, by default from an environment variable. You can override the default dynamic value resolution by subclassing `DefaultDynamicSourceResolver` or by implementing the `IDynamicSourceResolver` interface. This allows you to provide custom logic for resolving dynamic values in your XferLang documents.
 *   **Example:** `'Hello, <|USERNAME|>!'`
 
 ## 4. The `.NET XferLang Library`
@@ -402,6 +406,39 @@ string xfer = XferConvert.Serialize(config);
 - Numeric formatting attributes are only applied to `int` and `long` properties
 - `decimal` and `double` types ignore formatting attributes to preserve fractional precision
 - Custom formatting respects the configured `ElementStylePreference` for syntax style
+
+### 4.3 DynamicSource PI Override: Powerful and Flexible
+
+XferLang allows you to override dynamic value resolution in your document using the `dynamicSource` processing instruction (PI). This feature provides significant flexibility for configuration, testing, and integration scenarios.
+
+#### How it works
+- The resolver uses its default logic (e.g., reverse, DB, etc.) unless a PI override is present.
+- If a `dynamicSource` PI is present, you can specify per-key overrides:
+    - `demo "reverse:!dlroW ,olleH"` (custom logic)
+    - `password "env:MY_PASSWORD"` (environment variable)
+    - `greeting "This is a hard-coded greeting."` (hard-coded value)
+- The PI can be placed at the top of your Xfer document.
+- If a key is not present in the PI, the resolver falls back to its default logic.
+
+#### Example
+```xfer
+<! dynamicSource {
+    demo "reverse:!dlroW ,olleH"
+    greeting "env:GREETING_MSG"
+    password "hardcoded-demo-password"
+} !>
+message {
+    text '<|demo|>'
+    greeting '<|greeting|>'
+    password '<|password|>'
+}
+```
+
+#### Why this matters
+- Enables flexible, testable, and environment-specific configuration.
+- Supports secrets, test data, and runtime overrides without code changes.
+
+This feature makes XferLang highly extensible and adaptable for a wide range of use cases.
 
 ## 5. Project Status & Roadmap
 

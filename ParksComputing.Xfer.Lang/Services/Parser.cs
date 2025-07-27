@@ -9,11 +9,28 @@ using ParksComputing.Xfer.Lang.Schema;
 
 namespace ParksComputing.Xfer.Lang.Services;
 
-/* This parser is ROUGH. I'm trying out a lot of ideas, some of them supported in parallel. Once I 
+/* This parser is ROUGH. I'm trying out a lot of ideas, some of them supported in parallel. Once I
 settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
 
 public class Parser : IXferParser {
-    public static readonly string Version = "0.10.0";
+    // Used to assign IDs from inline PIs to subsequent elements
+    private Queue<string> _pendingIds = new Queue<string>();
+    private ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver _dynamicSourceResolver = new ParksComputing.Xfer.Lang.DynamicSource.DefaultDynamicSourceResolver();
+    private ParksComputing.Xfer.Lang.Deserialization.IDeserializationInstructionResolver _deserializationInstructionResolver = new ParksComputing.Xfer.Lang.Deserialization.DefaultDeserializationInstructionResolver();
+
+    public ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver DynamicSourceResolver
+    {
+        get => _dynamicSourceResolver;
+        set => _dynamicSourceResolver = value ?? new ParksComputing.Xfer.Lang.DynamicSource.DefaultDynamicSourceResolver();
+    }
+
+    public ParksComputing.Xfer.Lang.Deserialization.IDeserializationInstructionResolver DeserializationInstructionResolver
+    {
+        get => _deserializationInstructionResolver;
+        set => _deserializationInstructionResolver = value ?? new ParksComputing.Xfer.Lang.Deserialization.DefaultDeserializationInstructionResolver();
+    }
+    private XferDocument? _currentDocument = null;
+    public static readonly string Version = "0.10";
 
     public Parser() : this(Encoding.UTF8) { }
 
@@ -244,7 +261,7 @@ public class Parser : IXferParser {
             Advance();
             Advance();
 
-            /* This is really ugly to me, and it seems I'm missing a more elegant way to parse this. What I'm 
+            /* This is really ugly to me, and it seems I'm missing a more elegant way to parse this. What I'm
             doing here is handling empty elements, like <""> and <##>. */
             if (CurrentChar == closingSpecifier && Peek == Element.ElementClosingCharacter) {
                 _delimStack.Push(new ElementDelimiter(openingSpecifier, closingSpecifier, specifierCount, ElementStyle.Explicit));
@@ -298,7 +315,7 @@ public class Parser : IXferParser {
     }
 
     internal bool PlaceholderElementClosing() {
-        Debug.Assert(_delimStack.Peek().ClosingSpecifier == PlaceholderElement.ClosingSpecifier);
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == DynamicElement.ClosingSpecifier);
         return ElementCompactClosing();
     }
 
@@ -530,15 +547,18 @@ public class Parser : IXferParser {
 
         ScanString = Encoding.GetString(input);
 
+        // Handle empty input
         if (CurrentChar == '\0') {
             return new XferDocument();
         }
 
-        // Maybe do something with the BOM here?
+        // Skip BOM if present
         SkipBOM();
 
+        // Parse the document using the robust main loop
         var document = ParseDocument();
 
+        // Validate if schema validator is present
         if (document is { } && _validator is { }) {
             _validator.Validate(document.Root);
         }
@@ -547,140 +567,108 @@ public class Parser : IXferParser {
 
     internal XferDocument ParseDocument() {
         var document = new XferDocument();
-        var element = ParseElement();
-
-        if (element is MetadataElement metadataElement) {
-            document.Metadata = metadataElement;
-        }
-        else {
-            document.Root.Add(element);
-        }
-
+        _currentDocument = document;
         while (IsCharAvailable()) {
-            var content = ParseElement();
-            /* I'm still debating whether or not to allow metadata elements here. */
-            document.Root.Add(content);
-        }
+            var element = ParseElement();
+            // Handle PI and metadata elements
+            if (element is ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement) {
+                if (!document.MetadataCollection.Contains(element)) {
+                    document.MetadataCollection.Add(element);
+                }
+                continue;
+            }
+            else if (element is MetadataElement metaElem)
+            {
+                if (!document.MetadataCollection.Contains(metaElem))
+                {
+                    document.MetadataCollection.Add(metaElem);
+                }
+                continue;
+            }
 
+            // Assign pending ID to the next real element only
+            if (element is not EmptyElement) {
+                if (_pendingIds.Count > 0) {
+                    element.Id = _pendingIds.Dequeue();
+                }
+                document.Root.Add(element);
+            }
+        }
         return document;
     }
 
     internal Element ParseElement() {
         SkipWhitespace();
 
+        // Inline MetadataElement support: <! ... !>
+        if (ElementOpening(MetadataElement.ElementDelimiter, out int metaSpecifierCount)) {
+            var metadataElement = ParseMetadataElement(metaSpecifierCount);
+            // Add PI elements and inline metadata to document's metadata collection for global visibility
+            if (_currentDocument != null) {
+                if ((metadataElement is ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement ||
+                     metadataElement is MetadataElement) &&
+                    !_currentDocument.MetadataCollection.Contains(metadataElement)) {
+                    _currentDocument.MetadataCollection.Add(metadataElement);
+                }
+            }
+
+            SkipWhitespace();
+            // Do NOT parse the next element here; let the main loop handle it and assign the ID
+            return new EmptyElement();
+        }
+
         while (IsCharAvailable()) {
+            Element? result = null;
             if (IdentifierElementOpening(out int identifierSpecifierCount)) {
-                var keyValuePairElement = ParseIdentifierElement(identifierSpecifierCount);
-                SkipWhitespace();
-                return keyValuePairElement;
-            }
-
-            if (KeywordElementOpening(out int keywordSpecifierCount)) {
-                var keyValuePairElement = ParseKeywordElement(keywordSpecifierCount);
-                SkipWhitespace();
-                return keyValuePairElement;
-            }
-
-            if (ElementOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
-                var stringElement = ParseStringElement(stringSpecifierCount);
-                SkipWhitespace();
-                return stringElement;
-            }
-
-            if (ElementOpening(InterpolatedElement.ElementDelimiter, out int evalSpecifierCount)) {
-                var literalElement = ParseEvaluatedElement(evalSpecifierCount);
-                SkipWhitespace();
-                return literalElement;
-            }
-
-            if (ElementOpening(CharacterElement.ElementDelimiter, out int charSpecifierCount)) {
-                var characterElement = ParseCharacterElement();
-                SkipWhitespace();
-                return characterElement;
-            }
-
-            if (ElementOpening(TupleElement.ElementDelimiter, out int propSpecifierCount)) {
-                var tupleElement = ParseTupleElement(propSpecifierCount);
-                SkipWhitespace();
-                return tupleElement;
-            }
-
-            if (ElementOpening(MetadataElement.ElementDelimiter, out int metaSpecifierCount)) {
-                var metadataElement = ParseMetadataElement(metaSpecifierCount);
-                SkipWhitespace();
-                return metadataElement;
-            }
-
-            if (ElementOpening(ObjectElement.ElementDelimiter, out int objSpecifierCount)) {
-                var objectElement = ParseObjectElement(objSpecifierCount);
-                SkipWhitespace();
-                return objectElement;
-            }
-
-            if (ElementOpening(ArrayElement.ElementDelimiter, out int arraySpecifierCount)) {
-                var arrayElement = ParseArrayElement(arraySpecifierCount);
-                SkipWhitespace();
-                return arrayElement;
-            }
-
-            if (IntegerElementOpening(out int intSpecifierCount)) {
-                var integerElement = ParseIntegerElement(intSpecifierCount);
-                SkipWhitespace();
-                return integerElement;
-            }
-
-            if (ElementOpening(LongElement.ElementDelimiter, out int longSpecifierCount)) {
-                var longIntegerElement = ParseLongIntegerElement(longSpecifierCount);
-                SkipWhitespace();
-                return longIntegerElement;
-            }
-
-            if (ElementOpening(DecimalElement.ElementDelimiter, out int decSpecifierCount)) {
-                var decimalElement = ParseDecimalElement(decSpecifierCount);
-                SkipWhitespace();
-                return decimalElement;
-            }
-
-            if (ElementOpening(DoubleElement.ElementDelimiter, out int doubleSpecifierCount)) {
-                var doubleElement = ParseDoubleElement(doubleSpecifierCount);
-                SkipWhitespace();
-                return doubleElement;
-            }
-
-            if (ElementOpening(BooleanElement.ElementDelimiter, out int boolSpecifierCount)) {
-                var booleanElement = ParseBooleanElement(boolSpecifierCount);
-                SkipWhitespace();
-                return booleanElement;
-            }
-
-            if (ElementOpening(DateTimeElement.ElementDelimiter, out int dateSpecifierCount)) {
-                var dateElement = ParseDateElement(dateSpecifierCount);
-                SkipWhitespace();
-                return dateElement;
-            }
-
-            if (ElementOpening(PlaceholderElement.ElementDelimiter, out int phSpecifierCount)) {
-                var placeholderElement = ParsePlaceholderElement(phSpecifierCount);
-                SkipWhitespace();
-                return placeholderElement;
-            }
-
-            if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
-                var nullElement = ParseNullElement(nullSpecifierCount);
-                SkipWhitespace();
-                return nullElement;
-            }
-
-            if (ElementOpening(CommentElement.ElementDelimiter, out int commentSpecifierCount)) {
+                result = ParseIdentifierElement(identifierSpecifierCount);
+            } else if (KeywordElementOpening(out int keywordSpecifierCount)) {
+                result = ParseKeywordElement(keywordSpecifierCount);
+            } else if (ElementOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
+                result = ParseStringElement(stringSpecifierCount);
+            } else if (ElementOpening(InterpolatedElement.ElementDelimiter, out int evalSpecifierCount)) {
+                result = ParseEvaluatedElement(evalSpecifierCount);
+            } else if (ElementOpening(CharacterElement.ElementDelimiter, out int charSpecifierCount)) {
+                result = ParseCharacterElement();
+            } else if (ElementOpening(TupleElement.ElementDelimiter, out int propSpecifierCount)) {
+                result = ParseTupleElement(propSpecifierCount);
+            } else if (ElementOpening(MetadataElement.ElementDelimiter, out int metaSpecifierCount2)) {
+                var metadataElement2 = ParseMetadataElement(metaSpecifierCount2);
+                result = metadataElement2;
+            } else if (ElementOpening(ObjectElement.ElementDelimiter, out int objSpecifierCount)) {
+                result = ParseObjectElement(objSpecifierCount);
+            } else if (ElementOpening(ArrayElement.ElementDelimiter, out int arraySpecifierCount)) {
+                result = ParseArrayElement(arraySpecifierCount);
+            } else if (IntegerElementOpening(out int intSpecifierCount)) {
+                result = ParseIntegerElement(intSpecifierCount);
+            } else if (ElementOpening(LongElement.ElementDelimiter, out int longSpecifierCount)) {
+                result = ParseLongIntegerElement(longSpecifierCount);
+            } else if (ElementOpening(DecimalElement.ElementDelimiter, out int decSpecifierCount)) {
+                result = ParseDecimalElement(decSpecifierCount);
+            } else if (ElementOpening(DoubleElement.ElementDelimiter, out int doubleSpecifierCount)) {
+                result = ParseDoubleElement(doubleSpecifierCount);
+            } else if (ElementOpening(BooleanElement.ElementDelimiter, out int boolSpecifierCount)) {
+                result = ParseBooleanElement(boolSpecifierCount);
+            } else if (ElementOpening(DateTimeElement.ElementDelimiter, out int dateSpecifierCount)) {
+                result = ParseDateElement(dateSpecifierCount);
+            } else if (ElementOpening(DynamicElement.ElementDelimiter, out int phSpecifierCount)) {
+                result = ParsePlaceholderElement(phSpecifierCount);
+            } else if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
+                result = ParseNullElement(nullSpecifierCount);
+            } else if (ElementOpening(CommentElement.ElementDelimiter, out int commentSpecifierCount)) {
                 /* Parse comment but don't return it, as comments are not part of the logical output. */
                 ParseCommentElement(commentSpecifierCount);
                 SkipWhitespace();
                 continue;
+            } else {
+                throw new InvalidOperationException($"Expected element at row {CurrentRow}, column {CurrentColumn}.");
             }
-
-            throw new InvalidOperationException($"Expected element at row {CurrentRow}, column {CurrentColumn}.");
+            SkipWhitespace();
+            // Only assign pending ID to the very next real element, then stop
+            if (result is not null && result is not EmptyElement && _pendingIds.Count > 0) {
+                result.Id = _pendingIds.Dequeue();
+            }
+            return result!;
         }
-
         return new EmptyElement();
     }
 
@@ -698,40 +686,61 @@ public class Parser : IXferParser {
 
     private MetadataElement ParseMetadataElement(int specifierCount = 1) {
         SkipWhitespace();
-        var metadataElement = new MetadataElement();
-
+        var kvps = new List<KeyValuePairElement>();
         while (IsCharAvailable()) {
             if (MetadataElementClosing()) {
+                // Check for PI keywords
+                foreach (var piKvp in kvps) {
+                    var keyLower = piKvp.Key.ToLowerInvariant();
+                    if (ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.KnownPIKeywords.Contains(keyLower)) {
+                        // Instantiate the correct PI element type
+                        if (keyLower == ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.DeserializeKeyword) {
+                            var pi = new ParksComputing.Xfer.Lang.Elements.DeserializePIElement();
+                            foreach (var k in kvps) pi.Add(k);
+                            return pi;
+                        }
+                        if (keyLower == ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.IncludeKeyword) {
+                            var pi = new ParksComputing.Xfer.Lang.Elements.IncludePIElement();
+                            foreach (var k in kvps) pi.Add(k);
+                            return pi;
+                        }
+                    }
+                }
+                // If no PI keyword, return regular MetadataElement
+                var metadataElement = new MetadataElement();
+                foreach (var k in kvps) metadataElement.Add(k);
+                if (metadataElement.ContainsKey(ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.IdKeyword)) {
+                    if (metadataElement.Values[ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.IdKeyword].Value is ParksComputing.Xfer.Lang.Elements.TextElement idValue) {
+                        _pendingIds.Enqueue(idValue.Value);
+                    }
+                }
+                // Schema validation logic
                 if (metadataElement.ContainsKey(MetadataElement.SchemaKeyword)) {
                     var schemaElement = metadataElement[MetadataElement.SchemaKeyword];
-
                     if (schemaElement.Value is ObjectElement schemaObject) {
                         var schemaParser = new XferSchemaParser();
                         var schemaObjects = schemaParser.ParseSchema(schemaObject);
-
                         if (schemaObjects is { }) {
                             _validator = new XferSchemaValidator(schemaObjects);
                         }
                     }
                 }
-
                 return metadataElement;
             }
-
             var lastRow = CurrentRow;
             var lastColumn = CurrentColumn;
             var element = ParseElement();
-
             if (element is KeyValuePairElement kvp) {
-                if (!metadataElement.Add(kvp)) {
+                // Check for duplicate keys
+                if (kvps.Exists(x => x.Key == kvp.Key)) {
                     throw new InvalidOperationException($"Duplicate key '{kvp.Key}' in object at row {lastRow}, column {lastColumn}.");
                 }
+                kvps.Add(kvp);
             }
             else {
                 throw new InvalidOperationException($"Unexpected element type at row {lastRow}, column {lastColumn}.");
             }
         }
-
         throw new InvalidOperationException($"Unexpected end of {MetadataElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
@@ -747,7 +756,7 @@ public class Parser : IXferParser {
 
             var element = ParseElement();
 
-            /* This looks and feels kind of dirty, for some reason, yet it does the job. Sure, I could put this in a 
+            /* This looks and feels kind of dirty, for some reason, yet it does the job. Sure, I could put this in a
             dictionary or make a factory, but that just moves the ugliness around. */
 
             ArrayElement arrayElement = element switch {
@@ -835,7 +844,7 @@ public class Parser : IXferParser {
         throw new InvalidOperationException($"Unexpected end of {TupleElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private PlaceholderElement ParsePlaceholderElement(int specifierCount = 1) {
+    private DynamicElement ParsePlaceholderElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Compact) {
@@ -852,15 +861,19 @@ public class Parser : IXferParser {
                     throw new InvalidOperationException($"Placeholder variable must be a non-empty string at row {CurrentRow}, column {CurrentColumn}.");
                 }
 
-                var value = Environment.GetEnvironmentVariable(variable);
-                return new PlaceholderElement(value ?? string.Empty, specifierCount, style: style);
+                string? value = null;
+                if (_currentDocument != null)
+                {
+                    value = _dynamicSourceResolver.Resolve(variable, _currentDocument);
+                }
+                return new DynamicElement(value ?? string.Empty, specifierCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
             Expand();
         }
 
-        throw new InvalidOperationException($"Unexpected end of {PlaceholderElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
+        throw new InvalidOperationException($"Unexpected end of {DynamicElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
     private KeyValuePairElement ParseKeywordElement(int specifierCount = 1) {
@@ -943,16 +956,23 @@ public class Parser : IXferParser {
         var keyValuePairElement = new KeyValuePairElement(keyElement);
 
         if (IsCharAvailable()) {
+            // Assign pending ID to the KeyValuePairElement itself, if present
+            string? id = null;
+            if (_pendingIds.Count > 0) {
+                id = _pendingIds.Dequeue();
+            }
             Element valueElement = ParseElement();
+            // Do NOT assign pending ID to valueElement here
             keyValuePairElement.Value = valueElement;
+            keyValuePairElement.Id = id;
             return keyValuePairElement;
         }
 
         throw new InvalidOperationException($"Unexpected end of {KeyValuePairElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    /* 
-    The following two methods need a LOT of work to handle the vagaries of Unicode. 
+    /*
+    The following two methods need a LOT of work to handle the vagaries of Unicode.
     I'm just trying to get through the basic scenarios first.
     */
 
@@ -1069,8 +1089,8 @@ public class Parser : IXferParser {
                 continue;
             }
 
-            if (ElementExplicitOpening(PlaceholderElement.ElementDelimiter, out int phSpecifierCount)) {
-                PlaceholderElement evaluatedElement = ParsePlaceholderElement(phSpecifierCount);
+            if (ElementExplicitOpening(DynamicElement.ElementDelimiter, out int phSpecifierCount)) {
+                DynamicElement evaluatedElement = ParsePlaceholderElement(phSpecifierCount);
                 valueBuilder.Append(evaluatedElement.Value);
                 continue;
             }
@@ -1103,7 +1123,10 @@ public class Parser : IXferParser {
             valueBuilder.Append(CurrentChar);
             Expand();
         }
-
+        // If we reach end of input, treat as closed for compact/implicit style
+        if (valueBuilder.Length > 0 && (style == ElementStyle.Compact || style == ElementStyle.Implicit)) {
+            return new StringElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount, style: style);
+        }
         throw new InvalidOperationException($"Unexpected end of {StringElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
@@ -1116,8 +1139,8 @@ public class Parser : IXferParser {
 
         StringBuilder valueBuilder = new StringBuilder();
 
-        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
-            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+        if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
+            DynamicElement evaluatedElement = ParsePlaceholderElement();
             valueBuilder.Append(evaluatedElement.Value);
             _delimStack.Pop();
             var value = valueBuilder.ToString();
@@ -1169,8 +1192,8 @@ public class Parser : IXferParser {
 
         StringBuilder valueBuilder = new StringBuilder();
 
-        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
-            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+        if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
+            DynamicElement evaluatedElement = ParsePlaceholderElement();
             valueBuilder.Append(evaluatedElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<int>(valueBuilder.ToString());
@@ -1182,11 +1205,14 @@ public class Parser : IXferParser {
                 var value = ParseNumericValue<int>(valueBuilder.ToString());
                 return new IntegerElement(value, specifierCount, style);
             }
-
             valueBuilder.Append(CurrentChar);
             Expand();
         }
-
+        // If we reach end of input, treat as closed for compact/implicit style
+        if (valueBuilder.Length > 0 && (style == ElementStyle.Compact || style == ElementStyle.Implicit)) {
+            var value = ParseNumericValue<int>(valueBuilder.ToString());
+            return new IntegerElement(value, specifierCount, style);
+        }
         throw new InvalidOperationException($"Unexpected end of {IntegerElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
@@ -1200,8 +1226,8 @@ public class Parser : IXferParser {
 
         StringBuilder valueBuilder = new StringBuilder();
 
-        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
-            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+        if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
+            DynamicElement evaluatedElement = ParsePlaceholderElement();
             valueBuilder.Append(evaluatedElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<long>(valueBuilder.ToString());
@@ -1217,7 +1243,11 @@ public class Parser : IXferParser {
             valueBuilder.Append(CurrentChar);
             Expand();
         }
-
+        // If we reach end of input, treat as closed for compact/implicit style
+        if (valueBuilder.Length > 0 && (style == ElementStyle.Compact || style == ElementStyle.Implicit)) {
+            var value = ParseNumericValue<long>(valueBuilder.ToString());
+            return new LongElement(value, specifierCount, style: style);
+        }
         throw new InvalidOperationException($"Unexpected end of {LongElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
@@ -1230,8 +1260,8 @@ public class Parser : IXferParser {
 
         StringBuilder valueBuilder = new StringBuilder();
 
-        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
-            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+        if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
+            DynamicElement evaluatedElement = ParsePlaceholderElement();
             valueBuilder.Append(evaluatedElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<decimal>(valueBuilder.ToString());
@@ -1247,7 +1277,11 @@ public class Parser : IXferParser {
             valueBuilder.Append(CurrentChar);
             Expand();
         }
-
+        // If we reach end of input, treat as closed for compact/implicit style
+        if (valueBuilder.Length > 0 && (style == ElementStyle.Compact || style == ElementStyle.Implicit)) {
+            var value = ParseNumericValue<decimal>(valueBuilder.ToString());
+            return new DecimalElement(value, specifierCount, style: style);
+        }
         throw new InvalidOperationException($"Unexpected end of {DecimalElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
@@ -1260,8 +1294,8 @@ public class Parser : IXferParser {
 
         StringBuilder valueBuilder = new StringBuilder();
 
-        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
-            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+        if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
+            DynamicElement evaluatedElement = ParsePlaceholderElement();
             valueBuilder.Append(evaluatedElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<double>(valueBuilder.ToString());
@@ -1277,7 +1311,11 @@ public class Parser : IXferParser {
             valueBuilder.Append(CurrentChar);
             Expand();
         }
-
+        // If we reach end of input, treat as closed for compact/implicit style
+        if (valueBuilder.Length > 0 && (style == ElementStyle.Compact || style == ElementStyle.Implicit)) {
+            var value = ParseNumericValue<double>(valueBuilder.ToString());
+            return new DoubleElement(value, specifierCount, style: style);
+        }
         throw new InvalidOperationException($"Unexpected end of {DoubleElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
@@ -1292,8 +1330,8 @@ public class Parser : IXferParser {
         string valueString = valueBuilder.ToString().ToLower();
         bool value = false;
 
-        if (IsCharAvailable() && ElementOpening(PlaceholderElement.ElementDelimiter)) {
-            PlaceholderElement evaluatedElement = ParsePlaceholderElement();
+        if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
+            DynamicElement evaluatedElement = ParsePlaceholderElement();
             valueBuilder.Append(evaluatedElement.Value);
             _delimStack.Pop();
             goto ReturnElement;
@@ -1307,7 +1345,10 @@ public class Parser : IXferParser {
             valueBuilder.Append(CurrentChar);
             Expand();
         }
-
+        // If we reach end of input, treat as closed for compact/implicit style
+        if (valueBuilder.Length > 0 && (style == ElementStyle.Compact || style == ElementStyle.Implicit)) {
+            goto ReturnElement;
+        }
         throw new InvalidOperationException($"Unexpected end of {BooleanElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
 
 /* "Goto Considered Harmful" considered harmful. */

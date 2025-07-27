@@ -1,0 +1,15 @@
+</ The dynamic elements in the document below will use the DbDynamicSourceResolver
+class to resolve their values. If you want to override that behavior, uncomment the
+metadata element below. Make sure you define TESTING_PASSWORD in your environment. />
+
+</ <!
+dynamicSource {
+    dbpassword "env:TESTING_PASSWORD"
+    greeting "This is a test greeting."
+}
+!> />
+
+credentials {
+    password '<|dbpassword|>'
+    greeting '<|greeting|>'
+}

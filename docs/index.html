@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="highlightjs/styles/github.min.css">
     <script src="highlightjs/highlight.min.js"></script>
-    <script src="highlightjs/languages/xfer.min.js"></script>
 </head>
 <body>
     <div class="mobile-nav-toggle">
@@ -17,16 +16,41 @@
     </div>
     <nav class="sidebar">
         <div class="sidebar-header">
-            <h2>XferLang.NET</h2>
+            <h2><a href="index.html" class="home-link">XferLang.NET</a></h2>
         </div>
         <ul>
             <li><a href="#introduction">Introduction to XferLang</a></li>
             <li><a href="#philosophy">Design Philosophy</a></li>
-            <li><a href="#basic-syntax">Basic Syntax</a></li>
-            <li><a href="#syntax-variations">Syntax Variations</a></li>
-            <li><a href="#data-types">Data Types</a></li>
+            <li><a href="#metadata-and-processing-instructions">Metadata & Processing Instructions</a></li>
+            <li>
+                <button class="accordion">Element Types</button>
+                <div class="panel">
+                    <ul>
+                        <li><a href="#element-integer">IntegerElement</a></li>
+                        <li><a href="#element-long">LongElement</a></li>
+                        <li><a href="#element-boolean">BooleanElement</a></li>
+                        <li><a href="#element-double">DoubleElement</a></li>
+                        <li><a href="#element-decimal">DecimalElement</a></li>
+                        <li><a href="#element-datetime">DateTimeElement</a></li>
+                        <li><a href="#element-date">DateElement</a></li>
+                        <li><a href="#element-time">TimeElement</a></li>
+                        <li><a href="#element-timespan">TimeSpanElement</a></li>
+                        <li><a href="#element-string">StringElement</a></li>
+                        <li><a href="#element-character">CharacterElement</a></li>
+                        <li><a href="#element-guid">Guid/StringElement</a></li>
+                        <li><a href="#element-enum">Enum/StringElement</a></li>
+                        <li><a href="#element-uri">Uri/StringElement</a></li>
+                        <li><a href="#element-array">ArrayElement</a></li>
+                        <li><a href="#element-tuple">TupleElement</a></li>
+                        <li><a href="#element-object">ObjectElement</a></li>
+                        <li><a href="#element-keyvalue">KeyValuePairElement</a></li>
+                        <li><a href="#element-null">NullElement</a></li>
+                        <li><a href="#element-interpolated">InterpolatedElement</a></li>
+                        <li><a href="#element-dynamic">DynamicElement</a></li>
+                    </ul>
+                </div>
+            </li>
             <li><a href="#complex-structures">Complex Structures</a></li>
-            <li><a href="#metadata">Metadata</a></li>
             <li><a href="#examples">Complete Examples</a></li>
             <li><a href="#grammar">Grammar Reference</a></li>
             <li><a href="#getting-started">Getting Started with .NET</a></li>
@@ -35,6 +59,7 @@
             <li><a href="#settings">Serializer Settings</a></li>
             <li><a href="#property-attributes">Property Attributes</a></li>
             <li><a href="#numeric-formatting">Numeric Formatting Attributes</a></li>
+            <li><a href="#custom-pi-processors">Custom Processing Instructions</a></li>
             <li><a href="#contract-resolver">Contract Resolvers</a></li>
             <li><a href="#custom-converters">Custom Converters</a></li>
             <li><a href="#github-repository">GitHub Repository</a></li>
@@ -44,35 +69,36 @@
     </nav>
     <main class="content">
         <header>
+            <img src="XferLang-lg.png" alt="XferLang Logo" class="main-logo">
             <h1>XferLang Documentation</h1>
-            <p>Your complete guide to the XferLang data-interchange format and the .NET library.</p>
+            <p class="subtitle">Your complete guide to the XferLang data-interchange format and the .NET library.</p>
 
-            <div class="project-badges" style="margin: 20px 0; text-align: center;">
-                <a href="https://github.com/paulmooreparks/Xfer" target="_blank">
+            <div class="project-badges">
+                <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener">
                     <img src="https://img.shields.io/github/stars/paulmooreparks/Xfer?style=social" alt="GitHub Stars">
                 </a>
-                <a href="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml" target="_blank">
+                <a href="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml" target="_blank" rel="noopener">
                     <img src="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml/badge.svg" alt=".NET Build Status">
                 </a>
-                <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang" target="_blank">
+                <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang" target="_blank" rel="noopener">
                     <img src="https://img.shields.io/nuget/vpre/ParksComputing.Xfer.Lang.svg" alt="NuGet Version">
                 </a>
-                <a href="https://github.com/paulmooreparks/Xfer" target="_blank">
+                <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener">
                     <img src="https://img.shields.io/github/last-commit/paulmooreparks/Xfer" alt="Last Commit">
                 </a>
-                <a href="https://opensource.org/licenses/MIT" target="_blank">
+                <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">
                     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
                 </a>
             </div>
 
-            <div style="text-align: center; margin: 15px 0;">
-                <a href="https://github.com/paulmooreparks/Xfer" target="_blank" style="background: #333; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 0 10px;">
+            <div class="project-links">
+                <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener" class="github-btn">
                     📁 View on GitHub
                 </a>
-                <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang" target="_blank" style="background: #004880; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 0 10px;">
+                <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang" target="_blank" rel="noopener" class="nuget-btn">
                     📦 NuGet Package
                 </a>
-                <a href="https://github.com/paulmooreparks/Xfer/releases" target="_blank" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 0 10px;">
+                <a href="https://github.com/paulmooreparks/Xfer/releases" target="_blank" rel="noopener" class="releases-btn">
                     🔖 Releases
                 </a>
             </div>
@@ -82,7 +108,7 @@
             <h2>Introduction to XferLang</h2>
             <p>XferLang is a modern data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. Unlike JSON or XML, XferLang is designed with explicit typing, human readability, and safe data embedding at its core.</p>
 
-            <p>XferLang is an <strong>open-source project</strong> hosted on GitHub at <a href="https://github.com/paulmooreparks/Xfer" target="_blank">github.com/paulmooreparks/Xfer</a>. The project includes the complete language specification, a production-ready .NET library, comprehensive documentation, and development tools.</p>
+            <p>XferLang is an <strong>open-source project</strong> hosted on GitHub at <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener">github.com/paulmooreparks/Xfer</a>. The project includes the complete language specification, a production-ready .NET library, comprehensive documentation, and development tools.</p>
 
             <p>Here's a quick comparison to show XferLang in action:</p>
 
@@ -158,6 +184,44 @@ name "John"
 age #30</code></pre>
         </section>
 
+        <section id="metadata-and-processing-instructions">
+            <h2>Metadata & Processing Instructions (PIs)</h2>
+            <p>XferLang supports document-level metadata and extensible processing instructions (PIs) for configuration, runtime directives, and schema association. These features provide powerful control over parsing, validation, and dynamic value resolution.</p>
+
+            <h3>General Syntax</h3>
+            <p>Metadata and PIs are enclosed in angle brackets with exclamation marks, e.g., <code>&lt;! ... !&gt;</code>, and typically appear at the top of a document.</p>
+            <pre><code class="xfer">&lt;! name { key1 value1 key2 value2 ... } !&gt;</code></pre>
+
+            <h3>Document Metadata</h3>
+            <p>Use the <code>xfer</code> PI to specify XferLang version and document metadata:</p>
+            <pre><code class="xfer">&lt;! xfer "0.7.2" author "John Doe" created @2023-12-25T10:00:00Z@ !&gt;</code></pre>
+
+            <h3>Schema Association (TO BE IMPLEMENTED)</h3>
+            <p>Use the <code>schema</code> PI to associate a document with a schema definition:</p>
+            <pre><code class="xfer">&lt;! schema "foo" !&gt;</code></pre>
+
+            <h3>Dynamic Value Resolution</h3>
+            <p>The <code>dynamicSource</code> PI allows you to override how <a href="#element-dynamic">dynamic values</a> (e.g., environment variables, secrets, test data) are resolved at runtime. Example:</p>
+            <pre><code class="xfer">&lt;! dynamicSource { key "env:NAME" } !&gt;</code></pre>
+            <ul>
+                <li>If a <code>dynamicSource</code> PI is present, you can specify per-key overrides for dynamic values.</li>
+                <li>Supported override types include environment variables (<code>env:NAME</code>), hard-coded values, and custom logic (e.g., <code>reverse:...</code>).</li>
+                <li>If a key is not present in the PI, the resolver falls back to its default logic.</li>
+            </ul>
+
+            <h3>Extensibility</h3>
+            <p>PIs are designed to be extensible. You can define custom PIs for your application and implement corresponding logic in your parser or resolver. For dynamic value resolution, subclass <code>DefaultDynamicSourceResolver</code> or implement <code>IDynamicSourceResolver</code> in .NET.</p>
+
+            <h3>Why Use Metadata & PIs?</h3>
+            <ul>
+                <li>Specify document version, author, and creation date.</li>
+                <li>Associate with schemas for validation.</li>
+                <li>Enable flexible, testable, and environment-specific configuration.</li>
+                <li>Support secrets, test data, and runtime overrides without code changes.</li>
+                <li>Make XferLang highly extensible and adaptable for a wide range of use cases.</li>
+            </ul>
+        </section>
+
         <section id="syntax-variations">
             <h2>Syntax Variations</h2>
             <p>XferLang supports three different syntax styles for writing elements, providing flexibility for different use cases:</p>
@@ -179,6 +243,7 @@ name "Alice"        &lt;/ A key/value pair of a keyword 'name' and a string valu
             <pre><code class="xfer">&lt;"Alice said, "Boo!""&gt;
 &lt;// A comment containing &lt;/another comment/&gt; //&gt;</code></pre>
         </section>
+
 
         <section id="data-types">
             <h2>Data Types</h2>
@@ -203,13 +268,12 @@ long &123456789
 hexLong &$DEADBEEF
 binaryLong &%1001010100000010111110010000000000
 decimal *3.14159
-scientific *1.23e-4
 double ^2.71828</code></pre>
 
             <p>You can also write integers without the prefix when the context is clear (implicit syntax):</p>
             <pre><code class="xfer">simpleNumber 42</code></pre>
 
-            <p><strong>Hexadecimal and Binary Formatting:</strong> Integer and Long elements support alternative numeric representations using <code>#$</code> for hexadecimal and <code>#%</code> for binary (Integer) or <code>&$</code>/<code>&%</code> for Long values. These formats are ideal for memory addresses, color values, bitmasks, and low-level programming contexts.</p>
+            <p><strong>Hexadecimal and Binary Formatting:</strong> Integer, long, and character elements support alternative numeric representations using <code>#$</code> for hexadecimal and <code>#%</code> for binary (Integer), <code>&$</code>/<code>&%</code> for Long values, and <code>\$</code>/<code>\%</code> for Character values. These formats are ideal for memory addresses, color values, bitmasks, Unicode, and low-level programming contexts.</p>
 
             <h3>Booleans</h3>
             <p>Booleans use the <code>~</code> prefix in <a href="#compact-syntax">compact syntax</a>:</p>
@@ -222,10 +286,23 @@ isDeleted ~false</code></pre>
 explicitNull &lt;??&gt;</code></pre>
 
             <h3>Characters</h3>
-            <p>Single characters use the backslash prefix and can be specified as ASCII values or Unicode:</p>
+            <p>Single characters use the backslash (<code>\</code>) prefix and can be specified in several explicit ways: Unicode code points (<code>\$2764</code> for '❤'), decimal (<code>\65</code> for 'A'), hexadecimal (<code>\$41</code> for 'A'), binary (<code>\%1000001</code> for 'A'), and named control characters (<code>nul</code>, <code>cr</code>, <code>lf</code>, <code>nl</code>, <code>tab</code>, <code>vtab</code>, <code>bksp</code>, <code>ff</code>, <code>bel</code>, <code>quote</code>, <code>apos</code>, <code>backslash</code>, <code>lt</code>, <code>gt</code>).</p>
             <pre><code class="xfer">letter \A
 space \32
-unicode \$1F600  &lt;/ 😀 emoji /&gt;</code></pre>
+unicode \$1F600  &lt;/ 😀 emoji /&gt;
+tab \tab
+newline \lf
+verticalTab \vtab
+backspace \bksp
+formFeed \ff
+bell \bel
+doubleQuote \quote
+singleQuote \apos
+backslash \backslash
+lessThan \lt
+greaterThan \gt
+hexadecimal \$41  &lt;/ 'A' /&gt;
+binary \%1000001  &lt;/ 'A' /&gt;</code></pre>
 
             <h3>Dates and Times</h3>
             <p>Dates and times use the <code>@</code> prefix with ISO 8601 format and closing <code>@</code>:</p>
@@ -233,10 +310,179 @@ unicode \$1F600  &lt;/ 😀 emoji /&gt;</code></pre>
 meetingTime @2023-12-25T14:30:00@
 timestamp @2023-12-25T14:30:00.123Z@</code></pre>
 
-            <h3>Evaluated Elements</h3>
-            <p>XferLang supports evaluated elements that can contain expressions and other elements. These always require <a href="#explicit-syntax">explicit syntax</a> for complex content:</p>
-            <pre><code class="xfer">greeting 'Hello, <"World">&lt;/ This is a comment inside an eval /&gt;!'
+            <h3>Interpolated Elements</h3>
+            <p>XferLang supports interpolated elements that can contain expressions and other elements. These always require <a href="#explicit-syntax">explicit syntax</a> for complex content:</p>
+            <pre><code class="xfer">greeting 'Hello, &lt;"World"&gt;!&lt;/ This is a comment inside an eval /&gt;!'
 emoji 'I &lt;\$2764\&gt; Xfer &lt;\$1F600\&gt;'  &lt;/ I ❤︎ Xfer 😀 /&gt;</code></pre>
+        </section>
+
+        <section id="element-types">
+            <h2>Xfer Element Types (Concept & Code)</h2>
+            <p>XferLang supports a rich set of data types designed for clarity, explicitness, and flexibility. Each type is chosen to represent a distinct kind of value, making data both human-readable and machine-precise. The main categories are:
+    <ul>
+        <li><strong>Numbers</strong>: Integers, longs, decimals, and doubles for numeric values.</li>
+        <li><strong>Booleans</strong>: True/false values for logic and state.</li>
+        <li><strong>Strings & Characters</strong>: Textual data, including single characters and multi-line strings.</li>
+        <li><strong>Dates & Times</strong>: Date, time, and time span for temporal data.</li>
+        <li><strong>Nulls</strong>: Explicit representation of missing or undefined values.</li>
+        <li><strong>Objects</strong>: Named key-value pairs for structured records.</li>
+        <li><strong>Arrays & Tuples</strong>: Ordered collections, either typed (arrays) or mixed (tuples).</li>
+        <li><strong>Special Types</strong>: GUIDs, URIs, enums, dynamic elements, and interpolated values for advanced scenarios.</li>
+    </ul>
+    These concepts map directly to .NET element classes, which provide programmatic access and manipulation. Below you'll find each element type described both conceptually and with .NET code usage.</p>
+
+            <section id="element-integer">
+                <h3>IntegerElement</h3>
+                <p>Represents a 32-bit integer value.</p>
+                <pre><code>// Concept: Used for whole numbers.
+var element = new IntegerElement(42);
+int value = element.Value; // 42
+</code></pre>
+            </section>
+            <section id="element-long">
+                <h3>LongElement</h3>
+                <p>Represents a 64-bit integer value.</p>
+                <pre><code>var element = new LongElement(1234567890123L);
+long value = element.Value;
+</code></pre>
+            </section>
+            <section id="element-boolean">
+                <h3>BooleanElement</h3>
+                <p>Represents a boolean value (true/false).</p>
+                <pre><code>var element = new BooleanElement(true);
+bool value = element.Value;
+</code></pre>
+            </section>
+            <section id="element-double">
+                <h3>DoubleElement</h3>
+                <p>Represents a double-precision floating-point value.</p>
+                <pre><code>var element = new DoubleElement(3.14159);
+double value = element.Value;
+</code></pre>
+            </section>
+            <section id="element-decimal">
+                <h3>DecimalElement</h3>
+                <p>Represents a high-precision decimal value.</p>
+                <pre><code>var element = new DecimalElement(123.45m);
+decimal value = element.Value;
+</code></pre>
+            </section>
+            <section id="element-datetime">
+                <h3>DateTimeElement</h3>
+                <p>Represents a date and time value.</p>
+                <pre><code>var element = new DateTimeElement(DateTime.Now);
+DateTime value = element.Value;
+</code></pre>
+            </section>
+            <section id="element-date">
+                <h3>DateElement</h3>
+                <p>Represents a date-only value.</p>
+                <pre><code>var element = new DateElement(DateOnly.FromDateTime(DateTime.Now));
+DateOnly value = element.Value;
+</code></pre>
+            </section>
+            <section id="element-time">
+                <h3>TimeElement</h3>
+                <p>Represents a time-only value.</p>
+                <pre><code>var element = new TimeElement(TimeOnly.FromDateTime(DateTime.Now));
+TimeOnly value = element.Value;
+</code></pre>
+            </section>
+            <section id="element-timespan">
+                <h3>TimeSpanElement</h3>
+                <p>Represents a time interval.</p>
+                <pre><code>var element = new TimeSpanElement(TimeSpan.FromMinutes(90));
+TimeSpan value = element.Value;
+</code></pre>
+            </section>
+            <section id="element-string">
+                <h3>StringElement</h3>
+                <p>Represents a string value.</p>
+                <pre><code>var element = new StringElement("Hello, world!");
+string value = element.Value;
+</code></pre>
+            </section>
+            <section id="element-character">
+                <h3>CharacterElement</h3>
+                <p>Represents a single character. Supported formats: literal (<code>\A</code>), Unicode code point (<code>\$2764</code> for '❤'), decimal (<code>\65</code> for 'A'), hexadecimal (<code>\$41</code> for 'A'), binary (<code>\%1000001</code> for 'A'), and named control (<code>cr</code>, <code>lf</code>, <code>tab</code>, <code>vtab</code>, <code>bksp</code>, <code>ff</code>, <code>bel</code>, <code>quote</code>, <code>apos</code>, <code>backslash</code>, <code>lt</code>, <code>gt</code>). <br>Hexadecimal and binary formatting for character elements works the same as for integer and long elements. Example: <code>var element = new CharacterElement('A');</code>, <code>var element = new CharacterElement('\n');</code>, <code>var element = new CharacterElement((char)0x2764);</code></p>
+                <pre><code>var element = new CharacterElement('A');
+char value = element.Value;
+</code></pre>
+            </section>
+            <section id="element-guid">
+                <h3>Guid/StringElement</h3>
+                <p>Represents a GUID value as a string.</p>
+                <pre><code>var element = new StringElement(Guid.NewGuid().ToString());
+Guid value = Guid.Parse(element.Value);
+</code></pre>
+            </section>
+            <section id="element-enum">
+                <h3>Enum/StringElement</h3>
+                <p>Represents an enum value as a string.</p>
+                <pre><code>var element = new StringElement(MyEnum.Value.ToString());
+MyEnum value = Enum.Parse<MyEnum>(element.Value);
+</code></pre>
+            </section>
+            <section id="element-uri">
+                <h3>Uri/StringElement</h3>
+                <p>Represents a URI value as a string.</p>
+                <pre><code>var element = new StringElement("https://example.com");
+Uri value = new Uri(element.Value);
+</code></pre>
+            </section>
+            <section id="element-array">
+                <h3>ArrayElement</h3>
+                <p>Represents a typed array of elements.</p>
+                <pre><code>var element = new TypedArrayElement<IntegerElement>();
+element.Add(new IntegerElement(1));
+element.Add(new IntegerElement(2));
+// ...
+</code></pre>
+            </section>
+            <section id="element-tuple">
+                <h3>TupleElement</h3>
+                <p>Represents an ordered collection of elements.</p>
+                <pre><code>var element = new TupleElement();
+element.Add(new IntegerElement(1));
+element.Add(new StringElement("two"));
+// ...
+</code></pre>
+            </section>
+            <section id="element-object">
+                <h3>ObjectElement</h3>
+                <p>Represents a set of named key-value pairs.</p>
+                <pre><code>var element = new ObjectElement();
+element.AddOrUpdate(new KeyValuePairElement(new IdentifierElement("Name"), new StringElement("Alice")));
+// ...
+</code></pre>
+            </section>
+            <section id="element-keyvalue">
+                <h3>KeyValuePairElement</h3>
+                <p>Represents a single key-value pair.</p>
+                <pre><code>var kvp = new KeyValuePairElement(new IdentifierElement("Age"), new IntegerElement(30));
+</code></pre>
+            </section>
+            <section id="element-null">
+                <h3>NullElement</h3>
+                <p>Represents a null value.</p>
+                <pre><code>var element = new NullElement();
+object? value = element.Value; // null
+</code></pre>
+            </section>
+            <section id="element-interpolated">
+                <h3>InterpolatedElement</h3>
+                <p>Represents an interpolated string value.</p>
+                <pre><code>var element = new InterpolatedElement("${user.Name}");
+string value = element.Value;
+</code></pre>
+            </section>
+            <section id="element-dynamic">
+                <h3>DynamicElement</h3>
+                <p>Represents a dynamic value that is replaced during parsing or deserialization.</p>
+                <pre><code>var element = new DynamicElement("{value}");
+string value = element.Value;
+</code></pre>
+            </section>
         </section>
 
         <section id="complex-structures">
@@ -292,22 +538,6 @@ userInfo ("Alice" #25 ["admin" "user"] ~true)</code></pre>
             </ul>
         </section>
 
-        <section id="metadata">
-            <h2>Metadata</h2>
-            <p>XferLang supports metadata at the document level using special delimiters <code>&lt;!</code> and <code>!&gt;</code>:</p>
-
-            <h3>Document Metadata</h3>
-            <pre><code class="xfer">&lt;! xfer "0.7.2"
-   author "John Doe"
-   created @2023-12-25T10:00:00Z@
-!&gt;
-
-{
-    name "Document content"
-    value #42
-}</code></pre>
-        </section>
-
         <section id="examples">
             <h2>Complete Examples</h2>
 
@@ -323,7 +553,7 @@ database {
     name "myapp"
     credentials {
         username "dbuser"
-        password "secret123"
+        password '&lt;DBPASSWORD&gt;'
     }
     connectionPool {
         minSize #5
@@ -393,21 +623,8 @@ features {
     lastLogin @2023-12-25T09:30:00Z@
     loginCount #247
 }
+</code></pre>
 
-&lt;/ Example using evaluated elements for dynamic content /&gt;
-welcomeMessage 'Welcome, &lt;"Jane"&gt;! You have &lt;#5#&gt; new messages.'</code></pre>
-
-            <h3>Real-World Example from the Repository</h3>
-            <pre><code class="xfer">{
-    name "Alice"
-    age #30
-    isMember ~true
-    scores [*85 *90 *78.5]
-    profile {
-        email "alice@example.com"
-        joinedDate @2023-05-05T20:00:00@
-    }
-}</code></pre>
         </section>
 
         <section id="grammar">
@@ -437,13 +654,13 @@ welcomeMessage 'Welcome, &lt;"Jane"&gt;! You have &lt;#5#&gt; new messages.'</co
     | &lt;array_element&gt;
     | &lt;tuple_element&gt;
     | &lt;comment_element&gt;
-    | &lt;placeholder_element&gt;
+    | &lt;dynamic_element&gt;
     | &lt;interpolated_element&gt;
     ) &lt;opt_whitespace&gt;
 
 &lt;string_element&gt; ::= &lt;string_element_explicit&gt; | &lt;string_element_compact&gt;
-&lt;string_element_explicit&gt; ::= &lt;element_open&gt; &lt;string_specifier&gt; &lt;text&gt; &lt;string_specifier&gt; &lt;element_close&gt;
-&lt;string_element_compact&gt; ::= &lt;string_specifier&gt; &lt;text&gt; &lt;string_specifier&gt;
+&lt;string_element_explicit&gt; ::= &lt;element_open&gt; &lt;metadata_specifier&gt; &lt;text&gt; &lt;metadata_specifier&gt; &lt;element_close&gt;
+&lt;string_element_compact&gt; ::= &lt;metadata_specifier&gt; &lt;text&gt; &lt;metadata_specifier&gt;
 
 &lt;key_value_pair&gt; ::= &lt;keyword_element&gt; &lt;opt_whitespace&gt; &lt;body_element&gt;
 
@@ -497,9 +714,9 @@ welcomeMessage 'Welcome, &lt;"Jane"&gt;! You have &lt;#5#&gt; new messages.'</co
 &lt;null_element_explicit&gt; ::= &lt;element_open&gt; &lt;null_specifier&gt; &lt;null_specifier&gt; &lt;element_close&gt;
 &lt;null_element_compact&gt; ::= &lt;null_specifier&gt;
 
-&lt;placeholder_element&gt; ::= &lt;placeholder_element_explicit&gt; | &lt;placeholder_element_compact&gt;
-&lt;placeholder_element_explicit&gt; ::= &lt;element_open&gt; &lt;placeholder_specifier&gt; &lt;opt_whitespace&gt; &lt;identifier&gt; &lt;opt_whitespace&gt; &lt;placeholder_specifier&gt; &lt;element_close&gt;
-&lt;placeholder_element_compact&gt; ::= &lt;placeholder_specifier&gt; &lt;identifier&gt;
+&lt;dynamic_element&gt; ::= &lt;dynamic_element_explicit&gt; | &lt;dynamic_element_compact&gt;
+&lt;dynamic_element_explicit&gt; ::= &lt;element_open&gt; &lt;dynamic_specifier&gt; &lt;opt_whitespace&gt; &lt;identifier&gt; &lt;opt_whitespace&gt; &lt;dynamic_specifier&gt; &lt;element_close&gt;
+&lt;dynamic_element_compact&gt; ::= &lt;dynamic_specifier&gt; &lt;identifier&gt;
 
 &lt;comment_element&gt; ::= &lt;element_open&gt; &lt;comment_specifier&gt; &lt;text&gt; &lt;comment_specifier&gt; &lt;element_close&gt;
 
@@ -509,7 +726,7 @@ welcomeMessage 'Welcome, &lt;"Jane"&gt;! You have &lt;#5#&gt; new messages.'</co
 
 &lt;interpolated_content&gt; ::= (&lt;text&gt; | &lt;string_element_explicit&gt; | &lt;character_element_explicit&gt; | &lt;integer_element_explicit&gt;
                  | &lt;long_element_explicit&gt; | &lt;double_element_explicit&gt; | &lt;decimal_element_explicit&gt;
-                 | &lt;boolean_element_explicit&gt; | &lt;datetime_element_explicit&gt; | &lt;placeholder_element_explicit&gt;
+                 | &lt;boolean_element_explicit&gt; | &lt;datetime_element_explicit&gt; | &lt;dynamic_element_explicit&gt;
                  | &lt;interpolated_element_explicit&gt;)*
 
 &lt;object_element&gt; ::= &lt;object_element_explicit&gt; | &lt;object_element_compact&gt;
@@ -548,7 +765,7 @@ welcomeMessage 'Welcome, &lt;"Jane"&gt;! You have &lt;#5#&gt; new messages.'</co
 &lt;tuple_specifier_open&gt; ::= "("+
 &lt;tuple_specifier_close&gt; ::= ")"+
 &lt;comment_specifier&gt; ::= "/"+
-&lt;placeholder_specifier&gt; ::= "|"+
+&lt;dynamic_specifier&gt; ::= "|"+
 &lt;interpolated_specifier&gt; ::= "'"+
 
 &lt;character_value&gt; ::= &lt;positive_integer&gt;
@@ -562,16 +779,16 @@ welcomeMessage 'Welcome, &lt;"Jane"&gt;! You have &lt;#5#&gt; new messages.'</co
     | &lt;binary&gt;
     | &lt;hex_integer&gt;
     | &lt;binary_integer&gt;
-    | &lt;placeholder_element&gt;
+    | &lt;dynamic_element&gt;
 
 &lt;long_value&gt; ::= &lt;signed_integer&gt;
     | &lt;hexadecimal&gt;
     | &lt;binary&gt;
     | &lt;hex_long&gt;
     | &lt;binary_long&gt;
-    | &lt;placeholder_element&gt;
+    | &lt;dynamic_element&gt;
 
-&lt;decimal_value&gt; ::= &lt;signed_decimal&gt; | &lt;placeholder_element&gt;
+&lt;decimal_value&gt; ::= &lt;signed_decimal&gt; | &lt;dynamic_element&gt;
 
 &lt;signed_integer&gt; ::= ("+" | "-")? [0-9]+
 &lt;signed_decimal&gt; ::= ("+" | "-")? [0-9]+ "." [0-9]*
@@ -588,13 +805,13 @@ welcomeMessage 'Welcome, &lt;"Jane"&gt;! You have &lt;#5#&gt; new messages.'</co
 
 &lt;boolean&gt; ::= "true" | "false"
 
-&lt;datetime&gt; ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} ("T" [0-9]{2} ":" [0-9]{2} (":" [0-9]{2} ("." [0-9]+)?)?)? ("Z" | ("+" | "-") [0-9]{2} ":" [0-9]{2})? | &lt;placeholder_element&gt;
+&lt;datetime&gt; ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} ("T" [0-9]{2} ":" [0-9]{2} (":" [0-9]{2} ("." [0-9]+)?)?)? ("Z" | ("+" | "-") [0-9]{2} ":" [0-9]{2})? | &lt;dynamic_element&gt;
 
-&lt;date&gt; ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} | &lt;placeholder_element&gt;
+&lt;date&gt; ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} | &lt;dynamic_element&gt;
 
-&lt;time&gt; ::= [0-9]{2} ":" [0-9]{2} (":" [0-9]{2} ("." [0-9]+)?)? | &lt;placeholder_element&gt;
+&lt;time&gt; ::= [0-9]{2} ":" [0-9]{2} (":" [0-9]{2} ("." [0-9]+)?)? | &lt;dynamic_element&gt;
 
-&lt;timespan&gt; ::= ("-")?([0-9]+".")[0-9]{2}":"[0-9]{2}":"[0-9]{2}("."[0-9]+)? | &lt;placeholder_element&gt;
+&lt;timespan&gt; ::= ("-")?([0-9]+".")[0-9]{2}":"[0-9]{2}":"[0-9]{2}("."[0-9]+)? | &lt;dynamic_element&gt;
 
 &lt;identifier&gt; ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
 
@@ -613,7 +830,7 @@ welcomeMessage 'Welcome, &lt;"Jane"&gt;! You have &lt;#5#&gt; new messages.'</co
             <pre><code class="bash">dotnet add package ParksComputing.Xfer.Lang</code></pre>
 
             <h3>Build from Source</h3>
-            <p>Alternatively, you can build XferLang from source by cloning the <a href="https://github.com/paulmooreparks/Xfer" target="_blank">GitHub repository</a>:</p>
+            <p>Alternatively, you can build XferLang from source by cloning the <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener">GitHub repository</a>:</p>
             <pre><code class="bash">git clone https://github.com/paulmooreparks/Xfer.git
 cd Xfer
 dotnet build
@@ -640,7 +857,8 @@ var user = new User { Name = "John Doe", Age = 30, IsActive = true };
 // Serialize the object to an Xfer string
 string xferString = XferConvert.Serialize(user, Formatting.Indented);
 
-// Console.WriteLine(xferString);
+Console.WriteLine(xferString);
+// Output will look like:
 // {
 //     Name "John Doe"
 //     Age 30
@@ -779,6 +997,73 @@ string xfer = XferConvert.Serialize(config);
             </ul>
         </section>
 
+
+<section id="custom-pi-processors">
+    <h2>Writing Custom Processing Instruction (PI) Processors</h2>
+    <p>XferLang.NET allows you to extend the parser and deserializer by implementing custom logic for Processing Instructions (PIs). This is useful for advanced configuration, runtime directives, schema association, and dynamic value resolution.</p>
+
+    <h3>Conceptual Overview</h3>
+    <ul>
+        <li>PIs are metadata blocks that can control parsing, validation, and runtime behavior.</li>
+        <li>Custom PI processors let you interpret and act on PIs in your own way.</li>
+        <li>Common use cases: environment overrides, feature flags, schema binding, dynamic sources.</li>
+    </ul>
+
+    <h3>.NET API Usage</h3>
+    <p>To handle custom PIs, implement or extend the relevant resolver or processor interface. For example, to handle <code>dynamicSource</code> PIs, implement <code>IDynamicSourceResolver</code> or subclass <code>DefaultDynamicSourceResolver</code>:</p>
+    <pre><code class="csharp">
+public class MyDynamicSourceResolver : DefaultDynamicSourceResolver
+{
+    public override string? Resolve(string key)
+    {
+        // Custom logic for dynamic keys
+        if (key == "special")
+            return "custom-value";
+        // Fallback to default
+        return base.Resolve(key);
+    }
+}
+
+// Usage:
+var settings = new XferSerializerSettings
+{
+    DynamicSourceResolver = new MyDynamicSourceResolver()
+};
+
+var obj = XferConvert.Deserialize<MyConfig>(xferString, settings);
+    </code></pre>
+
+    <h3>Demo: Custom PI Processor</h3>
+    <pre><code class="csharp">
+// Example: Custom PI for feature flags
+public class FeatureFlagProcessor : IProcessingInstructionProcessor
+{
+    public void Process(ProcessingInstructionElement pi, XferDocumentContext context)
+    {
+        if (pi.Name == "featureFlag")
+        {
+            var flag = pi["enabled"]?.Value;
+            // Apply feature flag logic
+            context.Items["FeatureEnabled"] = flag == "true";
+        }
+    }
+}
+
+// Register processor
+var settings = new XferSerializerSettings();
+settings.ProcessingInstructionProcessors.Add(new FeatureFlagProcessor());
+    </code></pre>
+
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Keep PI processor logic focused and stateless when possible.</li>
+        <li>Use context objects to share state between processors and deserialization.</li>
+        <li>Validate PI values and handle errors gracefully.</li>
+        <li>Document custom PI formats for maintainability.</li>
+    </ul>
+    <p>Custom PI processors make XferLang.NET highly adaptable for configuration, runtime, and integration scenarios.</p>
+</section>
+
         <section id="contract-resolver">
             <h2>Contract Resolvers</h2>
             <p>A contract resolver allows you to customize how property names are mapped between your .NET objects and the Xfer document. For example, you can easily convert property names to camelCase.</p>
@@ -856,11 +1141,11 @@ var deserializedPerson = XferConvert.Deserialize&lt;Person&gt;(xfer, settings);
 
             <h3>Repository Overview</h3>
             <ul>
-                <li><strong>Main Repository:</strong> <a href="https://github.com/paulmooreparks/Xfer" target="_blank">https://github.com/paulmooreparks/Xfer</a></li>
+                <li><strong>Main Repository:</strong> <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener">https://github.com/paulmooreparks/Xfer</a></li>
                 <li><strong>Language:</strong> C# (.NET)</li>
-                <li><strong>License:</strong> <a href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a></li>
-                <li><strong>Build Status:</strong> <a href="https://github.com/paulmooreparks/Xfer/actions" target="_blank">GitHub Actions CI/CD</a></li>
-                <li><strong>Issues & Feature Requests:</strong> <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank">GitHub Issues</a></li>
+                <li><strong>License:</strong> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener">MIT License</a></li>
+                <li><strong>Build Status:</strong> <a href="https://github.com/paulmooreparks/Xfer/actions" target="_blank" rel="noopener">GitHub Actions CI/CD</a></li>
+                <li><strong>Issues & Feature Requests:</strong> <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank" rel="noopener">GitHub Issues</a></li>
             </ul>
 
             <h3>Key Repository Contents</h3>
@@ -878,7 +1163,7 @@ var deserializedPerson = XferConvert.Deserialize&lt;Person&gt;(xfer, settings);
             <p>XferLang welcomes contributions! Here's how you can get involved:</p>
             <ul>
                 <li>⭐ <strong>Star the repository</strong> to show your support</li>
-                <li>🐛 <strong>Report bugs</strong> or request features via <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank">GitHub Issues</a></li>
+                <li>🐛 <strong>Report bugs</strong> or request features via <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank" rel="noopener">GitHub Issues</a></li>
                 <li>💡 <strong>Contribute code</strong> by submitting pull requests</li>
                 <li>📖 <strong>Improve documentation</strong> and examples</li>
                 <li>🗣️ <strong>Join discussions</strong> in the community</li>
@@ -898,7 +1183,7 @@ var deserializedPerson = XferConvert.Deserialize&lt;Person&gt;(xfer, settings);
 
             <h3>Prerequisites</h3>
             <ul>
-                <li><strong>.NET SDK 6.0 or later</strong> - <a href="https://dotnet.microsoft.com/download" target="_blank">Download from Microsoft</a></li>
+                <li><strong>.NET SDK 6.0 or later</strong> - <a href="https://dotnet.microsoft.com/download" target="_blank" rel="noopener">Download from Microsoft</a></li>
                 <li><strong>Git</strong> - For cloning the repository</li>
                 <li><strong>IDE (Optional):</strong> Visual Studio, VS Code, or Rider</li>
             </ul>
@@ -982,30 +1267,29 @@ code --install-extension ms-dotnettools.vscode-dotnet-runtime</code></pre>
 
         <section id="community-resources">
             <h2>Community & Resources</h2>
-            <p>XferLang has a growing community of developers and users. Here are the key resources for learning, getting help, and staying up to date.</p>
+            <p>Here are the key resources for learning, getting help, and staying up to date with XferLang.</p>
 
             <h3>Official Resources</h3>
             <ul>
-                <li>🏠 <strong>Official Website:</strong> <a href="https://parkscomputing.com/xferlang/index.html" target="_blank">XferLang Documentation</a></li>
-                <li>📂 <strong>GitHub Repository:</strong> <a href="https://github.com/paulmooreparks/Xfer" target="_blank">Source Code & Issues</a></li>
-                <li>📦 <strong>NuGet Package:</strong> <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang" target="_blank">ParksComputing.Xfer.Lang</a></li>
-                <li>📋 <strong>Grammar Specification:</strong> <a href="https://github.com/paulmooreparks/Xfer/blob/master/xfer.bnf" target="_blank">xfer.bnf</a></li>
-                <li>🔖 <strong>Releases:</strong> <a href="https://github.com/paulmooreparks/Xfer/releases" target="_blank">Version History & Downloads</a></li>
+                <li>🏠 <strong>Official Website:</strong> <a href="https://xferlang.org/" target="_blank" rel="noopener">XferLang Documentation</a></li>
+                <li>📂 <strong>GitHub Repository:</strong> <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener">Source Code & Issues</a></li>
+                <li>📦 <strong>NuGet Package:</strong> <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang" target="_blank" rel="noopener">ParksComputing.Xfer.Lang</a></li>
+                <li>🔖 <strong>Releases:</strong> <a href="https://github.com/paulmooreparks/Xfer/releases" target="_blank" rel="noopener">Version History & Downloads</a></li>
             </ul>
 
             <h3>Documentation & Examples</h3>
             <ul>
                 <li>📖 <strong>Complete Documentation:</strong> This website covers all aspects of XferLang</li>
-                <li>💡 <strong>Code Examples:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master/XferTest" target="_blank">Unit Tests</a> provide comprehensive usage examples</li>
-                <li>📄 <strong>Sample Documents:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master" target="_blank">*.xfer files</a> in the repository</li>
-                <li>🏗️ <strong>Schema Examples:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master/schemas" target="_blank">Schema definitions</a></li>
+                <li>💡 <strong>Code Examples:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master/examples" target="_blank" rel="noopener">Code examples</a> provide comprehensive usage examples</li>
+                <li>💡 <strong>Tests:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master/XferTest" target="_blank" rel="noopener">Unit Tests</a> also show how to use the library and provide test coverage</li>
+                <li>📄 <strong>Sample Documents:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master" target="_blank" rel="noopener">*.xfer files</a> in the repository</li>
             </ul>
 
             <h3>Getting Help</h3>
             <ul>
-                <li>❓ <strong>Questions:</strong> Open a <a href="https://github.com/paulmooreparks/Xfer/discussions" target="_blank">GitHub Discussion</a></li>
-                <li>🐛 <strong>Bug Reports:</strong> Create an <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank">Issue</a> with details</li>
-                <li>💡 <strong>Feature Requests:</strong> Suggest improvements via <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank">GitHub Issues</a></li>
+                <li>❓ <strong>Questions:</strong> Open a <a href="https://github.com/paulmooreparks/Xfer/discussions" target="_blank" rel="noopener">GitHub Discussion</a></li>
+                <li>🐛 <strong>Bug Reports:</strong> Create an <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank" rel="noopener">Issue</a> with details</li>
+                <li>💡 <strong>Feature Requests:</strong> Suggest improvements via <a href="https://github.com/paulmooreparks/Xfer/issues" target="_blank" rel="noopener">GitHub Issues</a></li>
                 <li>📧 <strong>Direct Contact:</strong> Reach out via GitHub for complex questions</li>
             </ul>
 
@@ -1014,57 +1298,50 @@ code --install-extension ms-dotnettools.vscode-dotnet-runtime</code></pre>
             <ul>
                 <li>✅ <strong>Stable Core:</strong> Basic serialization/deserialization is production-ready</li>
                 <li>🚧 <strong>Active Development:</strong> Advanced features and optimizations ongoing</li>
-                <li>🔄 <strong>Regular Releases:</strong> Check <a href="https://github.com/paulmooreparks/Xfer/releases" target="_blank">releases</a> for updates</li>
+                <li>🔄 <strong>Regular Releases:</strong> Check <a href="https://github.com/paulmooreparks/Xfer/releases" target="_blank" rel="noopener">releases</a> for updates</li>
                 <li>📊 <strong>CI/CD:</strong> Automated testing and quality checks via GitHub Actions</li>
             </ul>
 
             <h3>Language Comparison</h3>
             <p>See how XferLang compares to other data formats:</p>
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-                <tr style="background: #f5f5f5;">
-                    <th style="border: 1px solid #ddd; padding: 8px;">Feature</th>
-                    <th style="border: 1px solid #ddd; padding: 8px;">XferLang</th>
-                    <th style="border: 1px solid #ddd; padding: 8px;">JSON</th>
-                    <th style="border: 1px solid #ddd; padding: 8px;">XML</th>
-                    <th style="border: 1px solid #ddd; padding: 8px;">YAML</th>
+            <table class="comparison-table">
+                <tr class="comparison-header">
+                    <th>Feature</th>
+                    <th>XferLang</th>
+                    <th>JSON</th>
+                    <th>XML</th>
+                    <th>YAML</th>
                 </tr>
                 <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px;"><strong>Explicit Types</strong></td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Built-in</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">❌ Limited</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">⚠️ Via attributes</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">⚠️ Via tags</td>
+                    <td><strong>Explicit Types</strong></td>
+                    <td>✅ Built-in</td>
+                    <td>❌ Limited</td>
+                    <td>⚠️ Via attributes</td>
+                    <td>⚠️ Via tags</td>
                 </tr>
                 <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px;"><strong>Human Readable</strong></td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Yes</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Yes</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">⚠️ Verbose</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Yes</td>
+                    <td><strong>Human Readable</strong></td>
+                    <td>✅ Yes</td>
+                    <td>✅ Yes</td>
+                    <td>⚠️ Verbose</td>
+                    <td>✅ Yes</td>
                 </tr>
                 <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px;"><strong>Comments</strong></td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Native</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">❌ No</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Native</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">✅ Native</td>
+                    <td><strong>Comments</strong></td>
+                    <td>✅ Native</td>
+                    <td>❌ No</td>
+                    <td>✅ Native</td>
+                    <td>✅ Native</td>
                 </tr>
                 <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px;"><strong>Safety</strong></td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">✅ High</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">⚠️ Medium</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">✅ High</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">⚠️ Medium</td>
+                    <td><strong>Safety</strong></td>
+                    <td>✅ High</td>
+                    <td>⚠️ Medium</td>
+                    <td>✅ High</td>
+                    <td>⚠️ Medium</td>
                 </tr>
             </table>
 
-            <h3>Community Recognition</h3>
-            <p>XferLang has been featured and discussed in various developer communities:</p>
-            <ul>
-                <li>🔥 <strong>Hacker News:</strong> <a href="https://news.ycombinator.com/item?id=42114543" target="_blank">Community Discussion</a></li>
-                <li>⭐ <strong>GitHub Stars:</strong> Growing community support</li>
-                <li>📈 <strong>Download Statistics:</strong> Available on <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang" target="_blank">NuGet</a></li>
-            </ul>
         </section>
 
         <footer>
@@ -1073,5 +1350,22 @@ code --install-extension ms-dotnettools.vscode-dotnet-runtime</code></pre>
     </main>
     <script src="script.js"></script>
     <script>hljs.highlightAll();</script>
+    <script>
+    // Accordion control for sidebar
+    document.addEventListener('DOMContentLoaded', function() {
+        var acc = document.getElementsByClassName("accordion");
+        for (var i = 0; i < acc.length; i++) {
+            acc[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var panel = this.nextElementSibling;
+                if (panel.style.display === "block") {
+                    panel.style.display = "none";
+                } else {
+                    panel.style.display = "block";
+                }
+            });
+        }
+    });
+    </script>
 </body>
 </html>

@@ -17,6 +17,14 @@ namespace ParksComputing.Xfer.Lang;
 public class XferConvert {
     private static readonly XferSerializerSettings DefaultSettings = new();
 
+    /// <summary>
+    /// Creates an ObjectElement from a POCO, similar to JObject.FromObject.
+    /// </summary>
+    public static ObjectElement FromObject(object o, XferSerializerSettings? settings = null)
+    {
+        return SerializeObject(o, settings ?? DefaultSettings);
+    }
+
     public static string Serialize(object? o, Formatting formatting = Formatting.None, char indentChar = ' ', int indentation = 2, int depth = 0) {
         return Serialize(o, DefaultSettings, formatting, indentChar, indentation, depth);
     }
@@ -202,7 +210,10 @@ public class XferConvert {
             return default;
         }
 
-        var result = DeserializeValue(first, typeof(T), settings);
+        // PI-driven deserialization customization
+        var parser = new ParksComputing.Xfer.Lang.Services.Parser();
+        var instructions = parser.DeserializationInstructionResolver.ResolveInstructions(first, document);
+        var result = DeserializeValue(first, typeof(T), settings, instructions);
 
         return (T?)result;
     }
@@ -216,7 +227,17 @@ public class XferConvert {
         {
             return default;
         }
-        return DeserializeValue(first, targetType, settings);
+        var parser = new ParksComputing.Xfer.Lang.Services.Parser();
+        var instructions = parser.DeserializationInstructionResolver.ResolveInstructions(first, document);
+        return DeserializeValue(first, targetType, settings, instructions);
+    }
+
+    // Overload to accept PI-driven instructions
+    private static object? DeserializeValue(Element element, Type targetType, XferSerializerSettings settings, object? instructions)
+    {
+        // TODO: Use instructions to customize deserialization logic as needed
+        // For now, fallback to default behavior
+        return DeserializeValue(element, targetType, settings);
     }
 
     public static object? Deserialize(string xfer, Type targetType) {
@@ -341,8 +362,8 @@ public class XferConvert {
             NullElement nullElement when targetType == typeof(object) => nullElement.Value,
             InterpolatedElement evalElement when targetType == typeof(string) => evalElement.Value,
             InterpolatedElement evalElement when targetType == typeof(object) => evalElement.Value,
-            PlaceholderElement phElement when targetType == typeof(string) => phElement.Value,
-            PlaceholderElement phElement when targetType == typeof(object) => phElement.Value,
+            DynamicElement phElement when targetType == typeof(string) => phElement.Value,
+            DynamicElement phElement when targetType == typeof(object) => phElement.Value,
             ArrayElement arrayElement => DeserializeArray(arrayElement, targetType, settings),
             TupleElement tupleElement => DeserializeTuple(tupleElement, targetType, settings),
             ObjectElement objectElement => DeserializeObject(objectElement, targetType, settings),
@@ -589,24 +610,114 @@ public class XferConvert {
     }
 
     private static object DeserializeObject(ObjectElement objectElement, Type targetType, XferSerializerSettings settings) {
-        var instance = Activator.CreateInstance(targetType);
+        // Map incoming data to a dictionary for easy lookup
+        var valueDict = objectElement.Values.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Value);
 
-        if (instance == null) {
-            throw new InvalidOperationException($"Could not create an instance of type {targetType.Name}.");
+        // Find the constructor with the most parameters
+        var constructors = targetType.GetConstructors();
+        var ctor = constructors.OrderByDescending(c => c.GetParameters().Length).FirstOrDefault();
+        object? instance = null;
+
+        // Cache property attributes for parameter name lookup
+        var properties = targetType.GetProperties();
+        var propertyAttrMap = properties.ToDictionary(
+            p => p.Name,
+            p => p.GetCustomAttribute<XferPropertyAttribute>()?.Name ?? p.Name,
+            StringComparer.OrdinalIgnoreCase);
+
+        if (ctor != null && ctor.GetParameters().Length > 0)
+        {
+            var ctorParams = ctor.GetParameters();
+            var args = new object?[ctorParams.Length];
+            for (int i = 0; i < ctorParams.Length; i++)
+            {
+                var param = ctorParams[i];
+                // Try to find a matching property attribute name, else use parameter name
+                // param.Name is never null for constructor parameters, but suppress warning for static analysis
+                string paramName = param.Name ?? string.Empty;
+                string matchName = propertyAttrMap.TryGetValue(paramName, out var attrName) ? attrName : paramName;
+                var match = valueDict.FirstOrDefault(kvp => string.Equals(kvp.Key, matchName, StringComparison.OrdinalIgnoreCase));
+                if (match.Key != null)
+                {
+                    args[i] = DeserializeValue(match.Value, param.ParameterType, settings);
+                }
+                else if (param.HasDefaultValue)
+                {
+                    args[i] = param.DefaultValue;
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Missing required constructor parameter '{param.Name}' for type {targetType.FullName}");
+                }
+            }
+            instance = ctor.Invoke(args);
+        }
+        else
+        {
+            // Fallback to default constructor
+            instance = Activator.CreateInstance(targetType);
+            if (instance == null)
+            {
+                throw new InvalidOperationException($"Could not create an instance of type {targetType.Name}.");
+            }
         }
 
-        var properties = targetType.GetProperties();
-
-        foreach (var prop in properties) {
+        // Set remaining writable properties (not set via constructor)
+        foreach (var prop in properties)
+        {
+            if (!prop.CanWrite) continue;
             var attribute = prop.GetCustomAttribute<XferPropertyAttribute>();
             var propName = attribute?.Name ?? prop.Name;
-            var matchingElement = objectElement.Values.FirstOrDefault(kvp => kvp.Key == propName).Value;
-
-            if (matchingElement != null) {
-                var propValue = DeserializeValue(matchingElement.Value, prop.PropertyType, settings);
+            // Only set if not already set by constructor
+            if (valueDict.TryGetValue(propName, out var rawValue))
+            {
+                var propValue = DeserializeValue(rawValue, prop.PropertyType, settings);
                 prop.SetValue(instance, propValue);
             }
         }
         return instance;
+    }
+
+    /// <summary>
+    /// Deserializes an ObjectElement to a POCO of type T.
+    /// </summary>
+    public static T? ToObject<T>(ObjectElement element, XferSerializerSettings? settings = null)
+    {
+        if (element == null) return default;
+        return (T?)DeserializeObject(element, typeof(T), settings ?? DefaultSettings);
+    }
+
+    /// <summary>
+    /// Tries to create an ObjectElement from a POCO, returns false on error.
+    /// </summary>
+    public static bool TryFromObject(object o, out ObjectElement? result, XferSerializerSettings? settings = null)
+    {
+        try
+        {
+            result = SerializeObject(o, settings ?? DefaultSettings);
+            return true;
+        }
+        catch
+        {
+            result = null;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Tries to deserialize an ObjectElement to a POCO of type T, returns false on error.
+    /// </summary>
+    public static bool TryToObject<T>(ObjectElement element, out T? result, XferSerializerSettings? settings = null)
+    {
+        try
+        {
+            result = ToObject<T>(element, settings);
+            return true;
+        }
+        catch
+        {
+            result = default;
+            return false;
+        }
     }
 }

@@ -5,7 +5,7 @@ using ParksComputing.Xfer.Lang.Attributes;
 using ParksComputing.Xfer.Lang.Elements;
 using ParksComputing.Xfer.Lang.Services;
 
-namespace Xfer.Tests;
+namespace XferTest;
 
 [TestClass]
 public class ParserTests {

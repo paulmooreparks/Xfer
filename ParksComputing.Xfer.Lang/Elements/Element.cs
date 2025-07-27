@@ -15,6 +15,11 @@ public abstract class Element
     public string Name { get; }
     public ElementDelimiter Delimiter { get; set; } = new ElementDelimiter('\0', '\0');
 
+    /// <summary>
+    /// Optional ID for this element, settable via inline PI: <! id "myId" !>
+    /// </summary>
+    public string? Id { get; set; }
+
     public Element(string name, ElementDelimiter delimiter)
     {
         Name = name;

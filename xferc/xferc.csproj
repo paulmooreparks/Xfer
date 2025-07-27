@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <PackageReference Include="Cliffer" Version="0.4.14-prerelease" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.6.3" />
     <PackageReference Include="MSTest.TestFramework" Version="3.6.3" />
   </ItemGroup>
 

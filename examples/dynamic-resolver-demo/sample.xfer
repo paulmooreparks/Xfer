@@ -1,0 +1,8 @@
+<! dynamicSource {
+    demo "reverse:!dlroW ,olleH"
+    greeting "reverse:!gninrom dooG"
+} !>
+message {
+    text '<|demo|>'
+    greeting '<|greeting|>'
+}

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using ParksComputing.Xferc.Services;
+using xferc;
 
 
 namespace ParksComputing.Xferc;
@@ -41,6 +42,7 @@ internal class XfercProgram {
         };
 
         Console.OutputEncoding = Encoding.UTF8;
+        DemoDeserializationPI.Run();
 
         return await cli.RunAsync(args);
     }

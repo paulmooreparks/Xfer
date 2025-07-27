@@ -21,7 +21,7 @@ public static class CharExtensions {
     }
 
     public static bool IsElementOpeningSpecifier(this char c) {
-        return 
+        return
                c == IdentifierElement.OpeningSpecifier
             || c == IntegerElement.OpeningSpecifier
             || c == LongElement.OpeningSpecifier
@@ -31,7 +31,7 @@ public static class CharExtensions {
             || c == DateTimeElement.OpeningSpecifier
             || c == CharacterElement.OpeningSpecifier
             || c == InterpolatedElement.OpeningSpecifier
-            || c == PlaceholderElement.OpeningSpecifier
+            || c == DynamicElement.OpeningSpecifier
             || c == NullElement.OpeningSpecifier
             || c == CommentElement.OpeningSpecifier
             || c == StringElement.OpeningSpecifier
@@ -52,7 +52,7 @@ public static class CharExtensions {
             || c == DateTimeElement.ClosingSpecifier
             || c == CharacterElement.ClosingSpecifier
             || c == InterpolatedElement.ClosingSpecifier
-            || c == PlaceholderElement.ClosingSpecifier
+            || c == DynamicElement.ClosingSpecifier
             || c == NullElement.ClosingSpecifier
             || c == CommentElement.ClosingSpecifier
             || c == StringElement.ClosingSpecifier
@@ -63,7 +63,7 @@ public static class CharExtensions {
     }
 
     public static bool IsCollectionOpeningSpecifier(this char c) {
-        return  
+        return
                c == ObjectElement.OpeningSpecifier
             || c == ArrayElement.OpeningSpecifier
             || c == TupleElement.OpeningSpecifier
@@ -71,7 +71,7 @@ public static class CharExtensions {
     }
 
     public static bool IsCollectionClosingSpecifier(this char c) {
-        return  
+        return
                c == ObjectElement.ClosingSpecifier
             || c == ArrayElement.ClosingSpecifier
             || c == TupleElement.ClosingSpecifier

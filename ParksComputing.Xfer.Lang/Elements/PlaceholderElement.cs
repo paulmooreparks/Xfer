@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
-public class PlaceholderElement : TextElement
+public class DynamicElement : TextElement
 {
-    public static readonly string ElementName = "placeholder";
+    public static readonly string ElementName = "dynamic";
     public const char OpeningSpecifier = '|';
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    public PlaceholderElement(string text, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
+    public DynamicElement(string text, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
         : base(text, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
     {
     }

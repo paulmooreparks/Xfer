@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ParksComputing.Xfer.Lang;
 using ParksComputing.Xfer.Lang.Attributes;
 using ParksComputing.Xfer.Lang.Configuration;
+using ParksComputing.Xfer.Lang.Elements;
 using System;
 using System.Collections.Generic;
 
@@ -21,6 +22,194 @@ public class XferConvertTests
         public List<string> ListProperty { get; set; } = new List<string> { "one", "two", "three" };
         public Dictionary<string, int> DictionaryProperty { get; set; } = new Dictionary<string, int> { { "a", 1 }, { "b", 2 } };
         public string? NullStringProperty { get; set; } = null;
+    }
+
+    public class TestModel
+    {
+        public string Name { get; set; } = "Test";
+        public int Value { get; set; } = 42;
+    }
+
+    [TestMethod]
+    public void FromObject_And_ToObject_RoundTrip()
+    {
+        var model = new TestModel { Name = "RoundTrip", Value = 99 };
+        var obj = XferConvert.FromObject(model);
+        var result = XferConvert.ToObject<TestModel>(obj);
+
+        Assert.IsNotNull(result);
+        Assert.AreEqual(model.Name, result.Name);
+        Assert.AreEqual(model.Value, result.Value);
+    }
+
+    [TestMethod]
+    public void TryFromObject_ReturnsTrue()
+    {
+        var model = new TestModel();
+        bool success = XferConvert.TryFromObject(model, out ObjectElement? obj);
+        Assert.IsTrue(success);
+        Assert.IsNotNull(obj);
+    }
+
+    [TestMethod]
+    public void TryToObject_ReturnsTrue()
+    {
+        var model = new TestModel();
+        var obj = XferConvert.FromObject(model);
+        bool success = XferConvert.TryToObject(obj, out TestModel? result);
+        Assert.IsTrue(success);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(model.Name, result.Name);
+        Assert.AreEqual(model.Value, result.Value);
+    }
+
+    public record PositionalRecord(string Name, int Value);
+    public record ImmutableRecord
+    {
+        public string Name { get; }
+        public int Value { get; }
+        public ImmutableRecord(string name, int value)
+        {
+            Name = name;
+            Value = value;
+        }
+    }
+
+    public record OptionalRecord(string Name, int Value = 42);
+
+    public record AttributeRecord(
+        [property: XferProperty("customName")] string Name,
+        [property: XferProperty("customValue")] int Value);
+
+    public record MixedRecord(string Name)
+    {
+        public int Value { get; set; }
+    }
+
+    public record NestedRecord(PositionalRecord Inner, int OuterValue);
+
+    public record CollectionRecord(List<int> Numbers, string[] Tags);
+
+    public record CaseInsensitiveRecord(string NAME, int VALUE);
+
+    public class PrivateSetterPoco
+    {
+        public string Name { get; private set; }
+        public int Value { get; private set; }
+        public PrivateSetterPoco(string name, int value)
+        {
+            Name = name;
+            Value = value;
+        }
+    }
+
+    [TestMethod]
+    public void PositionalRecord_RoundTrip_Supported()
+    {
+        var record = new PositionalRecord("Positional", 123);
+        var element = XferConvert.FromObject(record);
+        var result = XferConvert.ToObject<PositionalRecord>(element);
+        Assert.AreEqual(record, result);
+    }
+
+    [TestMethod]
+    public void OptionalRecord_RoundTrip_Supported()
+    {
+        var record = new OptionalRecord("Optional");
+        var element = XferConvert.FromObject(record);
+        var result = XferConvert.ToObject<OptionalRecord>(element);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(record.Name, result.Name);
+        Assert.AreEqual(record.Value, result.Value);
+    }
+
+    [TestMethod]
+    public void AttributeRecord_RoundTrip_Supported()
+    {
+        var record = new AttributeRecord("AttrName", 77);
+        var element = XferConvert.FromObject(record);
+        var result = XferConvert.ToObject<AttributeRecord>(element);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(record.Name, result.Name);
+        Assert.AreEqual(record.Value, result.Value);
+    }
+
+    [TestMethod]
+    public void MixedRecord_RoundTrip_Supported()
+    {
+        var record = new MixedRecord("Mixed") { Value = 99 };
+        var element = XferConvert.FromObject(record);
+        var result = XferConvert.ToObject<MixedRecord>(element);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(record.Name, result.Name);
+        Assert.AreEqual(record.Value, result.Value);
+    }
+
+    [TestMethod]
+    public void NestedRecord_RoundTrip_Supported()
+    {
+        var inner = new PositionalRecord("Inner", 11);
+        var record = new NestedRecord(inner, 22);
+        var element = XferConvert.FromObject(record);
+        var result = XferConvert.ToObject<NestedRecord>(element);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(record.Inner, result.Inner);
+        Assert.AreEqual(record.OuterValue, result.OuterValue);
+    }
+
+    [TestMethod]
+    public void CollectionRecord_RoundTrip_Supported()
+    {
+        var record = new CollectionRecord(new List<int> { 1, 2, 3 }, new[] { "a", "b" });
+        var element = XferConvert.FromObject(record);
+        var result = XferConvert.ToObject<CollectionRecord>(element);
+        Assert.IsNotNull(result);
+        CollectionAssert.AreEqual(record.Numbers, result.Numbers);
+        CollectionAssert.AreEqual(record.Tags, result.Tags);
+    }
+
+    [TestMethod]
+    public void CaseInsensitiveRecord_RoundTrip_Supported()
+    {
+        // Simulate incoming data with different casing
+        var element = new ObjectElement();
+        element.AddOrUpdate(new KeyValuePairElement(new IdentifierElement("name"), new StringElement("CaseTest")));
+        element.AddOrUpdate(new KeyValuePairElement(new IdentifierElement("value"), new IntegerElement(123)));
+        var result = XferConvert.ToObject<CaseInsensitiveRecord>(element);
+        Assert.IsNotNull(result);
+        Assert.AreEqual("CaseTest", result.NAME);
+        Assert.AreEqual(123, result.VALUE);
+    }
+
+    [TestMethod]
+    public void PrivateSetterPoco_RoundTrip_Supported()
+    {
+        var obj = new PrivateSetterPoco("Private", 321);
+        var element = XferConvert.FromObject(obj);
+        var result = XferConvert.ToObject<PrivateSetterPoco>(element);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(obj.Name, result.Name);
+        Assert.AreEqual(obj.Value, result.Value);
+    }
+
+    [TestMethod]
+    public void Record_MissingRequiredParameter_Throws()
+    {
+        var element = new ObjectElement();
+        // Only provide one required parameter
+        element.AddOrUpdate(new KeyValuePairElement(new IdentifierElement("Name"), new StringElement("Missing")));
+        Assert.ThrowsException<InvalidOperationException>(() => XferConvert.ToObject<PositionalRecord>(element));
+    }
+
+    [TestMethod]
+    public void ImmutableRecord_RoundTrip_Supported()
+    {
+        var record = new ImmutableRecord("Immutable", 456);
+        var element = XferConvert.FromObject(record);
+        var result = XferConvert.ToObject<ImmutableRecord>(element);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(record.Name, result.Name);
+        Assert.AreEqual(record.Value, result.Value);
     }
 
     [TestMethod]

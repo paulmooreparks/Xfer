@@ -22,7 +22,7 @@
     | <array_element>
     | <tuple_element>
     | <comment_element>
-    | <placeholder_element>
+    | <dynamic_element>
     | <interpolated_element>
     ) <opt_whitespace>
 
@@ -82,9 +82,9 @@
 <null_element_explicit> ::= <element_open> <null_specifier> <null_specifier> <element_close>
 <null_element_compact> ::= <null_specifier>
 
-<placeholder_element> ::= <placeholder_element_explicit> | <placeholder_element_compact>
-<placeholder_element_explicit> ::= <element_open> <placeholder_specifier> <opt_whitespace> <identifier> <opt_whitespace> <placeholder_specifier> <element_close>
-<placeholder_element_compact> ::= <placeholder_specifier> <identifier>
+<dynamic_element> ::= <dynamic_element_explicit> | <dynamic_element_compact>
+<dynamic_element_explicit> ::= <element_open> <dynamic_specifier> <opt_whitespace> <identifier> <opt_whitespace> <dynamic_specifier> <element_close>
+<dynamic_element_compact> ::= <dynamic_specifier> <identifier>
 
 <comment_element> ::= <element_open> <comment_specifier> <text> <comment_specifier> <element_close>
 
@@ -94,7 +94,7 @@
 
 <interpolated_content> ::= (<text> | <string_element_explicit> | <character_element_explicit> | <integer_element_explicit>
                  | <long_element_explicit> | <double_element_explicit> | <decimal_element_explicit>
-                 | <boolean_element_explicit> | <datetime_element_explicit> | <placeholder_element_explicit>
+                 | <boolean_element_explicit> | <datetime_element_explicit> | <dynamic_element_explicit>
                  | <interpolated_element_explicit>)*
 
 <object_element> ::= <object_element_explicit> | <object_element_compact>
@@ -133,7 +133,7 @@
 <tuple_specifier_open> ::= "("+
 <tuple_specifier_close> ::= ")"+
 <comment_specifier> ::= "/"+
-<placeholder_specifier> ::= "|"+
+<dynamic_specifier> ::= "|"+
 <interpolated_specifier> ::= "'"+
 
 <character_value> ::= <positive_integer>
@@ -147,16 +147,16 @@
     | <binary>
     | <hex_integer>
     | <binary_integer>
-    | <placeholder_element>
+    | <dynamic_element>
 
 <long_value> ::= <signed_integer>
     | <hexadecimal>
     | <binary>
     | <hex_long>
     | <binary_long>
-    | <placeholder_element>
+    | <dynamic_element>
 
-<decimal_value> ::= <signed_decimal> | <placeholder_element>
+<decimal_value> ::= <signed_decimal> | <dynamic_element>
 
 <signed_integer> ::= ("+" | "-")? [0-9]+
 <signed_decimal> ::= ("+" | "-")? [0-9]+ "." [0-9]*
@@ -173,13 +173,13 @@
 
 <boolean> ::= "true" | "false"
 
-<datetime> ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} ("T" [0-9]{2} ":" [0-9]{2} (":" [0-9]{2} ("." [0-9]+)?)?)? ("Z" | ("+" | "-") [0-9]{2} ":" [0-9]{2})? | <placeholder_element>
+<datetime> ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} ("T" [0-9]{2} ":" [0-9]{2} (":" [0-9]{2} ("." [0-9]+)?)?)? ("Z" | ("+" | "-") [0-9]{2} ":" [0-9]{2})? | <dynamic_element>
 
-<date> ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} | <placeholder_element>
+<date> ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} | <dynamic_element>
 
-<time> ::= [0-9]{2} ":" [0-9]{2} (":" [0-9]{2} ("." [0-9]+)?)? | <placeholder_element>
+<time> ::= [0-9]{2} ":" [0-9]{2} (":" [0-9]{2} ("." [0-9]+)?)? | <dynamic_element>
 
-<timespan> ::= ("-")?([0-9]+".")[0-9]{2}":"[0-9]{2}":"[0-9]{2}("."[0-9]+)? | <placeholder_element>
+<timespan> ::= ("-")?([0-9]+".")[0-9]{2}":"[0-9]{2}":"[0-9]{2}("."[0-9]+)? | <dynamic_element>
 
 <identifier> ::= ([A-Z] | [a-z] | "_") ([A-Z] | [a-z] | "_" | [0-9])*
 

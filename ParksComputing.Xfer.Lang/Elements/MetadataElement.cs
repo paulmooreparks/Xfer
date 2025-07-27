@@ -6,6 +6,10 @@ namespace ParksComputing.Xfer.Lang.Elements;
 
 public class MetadataElement : Element
 {
+    /// <summary>
+    /// The element this metadata is associated with (e.g., PI target).
+    /// </summary>
+    public Element? AnnotatedElement { get; set; }
     public static readonly string ElementName = "metadata";
     public const char OpeningSpecifier = '!';
     public const char ClosingSpecifier = OpeningSpecifier;
@@ -30,12 +34,6 @@ public class MetadataElement : Element
         }
         set
         {
-            if (string.Equals(index, XferKeyword))
-            {
-                Xfer = CastOrThrow<TextElement>(value, index).Value ?? string.Empty;
-                return;
-            }
-
             SetElement(index, value.Value);
         }
     }
@@ -54,29 +52,11 @@ public class MetadataElement : Element
 
     private string _xfer = string.Empty;
 
-    public string Xfer
-    {
-        get
-        {
-            return _xfer;
-        }
-        set
-        {
-            _xfer = value;
-            SetElement(XferKeyword, new StringElement(value));
-        }
-    }
-
     private string _message_id = string.Empty;
 
-    public MetadataElement(ElementStyle elementStyle = ElementStyle.Explicit) : this(DefaultVersion, elementStyle)
-    {
-    }
-
-    public MetadataElement(string version, ElementStyle elementStyle = ElementStyle.Explicit)
+    public MetadataElement(ElementStyle elementStyle = ElementStyle.Explicit)
         : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, elementStyle))
     {
-        Xfer = version;
     }
 
     private bool IsKeyword(string compare, out string? keyword)

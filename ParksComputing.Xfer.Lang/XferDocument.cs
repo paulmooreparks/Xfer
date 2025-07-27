@@ -3,21 +3,16 @@ using ParksComputing.Xfer.Lang.Elements;
 
 namespace ParksComputing.Xfer.Lang;
 
-public class XferDocument
-{
-    public MetadataElement Metadata { get; set; } = new();
+public class XferDocument {
+    public Configuration.XferDocumentContext Context { get; set; } = new Configuration.XferDocumentContext();
+    public List<Element> MetadataCollection { get; set; } = new();
     public TupleElement Root { get; set; } = new();
 
-    public XferDocument() {
-    }
+    public XferDocument() { }
 
-    public XferDocument(MetadataElement metadata, TupleElement root) {
-        Metadata = metadata;
+    public XferDocument(List<Element> metadataCollection, TupleElement root) {
+        MetadataCollection = metadataCollection;
         Root = root;
-    }
-
-    public XferDocument(MetadataElement metadata) {
-        Metadata = metadata;
     }
 
     public XferDocument(TupleElement root) {
@@ -39,10 +34,11 @@ public class XferDocument
         string nestIndent = string.Empty;
 
         var sb = new StringBuilder();
-        sb.Append(Metadata.ToXfer(formatting, indentChar, indentation, depth));
-
-        if (isIndented) {
-            sb.Append(Environment.NewLine);
+        foreach (var meta in MetadataCollection) {
+            sb.Append(meta.ToXfer(formatting, indentChar, indentation, depth));
+            if (isIndented) {
+                sb.Append(Environment.NewLine);
+            }
         }
 
         int i = 0;
@@ -69,13 +65,18 @@ public class XferDocument
 
     public byte[] ToByteArray() {
         var stringRepresentation = ToString();
-        return Metadata.Encoding switch {
+        // Use UTF-8 by default, or try to get encoding from first metadata element if available
+        string encodingName = "UTF-8";
+        if (MetadataCollection.Count > 0 && MetadataCollection[0] is MetadataElement meta && !string.IsNullOrEmpty(meta.Encoding)) {
+            encodingName = meta.Encoding;
+        }
+        return encodingName switch {
             "UTF-8" => Encoding.UTF8.GetBytes(stringRepresentation),
             "UTF-16" => Encoding.Unicode.GetBytes(stringRepresentation),
             "UTF-32" => Encoding.UTF32.GetBytes(stringRepresentation),
             "Unicode" => Encoding.Unicode.GetBytes(stringRepresentation),
             "ASCII" => Encoding.ASCII.GetBytes(stringRepresentation),
-            _ => throw new NotSupportedException($"Encoding '{Metadata.Encoding}' is not supported.")
+            _ => throw new NotSupportedException($"Encoding '{encodingName}' is not supported.")
         };
     }
 }
