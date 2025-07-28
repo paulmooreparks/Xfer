@@ -76,3 +76,18 @@ jobs:
           if [ -f ./nupkgs/ParksComputing.Xfer.Lang.$VERSION.snupkg ]; then
             dotnet nuget push ./nupkgs/ParksComputing.Xfer.Lang.$VERSION.snupkg --source "github" --skip-duplicate
           fi
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git tag | grep -q "v$VERSION"; then
+            echo "Tag v$VERSION already exists, skipping tag creation."
+          else
+            git tag "v$VERSION"
+            git push origin "v$VERSION"
+          fi
+          gh release create "v$VERSION" --title "v$VERSION" --notes "Automated release for version $VERSION" || echo "Release already exists."
