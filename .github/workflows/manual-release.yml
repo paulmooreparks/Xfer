@@ -1,18 +1,10 @@
-name: .NET CI
-
 on:
   workflow_dispatch:
     inputs:
       reset_build_number:
-        description: 'Reset build number to 1?'
+        description: "Reset the build number (true/false)"
         required: false
-        default: 'false'
-
-  pull_request:
-    branches: [ "master" ]
-  push:
-    branches: [ "master" ]
-
+        default: "false"
 permissions:
   contents: write
   actions: read
@@ -37,10 +29,19 @@ jobs:
 
     - name: Read version from csproj
       id: read-version
+      env:
+        RESET_BUILD: ${{ github.event.inputs.reset_build_number }}
       run: |
-        base=$(grep -oPm1 "(?<=<Version>)[^<]+" ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj)
-        build=${{github.run_number}}
-        echo "version=$base.$build" >> $GITHUB_OUTPUT
+        base=$(grep -oPm1 "(?<=<Version>)[^<]+" xk/xk.csproj)
+        if [[ "$RESET_BUILD" == "true" ]]; then
+          echo "Resetting build number to 1"
+          build=1
+        else
+          build=${GITHUB_RUN_NUMBER}
+        fi
+        full="$base.$build"
+        echo "VERSION=$full" >> $GITHUB_ENV
+        echo "version=$full" >> $GITHUB_OUTPUT
 
     - name: Build
       run: dotnet build --no-restore -c Release ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -p:Version=${ steps.read-version.outputs.version }
