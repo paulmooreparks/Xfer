@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XferLang.NET Documentation</title>
+    <title>XferLang Documentation</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="highlightjs/styles/github.min.css">
     <script src="highlightjs/highlight.min.js"></script>
@@ -16,44 +16,85 @@
     </div>
     <nav class="sidebar">
         <div class="sidebar-header">
-            <h2><a href="index.html" class="home-link">XferLang.NET</a></h2>
+            <h2><a href="index.html" class="home-link">XferLang</a></h2>
         </div>
         <ul>
             <li><a href="#introduction">Introduction to XferLang</a></li>
             <li><a href="#philosophy">Design Philosophy</a></li>
             <li><a href="#metadata-and-processing-instructions">Metadata & Processing Instructions</a></li>
             <li>
-                <button class="accordion">Element Types</button>
-                <div class="panel">
-                    <ul>
-                        <li><a href="#element-integer">IntegerElement</a></li>
-                        <li><a href="#element-long">LongElement</a></li>
-                        <li><a href="#element-boolean">BooleanElement</a></li>
-                        <li><a href="#element-double">DoubleElement</a></li>
-                        <li><a href="#element-decimal">DecimalElement</a></li>
-                        <li><a href="#element-datetime">DateTimeElement</a></li>
-                        <li><a href="#element-date">DateElement</a></li>
-                        <li><a href="#element-time">TimeElement</a></li>
-                        <li><a href="#element-timespan">TimeSpanElement</a></li>
-                        <li><a href="#element-string">StringElement</a></li>
-                        <li><a href="#element-character">CharacterElement</a></li>
-                        <li><a href="#element-guid">Guid/StringElement</a></li>
-                        <li><a href="#element-enum">Enum/StringElement</a></li>
-                        <li><a href="#element-uri">Uri/StringElement</a></li>
-                        <li><a href="#element-array">ArrayElement</a></li>
-                        <li><a href="#element-tuple">TupleElement</a></li>
-                        <li><a href="#element-object">ObjectElement</a></li>
-                        <li><a href="#element-keyvalue">KeyValuePairElement</a></li>
-                        <li><a href="#element-null">NullElement</a></li>
-                        <li><a href="#element-interpolated">InterpolatedElement</a></li>
-                        <li><a href="#element-dynamic">DynamicElement</a></li>
-                    </ul>
-                </div>
+                <details>
+                    <summary class="sidebar-accordion">XferLang Elements</summary>
+                    <details>
+                        <summary class="sidebar-accordion">Collection Elements</summary>
+                        <ul>
+                            <li><a href="#xferlang-elements-array">Array</a></li>
+                            <li><a href="#xferlang-elements-keyvalue">Key/Value Pair</a></li>
+                            <li><a href="#xferlang-elements-object">Object</a></li>
+                            <li><a href="#xferlang-elements-tuple">Tuple</a></li>
+                        </ul>
+                    </details>
+                    <details>
+                        <summary class="sidebar-accordion">Structural Elements</summary>
+                        <ul>
+                            <li><a href="#xferlang-elements-comment">Comment</a></li>
+                            <li><a href="#xferlang-elements-dynamic">Dynamic</a></li>
+                            <li><a href="#xferlang-elements-identifier">Identifier</a></li>
+                            <li><a href="#xferlang-elements-metadata">Metadata</a></li>
+                        </ul>
+                    </details>
+                    <details>
+                        <summary class="sidebar-accordion">Data Elements</summary>
+                        <ul>
+                            <li><a href="#xferlang-elements-integer">Integer</a></li>
+                            <li><a href="#xferlang-elements-long">Long</a></li>
+                            <li><a href="#xferlang-elements-double">Double</a></li>
+                            <li><a href="#xferlang-elements-decimal">Decimal</a></li>
+                            <li><a href="#xferlang-elements-boolean">Boolean</a></li>
+                            <li><a href="#xferlang-elements-character">Character</a></li>
+                            <li><a href="#xferlang-elements-datetime">DateTime</a></li>
+                            <li><a href="#xferlang-elements-null">Null</a></li>
+                            <li><a href="#xferlang-elements-string">String</a></li>
+                            <li><a href="#xferlang-elements-interpolated">Interpolated String</a></li>
+                        </ul>
+                    </details>
+                </details>
             </li>
             <li><a href="#complex-structures">Complex Structures</a></li>
             <li><a href="#examples">Complete Examples</a></li>
             <li><a href="#grammar">Grammar Reference</a></li>
             <li><a href="#getting-started">Getting Started with .NET</a></li>
+            <li>
+                <details>
+                    <summary class="sidebar-accordion">.NET Element Types</summary>
+                    <ul>
+                        <li><a href="#dotnet-elements-array">ArrayElement</a></li>
+                        <li><a href="#dotnet-elements-boolean">BooleanElement</a></li>
+                        <li><a href="#dotnet-elements-character">CharacterElement</a></li>
+                        <li><a href="#dotnet-elements-comment">CommentElement</a></li>
+                        <li><a href="#dotnet-elements-date">DateElement</a></li>
+                        <li><a href="#dotnet-elements-datetime">DateTimeElement</a></li>
+                        <li><a href="#dotnet-elements-decimal">DecimalElement</a></li>
+                        <li><a href="#dotnet-elements-dynamic">DynamicElement</a></li>
+                        <li><a href="#dotnet-elements-long">LongElement</a></li>
+                        <li><a href="#dotnet-elements-double">DoubleElement</a></li>
+                        <li><a href="#dotnet-elements-identifier">IdentifierElement</a></li>
+                        <li><a href="#dotnet-elements-integer">IntegerElement</a></li>
+                        <li><a href="#dotnet-elements-interpolated">InterpolatedElement</a></li>
+                        <li><a href="#dotnet-elements-keyvalue">KeyValuePairElement</a></li>
+                        <li><a href="#dotnet-elements-keyword">KeywordElement</a></li>
+                        <li><a href="#dotnet-elements-long">LongElement</a></li>
+                        <li><a href="#dotnet-elements-metadata">MetadataElement</a></li>
+                        <li><a href="#dotnet-elements-null">NullElement</a></li>
+                        <li><a href="#dotnet-elements-object">ObjectElement</a></li>
+                        <li><a href="#dotnet-elements-processinginstruction">ProcessingInstructionElement</a></li>
+                        <li><a href="#dotnet-elements-string">StringElement</a></li>
+                        <li><a href="#dotnet-elements-time">TimeElement</a></li>
+                        <li><a href="#dotnet-elements-timespan">TimeSpanElement</a></li>
+                        <li><a href="#dotnet-elements-tuple">TupleElement</a></li>
+                    </ul>
+                </details>
+            </li>
             <li><a href="#serialization">Serialization</a></li>
             <li><a href="#deserialization">Deserialization</a></li>
             <li><a href="#settings">Serializer Settings</a></li>
@@ -71,7 +112,7 @@
         <header>
             <img src="XferLang-lg.png" alt="XferLang Logo" class="main-logo">
             <h1>XferLang Documentation</h1>
-            <p class="subtitle">Your complete guide to the XferLang data-interchange format and the .NET library.</p>
+            <p class="subtitle">Your complete guide to the XferLang data-interchange format and its .NET library.</p>
 
             <div class="project-badges">
                 <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener">
@@ -106,11 +147,11 @@
 
         <section id="introduction">
             <h2>Introduction to XferLang</h2>
-            <p>XferLang is a modern data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. Unlike JSON or XML, XferLang is designed with explicit typing, human readability, and safe data embedding at its core.</p>
+            <p>XferLang is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. XferLang is designed with explicit typing, human readability, and safe data embedding at its core.</p>
 
-            <p>XferLang is an <strong>open-source project</strong> hosted on GitHub at <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener">github.com/paulmooreparks/Xfer</a>. The project includes the complete language specification, a production-ready .NET library, comprehensive documentation, and development tools.</p>
+            <p>XferLang is an <strong>open-source project</strong> hosted on GitHub at <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener">github.com/paulmooreparks/Xfer</a>. The project includes the complete language specification, a .NET library, comprehensive documentation, and development tools.</p>
 
-            <p>Here's a quick comparison to show XferLang in action:</p>
+            <p>Here's a quick comparison to JSON:</p>
 
             <h3>JSON Example:</h3>
             <pre><code class="json">{
@@ -142,7 +183,7 @@
     metadata ?
 }</code></pre>
 
-            <p>Notice how XferLang eliminates commas, uses explicit type prefixes (#30 for integers, ~true for booleans, ? for null), and maintains excellent readability.</p>
+            <p>In contrast to JSON, XferLang eliminates commas, uses explicit type prefixes (#30 for integers, ~true for booleans, ? for null) while maintaining readability.</p>
 
             <p>Because whitespace is flexible, the same document can be made extremely compact:</p>
 
@@ -194,7 +235,7 @@ age #30</code></pre>
 
             <h3>Document Metadata</h3>
             <p>Use the <code>xfer</code> PI to specify XferLang version and document metadata:</p>
-            <pre><code class="xfer">&lt;! xfer "0.7.2" author "John Doe" created @2023-12-25T10:00:00Z@ !&gt;</code></pre>
+            <pre><code class="xfer">&lt;! xfer "0.11" author "John Doe" created @2023-12-25T10:00:00Z@ !&gt;</code></pre>
 
             <h3>Schema Association (TO BE IMPLEMENTED)</h3>
             <p>Use the <code>schema</code> PI to associate a document with a schema definition:</p>
@@ -316,189 +357,128 @@ timestamp @2023-12-25T14:30:00.123Z@</code></pre>
 emoji 'I &lt;\$2764\&gt; Xfer &lt;\$1F600\&gt;'  &lt;/ I ❤︎ Xfer 😀 /&gt;</code></pre>
         </section>
 
-        <section id="element-types">
-            <h2>Xfer Element Types (Concept & Code)</h2>
+        <section id="xferlang-elements">
+            <h2>XferLang Elements</h2>
             <p>XferLang supports a rich set of data types designed for clarity, explicitness, and flexibility. Each type is chosen to represent a distinct kind of value, making data both human-readable and machine-precise. The main categories are:
-    <ul>
-        <li><strong>Numbers</strong>: Integers, longs, decimals, and doubles for numeric values.</li>
-        <li><strong>Booleans</strong>: True/false values for logic and state.</li>
-        <li><strong>Strings & Characters</strong>: Textual data, including single characters and multi-line strings.</li>
-        <li><strong>Dates & Times</strong>: Date, time, and time span for temporal data.</li>
-        <li><strong>Nulls</strong>: Explicit representation of missing or undefined values.</li>
-        <li><strong>Objects</strong>: Named key-value pairs for structured records.</li>
-        <li><strong>Arrays & Tuples</strong>: Ordered collections, either typed (arrays) or mixed (tuples).</li>
-        <li><strong>Special Types</strong>: GUIDs, URIs, enums, dynamic elements, and interpolated values for advanced scenarios.</li>
-    </ul>
-    These concepts map directly to .NET element classes, which provide programmatic access and manipulation. Below you'll find each element type described both conceptually and with .NET code usage.</p>
+            <ul>
+                <li><strong>Numbers</strong>: Integers, longs, decimals, and doubles for numeric values.</li>
+                <li><strong>Booleans</strong>: True/false values for logic and state.</li>
+                <li><strong>Characters</strong>: Character data with a large set of pre-defined character keywords and facilities to define custom keywords.</li>
+                <li><strong>Strings</strong>: Textual data, including interpolated strings.</li>
+                <li><strong>Dates & Times</strong>: ISO Date/time values.</li>
+                <li><strong>Nulls</strong>: Explicit representation of missing or undefined values.</li>
+                <li><strong>Objects</strong>: Named key-value pairs for structured records.</li>
+                <li><strong>Arrays & Tuples</strong>: Collections, either typed (arrays) or mixed (tuples).</li>
+                <li><strong>Dynamic</strong>: Values that can be resolved at runtime, such as environment variables or secrets.</li>
+                <li><strong>Metadata</strong>: Document-level metadata and processing instructions for configuration and extensibility.</li>
 
-            <section id="element-integer">
-                <h3>IntegerElement</h3>
-                <p>Represents a 32-bit integer value.</p>
-                <pre><code>// Concept: Used for whole numbers.
-var element = new IntegerElement(42);
-int value = element.Value; // 42
-</code></pre>
-            </section>
-            <section id="element-long">
-                <h3>LongElement</h3>
-                <p>Represents a 64-bit integer value.</p>
-                <pre><code>var element = new LongElement(1234567890123L);
-long value = element.Value;
-</code></pre>
-            </section>
-            <section id="element-boolean">
-                <h3>BooleanElement</h3>
-                <p>Represents a boolean value (true/false).</p>
-                <pre><code>var element = new BooleanElement(true);
-bool value = element.Value;
-</code></pre>
-            </section>
-            <section id="element-double">
-                <h3>DoubleElement</h3>
-                <p>Represents a double-precision floating-point value.</p>
-                <pre><code>var element = new DoubleElement(3.14159);
-double value = element.Value;
-</code></pre>
-            </section>
-            <section id="element-decimal">
-                <h3>DecimalElement</h3>
-                <p>Represents a high-precision decimal value.</p>
-                <pre><code>var element = new DecimalElement(123.45m);
-decimal value = element.Value;
-</code></pre>
-            </section>
-            <section id="element-datetime">
-                <h3>DateTimeElement</h3>
-                <p>Represents a date and time value.</p>
-                <pre><code>var element = new DateTimeElement(DateTime.Now);
-DateTime value = element.Value;
-</code></pre>
-            </section>
-            <section id="element-date">
-                <h3>DateElement</h3>
-                <p>Represents a date-only value.</p>
-                <pre><code>var element = new DateElement(DateOnly.FromDateTime(DateTime.Now));
-DateOnly value = element.Value;
-</code></pre>
-            </section>
-            <section id="element-time">
-                <h3>TimeElement</h3>
-                <p>Represents a time-only value.</p>
-                <pre><code>var element = new TimeElement(TimeOnly.FromDateTime(DateTime.Now));
-TimeOnly value = element.Value;
-</code></pre>
-            </section>
-            <section id="element-timespan">
-                <h3>TimeSpanElement</h3>
-                <p>Represents a time interval.</p>
-                <pre><code>var element = new TimeSpanElement(TimeSpan.FromMinutes(90));
-TimeSpan value = element.Value;
-</code></pre>
-            </section>
-            <section id="element-string">
-                <h3>StringElement</h3>
-                <p>Represents a string value.</p>
-                <pre><code>var element = new StringElement("Hello, world!");
-string value = element.Value;
-</code></pre>
-            </section>
-            <section id="element-character">
-                <h3>CharacterElement</h3>
-                <p>Represents a single character. Supported formats: literal (<code>\A</code>), Unicode code point (<code>\$2764</code> for '❤'), decimal (<code>\65</code> for 'A'), hexadecimal (<code>\$41</code> for 'A'), binary (<code>\%1000001</code> for 'A'), and named control (<code>cr</code>, <code>lf</code>, <code>tab</code>, <code>vtab</code>, <code>bksp</code>, <code>ff</code>, <code>bel</code>, <code>quote</code>, <code>apos</code>, <code>backslash</code>, <code>lt</code>, <code>gt</code>). <br>Hexadecimal and binary formatting for character elements works the same as for integer and long elements. Example: <code>var element = new CharacterElement('A');</code>, <code>var element = new CharacterElement('\n');</code>, <code>var element = new CharacterElement((char)0x2764);</code></p>
-                <pre><code>var element = new CharacterElement('A');
-char value = element.Value;
-</code></pre>
-            </section>
-            <section id="element-guid">
-                <h3>Guid/StringElement</h3>
-                <p>Represents a GUID value as a string.</p>
-                <pre><code>var element = new StringElement(Guid.NewGuid().ToString());
-Guid value = Guid.Parse(element.Value);
-</code></pre>
-            </section>
-            <section id="element-enum">
-                <h3>Enum/StringElement</h3>
-                <p>Represents an enum value as a string.</p>
-                <pre><code>var element = new StringElement(MyEnum.Value.ToString());
-MyEnum value = Enum.Parse<MyEnum>(element.Value);
-</code></pre>
-            </section>
-            <section id="element-uri">
-                <h3>Uri/StringElement</h3>
-                <p>Represents a URI value as a string.</p>
-                <pre><code>var element = new StringElement("https://example.com");
-Uri value = new Uri(element.Value);
-</code></pre>
-            </section>
-            <section id="element-array">
-                <h3>ArrayElement</h3>
+            <section id="xferlang-elements-array">
+                <h3>Array</h3>
+            <!-- Collection Elements -->
+            <section id="xferlang-elements-array">
+                <h3>Array</h3>
                 <p>Represents a typed array of elements.</p>
-                <pre><code>var element = new TypedArrayElement<IntegerElement>();
-element.Add(new IntegerElement(1));
-element.Add(new IntegerElement(2));
-// ...
-</code></pre>
             </section>
-            <section id="element-tuple">
-                <h3>TupleElement</h3>
-                <p>Represents an ordered collection of elements.</p>
-                <pre><code>var element = new TupleElement();
-element.Add(new IntegerElement(1));
-element.Add(new StringElement("two"));
-// ...
-</code></pre>
+            <section id="xferlang-elements-keyvalue">
+                <h3>Key/Value Pair</h3>
+                <p>Represents a single key-value pair.</p>
             </section>
-            <section id="element-object">
-                <h3>ObjectElement</h3>
+            <section id="xferlang-elements-object">
+                <h3>Object</h3>
                 <p>Represents a set of named key-value pairs.</p>
                 <pre><code>var element = new ObjectElement();
-element.AddOrUpdate(new KeyValuePairElement(new IdentifierElement("Name"), new StringElement("Alice")));
-// ...
 </code></pre>
             </section>
-            <section id="element-keyvalue">
-                <h3>KeyValuePairElement</h3>
-                <p>Represents a single key-value pair.</p>
-                <pre><code>var kvp = new KeyValuePairElement(new IdentifierElement("Age"), new IntegerElement(30));
 </code></pre>
             </section>
-            <section id="element-null">
-                <h3>NullElement</h3>
-                <p>Represents a null value.</p>
-                <pre><code>var element = new NullElement();
-object? value = element.Value; // null
-</code></pre>
-            </section>
-            <section id="element-interpolated">
-                <h3>InterpolatedElement</h3>
-                <p>Represents an interpolated string value.</p>
-                <pre><code>var element = new InterpolatedElement("${user.Name}");
-string value = element.Value;
-</code></pre>
-            </section>
-            <section id="element-dynamic">
-                <h3>DynamicElement</h3>
-                <p>Represents a dynamic value that is replaced during parsing or deserialization.</p>
-                <pre><code>var element = new DynamicElement("{value}");
-string value = element.Value;
-</code></pre>
-            </section>
+            <section id="xferlang-elements-tuple">
+                <h3>Tuple</h3>
+                <p>Represents an ordered collection of elements.</p>
+                <pre><code>var element = new TupleElement();
         </section>
 
         <section id="complex-structures">
-            <h2>Complex Structures</h2>
+</code></pre>
+            </section>
 
-            <h3>Objects</h3>
-            <p>Objects are enclosed in curly braces and contain key-value pairs:</p>
-            <pre><code class="xfer">{
-    name "John Doe"
-    age #30
-    address {
-        street "123 Main St"
-        city "Anytown"
-        zipCode "12345"
-    }
-}</code></pre>
+            <!-- Structural Elements -->
+            <section id="xferlang-elements-comment">
+                <h3>Comment</h3>
+                <p>Comments start with <code>&lt;/</code> and end with <code>/&gt;</code>. They can be placed anywhere in the document and are ignored by the parser.</p>
+                <pre><code>&lt;/ This is a comment /&gt;</code></pre>
+            </section>
+            <section id="xferlang-elements-dynamic">
+                <h3>Dynamic</h3>
+                <p>Represents a dynamic value that is replaced during parsing or deserialization.</p>
+                <pre><code>var element = new DynamicElement("{value}");</code></pre>
+            </section>
+            <section id="xferlang-elements-identifier">
+                <h3>Identifier</h3>
+                <p>Represents a symbolic name for an element, used as a key in key-value pairs or as a standalone value.</p>
+                <pre><code>var element = new IdentifierElement("Name");</code></pre>
+            </section>
+            <section id="xferlang-elements-metadata">
+                <h3>Metadata</h3>
+                <p>Represents document-level metadata or processing instructions.</p>
+                <pre><code>var element = new MetadataElement("xfer", new ObjectElement());</code></pre>
+            </section>
+
+            <!-- Data Elements -->
+            <section id="xferlang-elements-integer">
+                <h3>Integer</h3>
+                <p>Represents a 32-bit integer value.</p>
+            </section>
+            <section id="xferlang-elements-long">
+                <h3>Long</h3>
+                <p>Represents a 64-bit integer value.</p>
+            </section>
+            <section id="xferlang-elements-double">
+                <h3>Double</h3>
+                <p>Represents a double-precision floating-point value.</p>
+            </section>
+            <section id="xferlang-elements-decimal">
+                <h3>Decimal</h3>
+                <p>Represents a high-precision decimal value.</p>
+            </section>
+            <section id="xferlang-elements-boolean">
+                <h3>Boolean</h3>
+                <p>Represents a boolean value (true/false).</p>
+            </section>
+            <section id="xferlang-elements-character">
+                <h3>Character</h3>
+                <p>Represents a single character. Supported formats include:</p>
+                <ul>
+                    <li>Literal: <code>\A</code> (character 'A')</li>
+                    <li>Decimal: <code>\65</code> (character 'A')</li>
+                    <li>Hexadecimal: <code>\$41</code> (character 'A')</li>
+                    <li>Binary: <code>\%1000001</code> (character 'A')</li>
+                    <li>Unicode code point: <code>\$2764</code> (character '❤')</li>
+                    <li>Named: see table below for all built-in names (control, emoji, icons, etc.)</li>
+                </ul>
+                <p>Hexadecimal and binary formatting for character elements works the same as for integer and long elements.</p>
+                <details>
+                  <summary><strong>Built-in Character Names</strong> (click to expand)</summary>
+                  <div class="summary">
+                  <!-- ...existing code for character table... -->
+                  </div>
+                </details>
+            </section>
+            <section id="xferlang-elements-datetime">
+                <!-- Date/Time section is user-edited and left as is -->
+                ...existing code...
+            </section>
+            <section id="xferlang-elements-null">
+                <h3>Null</h3>
+                <p>Represents a null value.</p>
+            </section>
+            <section id="xferlang-elements-string">
+                <h3>String</h3>
+                <p>Represents a string value.</p>
+            </section>
+            <section id="xferlang-elements-interpolated">
+                <h3>Interpolated String</h3>
+                <p>Represents an interpolated string value.</p>
+            </section>
 
             <h3>Arrays</h3>
             <p>Arrays are enclosed in square brackets and contain elements of the <strong>same type</strong>:</p>
@@ -542,7 +522,7 @@ userInfo ("Alice" #25 ["admin" "user"] ~true)</code></pre>
             <h2>Complete Examples</h2>
 
             <h3>Configuration File</h3>
-            <pre><code class="xfer">&lt;! xfer "0.7.2"
+            <pre><code class="xfer">&lt;! xfer "0.11"
    name "Application Configuration"
    version "1.2.3"
 !&gt;
@@ -839,6 +819,218 @@ dotnet test</code></pre>
             <p>The library provides similar functionality to popular JSON libraries like Newtonsoft.Json, but for the XferLang format. You can serialize .NET objects to XferLang and deserialize XferLang documents back to .NET objects.</p>
 
             <p>For detailed build instructions, development setup, and contribution guidelines, see the <a href="#building-xferlang">Building XferLang</a> section.</p>
+        </section>
+
+        <section id="dotnet-elements-types">
+            <h2>Xfer Element Types (Concept & Code)</h2>
+            <p>XferLang supports a rich set of data types designed for clarity, explicitness, and flexibility. Each type is chosen to represent a distinct kind of value, making data both human-readable and machine-precise. The main categories are:
+            <ul>
+                <li><strong>Numbers</strong>: Integers, longs, decimals, and doubles for numeric values.</li>
+                <li><strong>Booleans</strong>: True/false values for logic and state.</li>
+                <li><strong>Strings & Characters</strong>: Textual data, including single characters and multi-line strings.</li>
+                <li><strong>Dates & Times</strong>: Date, time, and time span for temporal data.</li>
+                <li><strong>Nulls</strong>: Explicit representation of missing or undefined values.</li>
+                <li><strong>Objects</strong>: Named key-value pairs for structured records.</li>
+                <li><strong>Arrays & Tuples</strong>: Ordered collections, either typed (arrays) or mixed (tuples).</li>
+                <li><strong>Special Types</strong>: GUIDs, URIs, enums, dynamic elements, and interpolated values for advanced scenarios.</li>
+            </ul>
+            These concepts map directly to .NET element classes, which provide programmatic access and manipulation. Below you'll find each element type described both conceptually and with .NET code usage.</p>
+
+            <section id="dotnet-elements-integer">
+                <h3>IntegerElement</h3>
+                <p>Represents a 32-bit integer value.</p>
+                <pre><code>// Concept: Used for whole numbers.
+var element = new IntegerElement(42);
+int value = element.Value; // 42
+</code></pre>
+            </section>
+            <section id="dotnet-elements-long">
+                <h3>LongElement</h3>
+                <p>Represents a 64-bit integer value.</p>
+                <pre><code>var element = new LongElement(1234567890123L);
+long value = element.Value;
+</code></pre>
+            </section>
+            <section id="dotnet-elements-boolean">
+                <h3>BooleanElement</h3>
+                <p>Represents a boolean value (true/false).</p>
+                <pre><code>var element = new BooleanElement(true);
+bool value = element.Value;
+</code></pre>
+            </section>
+            <section id="dotnet-elements-double">
+                <h3>DoubleElement</h3>
+                <p>Represents a double-precision floating-point value.</p>
+                <pre><code>var element = new DoubleElement(3.14159);
+double value = element.Value;
+</code></pre>
+            </section>
+            <section id="dotnet-elements-decimal">
+                <h3>DecimalElement</h3>
+                <p>Represents a high-precision decimal value.</p>
+                <pre><code>var element = new DecimalElement(123.45m);
+decimal value = element.Value;
+</code></pre>
+            </section>
+            <section id="dotnet-elements-datetime">
+                <h3>DateTimeElement</h3>
+                <p>Represents a date and time value.</p>
+                <pre><code>var element = new DateTimeElement(DateTime.Now);
+DateTime value = element.Value;
+</code></pre>
+            </section>
+            <section id="dotnet-elements-date">
+                <h3>DateElement</h3>
+                <p>Represents a date-only value.</p>
+                <pre><code>var element = new DateElement(DateOnly.FromDateTime(DateTime.Now));
+DateOnly value = element.Value;
+</code></pre>
+            </section>
+            <section id="dotnet-elements-time">
+                <h3>TimeElement</h3>
+                <p>Represents a time-only value.</p>
+                <pre><code>var element = new TimeElement(TimeOnly.FromDateTime(DateTime.Now));
+TimeOnly value = element.Value;
+</code></pre>
+            </section>
+            <section id="dotnet-elements-timespan">
+                <h3>TimeSpanElement</h3>
+                <p>Represents a time interval.</p>
+                <pre><code>var element = new TimeSpanElement(TimeSpan.FromMinutes(90));
+TimeSpan value = element.Value;
+</code></pre>
+            </section>
+            <section id="dotnet-elements-string">
+                <h3>StringElement</h3>
+                <p>Represents a string value.</p>
+                <pre><code>var element = new StringElement("Hello, world!");
+string value = element.Value;
+</code></pre>
+            </section>
+            <section id="dotnet-elements-character">
+                <h3>CharacterElement</h3>
+                <p>Represents a single character. Supported formats include:</p>
+                <ul>
+                    <li>Literal: <code>\A</code> (character 'A')</li>
+                    <li>Decimal: <code>\65</code> (character 'A')</li>
+                    <li>Hexadecimal: <code>\$41</code> (character 'A')</li>
+                    <li>Binary: <code>\%1000001</code> (character 'A')</li>
+                    <li>Unicode code point: <code>\$2764</code> (character '❤')</li>
+                    <li>Named: see table below for all built-in names (control, emoji, icons, etc.)</li>
+                </ul>
+                <p>Hexadecimal and binary formatting for character elements works the same as for integer and long elements.</p>
+                <pre><code>var element = new CharacterElement('A');
+char value = element.Value;
+</code></pre>
+                <details>
+                  <summary><strong>Built-in Character Names</strong> (click to expand)</summary>
+                  <div class="summary">
+                  <table>
+                    <thead><tr><th>Name</th><th>Char</th><th>Unicode</th><th>Description</th></tr></thead>
+                    <tbody>
+                      <tr><td>nul</td><td>\0</td><td>U+0000</td><td>Null</td></tr>
+                      <tr><td>cr</td><td>\r</td><td>U+000D</td><td>Carriage Return</td></tr>
+                      <tr><td>lf</td><td>\n</td><td>U+000A</td><td>Line Feed</td></tr>
+                      <tr><td>nl</td><td>\n</td><td>U+000A</td><td>New Line (alias for lf)</td></tr>
+                      <tr><td>tab</td><td>\t</td><td>U+0009</td><td>Tab</td></tr>
+                      <tr><td>vtab</td><td>\v</td><td>U+000B</td><td>Vertical Tab</td></tr>
+                      <tr><td>bksp</td><td>\b</td><td>U+0008</td><td>Backspace</td></tr>
+                      <tr><td>ff</td><td>\f</td><td>U+000C</td><td>Form Feed</td></tr>
+                      <tr><td>bel</td><td>\a</td><td>U+0007</td><td>Bell</td></tr>
+                      <tr><td>quote</td><td>"</td><td>U+0022</td><td>Double Quote</td></tr>
+                      <tr><td>apos</td><td>'</td><td>U+0027</td><td>Single Quote</td></tr>
+                      <tr><td>backslash</td><td>\</td><td>U+005C</td><td>Backslash</td></tr>
+                      <tr><td>lt</td><td>&lt;</td><td>U+003C</td><td>Less Than</td></tr>
+                      <tr><td>gt</td><td>&gt;</td><td>U+003E</td><td>Greater Than</td></tr>
+                      <tr><td>heart</td><td>❤</td><td>U+2764</td><td>Heart emoji</td></tr>
+                      <tr><td>smile</td><td>😀</td><td>U+1F600</td><td>Grinning face emoji</td></tr>
+                      <tr><td>rocket</td><td>🚀</td><td>U+1F680</td><td>Rocket emoji</td></tr>
+                      <tr><td>check</td><td>✔</td><td>U+2714</td><td>Check mark</td></tr>
+                      <tr><td>cross</td><td>✖</td><td>U+2716</td><td>Cross mark</td></tr>
+                      <tr><td>warn</td><td>⚠</td><td>U+26A0</td><td>Warning sign</td></tr>
+                      <tr><td>info</td><td>ℹ</td><td>U+2139</td><td>Info symbol</td></tr>
+                      <tr><td>star</td><td>★</td><td>U+2605</td><td>Star</td></tr>
+                      <tr><td>bug</td><td>🐞</td><td>U+1F41E</td><td>Bug emoji</td></tr>
+                      <tr><td>gear</td><td>⚙</td><td>U+2699</td><td>Gear</td></tr>
+                      <tr><td>package</td><td>📦</td><td>U+1F4E6</td><td>Package emoji</td></tr>
+                      <tr><td>nuget</td><td>🛒</td><td>U+1F6D2</td><td>NuGet/cart icon</td></tr>
+                      <tr><td>github</td><td></td><td>U+F0C7</td><td>GitHub mark (font icon)</td></tr>
+                      <tr><td>ci</td><td>🏗</td><td>U+1F3D7</td><td>CI/build</td></tr>
+                      <tr><td>build</td><td>🔨</td><td>U+1F528</td><td>Build/hammer</td></tr>
+                      <tr><td>test</td><td>🧪</td><td>U+1F9EA</td><td>Test tube</td></tr>
+                      <tr><td>pass</td><td>✅</td><td>U+2705</td><td>Pass/check</td></tr>
+                      <tr><td>fail</td><td>❌</td><td>U+274C</td><td>Fail/cross</td></tr>
+                      <tr><td>pending</td><td>⏳</td><td>U+23F3</td><td>Pending/hourglass</td></tr>
+                      <tr><td>clock</td><td>⏰</td><td>U+23F0</td><td>Clock/alarm</td></tr>
+                      <tr><td>calendar</td><td>📅</td><td>U+1F4C5</td><td>Calendar</td></tr>
+                      <tr><td>zap</td><td>⚡</td><td>U+26A1</td><td>Zap/bolt</td></tr>
+                      <tr><td>fire</td><td>🔥</td><td>U+1F525</td><td>Fire</td></tr>
+                      <tr><td>snow</td><td>❄</td><td>U+2744</td><td>Snowflake</td></tr>
+                      <tr><td>sun</td><td>☀</td><td>U+2600</td><td>Sun</td></tr>
+                      <tr><td>moon</td><td>🌙</td><td>U+1F319</td><td>Moon</td></tr>
+                      <tr><td>cloud</td><td>☁</td><td>U+2601</td><td>Cloud</td></tr>
+                      <tr><td>rain</td><td>🌧</td><td>U+1F327</td><td>Rain</td></tr>
+                      <tr><td>bolt</td><td>🌩</td><td>U+1F329</td><td>Lightning/bolt</td></tr>
+                      <!-- Add more as needed -->
+                    </tbody>
+                  </table>
+                  <p>For a full list, see <a href="https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/CharacterIdRegistry.cs" target="_blank" rel="noopener"><code>CharacterIdRegistry.cs</code></a> in the source.</p>
+                  </div>
+                </details>
+            </section>
+            <section id="dotnet-elements-array">
+                <h3>ArrayElement</h3>
+                <p>Represents a typed array of elements.</p>
+                <pre><code>var element = new TypedArrayElement<IntegerElement>();
+element.Add(new IntegerElement(1));
+element.Add(new IntegerElement(2));
+// ...
+</code></pre>
+            </section>
+            <section id="dotnet-elements-tuple">
+                <h3>TupleElement</h3>
+                <p>Represents an ordered collection of elements.</p>
+                <pre><code>var element = new TupleElement();
+element.Add(new IntegerElement(1));
+element.Add(new StringElement("two"));
+// ...
+</code></pre>
+            </section>
+            <section id="dotnet-elements-object">
+                <h3>ObjectElement</h3>
+                <p>Represents a set of named key-value pairs.</p>
+                <pre><code>var element = new ObjectElement();
+element.AddOrUpdate(new KeyValuePairElement(new IdentifierElement("Name"), new StringElement("Alice")));
+// ...
+</code></pre>
+            </section>
+            <section id="dotnet-elements-keyvalue">
+                <h3>KeyValuePairElement</h3>
+                <p>Represents a single key-value pair.</p>
+                <pre><code>var kvp = new KeyValuePairElement(new IdentifierElement("Age"), new IntegerElement(30));
+</code></pre>
+            </section>
+            <section id="dotnet-elements-null">
+                <h3>NullElement</h3>
+                <p>Represents a null value.</p>
+                <pre><code>var element = new NullElement();
+object? value = element.Value; // null
+</code></pre>
+            </section>
+            <section id="dotnet-elements-interpolated">
+                <h3>InterpolatedElement</h3>
+                <p>Represents an interpolated string value.</p>
+                <pre><code>var element = new InterpolatedElement("${user.Name}");
+string value = element.Value;
+</code></pre>
+            </section>
+            <section id="dotnet-elements-dynamic">
+                <h3>DynamicElement</h3>
+                <p>Represents a dynamic value that is replaced during parsing or deserialization.</p>
+                <pre><code>var element = new DynamicElement("{value}");
+string value = element.Value;
+</code></pre>
+            </section>
         </section>
 
         <section id="serialization">

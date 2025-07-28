@@ -1,10 +1,122 @@
-/* Main page logo styles */
-.main-logo {
-    display: block;
-    margin: 0 auto 20px auto;
-    max-width: 180px;
-    height: auto;
+/* Sidebar Styles */
+.sidebar {
+    width: 260px;
+    background-color: #343a40;
+    color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding-top: 20px;
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Accordion Styles for Sidebar */
+    .accordion {
+        background-color: #495057;
+        color: #fff;
+        cursor: pointer;
+        padding: 10px 20px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 1em;
+        transition: background-color 0.2s;
+    }
+    .active, .accordion:hover {
+        background-color: #212529;
+    }
+    .panel {
+        padding-left: 10px;
+        display: none;
+        background-color: #343a40;
+    }
 }
+
+.sidebar-header {
+    padding: 0 20px 20px 20px;
+    text-align: center;
+    border-bottom: 1px solid #495057;
+}
+
+.sidebar-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar ul li a {
+    display: block;
+    padding: 12px 20px;
+    color: #adb5bd;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.sidebar ul li a:hover {
+    background-color: #495057;
+    color: #fff;
+}
+
+.sidebar ul li a.active {
+    background-color: #0d6efd;
+    color: #fff;
+    border-left: 3px solid #80bfff;
+}
+
+.sidebar ul ul {
+  padding-left: 20px; /* Indents nested <ul> elements */
+}
+
+.sidebar ul ul li,
+.sidebar ul ul .sidebar-accordion {
+  padding-left: 1em; /* Optional: adds extra depth inside nested items */
+}
+
+.sidebar summary {
+    padding: 12px 20px;
+    overflow-x:auto;
+}
+
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar li a {
+  display: block;
+  padding-left: 1.5em;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.sidebar li a:hover {
+  background-color: #495057;
+  color: #fff;
+}
+
+.sidebar li a.active {
+  background-color: #0d6efd;
+  color: #fff;
+  border-left: 3px solid #80bfff;
+}
+
+.sidebar-accordion {
+  display: list-item; /* Important: keeps the native arrow */
+  cursor: pointer;
+}
+
+details details > summary.sidebar-accordion {
+  padding-left: 2.5em; /* or more, depending on your desired depth */
+}
+
 /* Highlighted link style: looks like normal text, box on hover, home icon */
 .home-link {
     color: inherit;
@@ -34,6 +146,15 @@
     cursor: pointer;
     color: #222 !important; /* Ensure text is visible on hover */
 }
+
+/* Main logo in content */
+.main-logo {
+    display: block;
+    margin: 0 auto 20px auto;
+    max-width: 180px;
+    height: auto;
+}
+
 /* Comparison table styles */
 .comparison-table {
     width: 100%;
@@ -84,79 +205,6 @@ body {
     background-color: #f8f9fa;
     color: #343a40;
     display: flex;
-}
-
-/* Sidebar Styles */
-.sidebar {
-    width: 260px;
-    background-color: #343a40;
-    color: #fff;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    padding-top: 20px;
-    transition: transform 0.3s ease;
-    overflow-y: auto;
-    overflow-x: hidden;
-    /* Accordion Styles for Sidebar */
-    .accordion {
-        background-color: #495057;
-        color: #fff;
-        cursor: pointer;
-        padding: 10px 20px;
-        width: 100%;
-        border: none;
-        text-align: left;
-        outline: none;
-        font-size: 1em;
-        transition: background-color 0.2s;
-    }
-    .active, .accordion:hover {
-        background-color: #212529;
-    }
-    .panel {
-        padding-left: 10px;
-        display: none;
-        background-color: #343a40;
-    }
-}
-
-.sidebar-header {
-    padding: 0 20px 20px 20px;
-    text-align: center;
-    border-bottom: 1px solid #495057;
-}
-
-.sidebar-header h2 {
-    margin: 0;
-    font-size: 1.5em;
-}
-
-.sidebar ul {
-    list-style: none;
-    padding: 20px 0;
-    margin: 0;
-}
-
-.sidebar ul li a {
-    display: block;
-    padding: 12px 20px;
-    color: #adb5bd;
-    text-decoration: none;
-    transition: background-color 0.2s, color 0.2s;
-    border-left: 3px solid transparent;
-}
-
-.sidebar ul li a:hover {
-    background-color: #495057;
-    color: #fff;
-}
-
-.sidebar ul li a.active {
-    background-color: #0d6efd;
-    color: #fff;
-    border-left: 3px solid #80bfff;
 }
 
 /* Main Content Styles */

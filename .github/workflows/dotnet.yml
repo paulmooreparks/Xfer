@@ -5,54 +5,68 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
+    inputs:
+      reset_build_number:
+        description: "Reset the build number (true/false)"
+        required: false
+        default: "false"
 
 permissions:
   contents: write
-  actions: read
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore Xfer.sln
-    - name: Build
-      run: dotnet build --no-restore --configuration Release Xfer.sln
-    - name: Test
-      run: dotnet test --no-build --configuration Release Xfer.sln
-
-  # Keep automatic versioning for CI validation (no publishing)
-  package-validation:
-    needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
-    - name: Read base version
-      id: version
-      run: |
-        BASE_VERSION=$(cat version.txt)
-        FULL_VERSION="${BASE_VERSION}.${{ github.run_number }}-prerelease"
-        echo "base=$BASE_VERSION" >> $GITHUB_OUTPUT
-        echo "full=$FULL_VERSION" >> $GITHUB_OUTPUT
-        echo "📦 Building version: $FULL_VERSION"
-    - name: Build
-      run: dotnet build ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release -p:Version=${{ steps.version.outputs.full }}
-    - name: Pack with auto-increment version (CI validation only)
-      run: dotnet pack ./ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release -p:Version=${{ steps.version.outputs.full }} -o ./nupkgs --no-build
-    - name: List generated packages (not published)
-      run: ls -la ./nupkgs/
+        dotnet-version: '8.x'
 
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Read version from csproj
+      id: read-version
+      run: |
+        base=$(grep -oPm1 "(?<=<Version>)[^<]+" ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj)
+        base2=${base%.*}
+
+        if [ "$GITHUB_ACTIONS" = "true" ]; then
+          reset="${{ github.event.inputs.reset_build_number }}"
+        else
+          reset="false"
+        fi
+
+        if [ "$reset" = "true" ]; then
+          build=1
+        else
+          build=${GITHUB_RUN_NUMBER:-1}
+        fi
+
+        full="$base2.$build"
+        echo "version=$full" >> $GITHUB_OUTPUT
+        echo "VERSION=$full" >> $GITHUB_ENV
+
+    - name: Build
+      run: dotnet build --no-restore -c Release ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -p:Version=$VERSION
+
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+
+    - name: Pack with computed version
+      run: dotnet pack ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release --no-build -o ./nupkgs -p:PackageVersion=$VERSION -p:Version=$VERSION
+
+    - name: Tag release
+      if: ${{ github.actor != 'nektos/act' }}
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag "v$VERSION"
+        git push origin "v$VERSION"

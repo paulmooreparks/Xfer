@@ -45,7 +45,7 @@
     tags ["tag1" "tag2" "tag3"]
     metadata{
         created @2024-11-10T08:00:00@
-        modified @2024-11-11T12:30:00@
+        modified <@2024-11-11T12:30:00@>
     }
 }
 
@@ -103,7 +103,8 @@ elements of any type. />
     date @2019-01-01@ </ Date specifier is @ />
     placeholder '<|USERPROFILE|>'  </ Placeholder specifier is | />
     evalString <'Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><''as<\$20\>is''>.'>  </ Evaluated element specifier is ' />
-    nullValue?
+    nullValue ?
+    anotherNullProperty <??>
 
     array [
         #1

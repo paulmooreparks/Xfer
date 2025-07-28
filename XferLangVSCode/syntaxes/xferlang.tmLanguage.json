@@ -3,6 +3,7 @@
   "name": "XferLang",
   "scopeName": "source.xferlang",
   "patterns": [
+	{ "include": "#dateElement" },
 	{ "include": "#metadata" },
 	{ "include": "#comments" },
 	{ "include": "#stringElement" },
@@ -14,6 +15,20 @@
 	{ "include": "#delimiters" }
   ],
   "repository": {
+	"dateElement": {
+	  "patterns": [
+		{
+		  "name": "constant.datetime.xferlang",
+		  "begin": "<@",
+		  "end": "@>"
+		},
+		{
+		  "name": "constant.datetime.xferlang",
+		  "begin": "@",
+		  "end": "@"
+		}
+	  ]
+	},
 	"metadata": {
 	  "patterns": [
 		{
@@ -363,15 +378,7 @@
 	  "patterns": [
 		{
 		  "name": "punctuation.section.delimiter.xferlang",
-		  "match": "[\\[\\]\\{\\}\\(\\)<>]"
-		},
-		{
-		  "name": "punctuation.section.delimiter.xferlang",
-		  "match": "<([!\"=#\\\\&^*~@?/\\[\\{\\(\\|'])+"
-		},
-		{
-		  "name": "punctuation.section.delimiter.xferlang",
-		  "match": "([!\"=#\\\\&^*~@?/\\]\\}\\)\\|'])+>"
+		  "match": "[\\[\\]\\{\\}\\(\\)]"
 		}
 	  ]
 	}
