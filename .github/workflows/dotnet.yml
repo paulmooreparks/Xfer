@@ -14,13 +14,15 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -34,39 +36,32 @@ jobs:
 
     - name: Read version from csproj
       id: read-version
+      env:
+        RESET_BUILD: ${{ github.event.inputs.reset_build_number }}
       run: |
         base=$(grep -oPm1 "(?<=<Version>)[^<]+" ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj)
-        base2=${base%.*}
-
-        if [ "$GITHUB_ACTIONS" = "true" ]; then
-          reset="${{ github.event.inputs.reset_build_number }}"
-        else
-          reset="false"
-        fi
-
-        if [ "$reset" = "true" ]; then
+        if [[ "$RESET_BUILD" == "true" ]]; then
+          echo "Resetting build number to 1"
           build=1
         else
-          build=${GITHUB_RUN_NUMBER:-1}
+          build=${GITHUB_RUN_NUMBER}
         fi
-
-        full="$base2.$build"
-        echo "version=$full" >> $GITHUB_OUTPUT
+        full="$base.$build"
         echo "VERSION=$full" >> $GITHUB_ENV
+        echo "version=$full" >> $GITHUB_OUTPUT
 
     - name: Build
-      run: dotnet build --no-restore -c Release ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -p:Version=$VERSION
+      run: dotnet build --no-restore -c Release ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -p:Version=${ steps.read-version.outputs.version }
 
     - name: Test
       run: dotnet test --no-build --verbosity normal
 
     - name: Pack with computed version
-      run: dotnet pack ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release --no-build -o ./nupkgs -p:PackageVersion=$VERSION -p:Version=$VERSION
+      run: dotnet pack ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release --no-build -o ./nupkgs -p:PackageVersion=${ steps.read-version.outputs.version } -p:Version=${ steps.read-version.outputs.version }
 
     - name: Tag release
-      if: ${{ github.actor != 'nektos/act' }}
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git tag "v$VERSION"
-        git push origin "v$VERSION"
+        git tag "v${ steps.read-version.outputs.version }"
+        git push origin "v${ steps.read-version.outputs.version }"
