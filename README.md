@@ -2,23 +2,11 @@
 
 # The XferLang Data-Interchange Format
 
-<p>
-  <a href="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml">
-    <img alt=".NET Build Status" src="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml/badge.svg">
-  </a>
-  <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang">
-    <img alt="NuGet" src="https://img.shields.io/nuget/vpre/ParksComputing.Xfer.Lang.svg">
-  </a>
-  <a href="https://github.com/paulmooreparks/Xfer">
-    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/paulmooreparks/Xfer">
-  </a>
-  <a href="https://github.com/paulmooreparks/Xfer">
-    <img alt="GitHub issues" src="https://img.shields.io/github/issues/paulmooreparks/Xfer">
-  </a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg">
-  </a>
-</p>
+[![.NET Build Status](https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml/badge.svg)](https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml)
+[![NuGet](https://img.shields.io/nuget/vpre/ParksComputing.Xfer.Lang.svg)](https://www.nuget.org/packages/ParksComputing.Xfer.Lang)
+[![GitHub last commit](https://img.shields.io/github/last-commit/paulmooreparks/Xfer)](https://github.com/paulmooreparks/Xfer)
+[![GitHub issues](https://img.shields.io/github/issues/paulmooreparks/Xfer)](https://github.com/paulmooreparks/Xfer/issues)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.com/item?id=42114543). Thank you so much for all the great input and discussion!_
 
