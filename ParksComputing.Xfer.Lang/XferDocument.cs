@@ -3,9 +3,11 @@ using ParksComputing.Xfer.Lang.Elements;
 
 namespace ParksComputing.Xfer.Lang;
 
+
 public class XferDocument {
     public Configuration.XferDocumentContext Context { get; set; } = new Configuration.XferDocumentContext();
     public TupleElement Root { get; set; } = new();
+    public XferDocumentMetadata? Metadata { get; set; }
 
     public XferDocument() { }
 

@@ -595,12 +595,57 @@ public class Parser : IXferParser {
     internal XferDocument ParseDocument() {
         var document = new XferDocument();
         _currentDocument = document;
+        int elementIndex = 0;
+        bool foundDocMetadata = false;
         while (IsCharAvailable()) {
             var element = ParseElement();
-            // All metadata handling is now in ParseElement; just add elements to Root
+            // Check for document-level metadata (must be first)
+            if (element is MetadataElement metaElem && metaElem.ContainsKey(MetadataElement.XferKeyword)) {
+                if (elementIndex != 0) {
+                    throw new InvalidOperationException($"Document-level metadata (<! xfer ... !>) must be the first element. Found at row {LastElementRow}, column {LastElementColumn}.");
+                }
+                // Map to XferDocumentMetadata and attach
+                document.Metadata = MapToXferDocumentMetadata(metaElem);
+                foundDocMetadata = true;
+            }
+            else if (elementIndex == 0) {
+                // If first element is not doc metadata, Metadata will be set below
+            }
+            else if (element is MetadataElement metaElem2 && metaElem2.ContainsKey(MetadataElement.XferKeyword)) {
+                // Defensive: should never hit, but just in case
+                throw new InvalidOperationException($"Document-level metadata (<! xfer ... !>) must be the first element. Found at row {LastElementRow}, column {LastElementColumn}.");
+            }
             document.Root.Add(element);
+            elementIndex++;
+        }
+        if (!foundDocMetadata) {
+            document.Metadata = new XferDocumentMetadata();
         }
         return document;
+    }
+
+    // Map MetadataElement with XferKeyword to XferDocumentMetadata (with extensions)
+    private XferDocumentMetadata MapToXferDocumentMetadata(MetadataElement metaElem) {
+        var metadata = new XferDocumentMetadata();
+        if (metaElem.Values.TryGetValue(MetadataElement.XferKeyword, out var xferKvp) && xferKvp.Value is ObjectElement obj) {
+            foreach (var kv in obj.Values) {
+                var key = kv.Key;
+                var value = kv.Value.Value;
+                switch (key.ToLowerInvariant()) {
+                    case "version":
+                        if (value is TextElement txt1) { metadata.Version = txt1.Value; }
+                        break;
+                    case "documentversion":
+                        if (value is TextElement txt2) { metadata.DocumentVersion = txt2.Value; }
+                        break;
+                    // Add more known properties here as needed
+                    default:
+                        metadata.Extensions[key] = value;
+                        break;
+                }
+            }
+        }
+        return metadata;
     }
 
     internal Element ParseElement() {
