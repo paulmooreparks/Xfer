@@ -1,0 +1,25 @@
+{
+  "name": "xfer",
+  "displayName": "XferLang",
+  "description": "Syntax highlighting and language support for XferLang (.xfer files)",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.102.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "xferlang",
+      "aliases": ["XferLang", "xferlang"],
+      "extensions": ["xfer"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "xferlang",
+      "scopeName": "source.xferlang",
+      "path": "./syntaxes/xferlang.tmLanguage.json"
+    }]
+  }
+}

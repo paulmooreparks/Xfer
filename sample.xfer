@@ -1,112 +1,4 @@
 ﻿<! xfer "0.7.2" !>
-foo []
-:string bar ?
-{foo"bar"}(numProcs #<|NUMBER_OF_PROCESSORS|></ A key-value pair element may have a key/value pair as a value. />
-    keyValuePair key "value"
-    'What if an eval element contains a comment?</ The comment is removed./>' )
-EmptyString <"">
-NullProperty <??>
-{=full name=""John "Mystery" Doe""Age#42=99=@2024-11-26T15:36:23@Description'Serializing Xfer makes me <\$1F600\>'ints[#1#2#3]strings["one""two""three"]bag_o_bits1("one"#2^3.14)}=key="value"
-123
--123
-(456)
-[789 101112]
-{key 131415}
-$41
-#<|NUMBER_OF_PROCESSORS|>
-"""An empty string is represented by an empty pair of quotes ("")."""
-{name"Alice"age 30 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00@}}
-</ The outermost element of an Xfer document is an implicit property-bag element. It may contain 
-elements of any type. />
-
-</ A string element is a sequence of characters which are rendered literally, as they appear. />
-<"Hello, Xfer!">
-
-</ An evaluated element evaluates its embedded elements. The following will render as "I ❤︎ Xfer 😀". />
-' I <\$2764\><\$fe0e\> Xfer <\$1F600\> '
-'<\$1F468\>'
-" I <\$2764\><\$fe0e\> Xfer <\$1F600\> "
-
-</ An example of embedding a string element and a comment inside an Xfer string. />
-<""
-<"Xfer"> is an Xfer string element </and this is an Xfer comment/>.
-"">
-
-</// A comment with <// a comment </ inside another comment /> //>. ///>
-
-<"A string may contain character elements<\$20\>inside of it, which will not be parsed.">
-<'When character elements are inside an evaluated<\$20\>element, they are parsed'>
-<''An eval element may contain <'another eval'> if its specifiers are repeated''>
-<'Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) may also be embedded in eval elements, and their evaluated results will become part of the rendered value.'> {
-    string "value"  </ String specifier is " />
-    character \65  </ Character specifier is \ />
-    boolean ~true  </ Boolean specifier is ~ />
-    integer #42  </ Integer specifier is # />
-    implicitInteger 42  </ No specifier needed. />
-    implicitHexInteger $F00D  </ Same with hex />
-    implicitBinaryInteger %10101010  </ Or binary. />
-    long &5000000000  </ Long specifier is & />
-    hexLongInteger &$BAADF00D  </ Hex numeric values are preceded by $ />
-    binaryInteger #%10101010  </ Binary numeric values are preceded by % />
-    double ^3.1415926535  </ Double specifier is ^ />
-    decimal *123.45  </ Decimal specifier is * />
-    date @2019-01-01@ </ Date specifier is @ />
-    placeholder '<|USERPROFILE|>'  </ Placeholder specifier is | />
-    evalString <'Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><''as<\$20\>is''>.'>  </ Evaluated element specifier is ' />
-    nullValue?
-
-    array [
-        #1 
-        #2 
-        #3
-    ] 
-    </ Array specifiers are [ ] />
-
-    object { 
-        key "value"
-        boolean ~false
-    } </ Object specifiers are { } />
-
-    </ A property-bag element may hold any number of elements of any type. />
-    propertyBag (
-        "value"
-        #123
-        ~true
-        @2019-02-02@
-    ) </ Property bag specifiers are ( ) />
-    
-    <=If a key in a key/value pair needs to contain more than a simple string, it can be wrapped in a pair of (that's 2) digraphs=>"value"
-    <=A key may even contain <"other elements">=> "value"
-    <==A key may contain a <=key element=> as long as the outer specifiers are repeated.==> "value"
-    <=123=> #123
-}
-
-</ We are able to round-trip the minified output of the parser. />
-{string"value"character\65 boolean~true integer#42 long&5000000000 hexLongInteger&3131961357 binaryInteger#170 double^3.1415926535 decimal*123.45 date@2019-01-01T08:00:00@placeholder'C:\Users\paul'evalString'Inner elements are evaluated 1 at a time and rendered as is.'array[#1 #2 #3]object{key"value"boolean~false}propertyBag("value"#123 ~true @2019-02-02T08:00:00@)}
-
-(
-    </ Most elements may pull their values from a placeholder. />
-    numProcs #<|NUMBER_OF_PROCESSORS|>
-
-    </ A key-value pair element may have a key/value pair as a value. />
-    keyValuePair key "value"
-
-    'What if an eval element contains a comment?</ The comment is removed./>'
-
-    "What if an string element contains a comment?</ The comment is retained./>"
-)
-
-<"
-/* Now it's possible to embed code with less worry */
-namespace HelloWorldApp;
-
-class Program {
-    static void Main(string[] args) {
-        Console.WriteLine("Hello, Xfer!");
-    }
-}
-">
-
 {
     name "Alice"
     age #30
@@ -118,7 +10,7 @@ class Program {
     }
     settings {
         theme "dark"
-        notifications { 
+        notifications {
             email ~true
             sms ~false
         }
@@ -157,102 +49,114 @@ class Program {
     }
 }
 
-</ These are some ideas about how I might create a programming language using XferLang. />
+foo []
+:string bar ?
+{foo"bar"}(numProcs #<|NUMBER_OF_PROCESSORS|></ A key-value pair element may have a key/value pair as a value. />
+    keyValuePair key "value"
+    'What if an eval element contains a comment?</ The comment is removed./>' )
+EmptyString <"">
+NullProperty <??>
+{=full name=""John "Mystery" Doe""Age#42=99=@2024-11-26T15:36:23@Description'Serializing Xfer makes me <\$1F600\>'ints[#1#2#3]strings["one""two""three"]bag_o_bits1("one"#2^3.14)}=key="value"
+123
+-123
+(456)
+[789 101112]
+{key 131415}
+$41
+#<|NUMBER_OF_PROCESSORS|>
+"""An empty string is represented by an empty pair of quotes ("")."""
+{name"Alice"age 30 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00@}}
+</ The outermost element of an Xfer document is an implicit property-bag element. It may contain
+elements of any type. />
+<"Hello, Xfer!">
 
-xfer :interface {
-    if :static :method {
-        params [
-            condition :boolean {
-                required ~true
-            }
-            then :block {
-                required ~true
-            }
-            else :block {
-                required ~false
-                default ?
-            }
-        ]
-    }
+</ A string element is a sequence of characters which are rendered literally, as they appear. />
+" I <\$2764\><\$fe0e\> Xfer <\$1F600\> "
+
+</ An interpolated element evaluates its embedded elements. The following will render as "I ❤︎ Xfer 😀". />
+' I <\$2764\><\$fe0e\> Xfer <\$1F600\> '
+'<\$1F468\>'
+
+</ An example of embedding a string element and a comment inside an Xfer string. />
+<""
+<"Xfer"> is an Xfer string element </and this is an Xfer comment/>.
+"">
+
+</// A comment with <// a comment </ inside another comment /> //>. ///>
+
+<"A string may contain character elements<\$20\>inside of it, which will not be parsed.">
+<'When character elements are inside an evaluated<\$20\>element, they are parsed'>
+<''An eval element may contain <'another eval'> if its specifiers are repeated''>
+<'Other elements like strings (<"Hello, World!">), numbers (<#123#>, <&456&>), and dates (<@1976-04-07@>) may also be embedded in eval elements, and their evaluated results will become part of the rendered value.'> {
+    string "value"  </ String specifier is " />
+    character \65  </ Character specifier is \ />
+    boolean ~true  </ Boolean specifier is ~ />
+    integer #42  </ Integer specifier is # />
+    implicitInteger 42  </ No specifier needed. />
+    implicitHexInteger $F00D  </ Same with hex />
+    implicitBinaryInteger %10101010  </ Or binary. />
+    long &5000000000  </ Long specifier is & />
+    hexLongInteger &$BAADF00D  </ Hex numeric values are preceded by $ />
+    binaryInteger #%10101010  </ Binary numeric values are preceded by % />
+    double ^3.1415926535  </ Double specifier is ^ />
+    decimal *123.45  </ Decimal specifier is * />
+    date @2019-01-01@ </ Date specifier is @ />
+    placeholder '<|USERPROFILE|>'  </ Placeholder specifier is | />
+    evalString <'Inner elements <"are evaluated"> <#1#> at a time and<\$20\>rendered<\$20\><''as<\$20\>is''>.'>  </ Evaluated element specifier is ' />
+    nullValue?
+
+    array [
+        #1
+        #2
+        #3
+    ]
+    </ Array specifiers are [ ] />
+
+    object {
+        key "value"
+        boolean ~false
+    } </ Object specifiers are { } />
+
+    </ A property-bag element may hold any number of elements of any type. />
+    propertyBag (
+        "value"
+        #123
+        ~true
+        @2019-02-02@
+    ) </ Property bag specifiers are ( ) />
+
+    <=If a key in a key/value pair needs to contain more than a simple string, it can be wrapped in a pair of (that's 2) digraphs=>"value"
+    <=A key may even contain <"other elements">=> "value"
+    <==A key may contain a <=key element=> as long as the outer specifiers are repeated.==> "value"
+    <=123=> #123
 }
 
-function hello (
-    console.write( "Hello, " )
-)
+</ We are able to round-trip the minified output of the parser. />
+{string"value"character\65 boolean~true integer#42 long&5000000000 hexLongInteger&3131961357 binaryInteger#170 double^3.1415926535 decimal*123.45 date@2019-01-01T08:00:00@placeholder'C:\Users\paul'evalString'Inner elements are evaluated 1 at a time and rendered as is.'array[#1 #2 #3]object{key"value"boolean~false}propertyBag("value"#123 ~true @2019-02-02T08:00:00@)}
 
-function world (
-    console.writeLine( "World!" )
-)
-
-hello() world()
-
-sayMyName :function {
-    name :string {
-        required ~true
-    }
-}
 (
-    console.writeLine( "My name is " + name )
+    </ Most elements may pull their values from a placeholder. />
+    numProcs #<|NUMBER_OF_PROCESSORS|>
+
+    </ A key-value pair element may have a key/value pair as a value. />
+    keyValuePair key "value"
+
+    'What if an eval element contains a comment?</ The comment is removed./>'
+
+    "What if an string element contains a comment?</ The comment is retained./>"
 )
 
-if (~true) (
-        console.writeLine ( "Condition is true!" )
-    )
-    (eq (1 2)) (
-        console.writeLine ( "Whoa!" )
-        console.writeLine ( "Stop the world; I want to get off!" )
-    )
-    else (
-        console.writeLine ( "Condition is false!" )
-    )
-    else console.writeLine ( "Condition is false!" )
+<"
+/* Now it's possible to embed code with less worry */
+namespace HelloWorldApp;
 
-
-console :object {
-    width :static :property {
-        value :int #80
-        get (
-            :let [ value <|hardware.console.width|> ]
-        )
-    }
-    writeLine :static :method {
-        result status :int #0
-        params {
-            out :string <"">
-        }
-        main (
-            </
-            :if [
-                out ? 
-                (
-                    :let { status #3 }
-                    :return
-                )
-            ]
-            try (
-                :let [ status stdio.out ( <|s|> ) ]
-                xfer.if [ status #0 ( :let status stdio.out ( '<\nl\>' ) ) ]
-            )
-            catch {
-                exception.io (
-                    :let { status #1 }
-                )
-            }
-            />
-        )
-        catch {
-            exception.unexpected (
-                :let { status #2 }
-            )
-        }
-        finally (
-        )
+class Program {
+    static void Main(string[] args) {
+        Console.WriteLine("Hello, Xfer!");
     }
 }
+">
 
-main (
-    console.writeLine { out "Hello, Xfer!" }
-)
 
 </ I parked this comment here so that I could remember how to replace the parse parameter for testing. />
 </ parse ..\..\..\..\sample.xfer />

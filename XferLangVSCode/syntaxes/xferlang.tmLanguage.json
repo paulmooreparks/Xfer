@@ -1,0 +1,379 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "XferLang",
+  "scopeName": "source.xferlang",
+  "patterns": [
+	{ "include": "#metadata" },
+	{ "include": "#comments" },
+	{ "include": "#stringElement" },
+	{ "include": "#characterElement" },
+	{ "include": "#numbers" },
+	{ "include": "#booleans" },
+	{ "include": "#null" },
+	{ "include": "#identifiers" },
+	{ "include": "#delimiters" }
+  ],
+  "repository": {
+	"metadata": {
+	  "patterns": [
+		{
+		  "name": "meta.processing-instruction.xferlang",
+		  "begin": "<!+",
+		  "end": "!+>",
+		  "patterns": [
+			{ "include": "#comments" },
+			{ "include": "#stringElement" },
+			{ "include": "#characterElement" },
+			{ "include": "#numbers" },
+			{ "include": "#booleans" },
+			{ "include": "#null" },
+			{ "include": "#identifiers" },
+			{ "include": "#delimiters" }
+		  ]
+		}
+	  ]
+	},
+	"comments": {
+	  "patterns": [
+		{
+		  "name": "comment.block.xferlang",
+		  "begin": "</+",
+		  "end": "/+>",
+		  "beginCaptures": {
+			"0": { "name": "punctuation.definition.comment.begin.xferlang" }
+		  },
+		  "endCaptures": {
+			"0": { "name": "punctuation.definition.comment.end.xferlang" }
+		  },
+		  "patterns": [
+			{ "include": "#comments" }
+		  ]
+		}
+	  ]
+	},
+	"stringElement": {
+	  "patterns": [
+		{
+		  "name": "string.quoted.triple.double.xferlang",
+		  "begin": "<\"\"\"",
+		  "end": "\"\"\">",
+		  "patterns": [
+			{
+			  "name": "constant.character.escape.xferlang",
+			  "match": "\\."
+			}
+		  ]
+		},
+		{
+		  "name": "string.quoted.triple.double.xferlang",
+		  "begin": "\"\"\"",
+		  "end": "\"\"\"",
+		  "patterns": [
+			{
+			  "name": "constant.character.escape.xferlang",
+			  "match": "\\."
+			}
+		  ]
+		},
+		{
+		  "name": "string.quoted.triple.single.xferlang",
+		  "begin": "<'''",
+		  "end": "'''>",
+		  "patterns": [
+			{
+			  "name": "constant.character.escape.xferlang",
+			  "match": "\\."
+			}
+		  ]
+		},
+		{
+		  "name": "string.quoted.triple.single.xferlang",
+		  "begin": "'''",
+		  "end": "'''",
+		  "patterns": [
+			{
+			  "name": "constant.character.escape.xferlang",
+			  "match": "\\."
+			}
+		  ]
+		},
+		{
+		  "name": "string.quoted.double.xferlang.empty",
+		  "match": "<\\\"\\\">",
+		  "captures": {
+			"0": { "name": "string.quoted.double.xferlang" }
+		  }
+		},
+		{
+		  "name": "string.quoted.double.xferlang.empty",
+		  "match": "\\\"\\\"",
+		  "captures": {
+			"0": { "name": "string.quoted.double.xferlang" }
+		  }
+		},
+		{
+		  "name": "string.quoted.single.xferlang.empty",
+		  "match": "<''>",
+		  "captures": {
+			"0": { "name": "string.quoted.single.xferlang" }
+		  }
+		},
+		{
+		  "name": "string.quoted.single.xferlang.empty",
+		  "match": "''",
+		  "captures": {
+			"0": { "name": "string.quoted.single.xferlang" }
+		  }
+		},
+		{
+		  "name": "string.quoted.triple.xferlang",
+		  "begin": "\"\"\"",
+		  "end": "\"\"\"",
+		  "patterns": [
+			{
+			  "name": "constant.character.escape.xferlang",
+			  "match": "\\."
+			}
+		  ]
+		},
+		{
+		  "name": "string.quoted.double.double.xferlang",
+		  "begin": "\"\"",
+		  "end": "\"\"",
+		  "patterns": [
+			{
+			  "name": "constant.character.escape.xferlang",
+			  "match": "\\."
+			}
+		  ]
+		},
+		{
+		  "name": "string.quoted.double.xferlang",
+		  "begin": "\"",
+		  "end": "\"",
+		  "patterns": [
+			{
+			  "name": "constant.character.escape.xferlang",
+			  "match": "\\."
+			}
+		  ]
+		},
+		{
+		  "name": "string.quoted.single.xferlang",
+		  "contentName": "string.quoted.single.xferlang",
+		  "begin": "'",
+		  "end": "'",
+		  "patterns": [
+		{
+		  "name": "meta.interpolated.element.xferlang.hash",
+		  "contentName": "source.xferlang",
+		  "begin": "<#",
+		  "end": "#>",
+		  "beginCaptures": { "0": { "name": "punctuation.section.embedded.begin.xferlang" } },
+		  "endCaptures": { "0": { "name": "punctuation.section.embedded.end.xferlang" } },
+		  "patterns": [
+				{ "include": "#comments" },
+				{ "include": "#stringElement" },
+				{ "include": "#characterElement" },
+				{ "include": "#numbers" },
+				{ "include": "#booleans" },
+				{ "include": "#null" },
+				{ "include": "#identifiers" },
+				{ "include": "#delimiters" }
+			  ]
+			},
+		{
+		  "name": "meta.interpolated.element.xferlang.pipe",
+		  "contentName": "source.xferlang",
+		  "begin": "<\\|",
+		  "end": "\\|>",
+		  "beginCaptures": { "0": { "name": "punctuation.section.embedded.begin.xferlang" } },
+		  "endCaptures": { "0": { "name": "punctuation.section.embedded.end.xferlang" } },
+		  "patterns": [
+				{ "include": "#comments" },
+				{ "include": "#stringElement" },
+				{ "include": "#characterElement" },
+				{ "include": "#numbers" },
+				{ "include": "#booleans" },
+				{ "include": "#null" },
+				{ "include": "#identifiers" },
+				{ "include": "#delimiters" }
+			  ]
+			},
+		{
+		  "name": "meta.interpolated.element.xferlang.plus",
+		  "contentName": "source.xferlang",
+		  "begin": "<\\+",
+		  "end": "\\+>",
+		  "beginCaptures": { "0": { "name": "punctuation.section.embedded.begin.xferlang" } },
+		  "endCaptures": { "0": { "name": "punctuation.section.embedded.end.xferlang" } },
+		  "patterns": [
+				{ "include": "#comments" },
+				{ "include": "#stringElement" },
+				{ "include": "#characterElement" },
+				{ "include": "#numbers" },
+				{ "include": "#booleans" },
+				{ "include": "#null" },
+				{ "include": "#identifiers" },
+				{ "include": "#delimiters" }
+			  ]
+			},
+		{
+		  "name": "meta.interpolated.element.xferlang.bang",
+		  "contentName": "source.xferlang",
+		  "begin": "<!",
+		  "end": "!+>",
+		  "beginCaptures": { "0": { "name": "punctuation.section.embedded.begin.xferlang" } },
+		  "endCaptures": { "0": { "name": "punctuation.section.embedded.end.xferlang" } },
+		  "patterns": [
+				{ "include": "#comments" },
+				{ "include": "#stringElement" },
+				{ "include": "#characterElement" },
+				{ "include": "#numbers" },
+				{ "include": "#booleans" },
+				{ "include": "#null" },
+				{ "include": "#identifiers" },
+				{ "include": "#delimiters" }
+			  ]
+			},
+		{
+		  "name": "meta.interpolated.element.xferlang.null",
+		  "contentName": "source.xferlang",
+		  "begin": "<\\?\\?>",
+		  "end": "\\?\\?>",
+		  "beginCaptures": { "0": { "name": "punctuation.section.embedded.begin.xferlang" } },
+		  "endCaptures": { "0": { "name": "punctuation.section.embedded.end.xferlang" } },
+		  "patterns": []
+			},
+		{
+		  "name": "meta.interpolated.element.xferlang.at",
+		  "contentName": "source.xferlang",
+		  "begin": "<@",
+		  "end": "@>",
+		  "beginCaptures": { "0": { "name": "punctuation.section.embedded.begin.xferlang" } },
+		  "endCaptures": { "0": { "name": "punctuation.section.embedded.end.xferlang" } },
+		  "patterns": [
+				{ "include": "#comments" },
+				{ "include": "#stringElement" },
+				{ "include": "#characterElement" },
+				{ "include": "#numbers" },
+				{ "include": "#booleans" },
+				{ "include": "#null" },
+				{ "include": "#identifiers" },
+				{ "include": "#delimiters" }
+			  ]
+			},
+		{
+		  "name": "meta.interpolated.element.xferlang.amp",
+		  "contentName": "source.xferlang",
+		  "begin": "<&",
+		  "end": "&>",
+		  "beginCaptures": { "0": { "name": "punctuation.section.embedded.begin.xferlang" } },
+		  "endCaptures": { "0": { "name": "punctuation.section.embedded.end.xferlang" } },
+		  "patterns": [
+				{ "include": "#comments" },
+				{ "include": "#stringElement" },
+				{ "include": "#characterElement" },
+				{ "include": "#numbers" },
+				{ "include": "#booleans" },
+				{ "include": "#null" },
+				{ "include": "#identifiers" },
+				{ "include": "#delimiters" }
+			  ]
+			},
+			{
+			  "name": "constant.character.escape.xferlang",
+			  "match": "\\."
+			}
+		  ]
+		}
+	  ]
+	},
+	"characterElement": {
+	  "patterns": [
+		{
+		  "name": "constant.character.xferlang",
+		  "begin": "<\\+",
+		  "end": "\\+>",
+		  "patterns": [
+			{
+			  "name": "constant.character.escape.xferlang",
+			  "match": "\\."
+			}
+		  ]
+		},
+		{
+		  "name": "constant.character.xferlang",
+		  "begin": "\\+",
+		  "end": "\\+",
+		  "patterns": [
+			{
+			  "name": "constant.character.escape.xferlang",
+			  "match": "\\."
+			}
+		  ]
+		}
+	  ]
+	},
+	"numbers": {
+	  "patterns": [
+		{
+		  "name": "constant.numeric.hex.xferlang",
+		  "match": "(\\$[0-9A-Fa-f]+|#\\$[0-9A-Fa-f]+|&\\$[0-9A-Fa-f]+)"
+		},
+		{
+		  "name": "constant.numeric.binary.xferlang",
+		  "match": "(%[01]+|#%[01]+|&%[01]+)"
+		},
+		{
+		  "name": "constant.numeric.decimal.xferlang",
+		  "match": "[+-]?[0-9]+(\\.[0-9]+)?"
+		}
+	  ]
+	},
+	"booleans": {
+	  "patterns": [
+		{
+		  "name": "constant.language.boolean.xferlang",
+		  "match": "\\b(true|false)\\b"
+		}
+	  ]
+	},
+	"null": {
+	  "patterns": [
+		{
+		  "name": "constant.language.null.xferlang.element",
+		  "match": "<\\?\\?>"
+		},
+		{
+		  "name": "constant.language.null.xferlang",
+		  "match": "\\bnull\\b"
+		}
+	  ]
+	},
+	"identifiers": {
+	  "patterns": [
+		{
+		  "name": "variable.other.identifier.xferlang",
+		  "match": "[A-Za-z_][A-Za-z0-9_]*"
+		}
+	  ]
+	},
+	"delimiters": {
+	  "patterns": [
+		{
+		  "name": "punctuation.section.delimiter.xferlang",
+		  "match": "[\\[\\]\\{\\}\\(\\)<>]"
+		},
+		{
+		  "name": "punctuation.section.delimiter.xferlang",
+		  "match": "<([!\"=#\\\\&^*~@?/\\[\\{\\(\\|'])+"
+		},
+		{
+		  "name": "punctuation.section.delimiter.xferlang",
+		  "match": "([!\"=#\\\\&^*~@?/\\]\\}\\)\\|'])+>"
+		}
+	  ]
+	}
+  }
+}
