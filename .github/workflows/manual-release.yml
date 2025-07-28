@@ -1,13 +1,11 @@
-name: Manual NuGet/GitHub Publish
-
-
+name: Manual NuGet/GitHub Build & Publish
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version to publish (leave blank to auto-detect)'
+      reset_build_number:
+        description: "Reset the build number (true/false)"
         required: false
-        type: string
+        default: "false"
       publish_to_nuget:
         description: 'Publish to NuGet?'
         required: true
@@ -18,69 +16,63 @@ on:
         required: true
         type: boolean
         default: true
-
 permissions:
-  contents: read
+  contents: write
   packages: write
-
 jobs:
-  publish:
+  build_and_publish:
     runs-on: ubuntu-latest
     steps:
-    - name: Download build artifacts
-      # Always fetch the latest 'nupkgs' artifact from the current repository
-      uses: actions/download-artifact@v4
-      with:
-        name: nupkgs
-        path: ./nupkgs
-
-    - name: Check for multiple .nupkg versions and print summary
-      id: check_nupkgs
-      run: |
-        echo "Listing all .nupkg files in ./nupkgs:"
-        ls -1 ./nupkgs/ParksComputing.Xfer.Lang.*.nupkg || true
-        NUPKG_COUNT=$(ls -1 ./nupkgs/ParksComputing.Xfer.Lang.*.nupkg 2>/dev/null | wc -l)
-        if [ "$NUPKG_COUNT" -eq 0 ]; then
-          echo "::error::No .nupkg files found in ./nupkgs. Aborting."
-          exit 1
-        fi
-        if [ -z "${{ github.event.inputs.version }}" ] && [ "$NUPKG_COUNT" -gt 1 ]; then
-          echo "::error::Multiple .nupkg files found and no version specified. Please specify the version to publish."
-          exit 1
-        fi
-        echo "Found $NUPKG_COUNT .nupkg file(s)."
-
-    - name: Detect version if not supplied
-      id: detect_version
-      run: |
-        if [ -z "${{ github.event.inputs.version }}" ]; then
-          VERSION=$(ls ./nupkgs/ParksComputing.Xfer.Lang.*.nupkg | sed -E 's/.*ParksComputing\.Xfer\.Lang\.([0-9A-Za-z\.-]+)\.nupkg/\1/' | head -1)
-        else
-          VERSION="${{ github.event.inputs.version }}"
-        fi
-        echo "Detected version: $VERSION"
-        echo "Will publish: ./nupkgs/ParksComputing.Xfer.Lang.$VERSION.nupkg"
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-    - name: Publish to NuGet
-      if: github.event.inputs.publish_to_nuget == 'true'
-      run: |
-        dotnet nuget push ./nupkgs/ParksComputing.Xfer.Lang.${{ steps.detect_version.outputs.version }}.nupkg \
-          --api-key ${{ secrets.NUGET_API_KEY }} \
-          --source https://api.nuget.org/v3/index.json \
-          --skip-duplicate
-        if [ -f ./nupkgs/ParksComputing.Xfer.Lang.${{ steps.detect_version.outputs.version }}.snupkg ]; then
-          dotnet nuget push ./nupkgs/ParksComputing.Xfer.Lang.${{ steps.detect_version.outputs.version }}.snupkg \
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+      - name: Restore dependencies
+        run: dotnet restore --configfile nuget.config
+      - name: Read version from csproj
+        id: read-version
+        env:
+          RESET_BUILD: ${{ github.event.inputs.reset_build_number }}
+        run: |
+          base=$(grep -oPm1 "(?<=<Version>)[^<]+" ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj)
+          base2=${base%.*}
+          if [[ "$RESET_BUILD" == "true" ]]; then
+            build=1
+          else
+            build=${GITHUB_RUN_NUMBER}
+          fi
+          full="$base2.$build-prerelease"
+          echo "version=$full" >> $GITHUB_OUTPUT
+          echo "VERSION=$full" >> $GITHUB_ENV
+      - name: Clean
+        run: dotnet clean --configuration Release
+      - name: Build
+        run: dotnet build --no-restore --configuration Release Xfer.sln -p:PackageVersion=$VERSION
+      - name: Test
+        run: dotnet test --no-build --configuration Release Xfer.sln
+      - name: Pack with computed version
+        run: dotnet pack ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release --no-build -o ./nupkgs -p:PackageVersion=$VERSION -p:NuGetVersion=$VERSION
+      - name: Publish to NuGet
+        if: github.event.inputs.publish_to_nuget == 'true'
+        run: |
+          dotnet nuget push ./nupkgs/ParksComputing.Xfer.Lang.$VERSION.nupkg \
             --api-key ${{ secrets.NUGET_API_KEY }} \
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
-        fi
-
-    - name: Publish to GitHub Packages
-      if: github.event.inputs.publish_to_github_packages == 'true'
-      run: |
-        dotnet nuget add source --username paulmooreparks --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/paulmooreparks/index.json"
-        dotnet nuget push ./nupkgs/ParksComputing.Xfer.Lang.${{ steps.detect_version.outputs.version }}.nupkg --source "github" --skip-duplicate
-        if [ -f ./nupkgs/ParksComputing.Xfer.Lang.${{ steps.detect_version.outputs.version }}.snupkg ]; then
-          dotnet nuget push ./nupkgs/ParksComputing.Xfer.Lang.${{ steps.detect_version.outputs.version }}.snupkg --source "github" --skip-duplicate
-        fi
+          if [ -f ./nupkgs/ParksComputing.Xfer.Lang.$VERSION.snupkg ]; then
+            dotnet nuget push ./nupkgs/ParksComputing.Xfer.Lang.$VERSION.snupkg \
+              --api-key ${{ secrets.NUGET_API_KEY }} \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          fi
+      - name: Publish to GitHub Packages
+        if: github.event.inputs.publish_to_github_packages == 'true'
+        run: |
+          dotnet nuget add source --username paulmooreparks --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/paulmooreparks/index.json"
+          dotnet nuget push ./nupkgs/ParksComputing.Xfer.Lang.$VERSION.nupkg --source "github" --skip-duplicate
+          if [ -f ./nupkgs/ParksComputing.Xfer.Lang.$VERSION.snupkg ]; then
+            dotnet nuget push ./nupkgs/ParksComputing.Xfer.Lang.$VERSION.snupkg --source "github" --skip-duplicate
+          fi
