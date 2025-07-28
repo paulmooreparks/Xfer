@@ -53,7 +53,7 @@ jobs:
       run: dotnet build --no-restore -c Release ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -p:NuGetVersion=$VERSION
 
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test XferTest/XferTest.csproj --no-build --verbosity normal
 
     - name: Pack with computed version
       run: dotnet pack ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release --no-build -o ./nupkgs -p:PackageVersion=$VERSION -p:NuGetVersion=$VERSION
