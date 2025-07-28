@@ -54,7 +54,7 @@ jobs:
       run: dotnet clean --configuration Release
 
     - name: Build
-      run: dotnet build --no-restore -c Release ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -p:PackageVersion=$VERSION
+      run: dotnet build --no-restore --configuration Release Xfer.sln -p:PackageVersion=$VERSION
 
     - name: Test
       run: dotnet test --no-build --configuration Release Xfer.sln
