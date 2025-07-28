@@ -32,7 +32,7 @@ jobs:
         dotnet-version: '8.x'
 
     - name: Restore dependencies
-      run: dotnet restore --configfile NuGet.config
+      run: dotnet restore --configfile nuget.config
 
     - name: Read version from csproj
       id: read-version
