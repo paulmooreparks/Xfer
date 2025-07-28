@@ -28,6 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Download build artifacts
+      # Always fetch the latest 'nupkgs' artifact from the current repository
       uses: actions/download-artifact@v4
       with:
         name: nupkgs
