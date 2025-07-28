@@ -52,9 +52,6 @@ internal class XferTextWriter : IDisposable {
             throw new ObjectDisposedException(GetType().Name);
         }
 
-        foreach (var meta in xferDocument.MetadataCollection) {
-            Write(meta);
-        }
         Write(xferDocument.Root);
     }
 

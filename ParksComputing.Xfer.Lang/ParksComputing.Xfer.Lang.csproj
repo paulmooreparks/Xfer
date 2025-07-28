@@ -7,9 +7,9 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>XferLang Data-Transfer Language</Title>
     <Company>Paul M. Parks</Company>
-    <Description>XferLang is a language for data transfer and data storage. It's similar to JSON, but has explicit typing and better support for embedding complex text data.</Description>
+    <Description>XferLang is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. XferLang is designed with explicit typing, human readability, and safe data embedding at its core.</Description>
     <Copyright>Copyright © 2025 Paul M. Parks</Copyright>
-    <PackageProjectUrl>https://github.com/paulmooreparks/Xfer</PackageProjectUrl>
+    <PackageProjectUrl>https://xferlang.org/</PackageProjectUrl>
     <PackageIcon>XferLang-sm.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/paulmooreparks/Xfer</RepositoryUrl>

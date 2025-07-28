@@ -7,15 +7,18 @@ namespace xferc {
     public class DemoDeserializationPI {
         public static void Run() {
             // Example Xfer document with global and inline deserialization PI
+
             var doc = new XferDocument();
             var globalPI = new ProcessingInstructionElement(ProcessingInstructionElement.DeserializeKeyword);
-            doc.MetadataCollection.Add(globalPI);
+            doc.Root.Add(globalPI); // Add global PI to Root
 
             var inlinePI = new ProcessingInstructionElement(ProcessingInstructionElement.DeserializeKeyword);
             var key = new IdentifierElement(ProcessingInstructionElement.DeserializeKeyword);
             var kvp = new KeyValuePairElement(key, inlinePI);
             var element = new MetadataElement();
             element.Add(kvp);
+            // Attach inline PI to element
+            element.AttachedMetadata.Add(inlinePI);
             doc.Root.Add(element);
 
             var resolver = new DefaultDeserializationInstructionResolver();

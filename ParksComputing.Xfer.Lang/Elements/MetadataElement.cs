@@ -4,8 +4,7 @@ using ParksComputing.Xfer.Lang.Services;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
-public class MetadataElement : Element
-{
+public class MetadataElement : Element {
     /// <summary>
     /// The element this metadata is associated with (e.g., PI target).
     /// </summary>
@@ -26,22 +25,17 @@ public class MetadataElement : Element
     private Dictionary<string, KeyValuePairElement> _values = new();
     public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
 
-    public KeyValuePairElement this[string index]
-    {
-        get
-        {
+    public KeyValuePairElement this[string index] {
+        get {
             return _values[index];
         }
-        set
-        {
+        set {
             SetElement(index, value.Value);
         }
     }
 
-    private TElement CastOrThrow<TElement>(KeyValuePairElement value, string key) where TElement : Element
-    {
-        if (value.Value is TElement t)
-        {
+    private TElement CastOrThrow<TElement>(KeyValuePairElement value, string key) where TElement : Element {
+        if (value.Value is TElement t) {
             return t;
         }
         throw new ArgumentException($"Invalid element type for '{key}': {value.GetType()}");
@@ -55,31 +49,24 @@ public class MetadataElement : Element
     private string _message_id = string.Empty;
 
     public MetadataElement(ElementStyle elementStyle = ElementStyle.Explicit)
-        : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, elementStyle))
-    {
+        : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, elementStyle)) {
     }
 
-    private bool IsKeyword(string compare, out string? keyword)
-    {
+    private bool IsKeyword(string compare, out string? keyword) {
         return Keywords.TryGetValue(compare, out keyword);
     }
 
-    private void SetElement<TElement>(string key, TElement element) where TElement : Element
-    {
-        if (_values.TryGetValue(key, out KeyValuePairElement? kvp))
-        {
+    private void SetElement<TElement>(string key, TElement element) where TElement : Element {
+        if (_values.TryGetValue(key, out KeyValuePairElement? kvp)) {
             _values[key] = new KeyValuePairElement(kvp.KeyElement, element);
         }
-        else
-        {
+        else {
             TextElement keyElement;
 
-            if (key.IsKeywordString())
-            {
+            if (key.IsKeywordString()) {
                 keyElement = new IdentifierElement(key, style: ElementStyle.Implicit);
             }
-            else
-            {
+            else {
                 keyElement = new StringElement(key);
             }
 
@@ -98,7 +85,7 @@ public class MetadataElement : Element
                 return true;
             }
             else if (kvp.Value is IConvertible convertible && typeof(TElement).IsAssignableFrom(convertible.GetType())) {
-                result = (TElement)Convert.ChangeType(convertible, typeof(TElement));
+                result = (TElement) Convert.ChangeType(convertible, typeof(TElement));
                 return true;
             }
         }
@@ -128,18 +115,15 @@ public class MetadataElement : Element
         return true;
     }
 
-    public void AddOrUpdate(KeyValuePairElement value)
-    {
+    public void AddOrUpdate(KeyValuePairElement value) {
         this[value.Key] = value;
     }
 
-    public override string ToXfer()
-    {
+    public override string ToXfer() {
         return ToXfer(Formatting.None);
     }
 
-    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
-    {
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
         bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
         bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
         string rootIndent = string.Empty;
@@ -180,6 +164,10 @@ public class MetadataElement : Element
             }
         }
 
+        if (isIndented) {
+            sb.Append(rootIndent);
+        }
+
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
                 sb.Append(Delimiter.Closing);
@@ -192,8 +180,7 @@ public class MetadataElement : Element
         return sb.ToString();
     }
 
-    public override string ToString()
-    {
+    public override string ToString() {
         return ToXfer();
     }
 }

@@ -13,7 +13,7 @@ namespace DynamicDbResolverDemo
         public override string? Resolve(string key, XferDocument document)
         {
             // 1. Check for PI override
-            foreach (var meta in document.MetadataCollection)
+            foreach (var meta in document.Root.Values)
             {
                 if (meta is MetadataElement metaElem && metaElem.ContainsKey("dynamicSource"))
                 {

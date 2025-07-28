@@ -8,7 +8,7 @@ namespace ParksComputing.Xfer.Lang.Elements;
 
 public class InterpolatedElement : TextElement
 {
-    public static readonly string ElementName = "eval";
+    public static readonly string ElementName = "interpolated";
     public const char OpeningSpecifier = '\'';
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);

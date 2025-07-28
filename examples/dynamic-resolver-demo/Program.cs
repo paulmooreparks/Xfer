@@ -11,7 +11,7 @@ namespace DynamicResolverDemo
     {
         public override string? Resolve(string key, XferDocument document)
         {
-            foreach (var meta in document.MetadataCollection)
+            foreach (var meta in document.Root.Values)
             {
                 if (meta is MetadataElement metaElem && metaElem.ContainsKey("dynamicSource"))
                 {

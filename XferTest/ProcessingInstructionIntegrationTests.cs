@@ -16,7 +16,7 @@ namespace XferTest {
         public void ParseDocument_WithDeserializePI_InstantiatesCorrectType() {
             string xferDoc = @"<! deserialize { value ""fr-FR"" } !> price *19.99 <! deserialize { value ""en-US"" } !> tax *3.99";
             var doc = XferParser.Parse(xferDoc);
-            var piElements = doc.MetadataCollection.OfType<ProcessingInstructionElement>().ToList();
+            var piElements = doc.Root.Values.OfType<ProcessingInstructionElement>().ToList();
             Assert.AreEqual(2, piElements.Count);
             Assert.IsTrue(piElements.TrueForAll(pi => pi is DeserializePIElement));
             MetadataElement meta0 = piElements[0] as MetadataElement;
@@ -45,7 +45,7 @@ namespace XferTest {
             string xferDoc = "<! include { path \"other.xfer\" } !>\ndata *42";
             var parser = new Parser();
             var doc = parser.Parse(xferDoc);
-            ProcessingInstructionElement? piElement = doc.MetadataCollection.OfType<ProcessingInstructionElement>().FirstOrDefault();
+            ProcessingInstructionElement? piElement = doc.Root.Values.OfType<ProcessingInstructionElement>().FirstOrDefault();
             Assert.IsNotNull(piElement);
             Assert.IsTrue(piElement is IncludePIElement);
             var metaInc = piElement as MetadataElement;
@@ -63,7 +63,7 @@ namespace XferTest {
             string xferDoc = "<! author { name \"Alice\" } !>\ndata *123";
             var parser = new Parser();
             var doc = parser.Parse(xferDoc);
-            MetadataElement? metaReg = doc.MetadataCollection.OfType<MetadataElement>().FirstOrDefault(m => !(m is ProcessingInstructionElement));
+            MetadataElement? metaReg = doc.Root.Values.OfType<MetadataElement>().FirstOrDefault(m => !(m is ProcessingInstructionElement));
             Assert.IsNotNull(metaReg);
             var values = metaReg.Values;
             Assert.IsTrue(values.ContainsKey("author"));

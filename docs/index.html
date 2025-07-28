@@ -21,7 +21,9 @@
         <ul>
             <li><a href="#introduction">Introduction to XferLang</a></li>
             <li><a href="#philosophy">Design Philosophy</a></li>
+            <li><a href="#basic-syntax">Basic Syntax</a></li>
             <li><a href="#metadata-and-processing-instructions">Metadata & Processing Instructions</a></li>
+            <li><a href="#data-types">Data Types</a></li>
             <li>
                 <details>
                     <summary class="sidebar-accordion">XferLang Elements</summary>
@@ -371,34 +373,28 @@ emoji 'I &lt;\$2764\&gt; Xfer &lt;\$1F600\&gt;'  &lt;/ I ❤︎ Xfer 😀 /&gt;<
                 <li><strong>Arrays & Tuples</strong>: Collections, either typed (arrays) or mixed (tuples).</li>
                 <li><strong>Dynamic</strong>: Values that can be resolved at runtime, such as environment variables or secrets.</li>
                 <li><strong>Metadata</strong>: Document-level metadata and processing instructions for configuration and extensibility.</li>
+            </ul>
 
-            <section id="xferlang-elements-array">
-                <h3>Array</h3>
-            <!-- Collection Elements -->
             <section id="xferlang-elements-array">
                 <h3>Array</h3>
                 <p>Represents a typed array of elements.</p>
             </section>
+
             <section id="xferlang-elements-keyvalue">
                 <h3>Key/Value Pair</h3>
                 <p>Represents a single key-value pair.</p>
             </section>
+
             <section id="xferlang-elements-object">
                 <h3>Object</h3>
                 <p>Represents a set of named key-value pairs.</p>
-                <pre><code>var element = new ObjectElement();
-</code></pre>
+                <pre><code>var element = new ObjectElement();</code></pre>
             </section>
-</code></pre>
-            </section>
+
             <section id="xferlang-elements-tuple">
                 <h3>Tuple</h3>
                 <p>Represents an ordered collection of elements.</p>
-                <pre><code>var element = new TupleElement();
-        </section>
-
-        <section id="complex-structures">
-</code></pre>
+                <pre><code>var element = new TupleElement();</code></pre>
             </section>
 
             <!-- Structural Elements -->
@@ -407,16 +403,19 @@ emoji 'I &lt;\$2764\&gt; Xfer &lt;\$1F600\&gt;'  &lt;/ I ❤︎ Xfer 😀 /&gt;<
                 <p>Comments start with <code>&lt;/</code> and end with <code>/&gt;</code>. They can be placed anywhere in the document and are ignored by the parser.</p>
                 <pre><code>&lt;/ This is a comment /&gt;</code></pre>
             </section>
+
             <section id="xferlang-elements-dynamic">
                 <h3>Dynamic</h3>
                 <p>Represents a dynamic value that is replaced during parsing or deserialization.</p>
                 <pre><code>var element = new DynamicElement("{value}");</code></pre>
             </section>
+
             <section id="xferlang-elements-identifier">
                 <h3>Identifier</h3>
                 <p>Represents a symbolic name for an element, used as a key in key-value pairs or as a standalone value.</p>
                 <pre><code>var element = new IdentifierElement("Name");</code></pre>
             </section>
+
             <section id="xferlang-elements-metadata">
                 <h3>Metadata</h3>
                 <p>Represents document-level metadata or processing instructions.</p>
@@ -428,22 +427,27 @@ emoji 'I &lt;\$2764\&gt; Xfer &lt;\$1F600\&gt;'  &lt;/ I ❤︎ Xfer 😀 /&gt;<
                 <h3>Integer</h3>
                 <p>Represents a 32-bit integer value.</p>
             </section>
+
             <section id="xferlang-elements-long">
                 <h3>Long</h3>
                 <p>Represents a 64-bit integer value.</p>
             </section>
+
             <section id="xferlang-elements-double">
                 <h3>Double</h3>
                 <p>Represents a double-precision floating-point value.</p>
             </section>
+
             <section id="xferlang-elements-decimal">
                 <h3>Decimal</h3>
                 <p>Represents a high-precision decimal value.</p>
             </section>
+
             <section id="xferlang-elements-boolean">
                 <h3>Boolean</h3>
                 <p>Represents a boolean value (true/false).</p>
             </section>
+
             <section id="xferlang-elements-character">
                 <h3>Character</h3>
                 <p>Represents a single character. Supported formats include:</p>
@@ -459,22 +463,75 @@ emoji 'I &lt;\$2764\&gt; Xfer &lt;\$1F600\&gt;'  &lt;/ I ❤︎ Xfer 😀 /&gt;<
                 <details>
                   <summary><strong>Built-in Character Names</strong> (click to expand)</summary>
                   <div class="summary">
-                  <!-- ...existing code for character table... -->
+                  <table>
+                    <thead><tr><th>Name</th><th>Char</th><th>Unicode</th><th>Description</th></tr></thead>
+                    <tbody>
+                      <tr><td>nul</td><td>\0</td><td>U+0000</td><td>Null</td></tr>
+                      <tr><td>cr</td><td>\r</td><td>U+000D</td><td>Carriage Return</td></tr>
+                      <tr><td>lf</td><td>\n</td><td>U+000A</td><td>Line Feed</td></tr>
+                      <tr><td>nl</td><td>\n</td><td>U+000A</td><td>New Line (alias for lf)</td></tr>
+                      <tr><td>tab</td><td>\t</td><td>U+0009</td><td>Tab</td></tr>
+                      <tr><td>vtab</td><td>\v</td><td>U+000B</td><td>Vertical Tab</td></tr>
+                      <tr><td>bksp</td><td>\b</td><td>U+0008</td><td>Backspace</td></tr>
+                      <tr><td>ff</td><td>\f</td><td>U+000C</td><td>Form Feed</td></tr>
+                      <tr><td>bel</td><td>\a</td><td>U+0007</td><td>Bell</td></tr>
+                      <tr><td>quote</td><td>"</td><td>U+0022</td><td>Double Quote</td></tr>
+                      <tr><td>apos</td><td>'</td><td>U+0027</td><td>Single Quote</td></tr>
+                      <tr><td>backslash</td><td>\</td><td>U+005C</td><td>Backslash</td></tr>
+                      <tr><td>lt</td><td>&lt;</td><td>U+003C</td><td>Less Than</td></tr>
+                      <tr><td>gt</td><td>&gt;</td><td>U+003E</td><td>Greater Than</td></tr>
+                      <tr><td>heart</td><td>❤</td><td>U+2764</td><td>Heart emoji</td></tr>
+                      <tr><td>smile</td><td>😀</td><td>U+1F600</td><td>Grinning face emoji</td></tr>
+                      <tr><td>rocket</td><td>🚀</td><td>U+1F680</td><td>Rocket emoji</td></tr>
+                      <tr><td>check</td><td>✔</td><td>U+2714</td><td>Check mark</td></tr>
+                      <tr><td>cross</td><td>✖</td><td>U+2716</td><td>Cross mark</td></tr>
+                      <tr><td>warn</td><td>⚠</td><td>U+26A0</td><td>Warning sign</td></tr>
+                      <tr><td>info</td><td>ℹ</td><td>U+2139</td><td>Info symbol</td></tr>
+                      <tr><td>star</td><td>★</td><td>U+2605</td><td>Star</td></tr>
+                      <tr><td>bug</td><td>🐞</td><td>U+1F41E</td><td>Bug emoji</td></tr>
+                      <tr><td>gear</td><td>⚙</td><td>U+2699</td><td>Gear</td></tr>
+                      <tr><td>package</td><td>📦</td><td>U+1F4E6</td><td>Package emoji</td></tr>
+                      <tr><td>nuget</td><td>🛒</td><td>U+1F6D2</td><td>NuGet/cart icon</td></tr>
+                      <tr><td>github</td><td></td><td>U+F0C7</td><td>GitHub mark (font icon)</td></tr>
+                      <tr><td>ci</td><td>🏗</td><td>U+1F3D7</td><td>CI/build</td></tr>
+                      <tr><td>build</td><td>🔨</td><td>U+1F528</td><td>Build/hammer</td></tr>
+                      <tr><td>test</td><td>🧪</td><td>U+1F9EA</td><td>Test tube</td></tr>
+                      <tr><td>pass</td><td>✅</td><td>U+2705</td><td>Pass/check</td></tr>
+                      <tr><td>fail</td><td>❌</td><td>U+274C</td><td>Fail/cross</td></tr>
+                      <tr><td>pending</td><td>⏳</td><td>U+23F3</td><td>Pending/hourglass</td></tr>
+                      <tr><td>clock</td><td>⏰</td><td>U+23F0</td><td>Clock/alarm</td></tr>
+                      <tr><td>calendar</td><td>📅</td><td>U+1F4C5</td><td>Calendar</td></tr>
+                      <tr><td>zap</td><td>⚡</td><td>U+26A1</td><td>Zap/bolt</td></tr>
+                      <tr><td>fire</td><td>🔥</td><td>U+1F525</td><td>Fire</td></tr>
+                      <tr><td>snow</td><td>❄</td><td>U+2744</td><td>Snowflake</td></tr>
+                      <tr><td>sun</td><td>☀</td><td>U+2600</td><td>Sun</td></tr>
+                      <tr><td>moon</td><td>🌙</td><td>U+1F319</td><td>Moon</td></tr>
+                      <tr><td>cloud</td><td>☁</td><td>U+2601</td><td>Cloud</td></tr>
+                      <tr><td>rain</td><td>🌧</td><td>U+1F327</td><td>Rain</td></tr>
+                      <tr><td>bolt</td><td>🌩</td><td>U+1F329</td><td>Lightning/bolt</td></tr>
+                      <!-- Add more as needed -->
+                    </tbody>
+                  </table>
+                  <p>For a full list, see <a href="https://github.com/paulmooreparks/Xfer/blob/master/ParksComputing.Xfer.Lang/Services/CharacterIdRegistry.cs" target="_blank" rel="noopener"><code>CharacterIdRegistry.cs</code></a> in the source.</p>
                   </div>
                 </details>
             </section>
+
             <section id="xferlang-elements-datetime">
                 <!-- Date/Time section is user-edited and left as is -->
                 ...existing code...
             </section>
+
             <section id="xferlang-elements-null">
                 <h3>Null</h3>
                 <p>Represents a null value.</p>
             </section>
+
             <section id="xferlang-elements-string">
                 <h3>String</h3>
                 <p>Represents a string value.</p>
             </section>
+
             <section id="xferlang-elements-interpolated">
                 <h3>Interpolated String</h3>
                 <p>Represents an interpolated string value.</p>

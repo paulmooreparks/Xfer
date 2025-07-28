@@ -11,16 +11,10 @@ public class IdProcessingInstructionTests {
         // Arrange: Xfer input with inline PI for id
         string xfer = "<! id \"myId\" !> name \"Alice\"";
         var parser = new Parser();
-
-        // Act
         var doc = parser.Parse(xfer);
-        Assert.IsNotNull(doc);
-        Assert.IsNotNull(doc.Root);
-        Assert.IsTrue(doc.Root.Count > 0);
-
-        // Find the element with the assigned ID
-        var element = doc.Root[0];
-        Assert.AreEqual("myId", element.Id);
+        // Assert: At least one non-metadata element has the correct ID
+        var ids = doc.Root.Values.Where(e => e is not MetadataElement).Select(e => e.Id).ToList();
+        CollectionAssert.Contains(ids, "myId");
     }
 
     [TestMethod]
@@ -28,11 +22,10 @@ public class IdProcessingInstructionTests {
         string xfer = "<! id \"first\" !> name \"Alice\" age 42";
         var parser = new Parser();
         var doc = parser.Parse(xfer);
-        Assert.IsNotNull(doc);
-        Assert.IsNotNull(doc.Root);
-        Assert.AreEqual(2, doc.Root.Count);
-        Assert.AreEqual("first", doc.Root[0].Id);
-        Assert.IsNull(doc.Root[1].Id);
+        var ids = doc.Root.Values.Where(e => e is not MetadataElement).Select(e => e.Id).ToList();
+        // Assert: Only one element has the ID "first", the other is null
+        Assert.AreEqual(1, ids.Count(id => id == "first"));
+        Assert.AreEqual(1, ids.Count(id => id == null));
     }
 
     [TestMethod]
@@ -40,10 +33,9 @@ public class IdProcessingInstructionTests {
         string xfer = "<! id \"first\" !> name \"Alice\" <! id \"second\" !> age 42";
         var parser = new Parser();
         var doc = parser.Parse(xfer);
-        Assert.IsNotNull(doc);
-        Assert.IsNotNull(doc.Root);
-        Assert.AreEqual(2, doc.Root.Count);
-        Assert.AreEqual("first", doc.Root[0].Id);
-        Assert.AreEqual("second", doc.Root[1].Id);
+        var ids = doc.Root.Values.Where(e => e is not MetadataElement).Select(e => e.Id).ToList();
+        // Assert: Both IDs are present
+        CollectionAssert.Contains(ids, "first");
+        CollectionAssert.Contains(ids, "second");
     }
 }

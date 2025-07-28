@@ -29,4 +29,6 @@ public abstract class Element
     public abstract string ToXfer();
 
     public abstract string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0);
+    // List of metadata/PIs attached to this element (if any)
+    public List<MetadataElement> AttachedMetadata { get; set; } = new List<MetadataElement>();
 }

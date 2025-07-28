@@ -15,6 +15,8 @@ settle on a solid grammar, I'll redo the parser or use some kind of tool to gene
 public class Parser : IXferParser {
     // Used to assign IDs from inline PIs to subsequent elements
     private Queue<string> _pendingIds = new Queue<string>();
+    // Used to stack PIs/metadata to attach to the next element
+    private List<MetadataElement> _pendingMetadata = new List<MetadataElement>();
     private ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver _dynamicSourceResolver = new ParksComputing.Xfer.Lang.DynamicSource.DefaultDynamicSourceResolver();
     private ParksComputing.Xfer.Lang.Deserialization.IDeserializationInstructionResolver _deserializationInstructionResolver = new ParksComputing.Xfer.Lang.Deserialization.DefaultDeserializationInstructionResolver();
 
@@ -334,12 +336,12 @@ public class Parser : IXferParser {
         return ElementCompactClosing();
     }
 
-    internal bool EvaluatedElementClosing() {
+    internal bool InterpolatedElementClosing() {
         Debug.Assert(_delimStack.Peek().ClosingSpecifier == InterpolatedElement.ClosingSpecifier);
         return ElementCompactClosing();
     }
 
-    internal bool PlaceholderElementClosing() {
+    internal bool DynamicElementClosing() {
         Debug.Assert(_delimStack.Peek().ClosingSpecifier == DynamicElement.ClosingSpecifier);
         return ElementCompactClosing();
     }
@@ -595,51 +597,14 @@ public class Parser : IXferParser {
         _currentDocument = document;
         while (IsCharAvailable()) {
             var element = ParseElement();
-            // Handle PI and metadata elements
-            if (element is ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement) {
-                if (!document.MetadataCollection.Contains(element)) {
-                    document.MetadataCollection.Add(element);
-                }
-                continue;
-            }
-            else if (element is MetadataElement metaElem) {
-                if (!document.MetadataCollection.Contains(metaElem)) {
-                    document.MetadataCollection.Add(metaElem);
-                }
-                continue;
-            }
-
-            // Assign pending ID to the next real element only
-            if (element is not EmptyElement) {
-                if (_pendingIds.Count > 0) {
-                    element.Id = _pendingIds.Dequeue();
-                }
-                document.Root.Add(element);
-            }
+            // All metadata handling is now in ParseElement; just add elements to Root
+            document.Root.Add(element);
         }
         return document;
     }
 
     internal Element ParseElement() {
         SkipWhitespace();
-
-        // Inline MetadataElement support: <! ... !>
-        if (ElementOpening(MetadataElement.ElementDelimiter, out int metaSpecifierCount)) {
-            var metadataElement = ParseMetadataElement(metaSpecifierCount);
-
-            // Add PI elements and inline metadata to document's metadata collection for global visibility
-            if (_currentDocument != null) {
-                if ((metadataElement is ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement ||
-                     metadataElement is MetadataElement) &&
-                    !_currentDocument.MetadataCollection.Contains(metadataElement)) {
-                    _currentDocument.MetadataCollection.Add(metadataElement);
-                }
-            }
-
-            SkipWhitespace();
-            // Do NOT parse the next element here; let the main loop handle it and assign the ID
-            return new EmptyElement();
-        }
 
         while (IsCharAvailable()) {
             Element? result = null;
@@ -653,7 +618,7 @@ public class Parser : IXferParser {
                 result = ParseStringElement(stringSpecifierCount);
             }
             else if (ElementOpening(InterpolatedElement.ElementDelimiter, out int evalSpecifierCount)) {
-                result = ParseEvaluatedElement(evalSpecifierCount);
+                result = ParseInterpolatedElement(evalSpecifierCount);
             }
             else if (ElementOpening(CharacterElement.ElementDelimiter, out int charSpecifierCount)) {
                 result = ParseCharacterElement();
@@ -662,8 +627,7 @@ public class Parser : IXferParser {
                 result = ParseTupleElement(propSpecifierCount);
             }
             else if (ElementOpening(MetadataElement.ElementDelimiter, out int metaSpecifierCount2)) {
-                var metadataElement2 = ParseMetadataElement(metaSpecifierCount2);
-                result = metadataElement2;
+                result = ParseMetadataElement(metaSpecifierCount2);
             }
             else if (ElementOpening(ObjectElement.ElementDelimiter, out int objSpecifierCount)) {
                 result = ParseObjectElement(objSpecifierCount);
@@ -690,7 +654,7 @@ public class Parser : IXferParser {
                 result = ParseDateElement(dateSpecifierCount);
             }
             else if (ElementOpening(DynamicElement.ElementDelimiter, out int phSpecifierCount)) {
-                result = ParsePlaceholderElement(phSpecifierCount);
+                result = ParseDynamicElement(phSpecifierCount);
             }
             else if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
                 result = ParseNullElement(nullSpecifierCount);
@@ -704,14 +668,36 @@ public class Parser : IXferParser {
             else {
                 throw new InvalidOperationException($"Expected element at row {CurrentRow}, column {CurrentColumn}.");
             }
+
             SkipWhitespace();
-            // Only assign pending ID to the very next real element, then stop
-            if (result is not null && result is not EmptyElement && _pendingIds.Count > 0) {
-                result.Id = _pendingIds.Dequeue();
-            }
-            return result!;
+            AttachPendingMetadata(result);
+
+            return result ?? new EmptyElement();
         }
         return new EmptyElement();
+    }
+
+    private void AttachPendingMetadata(Element element) {
+        // Attach or collect pending metadata (PIs) using a type switch
+        if (element is not null && element is not EmptyElement) {
+            switch (element) {
+                case MetadataElement meta:
+                    // If it's a metadata element, add it to the pending collection (for stacking)
+                    _pendingMetadata.Add(meta);
+                    break;
+
+                default:
+                    // For all other element types, attach and clear
+                    element.AttachedMetadata = [.. _pendingMetadata];
+                    _pendingMetadata.Clear();
+
+                    if (_pendingIds.Count > 0) {
+                        element.Id = _pendingIds.Dequeue();
+                    }
+
+                    break;
+            }
+        }
     }
 
     private void ParseCommentElement(int specifierCount = 1) {
@@ -810,6 +796,8 @@ public class Parser : IXferParser {
         var style = _delimStack.Peek().Style;
         SkipWhitespace();
 
+        var emptyElement = new EmptyElement();
+        AttachPendingMetadata(emptyElement);
 
         if (IsCharAvailable()) {
             if (ArrayElementClosing()) {
@@ -839,6 +827,12 @@ public class Parser : IXferParser {
 
             arrayElement.Add(element);
 
+            if (emptyElement.AttachedMetadata is { Count: > 0 }) {
+                // Attach metadata to the first element in the array
+                element.AttachedMetadata = [.. emptyElement.AttachedMetadata];
+                emptyElement.AttachedMetadata.Clear();
+            }
+
             while (IsCharAvailable()) {
                 if (ArrayElementClosing()) {
                     return arrayElement;
@@ -866,6 +860,7 @@ public class Parser : IXferParser {
     private ObjectElement ParseObjectElement(int specifierCount = 1) {
         SkipWhitespace();
         var objectElement = new ObjectElement();
+        AttachPendingMetadata(objectElement);
 
         while (IsCharAvailable()) {
             if (ObjectElementClosing()) {
@@ -893,6 +888,7 @@ public class Parser : IXferParser {
         var style = _delimStack.Peek().Style;
         SkipWhitespace();
         var tupleElement = new TupleElement(style);
+        AttachPendingMetadata(tupleElement);
 
         while (IsCharAvailable()) {
             if (TupleElementClosing()) {
@@ -906,7 +902,7 @@ public class Parser : IXferParser {
         throw new InvalidOperationException($"Unexpected end of {TupleElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
     }
 
-    private DynamicElement ParsePlaceholderElement(int specifierCount = 1) {
+    private DynamicElement ParseDynamicElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Compact) {
@@ -916,11 +912,11 @@ public class Parser : IXferParser {
         StringBuilder valueBuilder = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (PlaceholderElementClosing()) {
+            if (DynamicElementClosing()) {
                 var variable = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
 
                 if (string.IsNullOrEmpty(variable)) {
-                    throw new InvalidOperationException($"Placeholder variable must be a non-empty string at row {CurrentRow}, column {CurrentColumn}.");
+                    throw new InvalidOperationException($"Dynamic variable must be a non-empty string at row {CurrentRow}, column {CurrentColumn}.");
                 }
 
                 string? value = null;
@@ -1015,17 +1011,13 @@ public class Parser : IXferParser {
 
     private KeyValuePairElement ParseKeyValuePairElement(TextElement keyElement) {
         var keyValuePairElement = new KeyValuePairElement(keyElement);
+        AttachPendingMetadata(keyValuePairElement);
 
         if (IsCharAvailable()) {
             // Assign pending ID to the KeyValuePairElement itself, if present
-            string? id = null;
-            if (_pendingIds.Count > 0) {
-                id = _pendingIds.Dequeue();
-            }
             Element valueElement = ParseElement();
             // Do NOT assign pending ID to valueElement here
             keyValuePairElement.Value = valueElement;
-            keyValuePairElement.Id = id;
             return keyValuePairElement;
         }
 
@@ -1073,7 +1065,7 @@ public class Parser : IXferParser {
         return new CharacterElement(codePoint, specifierCount, style: style);
     }
 
-    private InterpolatedElement ParseEvaluatedElement(int specifierCount = 1) {
+    private InterpolatedElement ParseInterpolatedElement(int specifierCount = 1) {
         StringBuilder valueBuilder = new();
         var style = _delimStack.Peek().Style;
 
@@ -1136,14 +1128,14 @@ public class Parser : IXferParser {
             }
 
             if (ElementExplicitOpening(InterpolatedElement.ElementDelimiter, out int evalSpecifierCount)) {
-                InterpolatedElement evaluatedElement = ParseEvaluatedElement(evalSpecifierCount);
-                valueBuilder.Append(evaluatedElement.Value);
+                InterpolatedElement interpolatedElement = ParseInterpolatedElement(evalSpecifierCount);
+                valueBuilder.Append(interpolatedElement.Value);
                 continue;
             }
 
             if (ElementExplicitOpening(DynamicElement.ElementDelimiter, out int phSpecifierCount)) {
-                DynamicElement evaluatedElement = ParsePlaceholderElement(phSpecifierCount);
-                valueBuilder.Append(evaluatedElement.Value);
+                DynamicElement dynamicElement = ParseDynamicElement(phSpecifierCount);
+                valueBuilder.Append(dynamicElement.Value);
                 continue;
             }
 
@@ -1192,8 +1184,8 @@ public class Parser : IXferParser {
         StringBuilder valueBuilder = new StringBuilder();
 
         if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
-            DynamicElement evaluatedElement = ParsePlaceholderElement();
-            valueBuilder.Append(evaluatedElement.Value);
+            DynamicElement dynamicElement = ParseDynamicElement();
+            valueBuilder.Append(dynamicElement.Value);
             _delimStack.Pop();
             var value = valueBuilder.ToString();
             return new DateTimeElement(value, DateTimeHandling.RoundTrip, specifierCount, style);
@@ -1245,8 +1237,8 @@ public class Parser : IXferParser {
         StringBuilder valueBuilder = new StringBuilder();
 
         if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
-            DynamicElement evaluatedElement = ParsePlaceholderElement();
-            valueBuilder.Append(evaluatedElement.Value);
+            DynamicElement dynamicElement = ParseDynamicElement();
+            valueBuilder.Append(dynamicElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<int>(valueBuilder.ToString());
             return new IntegerElement(value, specifierCount, style);
@@ -1279,8 +1271,8 @@ public class Parser : IXferParser {
         StringBuilder valueBuilder = new StringBuilder();
 
         if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
-            DynamicElement evaluatedElement = ParsePlaceholderElement();
-            valueBuilder.Append(evaluatedElement.Value);
+            DynamicElement dynamicElement = ParseDynamicElement();
+            valueBuilder.Append(dynamicElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<long>(valueBuilder.ToString());
             return new LongElement(value, specifierCount, style: style);
@@ -1313,8 +1305,8 @@ public class Parser : IXferParser {
         StringBuilder valueBuilder = new StringBuilder();
 
         if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
-            DynamicElement evaluatedElement = ParsePlaceholderElement();
-            valueBuilder.Append(evaluatedElement.Value);
+            DynamicElement dynamicElement = ParseDynamicElement();
+            valueBuilder.Append(dynamicElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<decimal>(valueBuilder.ToString());
             return new DecimalElement(value, specifierCount, style: style);
@@ -1347,8 +1339,8 @@ public class Parser : IXferParser {
         StringBuilder valueBuilder = new StringBuilder();
 
         if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
-            DynamicElement evaluatedElement = ParsePlaceholderElement();
-            valueBuilder.Append(evaluatedElement.Value);
+            DynamicElement dynamicElement = ParseDynamicElement();
+            valueBuilder.Append(dynamicElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<double>(valueBuilder.ToString());
             return new DoubleElement(value, specifierCount, style: style);
@@ -1383,8 +1375,8 @@ public class Parser : IXferParser {
         bool value = false;
 
         if (IsCharAvailable() && ElementOpening(DynamicElement.ElementDelimiter)) {
-            DynamicElement evaluatedElement = ParsePlaceholderElement();
-            valueBuilder.Append(evaluatedElement.Value);
+            DynamicElement dynamicElement = ParseDynamicElement();
+            valueBuilder.Append(dynamicElement.Value);
             _delimStack.Pop();
             goto ReturnElement;
         }

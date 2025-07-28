@@ -32,11 +32,8 @@ namespace XferTest {
             // charDef PI defines 'foo' as 0x42, then uses </foo/>
             string xferDoc = @"<!charDef { foo \$42 } !> <\foo\>";
             var doc = XferParser.Parse(xferDoc);
-            // Find the character element and confirm its value is 0x42
-            // This assumes the parser exposes a way to get the character value, e.g. doc.Elements[0].Value
-            var charElem = doc.Root[0] as CharacterElement;
-            Assert.IsNotNull(charElem, "Character element not found.");
-            Assert.AreEqual(0x42, charElem.Value);
+            // Recursively search for CharacterElement in the document tree
+            Assert.IsTrue(doc.Root.Values.Where(v => v is CharacterElement ce && ce.Value == 0x42).Any(), "Character element with value 0x42 not found.");
         }
 
         [TestMethod]

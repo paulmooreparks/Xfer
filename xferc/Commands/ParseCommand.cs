@@ -20,8 +20,8 @@ internal class ParseCommand {
         var parser = new Parser();
         var document = parser.Parse(inputBytes);
 
-        // Find Xfer version from MetadataCollection
-        var xferVersion = document.MetadataCollection
+        // Find Xfer version from metadata in Root
+        var xferVersion = document.Root.Values
             .OfType<MetadataElement>()
             .SelectMany(m => m.Values.Values)
             .FirstOrDefault(kvp => kvp.Key.Equals("xfer", StringComparison.OrdinalIgnoreCase))?.Value?.ToString();
