@@ -18,19 +18,45 @@ public class Parser : IXferParser {
     private ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver _dynamicSourceResolver = new ParksComputing.Xfer.Lang.DynamicSource.DefaultDynamicSourceResolver();
     private ParksComputing.Xfer.Lang.Deserialization.IDeserializationInstructionResolver _deserializationInstructionResolver = new ParksComputing.Xfer.Lang.Deserialization.DefaultDeserializationInstructionResolver();
 
-    public ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver DynamicSourceResolver
-    {
+    public ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver DynamicSourceResolver {
         get => _dynamicSourceResolver;
         set => _dynamicSourceResolver = value ?? new ParksComputing.Xfer.Lang.DynamicSource.DefaultDynamicSourceResolver();
     }
 
-    public ParksComputing.Xfer.Lang.Deserialization.IDeserializationInstructionResolver DeserializationInstructionResolver
-    {
+    public ParksComputing.Xfer.Lang.Deserialization.IDeserializationInstructionResolver DeserializationInstructionResolver {
         get => _deserializationInstructionResolver;
         set => _deserializationInstructionResolver = value ?? new ParksComputing.Xfer.Lang.Deserialization.DefaultDeserializationInstructionResolver();
     }
+
     private XferDocument? _currentDocument = null;
-    public static readonly string Version = "0.10";
+
+    private Dictionary<string, int> _pendingCharDefs = new();
+
+    public static readonly string Version = "0.11";
+
+    // Call this after parsing metadata PIs
+    private void ApplyCharDefPI() {
+        if (_pendingCharDefs.Count > 0) {
+            ParksComputing.Xfer.Lang.Services.CharacterIdRegistry.SetCustomIds(_pendingCharDefs);
+        }
+    }
+
+    // Example stub: call this when you parse a charDef PI
+    private void ParseCharDefPI(KeyValuePairElement piKv) {
+        // piKv.Value should be an ObjectElement or similar containing mappings
+        if (piKv.Value is ObjectElement obj) {
+            foreach (var kv in obj.Values.Values) {
+                var name = kv.KeyElement.ToString();
+
+                if (kv.Value is CharacterElement charElem) {
+                    _pendingCharDefs[name] = charElem.Value;
+                }
+                else {
+                    throw new InvalidOperationException($"charDef PI expects a character element for key '{name}' at row {LastElementRow}, column {LastElementColumn}. Found: {kv.Value.GetType().Name}");
+                }
+            }
+        }
+    }
 
     public Parser() : this(Encoding.UTF8) { }
 
@@ -38,7 +64,6 @@ public class Parser : IXferParser {
         Encoding = encoding;
     }
 
-    /* Let's be honest: it's going to be UTF-8 for the foreseeable future, more than likely. */
     public Encoding Encoding { get; private set; } = Encoding.UTF8;
 
     private string _scanString = string.Empty;
@@ -577,10 +602,8 @@ public class Parser : IXferParser {
                 }
                 continue;
             }
-            else if (element is MetadataElement metaElem)
-            {
-                if (!document.MetadataCollection.Contains(metaElem))
-                {
+            else if (element is MetadataElement metaElem) {
+                if (!document.MetadataCollection.Contains(metaElem)) {
                     document.MetadataCollection.Add(metaElem);
                 }
                 continue;
@@ -603,6 +626,7 @@ public class Parser : IXferParser {
         // Inline MetadataElement support: <! ... !>
         if (ElementOpening(MetadataElement.ElementDelimiter, out int metaSpecifierCount)) {
             var metadataElement = ParseMetadataElement(metaSpecifierCount);
+
             // Add PI elements and inline metadata to document's metadata collection for global visibility
             if (_currentDocument != null) {
                 if ((metadataElement is ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement ||
@@ -621,45 +645,63 @@ public class Parser : IXferParser {
             Element? result = null;
             if (IdentifierElementOpening(out int identifierSpecifierCount)) {
                 result = ParseIdentifierElement(identifierSpecifierCount);
-            } else if (KeywordElementOpening(out int keywordSpecifierCount)) {
+            }
+            else if (KeywordElementOpening(out int keywordSpecifierCount)) {
                 result = ParseKeywordElement(keywordSpecifierCount);
-            } else if (ElementOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
+            }
+            else if (ElementOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
                 result = ParseStringElement(stringSpecifierCount);
-            } else if (ElementOpening(InterpolatedElement.ElementDelimiter, out int evalSpecifierCount)) {
+            }
+            else if (ElementOpening(InterpolatedElement.ElementDelimiter, out int evalSpecifierCount)) {
                 result = ParseEvaluatedElement(evalSpecifierCount);
-            } else if (ElementOpening(CharacterElement.ElementDelimiter, out int charSpecifierCount)) {
+            }
+            else if (ElementOpening(CharacterElement.ElementDelimiter, out int charSpecifierCount)) {
                 result = ParseCharacterElement();
-            } else if (ElementOpening(TupleElement.ElementDelimiter, out int propSpecifierCount)) {
+            }
+            else if (ElementOpening(TupleElement.ElementDelimiter, out int propSpecifierCount)) {
                 result = ParseTupleElement(propSpecifierCount);
-            } else if (ElementOpening(MetadataElement.ElementDelimiter, out int metaSpecifierCount2)) {
+            }
+            else if (ElementOpening(MetadataElement.ElementDelimiter, out int metaSpecifierCount2)) {
                 var metadataElement2 = ParseMetadataElement(metaSpecifierCount2);
                 result = metadataElement2;
-            } else if (ElementOpening(ObjectElement.ElementDelimiter, out int objSpecifierCount)) {
+            }
+            else if (ElementOpening(ObjectElement.ElementDelimiter, out int objSpecifierCount)) {
                 result = ParseObjectElement(objSpecifierCount);
-            } else if (ElementOpening(ArrayElement.ElementDelimiter, out int arraySpecifierCount)) {
+            }
+            else if (ElementOpening(ArrayElement.ElementDelimiter, out int arraySpecifierCount)) {
                 result = ParseArrayElement(arraySpecifierCount);
-            } else if (IntegerElementOpening(out int intSpecifierCount)) {
+            }
+            else if (IntegerElementOpening(out int intSpecifierCount)) {
                 result = ParseIntegerElement(intSpecifierCount);
-            } else if (ElementOpening(LongElement.ElementDelimiter, out int longSpecifierCount)) {
+            }
+            else if (ElementOpening(LongElement.ElementDelimiter, out int longSpecifierCount)) {
                 result = ParseLongIntegerElement(longSpecifierCount);
-            } else if (ElementOpening(DecimalElement.ElementDelimiter, out int decSpecifierCount)) {
+            }
+            else if (ElementOpening(DecimalElement.ElementDelimiter, out int decSpecifierCount)) {
                 result = ParseDecimalElement(decSpecifierCount);
-            } else if (ElementOpening(DoubleElement.ElementDelimiter, out int doubleSpecifierCount)) {
+            }
+            else if (ElementOpening(DoubleElement.ElementDelimiter, out int doubleSpecifierCount)) {
                 result = ParseDoubleElement(doubleSpecifierCount);
-            } else if (ElementOpening(BooleanElement.ElementDelimiter, out int boolSpecifierCount)) {
+            }
+            else if (ElementOpening(BooleanElement.ElementDelimiter, out int boolSpecifierCount)) {
                 result = ParseBooleanElement(boolSpecifierCount);
-            } else if (ElementOpening(DateTimeElement.ElementDelimiter, out int dateSpecifierCount)) {
+            }
+            else if (ElementOpening(DateTimeElement.ElementDelimiter, out int dateSpecifierCount)) {
                 result = ParseDateElement(dateSpecifierCount);
-            } else if (ElementOpening(DynamicElement.ElementDelimiter, out int phSpecifierCount)) {
+            }
+            else if (ElementOpening(DynamicElement.ElementDelimiter, out int phSpecifierCount)) {
                 result = ParsePlaceholderElement(phSpecifierCount);
-            } else if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
+            }
+            else if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
                 result = ParseNullElement(nullSpecifierCount);
-            } else if (ElementOpening(CommentElement.ElementDelimiter, out int commentSpecifierCount)) {
+            }
+            else if (ElementOpening(CommentElement.ElementDelimiter, out int commentSpecifierCount)) {
                 /* Parse comment but don't return it, as comments are not part of the logical output. */
                 ParseCommentElement(commentSpecifierCount);
                 SkipWhitespace();
                 continue;
-            } else {
+            }
+            else {
                 throw new InvalidOperationException($"Expected element at row {CurrentRow}, column {CurrentColumn}.");
             }
             SkipWhitespace();
@@ -694,26 +736,46 @@ public class Parser : IXferParser {
                     var keyLower = piKvp.Key.ToLowerInvariant();
                     if (ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.KnownPIKeywords.Contains(keyLower)) {
                         // Instantiate the correct PI element type
-                        if (keyLower == ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.DeserializeKeyword) {
-                            var pi = new ParksComputing.Xfer.Lang.Elements.DeserializePIElement();
-                            foreach (var k in kvps) pi.Add(k);
+                        if (keyLower == ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.CharDefKeyword) {
+                            var pi = new ParksComputing.Xfer.Lang.Elements.CharDefPIElement();
+                            ParseCharDefPI(piKvp);
+                            foreach (var k in kvps) {
+                                pi.Add(k);
+                            }
+                            ApplyCharDefPI();
                             return pi;
                         }
+
+                        if (keyLower == ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.DeserializeKeyword) {
+                            var pi = new ParksComputing.Xfer.Lang.Elements.DeserializePIElement();
+                            foreach (var k in kvps) {
+                                pi.Add(k);
+                            }
+                            return pi;
+                        }
+
                         if (keyLower == ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.IncludeKeyword) {
                             var pi = new ParksComputing.Xfer.Lang.Elements.IncludePIElement();
-                            foreach (var k in kvps) pi.Add(k);
+                            foreach (var k in kvps) {
+                                pi.Add(k);
+                            }
                             return pi;
                         }
                     }
                 }
                 // If no PI keyword, return regular MetadataElement
                 var metadataElement = new MetadataElement();
-                foreach (var k in kvps) metadataElement.Add(k);
+
+                foreach (var k in kvps) {
+                    metadataElement.Add(k);
+                }
+
                 if (metadataElement.ContainsKey(ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.IdKeyword)) {
                     if (metadataElement.Values[ParksComputing.Xfer.Lang.Elements.ProcessingInstructionElement.IdKeyword].Value is ParksComputing.Xfer.Lang.Elements.TextElement idValue) {
                         _pendingIds.Enqueue(idValue.Value);
                     }
                 }
+
                 // Schema validation logic
                 if (metadataElement.ContainsKey(MetadataElement.SchemaKeyword)) {
                     var schemaElement = metadataElement[MetadataElement.SchemaKeyword];
@@ -862,8 +924,7 @@ public class Parser : IXferParser {
                 }
 
                 string? value = null;
-                if (_currentDocument != null)
-                {
+                if (_currentDocument != null) {
                     value = _dynamicSourceResolver.Resolve(variable, _currentDocument);
                 }
                 return new DynamicElement(value ?? string.Empty, specifierCount, style: style);
@@ -997,24 +1058,15 @@ public class Parser : IXferParser {
         }
 
         if (char.IsLetter(charString[0])) {
-            /* Keyword, e.g., <\nl\> for newline */
-            return charString.ToLower() switch {
-                "nul" => new CharacterElement('\0'),
-                "cr" => new CharacterElement('\r'),
-                "lf" => new CharacterElement('\n'),
-                "nl" => new CharacterElement('\n'),
-                "tab" => new CharacterElement('\t'),
-                "vtab" => new CharacterElement('\v'),
-                "bksp" => new CharacterElement('\b'),
-                "ff" => new CharacterElement('\f'),
-                "bel" => new CharacterElement('\a'),
-                "quote" => new CharacterElement('"'),
-                "apos" => new CharacterElement('\''),
-                "backslash" => new CharacterElement('\\'),
-                "lt" => new CharacterElement('<'),
-                "gt" => new CharacterElement('>'),
-                _ => throw new InvalidOperationException($"Unknown character keyword '{charString}' at row {CurrentRow}, column {CurrentColumn}.")
-            };
+            // Try to resolve custom character ID first
+            var resolved = ParksComputing.Xfer.Lang.Services.CharacterIdRegistry.Resolve(charString);
+
+            if (resolved != null) {
+                return new CharacterElement(resolved.Value, specifierCount, style: style);
+            }
+
+            // Fallback to built-in keywords
+            throw new InvalidOperationException($"Unknown character keyword '{charString}' at row {CurrentRow}, column {CurrentColumn}.");
         }
 
         var codePoint = ParseNumericValue<int>(charString);
@@ -1022,7 +1074,7 @@ public class Parser : IXferParser {
     }
 
     private InterpolatedElement ParseEvaluatedElement(int specifierCount = 1) {
-        StringBuilder valueBuilder = new StringBuilder();
+        StringBuilder valueBuilder = new();
         var style = _delimStack.Peek().Style;
 
         while (IsCharAvailable()) {
@@ -1351,8 +1403,8 @@ public class Parser : IXferParser {
         }
         throw new InvalidOperationException($"Unexpected end of {BooleanElement.ElementName} element at row {CurrentRow}, column {CurrentColumn}.");
 
-/* "Goto Considered Harmful" considered harmful. */
-ReturnElement:
+    /* "Goto Considered Harmful" considered harmful. */
+    ReturnElement:
         valueString = valueBuilder.ToString().ToLower();
         value = false;
 
@@ -1392,22 +1444,22 @@ ReturnElement:
             switch (numberBase) {
                 case 10: {
                         if (typeof(T) == typeof(float)) {
-                            return (T)Convert.ChangeType(float.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                            return (T) Convert.ChangeType(float.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else if (typeof(T) == typeof(double)) {
-                            return (T)Convert.ChangeType(double.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                            return (T) Convert.ChangeType(double.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else if (typeof(T) == typeof(short)) {
-                            return (T)Convert.ChangeType(short.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                            return (T) Convert.ChangeType(short.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else if (typeof(T) == typeof(int)) {
-                            return (T)Convert.ChangeType(int.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                            return (T) Convert.ChangeType(int.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else if (typeof(T) == typeof(long)) {
-                            return (T)Convert.ChangeType(long.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                            return (T) Convert.ChangeType(long.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else if (typeof(T) == typeof(decimal)) {
-                            return (T)Convert.ChangeType(decimal.Parse(valueString, CultureInfo.InvariantCulture), typeof(T));
+                            return (T) Convert.ChangeType(decimal.Parse(valueString, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else {
                             throw new InvalidOperationException($"Unsupported type '{typeof(T)}' for decimal value parsing at row {CurrentRow}, column {CurrentColumn}.");
@@ -1415,11 +1467,11 @@ ReturnElement:
                     }
                 case 16: {
                         long hexValue = long.Parse(numberString, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-                        return (T)Convert.ChangeType(hexValue, typeof(T));
+                        return (T) Convert.ChangeType(hexValue, typeof(T));
                     }
                 case 2: {
                         long binaryValue = long.Parse(numberString, NumberStyles.BinaryNumber, CultureInfo.InvariantCulture);
-                        return (T)Convert.ChangeType(binaryValue, typeof(T));
+                        return (T) Convert.ChangeType(binaryValue, typeof(T));
                     }
                 default: {
                         throw new InvalidOperationException($"Unsupported numeric base '{numberBase}' at row {CurrentRow}, column {CurrentColumn}.");
