@@ -237,7 +237,7 @@ age #30</code></pre>
 
             <h3>Document Metadata</h3>
             <p>Use the <code>xfer</code> PI to specify XferLang version and document metadata:</p>
-            <pre><code class="xfer">&lt;! xfer "0.11" author "John Doe" created @2023-12-25T10:00:00Z@ !&gt;</code></pre>
+            <pre><code class="xfer">&lt;! xfer { version "0.12" author "John Doe" created @2023-12-25T10:00:00Z@ } !&gt;</code></pre>
 
             <h3>Schema Association (TO BE IMPLEMENTED)</h3>
             <p>Use the <code>schema</code> PI to associate a document with a schema definition:</p>
@@ -579,9 +579,10 @@ userInfo ("Alice" #25 ["admin" "user"] ~true)</code></pre>
             <h2>Complete Examples</h2>
 
             <h3>Configuration File</h3>
-            <pre><code class="xfer">&lt;! xfer "0.11"
-   name "Application Configuration"
-   version "1.2.3"
+            <pre><code class="xfer">&lt;! xfer {
+    version "0.12"
+    name "Application Configuration"
+}
 !&gt;
 
 database {

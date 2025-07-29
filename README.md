@@ -100,8 +100,8 @@ An XferLang document consists of two main parts: an optional **Metadata Element*
 *   **Root Tuple**: The main content of the document is contained within an implicit root tuple. This means an XferLang document can contain a sequence of multiple, distinct elements at its top level.
 
 ```xfer
-</ A metadata element is optional, but if present, comes first. />
-<! xfer "1.0.0" !>
+</ A document metadata element, which is signified with the reserved keyword `xfer` is optional, but if present it must be the first element in the document. />
+<! xfer { version "1.0" } !>
 
 </ The rest of the document is a sequence of elements in the root tuple. />
 "Hello, World!"
@@ -248,7 +248,7 @@ padded_binary: #%00101010  // MinBits = 8
 **Metadata Element**
 *   **Specifiers:** `!` (Exclamation Mark)
 *   **Description:** A special object that can only appear at the start of a document. It contains metadata about the document, such as the `xfer` version.
-*   **Example:** `<! xfer "1.0.0" description "Sample document" !>`
+*   **Example:** `<! xfer {version "1.0"} description "Sample document" !>`
 
 **Comment Element**
 *   **Specifier:** `/` (Slash)

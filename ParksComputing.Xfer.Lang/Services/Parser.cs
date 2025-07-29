@@ -34,7 +34,7 @@ public class Parser : IXferParser {
 
     private Dictionary<string, int> _pendingCharDefs = [];
 
-    public static readonly string Version = "0.11";
+    public static readonly string Version = "0.12";
 
     // Call this after parsing metadata PIs
     private void ApplyCharDefPI() {
