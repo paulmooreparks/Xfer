@@ -665,7 +665,10 @@ public class XferConvert {
         // Set remaining writable properties (not set via constructor)
         foreach (var prop in properties)
         {
-            if (!prop.CanWrite) continue;
+            if (!prop.CanWrite) {
+                continue;
+            }
+
             var attribute = prop.GetCustomAttribute<XferPropertyAttribute>();
             var propName = attribute?.Name ?? prop.Name;
             // Only set if not already set by constructor
@@ -683,7 +686,10 @@ public class XferConvert {
     /// </summary>
     public static T? ToObject<T>(ObjectElement element, XferSerializerSettings? settings = null)
     {
-        if (element == null) return default;
+        if (element == null) {
+            return default;
+        }
+
         return (T?)DeserializeObject(element, typeof(T), settings ?? DefaultSettings);
     }
 

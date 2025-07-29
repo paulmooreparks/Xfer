@@ -9,5 +9,5 @@ public class XferDocumentMetadata
     // Add more known properties as needed
 
     // For user-defined/unknown keys:
-    public Dictionary<string, object?> Extensions { get; } = new();
+    public Dictionary<string, object?> Extensions { get; } = [];
 }

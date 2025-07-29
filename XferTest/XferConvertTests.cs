@@ -19,7 +19,7 @@ public class XferConvertTests
         public double DoubleProperty { get; set; } = 3.14159;
         public DateTime DateTimeProperty { get; set; } = new DateTime(2025, 7, 23, 12, 30, 0);
         public Guid GuidProperty { get; set; } = Guid.NewGuid();
-        public List<string> ListProperty { get; set; } = new List<string> { "one", "two", "three" };
+        public List<string> ListProperty { get; set; } = ["one", "two", "three"];
         public Dictionary<string, int> DictionaryProperty { get; set; } = new Dictionary<string, int> { { "a", 1 }, { "b", 2 } };
         public string? NullStringProperty { get; set; } = null;
     }
@@ -160,7 +160,7 @@ public class XferConvertTests
     [TestMethod]
     public void CollectionRecord_RoundTrip_Supported()
     {
-        var record = new CollectionRecord(new List<int> { 1, 2, 3 }, new[] { "a", "b" });
+        var record = new CollectionRecord([1, 2, 3], new[] { "a", "b" });
         var element = XferConvert.FromObject(record);
         var result = XferConvert.ToObject<CollectionRecord>(element);
         Assert.IsNotNull(result);

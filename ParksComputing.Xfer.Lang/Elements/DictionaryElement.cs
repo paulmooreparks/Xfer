@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ParksComputing.Xfer.Lang.Elements;
 
 public abstract class DictionaryElement : CollectionElement<KeyValuePairElement> {
-    protected Dictionary<string, KeyValuePairElement> _values = new();
+    protected Dictionary<string, KeyValuePairElement> _values = [];
 
     protected DictionaryElement(string elementName, ElementDelimiter delimiter) : base(elementName, delimiter) { }
 
@@ -25,6 +25,10 @@ public abstract class DictionaryElement : CollectionElement<KeyValuePairElement>
         }
 
         _values.Add(value.Key, value);
+        // Add to Children if not already present (for round-trip consistency)
+        if (this is Element e && !e.Children.Contains(value)) {
+            e.Children.Add(value);
+        }
         return true;
     }
 

@@ -14,9 +14,9 @@ public class TupleElement : ListElement {
 
     public List<object> TypedValue {
         get {
-            List<object> values = new(_items.Count);
-            for (int i = 0; i < _items.Count; i++) {
-                values[i] = _items[i];
+            List<object> values = new(Children.Count);
+            for (int i = 0; i < Children.Count; i++) {
+                values.Add(Children[i]);
             }
             return values;
         }
@@ -27,11 +27,11 @@ public class TupleElement : ListElement {
     }
 
     public TupleElement(IEnumerable<Element> values) : this() {
-        _items.AddRange(values);
+        foreach (var v in values) { Add(v); }
     }
 
     public TupleElement(params Element[] values) : this() {
-        _items.AddRange(values);
+        foreach (var v in values) { Add(v); }
     }
 
     public override string ToXfer() {
@@ -64,14 +64,14 @@ public class TupleElement : ListElement {
             sb.Append(Environment.NewLine);
         }
 
-        /* TODO: Whitespace between elements can be removed in a few situations by examining the delimiter style of the surrounding elements. */
-        for (var i = 0; i < _items.Count(); ++i) {
-            var item = _items[i];
+        // Output all children (valid elements and metadata) in order
+        for (var i = 0; i < Children.Count; ++i) {
+            var item = Children[i];
             if (isIndented) {
                 sb.Append(nestIndent);
             }
             sb.Append(item.ToXfer(formatting, indentChar, indentation, depth + 1));
-            if (!isIndented && item.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i < _items.Count()) {
+            if (!isIndented && item.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i + 1 < Children.Count) {
                 sb.Append(' ');
             }
             if (isIndented) {

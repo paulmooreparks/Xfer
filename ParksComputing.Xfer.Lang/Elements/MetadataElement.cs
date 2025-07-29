@@ -18,11 +18,11 @@ public class MetadataElement : Element {
     public static readonly string XferKeyword = "xfer";
     public static readonly string SchemaKeyword = "schema";
 
-    private static readonly SortedSet<string> Keywords = new() {
+    private static readonly SortedSet<string> Keywords = [
         XferKeyword
-    };
+    ];
 
-    private Dictionary<string, KeyValuePairElement> _values = new();
+    private Dictionary<string, KeyValuePairElement> _values = [];
     public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
 
     public KeyValuePairElement this[string index] {
@@ -58,19 +58,27 @@ public class MetadataElement : Element {
 
     private void SetElement<TElement>(string key, TElement element) where TElement : Element {
         if (_values.TryGetValue(key, out KeyValuePairElement? kvp)) {
-            _values[key] = new KeyValuePairElement(kvp.KeyElement, element);
+            var newKvp = new KeyValuePairElement(kvp.KeyElement, element);
+            _values[key] = newKvp;
+            // Replace in Children
+            int idx = Children.FindIndex(e => e is KeyValuePairElement k && k.Key == key);
+            if (idx >= 0) {
+                Children[idx] = newKvp;
+            } else {
+                Children.Add(newKvp);
+            }
         }
         else {
             TextElement keyElement;
-
             if (key.IsKeywordString()) {
                 keyElement = new IdentifierElement(key, style: ElementStyle.Implicit);
             }
             else {
                 keyElement = new StringElement(key);
             }
-
-            _values.Add(key, new KeyValuePairElement(keyElement, element));
+            var newKvp = new KeyValuePairElement(keyElement, element);
+            _values.Add(key, newKvp);
+            Children.Add(newKvp);
         }
     }
 
@@ -110,8 +118,8 @@ public class MetadataElement : Element {
             }
             return false;
         }
-
         _values.Add(value.Key, value);
+        Children.Add(value);
         return true;
     }
 
@@ -149,14 +157,13 @@ public class MetadataElement : Element {
             sb.Append(Environment.NewLine);
         }
 
-        int i = 0;
-        foreach (var value in _values.Values) {
-            ++i;
+        for (var i = 0; i < Children.Count; ++i) {
+            var value = Children[i];
             if (isIndented) {
                 sb.Append(nestIndent);
             }
             sb.Append(value.ToXfer(formatting, indentChar, indentation, depth + 1));
-            if ((value.Delimiter.Style == ElementStyle.Implicit || value.Delimiter.Style == ElementStyle.Compact) && i < _values.Values.Count()) {
+            if (!isIndented && value is KeyValuePairElement kvp && (kvp.Delimiter.Style == ElementStyle.Implicit || kvp.Delimiter.Style == ElementStyle.Compact) && i + 1 < Children.Count) {
                 sb.Append(' ');
             }
             if (isIndented) {

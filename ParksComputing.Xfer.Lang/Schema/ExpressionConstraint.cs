@@ -10,7 +10,7 @@ namespace ParksComputing.Xfer.Lang.Schema;
 
 public class ExpressionConstraint {
     public string Operator { get; set; } = string.Empty; // "any", "all"
-    public List<string> Fields { get; set; } = new();
+    public List<string> Fields { get; set; } = [];
 
     public bool Evaluate(ObjectElement document) {
         return Operator switch {

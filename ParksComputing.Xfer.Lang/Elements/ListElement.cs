@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ParksComputing.Xfer.Lang.Elements;
 
 public abstract class ListElement : CollectionElement<Element> {
-    protected List<Element> _items = new();
+    protected List<Element> _items = [];
 
     protected ListElement(string elementName, ElementDelimiter delimiter) : base(elementName, delimiter) { }
 
@@ -17,6 +17,9 @@ public abstract class ListElement : CollectionElement<Element> {
 
     public override bool Add(Element element) {
         _items.Add(element);
+        if (!Children.Contains(element)) {
+            Children.Add(element);
+        }
         return true;
     }
 

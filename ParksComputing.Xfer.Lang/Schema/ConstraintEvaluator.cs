@@ -12,8 +12,9 @@ namespace ParksComputing.Xfer.Lang.Schema;
 public class ConstraintEvaluator {
     public static bool Evaluate(object? value, ObjectElement document) {
         // Handle boolean literals directly
-        if (value is bool boolValue)
+        if (value is bool boolValue) {
             return boolValue;
+        }
 
         // Evaluate expressions like "any", "all", or custom conditions
         if (value is ExpressionConstraint expression) {

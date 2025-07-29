@@ -6,7 +6,7 @@ namespace ParksComputing.Xfer.Lang.Configuration {
     public class XferSerializerSettings {
         public NullValueHandling NullValueHandling { get; set; } = NullValueHandling.Include;
         public IContractResolver ContractResolver { get; set; } = new DefaultContractResolver();
-        public IList<IXferConverter> Converters { get; } = new List<IXferConverter>();
+        public IList<IXferConverter> Converters { get; } = [];
 
         /// <summary>
         /// Controls how elements are serialized for compactness vs safety.

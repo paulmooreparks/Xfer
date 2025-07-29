@@ -15,7 +15,7 @@ namespace ParksComputing.Xfer.Lang.Configuration
         /// <summary>
         /// Parameters for the processing instruction, as parsed from the document.
         /// </summary>
-        public Dictionary<string, object> Parameters { get; set; } = new();
+        public Dictionary<string, object> Parameters { get; set; } = [];
 
         /// <summary>
         /// Reference to the element this PI applies to (if any).

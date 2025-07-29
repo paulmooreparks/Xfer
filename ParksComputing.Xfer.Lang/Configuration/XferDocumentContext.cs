@@ -10,11 +10,11 @@ using ParksComputing.Xfer.Lang.Elements;
         /// All processing instructions found during parsing, each referencing the element they apply to.
         /// </summary>
         // Now supports MetadataElement as PI
-        public IList<Element> ProcessingInstructions { get; } = new List<Element>();
+        public IList<Element> ProcessingInstructions { get; } = [];
 
         /// <summary>
         /// All top-level elements in the document.
         /// </summary>
-        public IList<object> Elements { get; } = new List<object>();
+        public IList<object> Elements { get; } = [];
     }
 }

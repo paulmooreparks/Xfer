@@ -121,5 +121,5 @@ public class SampleData {
 
     public int[] ints { get; set; } = [];
     public string[] strings { get; set; } = [];
-    public List<object> bag_o_bits1 { get; set; } = new List<object>() { };
+    public List<object> bag_o_bits1 { get; set; } = [];
 }

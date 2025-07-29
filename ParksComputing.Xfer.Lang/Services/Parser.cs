@@ -16,7 +16,7 @@ public class Parser : IXferParser {
     // Used to assign IDs from inline PIs to subsequent elements
     private Queue<string> _pendingIds = new Queue<string>();
     // Used to stack PIs/metadata to attach to the next element
-    private List<MetadataElement> _pendingMetadata = new List<MetadataElement>();
+    private List<MetadataElement> _pendingMetadata = [];
     private ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver _dynamicSourceResolver = new ParksComputing.Xfer.Lang.DynamicSource.DefaultDynamicSourceResolver();
     private ParksComputing.Xfer.Lang.Deserialization.IDeserializationInstructionResolver _deserializationInstructionResolver = new ParksComputing.Xfer.Lang.Deserialization.DefaultDeserializationInstructionResolver();
 
@@ -32,7 +32,7 @@ public class Parser : IXferParser {
 
     private XferDocument? _currentDocument = null;
 
-    private Dictionary<string, int> _pendingCharDefs = new();
+    private Dictionary<string, int> _pendingCharDefs = [];
 
     public static readonly string Version = "0.11";
 
@@ -917,9 +917,17 @@ public class Parser : IXferParser {
             var element = ParseElement();
 
             if (element is KeyValuePairElement kvp) {
-                if (!objectElement.Add(kvp)) {
+                if (objectElement.ContainsKey(kvp.Key)) {
                     throw new InvalidOperationException($"Duplicate key '{kvp.Key}' in object at row {lastRow}, column {lastColumn}.");
                 }
+                objectElement.AddOrUpdate(kvp);
+            }
+            else if (element is MetadataElement meta) {
+                objectElement.AddOrUpdate(meta);
+            }
+            else if (element is EmptyElement) {
+                // Ignore empty elements in objects
+                continue;
             }
             else {
                 throw new InvalidOperationException($"Unexpected element type at row {lastRow}, column {lastColumn}.");

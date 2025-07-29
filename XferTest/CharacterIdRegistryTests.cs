@@ -40,7 +40,7 @@ public class CharacterIdRegistryTests {
 
     [TestMethod]
     public void UnknownId_ReturnsNull() {
-        CharacterIdRegistry.SetCustomIds(new Dictionary<string, int>());
+        CharacterIdRegistry.SetCustomIds([]);
         Assert.IsNull(CharacterIdRegistry.Resolve("notfound"));
     }
 }
