@@ -1,24 +1,22 @@
-﻿using System.Text;
+using System.Text;
 using ParksComputing.Xfer.Lang.Elements;
 
 namespace ParksComputing.Xfer.Lang;
 
 
 public class XferDocument {
-    public Configuration.XferDocumentContext Context { get; set; } = new Configuration.XferDocumentContext();
-    public TupleElement Root { get; set; } = new();
-    public XferDocumentMetadata? Metadata { get; set; }
+    public DocumentElement Root { get; set; } = new();
+    public XferMetadata? Metadata { get; set; }
 
     public XferDocument() { }
 
-    public XferDocument(TupleElement root) {
+    public XferDocument(DocumentElement root) {
         Root = root;
     }
 
-    public void Add(KeyValuePairElement value) {
+    public void Add(Element value) {
         Root.Add(value);
     }
-
 
     public virtual string ToXfer() {
         return Root.ToXfer();

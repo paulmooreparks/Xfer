@@ -1,11 +1,11 @@
-﻿using Cliffer;
+using Cliffer;
 
 using System.CommandLine;
 using System.Text;
 using ParksComputing.Xfer.Lang;
 using ParksComputing.Xfer.Lang.Services;
 using ParksComputing.Xfer.Lang.Extensions;
-using ParksComputing.Xfer.Lang.Elements;
+using ParksComputing.Xfer.Lang.ProcessingInstructions;
 
 namespace ParksComputing.Xferc;
 
@@ -15,16 +15,18 @@ internal class ParseCommand {
     public int Execute(string file) {
         /* TODO: Temporary... */
         // file = "../../../../schemas/address.xfer";
-        file = "../../../../xfertest.xfer";
+        // file = "../../../../xfertest.xfer";
         var inputBytes = File.ReadAllBytes(file);
         var parser = new Parser();
         var document = parser.Parse(inputBytes);
 
         // Find Xfer version from metadata in Root
         var xferVersion = document.Root.Values
-            .OfType<MetadataElement>()
-            .SelectMany(m => m.Values.Values)
-            .FirstOrDefault(kvp => kvp.Key.Equals("xfer", StringComparison.OrdinalIgnoreCase))?.Value?.ToString();
+            .OfType<ProcessingInstruction>()
+            .Select(m => m.Kvp)
+            .Where(kvp => kvp != null && kvp.Key.Equals("xfer", StringComparison.OrdinalIgnoreCase))
+            .Select(kvp => kvp?.Value?.ToString())
+            .FirstOrDefault();
         Console.WriteLine($"Document uses Xfer version {xferVersion}");
         // Console.WriteLine($"Message ID is {document.Metadata.MessageId}");
         Console.WriteLine();

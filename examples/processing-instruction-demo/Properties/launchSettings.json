@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "processing-instruction-demo": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\paul\\source\\repos\\Xfer\\examples\\processing-instruction-demo\\"
+    }
+  }
+}

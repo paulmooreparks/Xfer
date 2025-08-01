@@ -17,7 +17,7 @@ public class DynamicElementPITests
         var expectedValue = "FileSecretValue123!";
         File.WriteAllText(tempFile, expectedValue);
 
-        var xfer = $@"<! dynamicSource {{ key ""dbpassword"" source ""file:{tempFile}"" }} !>
+        var xfer = $@"<! dynamicSource {{ dbpassword file ""{tempFile}"" }} !>
 credentials {{
 password '<|dbpassword|>'
 }}";

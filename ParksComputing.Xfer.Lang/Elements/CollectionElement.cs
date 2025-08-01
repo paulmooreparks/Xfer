@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
-public abstract class CollectionElement<T> : Element {
+public abstract class CollectionElement : Element {
     protected CollectionElement(string elementName, ElementDelimiter delimiter) : base(elementName, delimiter) { }
 
     public abstract int Count { get; }
 
-    public abstract T? GetElementAt(int index);
+    public abstract Element? GetElementAt(int index);
 
-    public abstract bool Add(T element);
+    public abstract bool Add(Element element);
 }

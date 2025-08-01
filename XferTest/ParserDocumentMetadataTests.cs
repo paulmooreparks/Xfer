@@ -15,8 +15,8 @@ public class ParserDocumentMetadataTests
         string input = "<! xfer { version '1.2.3' documentVersion 'abc' custom 42 } !> foo 1";
         var doc = parser.Parse(input);
         Assert.IsNotNull(doc.Metadata);
-        Assert.AreEqual("1.2.3", doc.Metadata.Version);
-        Assert.AreEqual("abc", doc.Metadata.DocumentVersion);
+        Assert.AreEqual("1.2.3", doc.Metadata.Xfer);
+        Assert.AreEqual("abc", doc.Metadata.Version);
         Assert.IsTrue(doc.Metadata.Extensions.ContainsKey("custom"));
         var customElement = doc.Metadata.Extensions["custom"] as IntegerElement;
         Assert.IsNotNull(customElement);
@@ -39,8 +39,8 @@ public class ParserDocumentMetadataTests
         string input = "foo 1 bar 2";
         var doc = parser.Parse(input);
         Assert.IsNotNull(doc.Metadata);
+        Assert.IsNull(doc.Metadata.Xfer);
         Assert.IsNull(doc.Metadata.Version);
-        Assert.IsNull(doc.Metadata.DocumentVersion);
         Assert.AreEqual(0, doc.Metadata.Extensions.Count);
     }
 

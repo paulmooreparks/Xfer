@@ -2,7 +2,14 @@
 
 baseurl "https://parkscomputing.com/"
 
-target "text"
+<! charDef { spider \$1F577 web \$1F578 } !>
+spider '<\spider\><\web\>'
+
+<:It's Complicated:> <'"It's complicated" is a common phrase used to describe a relationship that is not straightforward or has many complexities.'>
+
+<! dynamicSource { title const "Mr." surname const "Parks" } !>
+
+<'Dear <|title|> <|surname|>,'>
 
 [
     "ParksComputing.Xfer.Lang"

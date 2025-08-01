@@ -296,7 +296,7 @@ public class XferConvertTests
     public void ParseAndRoundTrip_MinifiedXferDocument_ShouldPreserveStructure()
     {
         // Arrange - the minified Xfer document from the documentation
-        string minifiedXfer = "{name\"Alice\"age 30 isMember~true scores[*85*90*78.5]profile{email\"alice@example.com\"joinedDate@2023-05-05T20:00:00@}}";
+        string minifiedXfer = @"{name""Alice""age 30 salary*50000.75 isMember~true scores[*85*90*78.5]profile{email""alice@example.com""joinedDate@2023-05-05T20:00:00@}}";
 
         // Create expected object for comparison
         var expected = new UserData
@@ -304,6 +304,7 @@ public class XferConvertTests
             Name = "Alice",
             Age = 30,
             IsMember = true,
+            Salary = 50000.75m,
             Scores = new decimal[] { 85m, 90m, 78.5m },
             Profile = new UserProfile
             {
@@ -590,6 +591,9 @@ public class UserData
 
     [XferProperty("age")]
     public int Age { get; set; }
+
+    [XferProperty("salary")]
+    public decimal Salary { get; set; }
 
     [XferProperty("isMember")]
     public bool IsMember { get; set; }

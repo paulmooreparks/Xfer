@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -212,8 +212,7 @@ public class XferConvert {
 
         // PI-driven deserialization customization
         var parser = new ParksComputing.Xfer.Lang.Services.Parser();
-        var instructions = parser.DeserializationInstructionResolver.ResolveInstructions(first, document);
-        var result = DeserializeValue(first, typeof(T), settings, instructions);
+        var result = DeserializeValue(first, typeof(T), settings);
 
         return (T?)result;
     }
@@ -228,16 +227,7 @@ public class XferConvert {
             return default;
         }
         var parser = new ParksComputing.Xfer.Lang.Services.Parser();
-        var instructions = parser.DeserializationInstructionResolver.ResolveInstructions(first, document);
-        return DeserializeValue(first, targetType, settings, instructions);
-    }
-
-    // Overload to accept PI-driven instructions
-    private static object? DeserializeValue(Element element, Type targetType, XferSerializerSettings settings, object? instructions)
-    {
-        // TODO: Use instructions to customize deserialization logic as needed
-        // For now, fallback to default behavior
-        return DeserializeValue(element, targetType, settings);
+        return DeserializeValue(first, targetType, settings);
     }
 
     public static object? Deserialize(string xfer, Type targetType) {
@@ -461,8 +451,8 @@ public class XferConvert {
         return objElement;
     }
 
-    private static TypedArrayElement<IntegerElement> SerializeIntArray(int[] intArray) {
-        var arrayElement = new TypedArrayElement<IntegerElement>();
+    private static ArrayElement SerializeIntArray(int[] intArray) {
+        var arrayElement = new ArrayElement();
 
         foreach (var item in intArray) {
             arrayElement.Add(new IntegerElement(item));
@@ -471,8 +461,8 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<LongElement> SerializeLongArray(long[] longArray) {
-        var arrayElement = new TypedArrayElement<LongElement>();
+    private static ArrayElement SerializeLongArray(long[] longArray) {
+        var arrayElement = new ArrayElement();
 
         foreach (var item in longArray) {
             arrayElement.Add(new LongElement(item));
@@ -481,8 +471,8 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<BooleanElement> SerializeBooleanArray(bool[] boolArray) {
-        var arrayElement = new TypedArrayElement<BooleanElement>();
+    private static ArrayElement SerializeBooleanArray(bool[] boolArray) {
+        var arrayElement = new ArrayElement();
 
         foreach (var item in boolArray) {
             arrayElement.Add(new BooleanElement(item));
@@ -491,8 +481,8 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<DoubleElement> SerializeDoubleArray(double[] doubleArray) {
-        var arrayElement = new TypedArrayElement<DoubleElement>();
+    private static ArrayElement SerializeDoubleArray(double[] doubleArray) {
+        var arrayElement = new ArrayElement();
 
         foreach (var item in doubleArray) {
             arrayElement.Add(new DoubleElement(item));
@@ -501,8 +491,8 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<DecimalElement> SerializeDecimalArray(decimal[] decimalArray) {
-        var arrayElement = new TypedArrayElement<DecimalElement>();
+    private static ArrayElement SerializeDecimalArray(decimal[] decimalArray) {
+        var arrayElement = new ArrayElement();
 
         foreach (var item in decimalArray) {
             arrayElement.Add(new DecimalElement(item));
@@ -511,8 +501,8 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<DateTimeElement> SerializeDateArray(DateTime[] dateArray) {
-        var arrayElement = new TypedArrayElement<DateTimeElement>();
+    private static ArrayElement SerializeDateArray(DateTime[] dateArray) {
+        var arrayElement = new ArrayElement();
 
         foreach (var item in dateArray) {
             arrayElement.Add(new DateTimeElement(item));
@@ -521,8 +511,8 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<DateElement> SerializeDateOnlyArray(DateOnly[] dateArray) {
-        var arrayElement = new TypedArrayElement<DateElement>();
+    private static ArrayElement SerializeDateOnlyArray(DateOnly[] dateArray) {
+        var arrayElement = new ArrayElement();
 
         foreach (var item in dateArray) {
             arrayElement.Add(new DateElement(item));
@@ -531,8 +521,8 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<TimeElement> SerializeTimeOnlyArray(TimeOnly[] timeArray) {
-        var arrayElement = new TypedArrayElement<TimeElement>();
+    private static ArrayElement SerializeTimeOnlyArray(TimeOnly[] timeArray) {
+        var arrayElement = new ArrayElement();
 
         foreach (var item in timeArray) {
             arrayElement.Add(new TimeElement(item));
@@ -541,8 +531,8 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<TimeSpanElement> SerializeTimeSpanArray(TimeSpan[] timeArray) {
-        var arrayElement = new TypedArrayElement<TimeSpanElement>();
+    private static ArrayElement SerializeTimeSpanArray(TimeSpan[] timeArray) {
+        var arrayElement = new ArrayElement();
 
         foreach (var item in timeArray) {
             arrayElement.Add(new TimeSpanElement(item));
@@ -551,8 +541,8 @@ public class XferConvert {
         return arrayElement;
     }
 
-    private static TypedArrayElement<StringElement> SerializeStringArray(string[] stringArray) {
-        var arrayElement = new TypedArrayElement<StringElement>();
+    private static ArrayElement SerializeStringArray(string[] stringArray) {
+        var arrayElement = new ArrayElement();
 
         foreach (var item in stringArray) {
             arrayElement.Add(new StringElement(item, style: ElementStyle.Explicit));
@@ -588,6 +578,7 @@ public class XferConvert {
         }
 
         var values = new List<object?>();
+        // Use the Values property from ArrayElement
         foreach (var item in arrayElement.Values) {
             values.Add(DeserializeValue(item, elementType, settings));
         }

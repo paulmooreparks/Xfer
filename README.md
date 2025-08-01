@@ -433,15 +433,16 @@ This feature makes XferLang highly extensible and adaptable for a wide range of 
 The .NET implementation of XferLang is becoming more robust, with a focus on professional-grade features like custom converters and contract resolvers. However, the project as a whole is still experimental.
 
 The future roadmap includes:
-*   Reimplementing the core library in Rust.
-*   Exposing a C ABI from the Rust implementation.
-*   Creating language wrappers (e.g., for C#, Python, JavaScript) that communicate with the C ABI.
+*   Completing the .NET implementation to achieve a production-quality 1.0 release
+*   Reimplementing the core library in Rust
+*   Exposing a C ABI from the Rust implementation
+*   Creating language wrappers (e.g., for C#, Python, JavaScript) that communicate with the C ABI
 
-This will provide a single, high-performance, and memory-safe core for all future XferLang implementations. I'm looking for contributors and collaborators to get that work started.
+The goal of moving to a Rust core is to provide a single, high-performance, and memory-safe core for all future XferLang implementations. I'm looking for contributors and collaborators to get that work started.
 
 ## 6. Contributing
 
-This is an open-source project, and contributions are always welcome! If you are interested in helping with the Rust implementation, creating language wrappers, improving the existing .NET library, or have other ideas, please feel free to open an issue or a pull request on GitHub. You can also reach out to me directly via email at [paul@parkscomputing.com](mailto:paul@parkscomputing.com).
+This is an open-source project, and contributions are always welcome! If you are interested in helping, please feel free to open an issue or a pull request on GitHub. You can also reach out to me directly via email at [paul@parkscomputing.com](mailto:paul@parkscomputing.com).
 
 ## 7. Grammar
 

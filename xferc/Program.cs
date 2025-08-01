@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Cliffer;
 
 using Microsoft.Extensions.Configuration;
@@ -42,7 +42,6 @@ internal class XfercProgram {
         };
 
         Console.OutputEncoding = Encoding.UTF8;
-        DemoDeserializationPI.Run();
 
         return await cli.RunAsync(args);
     }

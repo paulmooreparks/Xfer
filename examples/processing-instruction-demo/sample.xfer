@@ -1,0 +1,30 @@
+<!
+document {
+    xfer "11.1"
+    id "top"
+}
+!>
+
+<!
+charDef {
+    fooz \zeta
+    theend \omega
+    pin \pushpin
+}
+!>
+
+(
+    '<\theend\>'
+    'I <\heart\><\vsemoji\> XferLang!'
+    'Put a <\pin\> in it!'
+    [1 2 3]
+
+    alphabet {
+        a '<\alpha\>'
+        b '<\beta\>'
+        g '<\gamma\>'
+        d '<\delta\>'
+        e '<\epsilon\>'
+        z '<\zeta\>'
+    }
+)

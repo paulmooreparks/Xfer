@@ -1,4 +1,4 @@
-﻿using ParksComputing.Xfer.Lang.Elements;
+using ParksComputing.Xfer.Lang.Elements;
 
 namespace ParksComputing.Xfer.Lang.Extensions;
 

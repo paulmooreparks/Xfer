@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,19 +6,20 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
-public abstract class ListElement : CollectionElement<Element> {
+public abstract class ListElement : CollectionElement {
     protected List<Element> _items = [];
 
     protected ListElement(string elementName, ElementDelimiter delimiter) : base(elementName, delimiter) { }
 
     public override int Count => _items.Count;
 
-    public override Element GetElementAt(int index) => index < Count ? _items[index] : throw new InvalidOperationException("No element at index {index}");
+    public override Element? GetElementAt(int index) => index >= 0 && index < Count ? _items[index] : null;
 
     public override bool Add(Element element) {
         _items.Add(element);
         if (!Children.Contains(element)) {
             Children.Add(element);
+            element.Parent = this;
         }
         return true;
     }
@@ -41,6 +42,4 @@ public abstract class ListElement : CollectionElement<Element> {
             _items[index] = value;
         }
     }
-
-
 }

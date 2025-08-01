@@ -4,8 +4,8 @@ metadata element below. Make sure you define TESTING_PASSWORD in your environmen
 
 </ <!
 dynamicSource {
-    dbpassword "env:TESTING_PASSWORD"
-    greeting "This is a test greeting."
+    dbpassword env "TESTING_PASSWORD"
+    greeting const "This is a test greeting."
 }
 !> />
 
