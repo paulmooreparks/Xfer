@@ -8,29 +8,23 @@ using ParksComputing.Xfer.Lang.ProcessingInstructions;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
-public class ArrayElement : CollectionElement
-{
+public class ArrayElement : ListElement {
     public static readonly string ElementName = "array";
     public const char OpeningSpecifier = '[';
     public const char ClosingSpecifier = ']';
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact);
 
-    private List<Element> _items = [];
     private Type? _elementType = null; // Track the expected element type
 
-    public override int Count => _items.Count;
-
-    public override Element? GetElementAt(int index) => 
-        index >= 0 && index < Count ? _items[index] : null;
-
     public override bool Add(Element element) {
-        // Skip ProcessingInstructions for type checking - they're metadata
-        if (element is ProcessingInstruction pi) {
-            Children.Add(pi);
-            pi.Parent = this;
+        if (element is ProcessingInstruction || element is CommentElement) {
+            // Non-semantic: add only to Children
+            if (!Children.Contains(element)) {
+                Children.Add(element);
+                element.Parent = this;
+            }
             return true;
         }
-
         // Establish type from first non-PI element
         if (_elementType == null) {
             _elementType = element.GetType();
@@ -43,61 +37,53 @@ public class ArrayElement : CollectionElement
                     $"Use TupleElement for mixed-type collections.");
             }
         }
-
         _items.Add(element);
-        Children.Add(element);
-        element.Parent = this;
+        if (!Children.Contains(element)) {
+            Children.Add(element);
+            element.Parent = this;
+        }
         return true;
     }
 
-    public Element[] Value {
-        get {
-            return [.. _items];
-        }
-    }
 
-    public IEnumerable<Element> Values {
-        get {
-            return _items;
-        }
-    }
-
-    public Element this[int index] {
-        get {
-            return _items[index];
-        }
-        set {
-            // Also validate the setter for type consistency
-            if (_elementType != null && value.GetType() != _elementType) {
-                throw new InvalidOperationException(
-                    $"Array elements must be of the same type. Expected {_elementType.Name}, but got {value.GetType().Name}.");
-            }
-            
-            // If this is the first element being set, establish the type
-            if (_elementType == null) {
-                _elementType = value.GetType();
-            }
-            
-            _items[index] = value;
-        }
-    }
+    /// <summary>
+    /// Semantic items only
+    /// </summary>
+    public new IEnumerable<Element> Values => _items;
 
     /// <summary>
     /// Gets the element type for this homogeneous array, or null if empty.
     /// </summary>
     public Type? ElementType => _elementType;
 
-    public ArrayElement(ElementStyle style = ElementStyle.Compact)
-        : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, style)) {
+    public new Element this[int index] {
+        get { return _items[index]; }
+        set {
+            if (_elementType != null && value.GetType() != _elementType) {
+                throw new InvalidOperationException($"Array elements must be of the same type. Expected {_elementType.Name}, but got {value.GetType().Name}.");
+            }
+            if (_elementType == null) {
+                _elementType = value.GetType();
+            }
+            _items[index] = value;
+        }
     }
 
-    public ArrayElement(IEnumerable<Element> values) : this() {
+
+
+    public ArrayElement(ElementStyle style)
+        : base(ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: style)) {
+    }
+
+    public ArrayElement(IEnumerable<Element> values)
+        : base(ElementName, ElementDelimiter) {
         foreach (var value in values) {
             Add(value);
         }
     }
 
-    public ArrayElement(params Element[] values) : this() {
+    public ArrayElement(params Element[] values)
+        : base(ElementName, ElementDelimiter) {
         foreach (var value in values) {
             Add(value);
         }

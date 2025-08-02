@@ -12,15 +12,10 @@ public class TupleElement : ListElement {
     public const char ClosingSpecifier = ')';
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact);
 
-    public List<object> TypedValue {
-        get {
-            List<object> values = new(Children.Count);
-            for (int i = 0; i < Children.Count; i++) {
-                values.Add(Children[i]);
-            }
-            return values;
-        }
-    }
+    /// <summary>
+    /// Semantic items only
+    /// </summary>
+    public new IEnumerable<Element> Values => _items;
 
     public TupleElement(ElementStyle style = ElementStyle.Compact)
         : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, style)) {

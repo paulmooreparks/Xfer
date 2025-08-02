@@ -10,11 +10,12 @@ charDef {
     fooz \zeta
     theend \omega
     pin \pushpin
+    answer \$42
 }
 !>
 
 (
-    '<\theend\>'
+    <\answer\>
     'I <\heart\><\vsemoji\> XferLang!'
     'Put a <\pin\> in it!'
     [1 2 3]

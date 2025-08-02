@@ -31,6 +31,7 @@ namespace ProcessingInstructionDemo {
             Console.WriteLine(xfer);
 
             Console.WriteLine("Document-level metadata:");
+
             if (doc.Metadata != null) {
                 Console.WriteLine($"  Version: {doc.Metadata.Xfer}");
                 Console.WriteLine($"  DocumentVersion: {doc.Metadata.Version}");

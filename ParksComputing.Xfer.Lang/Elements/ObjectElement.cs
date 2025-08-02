@@ -15,6 +15,9 @@ public class ObjectElement : DictionaryElement {
     public const char ClosingSpecifier = '}';
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact);
 
+    /// <summary>
+    /// Only semantic key-value pairs (not PIs/comments)
+    /// </summary>
     public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
 
     public Element this[string index] {

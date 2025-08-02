@@ -30,7 +30,7 @@ namespace XferTest {
         [TestMethod]
         public void CharDefPI_CharacterElement_ResolvesCustomId() {
             // charDef PI defines 'foo' as 0x42, then uses </foo/>
-            string xferDoc = @"<!charDef { foo \$42 } !> <\foo\>";
+            string xferDoc = @"<!charDef { foo \$42 } !> ( <\foo\> )";
             var doc = XferParser.Parse(xferDoc);
             // Recursively search for CharacterElement in the document tree
             Assert.IsTrue(doc.Root.Values.Where(v => v is CharacterElement ce && ce.Value == 0x42).Any(), "Character element with value 0x42 not found.");
