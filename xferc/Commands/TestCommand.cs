@@ -33,7 +33,7 @@ internal class TestCommand {
         {
             Console.WriteLine(document.ToXfer(Formatting.Pretty));
 
-            var x = document.Root[0];
+            var x = document.Root.Values.FirstOrDefault();
 
             if (x is ObjectElement o)
             {

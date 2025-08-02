@@ -1,4 +1,4 @@
-using System.Diagnostics.Contracts;
+﻿using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Text;
 using System.Diagnostics;
@@ -581,10 +581,6 @@ public class Parser : IXferParser {
         // Parse the document using the robust main loop
         var document = ParseDocument();
 
-        // Validate if schema validator is present
-        if (document is { } && _validator is { }) {
-            _validator.Validate(document.Root);
-        }
         return document!;
     }
 
@@ -598,7 +594,25 @@ public class Parser : IXferParser {
 
         while (IsCharAvailable()) {
             var element = ParseElement();
-            document.Root.AddChild(element);
+
+            if (element is not EmptyElement) {
+                if (element is ProcessingInstruction pi) {
+                    if (pi.Name == DocumentProcessingInstruction.Keyword) {
+                        if (document.Root.Children.Count > 0) {
+                            throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Document metadata must be the first element.");
+                        }
+                    }
+
+                    document.Root.AddChild(element);
+                }
+                else if (element is CollectionElement collectionElement) {
+                    document.Root.AddChild(element);
+                }
+                else {
+                    // For all other elements, add to the root
+                    throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Unexpected element type '{element.GetType().Name}' at the root level.");
+                }
+            }
         }
 
         return document;
@@ -618,7 +632,7 @@ public class Parser : IXferParser {
             var metadata = new XferMetadata();
 
             if (metaElem.Kvp.Value is ObjectElement obj) {
-                foreach (var kv in obj.Values) {
+                foreach (var kv in obj.Dictionary) {
                     var key = kv.Key;
                     var value = kv.Value.Value;
                     switch (key.ToLowerInvariant()) {
@@ -758,8 +772,6 @@ public class Parser : IXferParser {
         }
     }
 
-    XferSchemaValidator? _validator = null;
-
     private ProcessingInstruction ParseProcessingInstruction(int specifierCount = 1) {
         SkipWhitespace();
         KeyValuePairElement? kvp = null;
@@ -837,7 +849,7 @@ public class Parser : IXferParser {
 
         var pi = new DocumentProcessingInstruction(obj);
 
-        foreach (var innerKvp in obj.Values.Values) {
+        foreach (var innerKvp in obj.Dictionary.Values) {
             if (_piProcessors.TryGetValue(innerKvp.Key, out var processors)) {
                 // Call each processor for the KVP
                 foreach (var processor in processors) {

@@ -14,8 +14,8 @@ public class ExpressionConstraint {
 
     public bool Evaluate(ObjectElement document) {
         return Operator switch {
-            "any" => Fields.Any(field => document.Values.ContainsKey(field)),
-            "all" => Fields.All(field => document.Values.ContainsKey(field)),
+            "any" => Fields.Any(field => document.Dictionary.ContainsKey(field)),
+            "all" => Fields.All(field => document.Dictionary.ContainsKey(field)),
             _ => throw new InvalidOperationException($"Unsupported operator: {Operator}")
         };
     }

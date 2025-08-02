@@ -18,7 +18,7 @@ public class ObjectElement : DictionaryElement {
     /// <summary>
     /// Only semantic key-value pairs (not PIs/comments)
     /// </summary>
-    public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
+    public IReadOnlyDictionary<string, KeyValuePairElement> Dictionary => _values;
 
     public Element this[string index] {
         get {

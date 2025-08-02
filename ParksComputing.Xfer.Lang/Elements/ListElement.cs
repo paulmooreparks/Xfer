@@ -10,7 +10,6 @@ public abstract class ListElement : CollectionElement {
     /// <summary>
     /// Holds only semantic items (not PIs/comments)
     /// </summary>
-    protected List<Element> _items = [];
 
     protected ListElement(string elementName, ElementDelimiter delimiter) : base(elementName, delimiter) { }
 
@@ -40,15 +39,6 @@ public abstract class ListElement : CollectionElement {
 
     public override string ToString() {
         return string.Join(" ", _items);
-    }
-
-    /// <summary>
-    /// Semantic items only
-    /// </summary>
-    public IEnumerable<Element> Values {
-        get {
-            return _items;
-        }
     }
 
     public Element this[int index] {

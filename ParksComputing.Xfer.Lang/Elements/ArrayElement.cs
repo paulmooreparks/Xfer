@@ -47,11 +47,6 @@ public class ArrayElement : ListElement {
 
 
     /// <summary>
-    /// Semantic items only
-    /// </summary>
-    public new IEnumerable<Element> Values => _items;
-
-    /// <summary>
     /// Gets the element type for this homogeneous array, or null if empty.
     /// </summary>
     public Type? ElementType => _elementType;

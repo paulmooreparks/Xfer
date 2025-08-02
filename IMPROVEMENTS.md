@@ -40,7 +40,7 @@ Based on the responses in Section 3, the development roadmap for XferLang will p
 
 ### Immediate Priorities (Next Release Cycle)
 
-1.  **Enforce Single Root Element**:
+1.  **(COMPLETE) Enforce Single Root Element**:
     *   **Task**: Modify the parser to require that a valid XferLang document contains exactly one top-level element.
     *   **Constraint**: The root element must be a `CollectionElement` (i.e., an `ObjectElement`, `ArrayElement`, or `TupleElement`).
     *   **Rationale**: This aligns with industry standards (JSON, XML), simplifies parsing, and ensures a document represents a single, coherent data structure. This is the highest-priority change.

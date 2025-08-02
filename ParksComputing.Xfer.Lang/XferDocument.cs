@@ -5,17 +5,30 @@ namespace ParksComputing.Xfer.Lang;
 
 
 public class XferDocument {
-    public DocumentElement Root { get; set; } = new();
+    public CollectionElement Root { get; set; } = new TupleElement();
+
     public XferMetadata? Metadata { get; set; }
 
     public XferDocument() { }
 
-    public XferDocument(DocumentElement root) {
+    public XferDocument(CollectionElement root) {
         Root = root;
     }
 
     public void Add(Element value) {
         Root.Add(value);
+    }
+
+    /// <summary>
+    /// Finds an element by its ID within the document.
+    /// </summary>
+    /// <param name="id">The ID of the element to find.</param>
+    /// <returns>The first element that matches the given ID; otherwise, null.</returns>
+    public Element? GetElementById(string id) {
+        if (string.IsNullOrEmpty(id)) {
+            return null;
+        }
+        return Root.FindElementById(id);
     }
 
     public virtual string ToXfer() {

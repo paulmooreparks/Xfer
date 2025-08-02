@@ -33,7 +33,7 @@ namespace XferTest {
             string xferDoc = @"<!charDef { foo \$42 } !> ( <\foo\> )";
             var doc = XferParser.Parse(xferDoc);
             // Recursively search for CharacterElement in the document tree
-            Assert.IsTrue(doc.Root.Values.Where(v => v is CharacterElement ce && ce.Value == 0x42).Any(), "Character element with value 0x42 not found.");
+            Assert.IsTrue(doc.Root.Children.Where(v => v is CharacterElement ce && ce.Value == 0x42).Any(), "Character element with value 0x42 not found.");
         }
 
         [TestMethod]

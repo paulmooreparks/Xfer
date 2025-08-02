@@ -7,11 +7,9 @@ using ParksComputing.Xfer.Lang.Elements;
 namespace XferTest;
 
 [TestClass]
-public class DynamicElementPITests
-{
+public class DynamicElementPITests {
     [TestMethod]
-    public void DynamicElement_ResolvesValue_FromFilePI()
-    {
+    public void DynamicElement_ResolvesValue_FromFilePI() {
         // Arrange: create a temp file with a known value
         var tempFile = Path.GetTempFileName();
         var expectedValue = "FileSecretValue123!";
@@ -26,20 +24,16 @@ password '<|dbpassword|>'
         var doc = XferParser.Parse(xfer);
         var root = doc.Root!;
         ObjectElement? credentials = null;
-        foreach (var element in root.Values)
-        {
-            if (element is KeyValuePairElement kvp && kvp.Key == "credentials")
-            {
+        foreach (var element in root.Children) {
+            if (element is KeyValuePairElement kvp && kvp.Key == "credentials") {
                 credentials = kvp.Value as ObjectElement;
                 break;
             }
         }
         Assert.IsNotNull(credentials, "Credentials object not found.");
         InterpolatedElement? passwordElement = null;
-        foreach (var kvp in credentials.Values)
-        {
-            if (kvp.Key == "password")
-            {
+        foreach (var kvp in credentials.Dictionary) {
+            if (kvp.Key == "password") {
                 passwordElement = kvp.Value.Value as InterpolatedElement;
                 break;
             }

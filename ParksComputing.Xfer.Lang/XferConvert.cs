@@ -365,7 +365,7 @@ public class XferConvert {
         var dictionaryType = typeof(Dictionary<,>).MakeGenericType(typeof(string), valueType);
         var dictionary = (IDictionary)Activator.CreateInstance(dictionaryType)!;
 
-        foreach (var kvp in objectElement.Values) {
+        foreach (var kvp in objectElement.Dictionary) {
             var key = kvp.Key;
             var value = DeserializeValue(kvp.Value.Value, valueType, settings);
             dictionary.Add(key, value);
@@ -602,7 +602,7 @@ public class XferConvert {
 
     private static object DeserializeObject(ObjectElement objectElement, Type targetType, XferSerializerSettings settings) {
         // Map incoming data to a dictionary for easy lookup
-        var valueDict = objectElement.Values.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Value);
+        var valueDict = objectElement.Dictionary.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Value);
 
         // Find the constructor with the most parameters
         var constructors = targetType.GetConstructors();

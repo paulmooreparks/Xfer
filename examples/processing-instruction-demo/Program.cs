@@ -76,7 +76,7 @@ namespace ProcessingInstructionDemo {
                 }
                 // Recurse into children if any
                 if (element is ObjectElement obj) {
-                    foreach (var kv in obj.Values) {
+                    foreach (var kv in obj.Dictionary) {
                         PrintElementMetadata(kv.Value, kv.Key);
                     }
                 } else if (element is ArrayElement arr) {
@@ -107,7 +107,7 @@ namespace ProcessingInstructionDemo {
                 }
                 // Recurse into children if any
                 if (element is ObjectElement obj) {
-                    foreach (var kv in obj.Values) {
+                    foreach (var kv in obj.Dictionary) {
                         PrintCharacters(kv.Value, kv.Key);
                     }
                 } else if (element is ArrayElement arr) {

@@ -32,10 +32,30 @@ public abstract class Element {
         Delimiter = delimiter;
     }
 
+    /// <summary>
+    /// Recursively finds the first descendant element with the specified ID.
+    /// </summary>
+    /// <param name="id">The ID to search for.</param>
+    /// <returns>The found element, or null if no element is found.</returns>
+    public Element? FindElementById(string id) {
+        if (string.Equals(Id, id, StringComparison.Ordinal)) {
+            return this;
+        }
+
+        foreach (var child in Children) {
+            var found = child.FindElementById(id);
+            if (found != null) {
+                return found;
+            }
+        }
+
+        return null;
+    }
+
     public abstract string ToXfer();
 
     public abstract string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0);
-    public void AddChild(Element child) {
+    public virtual void AddChild(Element child) {
         if (!children.Contains(child)) {
             children.Add(child);
             child.Parent = this;

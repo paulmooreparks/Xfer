@@ -11,6 +11,10 @@ public abstract class CollectionElement : Element {
 
     public abstract int Count { get; }
 
+    protected List<Element> _items = [];
+
+    public virtual IEnumerable<Element> Values => _items;
+
     public abstract Element? GetElementAt(int index);
 
     public abstract bool Add(Element element);

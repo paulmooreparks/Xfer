@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using ParksComputing.Xfer.Lang.Elements;
 using ParksComputing.Xfer.Lang.Services;
 
-namespace ParksComputing.Xfer.Lang.CharDef; 
+namespace ParksComputing.Xfer.Lang.CharDef;
 /// <summary>
 /// Handles charDef PI processing and efficient lookup for CharacterElements.
 /// Register with Parser.RegisterPIProcessor and RegisterElementProcessor.
@@ -22,7 +22,7 @@ public class CharDefProcessor {
             return;
         }
         if (charDefKvp.Value is ObjectElement obj) {
-            foreach (var kv in obj.Values.Values) {
+            foreach (var kv in obj.Dictionary.Values) {
                 var name = kv.KeyElement.ToString();
                 if (kv.Value is CharacterElement charElem) {
                     charDefRegistry[name] = charElem.Value;

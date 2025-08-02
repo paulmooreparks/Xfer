@@ -12,11 +12,6 @@ public class TupleElement : ListElement {
     public const char ClosingSpecifier = ')';
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact);
 
-    /// <summary>
-    /// Semantic items only
-    /// </summary>
-    public new IEnumerable<Element> Values => _items;
-
     public TupleElement(ElementStyle style = ElementStyle.Compact)
         : base(ElementName, new(OpeningSpecifier, ClosingSpecifier, style)) {
     }

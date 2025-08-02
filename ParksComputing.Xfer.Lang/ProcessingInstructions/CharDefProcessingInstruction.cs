@@ -16,7 +16,7 @@ public class CharDefProcessingInstruction : ProcessingInstruction {
             throw new InvalidOperationException($"{Keyword} processing instruction expects an object element. Found: {Value.GetType().Name}");
         }
 
-        foreach (var kv in obj.Values ) {
+        foreach (var kv in obj.Dictionary ) {
             var name = kv.Value.Key;
 
             if (kv.Value.Value is CharacterElement charElem) {

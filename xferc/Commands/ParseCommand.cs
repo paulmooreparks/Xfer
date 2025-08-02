@@ -21,7 +21,7 @@ internal class ParseCommand {
         var document = parser.Parse(inputBytes);
 
         // Find Xfer version from metadata in Root
-        var xferVersion = document.Root.Values
+        var xferVersion = document.Root.Children
             .OfType<ProcessingInstruction>()
             .Select(m => m.Kvp)
             .Where(kvp => kvp != null && kvp.Key.Equals("xfer", StringComparison.OrdinalIgnoreCase))

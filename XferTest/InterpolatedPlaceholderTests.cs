@@ -24,7 +24,7 @@ namespace XferTest
             Assert.IsNotNull(doc.Root, "Document root is null.");
             var root = doc.Root!;
             ObjectElement? credentials = null;
-            foreach (var element in root.Values)
+            foreach (var element in root.Children)
             {
                 if (element is KeyValuePairElement kvp && kvp.Key == "credentials")
                 {
@@ -34,7 +34,7 @@ namespace XferTest
             }
             Assert.IsNotNull(credentials, "Credentials object not found.");
             InterpolatedElement? passwordElement = null;
-            foreach (var kvp in credentials.Values)
+            foreach (var kvp in credentials.Dictionary)
             {
                 if (kvp.Key == "password")
                 {
