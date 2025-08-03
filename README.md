@@ -495,34 +495,52 @@ string xfer = XferConvert.Serialize(config);
 
 ### 4.3 DynamicSource PI Override: Powerful and Flexible
 
-XferLang allows you to override dynamic value resolution in your document using the `dynamicSource` processing instruction (PI). This feature provides significant flexibility for configuration, testing, and integration scenarios.
+XferLang allows you to override dynamic value resolution in your document using the `dynamicSource` processing instruction (PI). This feature provides significant flexibility for configuration, testing, and integration scenarios through an extensible source type system.
 
 #### How it works
-- The resolver uses its default logic (e.g., reverse, DB, etc.) unless a PI override is present.
-- If a `dynamicSource` PI is present, you can specify per-key overrides:
-    - `demo "reverse:!dlroW ,olleH"` (custom logic)
-    - `password "env:MY_PASSWORD"` (environment variable)
-    - `greeting "This is a hard-coded greeting."` (hard-coded value)
-- The PI can be placed at the top of your Xfer document.
-- If a key is not present in the PI, the resolver falls back to its default logic.
+- The library includes built-in source handlers: `const`, `env`, and `file`
+- You can register custom source handlers using `DynamicSourceHandlerRegistry.RegisterHandler()`
+- The `dynamicSource` PI uses a specific format: `key sourceType "sourceValue"`
+- Dynamic elements `<|key|>` are resolved according to their configured source type
+- If a key is not found in the PI, resolution falls back to environment variables
+
+#### Built-in Source Types
+- **`const`**: Returns the source value as a literal constant
+- **`env`**: Reads from environment variables (uses source value as variable name)
+- **`file`**: Reads content from files (uses source value as file path)
 
 #### Example
 ```xfer
 <! dynamicSource {
-    demo "reverse:!dlroW ,olleH"
-    greeting "env:GREETING_MSG"
-    password "hardcoded-demo-password"
+    greeting const "This is a test greeting from PI config."
+    username env "USERNAME"
+    dbpassword db "dbpassword"
+    config file "config.txt"
 } !>
-message {
-    text '<|demo|>'
-    greeting '<|greeting|>'
-    password '<|password|>'
+{
+    message '<|greeting|>'
+    user '<|username|>'
+    password '<|dbpassword|>'
+    settings '<|config|>'
 }
 ```
 
+#### Custom Source Handler Registration
+You can extend the system with custom source types:
+
+```csharp
+// Register a custom 'db' source handler
+DynamicSourceHandlerRegistry.RegisterHandler("db", (sourceValue, fallbackKey) => {
+    var key = sourceValue ?? fallbackKey;
+    return GetValueFromDatabase(key);
+});
+```
+
 #### Why this matters
-- Enables flexible, testable, and environment-specific configuration.
-- Supports secrets, test data, and runtime overrides without code changes.
+- Enables flexible, testable, and environment-specific configuration
+- Supports secrets, database lookups, file content, and custom sources
+- Completely extensible through the handler registry system
+- Runtime overrides without code changes
 
 This feature makes XferLang highly extensible and adaptable for a wide range of use cases.
 
