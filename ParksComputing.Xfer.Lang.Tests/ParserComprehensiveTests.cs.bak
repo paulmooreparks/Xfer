@@ -1,0 +1,232 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ParksComputing.Xfer.Lang;
+using ParksComputing.Xfer.Lang.Elements;
+using ParksComputing.Xfer.Lang.Services;
+using System.Text;
+
+namespace ParksComputing.Xfer.Lang.Tests;
+
+[TestClass]
+public class ParserComprehensiveTests
+{
+    private Parser _parser = null!;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _parser = new Parser();
+    }
+
+    [TestMethod]
+    public void Parse_NestedObjects_ShouldCreateCorrectStructure()
+    {
+        // Arrange
+        var input = """
+        {
+            person {
+                name "Alice"
+                age 30
+                address {
+                    street "123 Main St"
+                    city "Springfield"
+                }
+            }
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        var root = (ObjectElement)document.Root;
+        Assert.IsTrue(root.Dictionary.ContainsKey("person"));
+
+        var person = (ObjectElement)root["person"];
+        Assert.IsTrue(person.Dictionary.ContainsKey("name"));
+        Assert.IsTrue(person.Dictionary.ContainsKey("age"));
+        Assert.IsTrue(person.Dictionary.ContainsKey("address"));
+
+        var address = (ObjectElement)person["address"];
+        Assert.IsTrue(address.Dictionary.ContainsKey("street"));
+        Assert.IsTrue(address.Dictionary.ContainsKey("city"));
+    }
+
+    [TestMethod]
+    public void Parse_Arrays_ShouldCreateArrayElements()
+    {
+        // Arrange
+        var input = """
+        {
+            numbers [#1 #2 #3 #4 #5]
+            names ["Alice" "Bob" "Charlie"]
+            flags [~true ~false ~true]
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        var root = (ObjectElement)document.Root;
+
+        Assert.IsInstanceOfType<ArrayElement>(root["numbers"]);
+        Assert.IsInstanceOfType<ArrayElement>(root["names"]);
+        Assert.IsInstanceOfType<ArrayElement>(root["mixed"]);
+
+        var numbers = (ArrayElement)root["numbers"];
+        var names = (ArrayElement)root["names"];
+        var mixed = (ArrayElement)root["mixed"];
+
+        // Check that arrays have expected number of elements
+        Assert.IsTrue(numbers.Children.Count >= 5);
+        Assert.IsTrue(names.Children.Count >= 3);
+        Assert.IsTrue(mixed.Children.Count >= 4);
+    }
+
+    [TestMethod]
+    public void Parse_DifferentDataTypes_ShouldCreateCorrectElements()
+    {
+        // Arrange
+        var input = """
+        {
+            stringValue "Hello World"
+            intValue #42
+            floatValue *3.14159
+            boolValue ~true
+            charValue <\alpha\>
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        var root = (ObjectElement)document.Root;
+
+        // Verify we have all the expected keys
+        Assert.IsTrue(root.Dictionary.ContainsKey("stringValue"));
+        Assert.IsTrue(root.Dictionary.ContainsKey("intValue"));
+        Assert.IsTrue(root.Dictionary.ContainsKey("floatValue"));
+        Assert.IsTrue(root.Dictionary.ContainsKey("boolValue"));
+        Assert.IsTrue(root.Dictionary.ContainsKey("charValue"));
+
+        // Note: We can't easily check specific element types without knowing the exact inheritance hierarchy
+        // but we can verify the elements exist and the document parses successfully
+    }
+
+    [TestMethod]
+    public void Parse_WithProcessingInstructions_ShouldIncludeInChildren()
+    {
+        // Arrange
+        var input = """
+        <? xfer "1.0" ?>
+        {
+            name "Alice"
+            age 30
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+
+        // Check that the root has children (processing instructions)
+        Assert.IsTrue(document.Root.Children.Count > 0);
+
+        var root = (ObjectElement)document.Root;
+        Assert.IsTrue(root.Dictionary.ContainsKey("name"));
+        Assert.IsTrue(root.Dictionary.ContainsKey("age"));
+    }
+
+    [TestMethod]
+    public void Parse_WithComments_ShouldIgnoreComments()
+    {
+        // Arrange
+        var input = """
+        </ This is a comment />
+        {
+            name "Alice" </ Another comment />
+            age 30
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        var root = (ObjectElement)document.Root;
+        Assert.IsTrue(root.Dictionary.ContainsKey("name"));
+        Assert.IsTrue(root.Dictionary.ContainsKey("age"));
+    }
+
+    [TestMethod]
+    public void Parse_ComplexDocument_ShouldParseSuccessfully()
+    {
+        // Arrange
+        var input = """
+        <? xfer "1.0" ?>
+        </ Configuration document />
+        {
+            application {
+                name "MyApp"
+                version "1.0.0"
+                settings {
+                    debug true
+                    maxConnections 100
+                    allowedHosts ["localhost", "127.0.0.1", "::1"]
+                }
+            }
+            database {
+                host "localhost"
+                port 5432
+                credentials {
+                    username "admin"
+                    password "secret"
+                }
+            }
+            features ["auth", "logging", "metrics"]
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+
+        var root = (ObjectElement)document.Root;
+        Assert.IsTrue(root.Dictionary.ContainsKey("application"));
+        Assert.IsTrue(root.Dictionary.ContainsKey("database"));
+        Assert.IsTrue(root.Dictionary.ContainsKey("features"));
+
+        var application = (ObjectElement)root["application"];
+        Assert.IsTrue(application.Dictionary.ContainsKey("name"));
+        Assert.IsTrue(application.Dictionary.ContainsKey("version"));
+        Assert.IsTrue(application.Dictionary.ContainsKey("settings"));
+
+        var database = (ObjectElement)root["database"];
+        Assert.IsTrue(database.Dictionary.ContainsKey("host"));
+        Assert.IsTrue(database.Dictionary.ContainsKey("port"));
+        Assert.IsTrue(database.Dictionary.ContainsKey("credentials"));
+
+        Assert.IsInstanceOfType<ArrayElement>(root["features"]);
+    }
+}

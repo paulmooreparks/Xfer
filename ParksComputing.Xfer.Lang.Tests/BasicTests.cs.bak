@@ -1,0 +1,66 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ParksComputing.Xfer.Lang;
+using ParksComputing.Xfer.Lang.Elements;
+using ParksComputing.Xfer.Lang.Services;
+using System.Text;
+
+namespace ParksComputing.Xfer.Lang.Tests;
+
+[TestClass]
+public class BasicParserTests
+{
+    [TestMethod]
+    public void Parse_EmptyObject_ShouldSucceed()
+    {
+        // Arrange
+        var parser = new Parser();
+        var input = "{}";
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsNotNull(document.Root);
+        Assert.IsInstanceOfType<ObjectElement>(document.Root);
+        Assert.IsFalse(document.HasError);
+    }
+
+    [TestMethod]
+    public void Parse_SimpleKeyValue_ShouldSucceed()
+    {
+        // Arrange
+        var parser = new Parser();
+        var input = """{ name "Alice" }""";
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsInstanceOfType<ObjectElement>(document.Root);
+        var obj = (ObjectElement)document.Root;
+        Assert.IsTrue(obj.Dictionary.ContainsKey("name"));
+    }
+
+    [TestMethod]
+    public void WarningSystem_UnknownCharacter_ShouldGenerateWarning()
+    {
+        // Arrange
+        var parser = new Parser();
+        var input = """{ test <\unknown_char\> }""";
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        Assert.IsTrue(document.HasWarnings);
+        Assert.AreEqual(1, document.Warnings.Count);
+        Assert.AreEqual(WarningType.CharacterResolutionFailure, document.Warnings[0].Type);
+    }
+}

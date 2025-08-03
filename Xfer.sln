@@ -51,6 +51,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{02EA681E-C
 		docs\style.css = docs\style.css
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParksComputing.Xfer.Lang.Tests", "ParksComputing.Xfer.Lang.Tests\ParksComputing.Xfer.Lang.Tests.csproj", "{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -169,6 +171,18 @@ Global
 		{080D0523-2719-48C0-BAC6-A292736608AC}.Release|x64.Build.0 = Release|Any CPU
 		{080D0523-2719-48C0-BAC6-A292736608AC}.Release|x86.ActiveCfg = Release|Any CPU
 		{080D0523-2719-48C0-BAC6-A292736608AC}.Release|x86.Build.0 = Release|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Debug|x64.Build.0 = Debug|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Debug|x86.Build.0 = Debug|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Release|x64.ActiveCfg = Release|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Release|x64.Build.0 = Release|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Release|x86.ActiveCfg = Release|Any CPU
+		{C949F498-D39A-4CC3-868E-FFBCF10A5C2A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
