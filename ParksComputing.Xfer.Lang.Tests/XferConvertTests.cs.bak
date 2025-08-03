@@ -1,0 +1,242 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ParksComputing.Xfer.Lang;
+using ParksComputing.Xfer.Lang.Elements;
+using ParksComputing.Xfer.Lang.Configuration;
+using System.Text;
+
+namespace ParksComputing.Xfer.Lang.Tests;
+
+[TestClass]
+public class XferConvertTests
+{
+    [TestMethod]
+    public void Serialize_SimpleObject_ShouldProduceValidXfer()
+    {
+        // Arrange
+        var testObject = new
+        {
+            name = "John Doe",
+            age = 30,
+            active = true
+        };
+
+        // Act
+        var xferString = XferConvert.Serialize(testObject);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        Assert.IsTrue(xferString.Contains("name \"John Doe\""));
+        Assert.IsTrue(xferString.Contains("age 30"));
+        Assert.IsTrue(xferString.Contains("active true"));
+    }
+
+    [TestMethod]
+    public void Serialize_NestedObject_ShouldHandleNesting()
+    {
+        // Arrange
+        var testObject = new
+        {
+            user = new
+            {
+                profile = new
+                {
+                    name = "Jane Smith",
+                    settings = new
+                    {
+                        theme = "dark"
+                    }
+                }
+            }
+        };
+
+        // Act
+        var xferString = XferConvert.Serialize(testObject);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        Assert.IsTrue(xferString.Contains("user {"));
+        Assert.IsTrue(xferString.Contains("profile {"));
+        Assert.IsTrue(xferString.Contains("settings {"));
+        Assert.IsTrue(xferString.Contains("name \"Jane Smith\""));
+        Assert.IsTrue(xferString.Contains("theme \"dark\""));
+    }
+
+    [TestMethod]
+    public void Serialize_Array_ShouldProduceArraySyntax()
+    {
+        // Arrange
+        var testObject = new
+        {
+            numbers = new[] { 1, 2, 3, 4, 5 },
+            names = new[] { "Alice", "Bob", "Charlie" }
+        };
+
+        // Act
+        var xferString = XferConvert.Serialize(testObject);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        Assert.IsTrue(xferString.Contains("numbers ["));
+        Assert.IsTrue(xferString.Contains("names ["));
+        Assert.IsTrue(xferString.Contains("\"Alice\""));
+        Assert.IsTrue(xferString.Contains("\"Bob\""));
+        Assert.IsTrue(xferString.Contains("\"Charlie\""));
+    }
+
+    [TestMethod]
+    public void Serialize_NullValues_ShouldHandleNulls()
+    {
+        // Arrange
+        var testObject = new
+        {
+            name = "Test",
+            description = (string?)null,
+            count = 42
+        };
+
+        // Act
+        var xferString = XferConvert.Serialize(testObject);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        Assert.IsTrue(xferString.Contains("name \"Test\""));
+        Assert.IsTrue(xferString.Contains("count 42"));
+        // Null values should either be omitted or represented as null
+        Assert.IsTrue(xferString.Contains("description null") || !xferString.Contains("description"));
+    }
+
+    [TestMethod]
+    public void Deserialize_SimpleXfer_ShouldParseCorrectly()
+    {
+        // Arrange
+        var xferInput = """
+        {
+            name "John Doe"
+            age 30
+            active true
+        }
+        """;
+
+        // Act
+        var result = XferConvert.Deserialize<dynamic>(xferInput);
+
+        // Assert
+        Assert.IsNotNull(result);
+        // Note: Dynamic deserialization tests depend on the actual implementation
+        // These assertions may need adjustment based on the actual XferConvert implementation
+    }
+
+    [TestMethod]
+    public void FromObject_SimpleObject_ShouldCreateObjectElement()
+    {
+        // Arrange
+        var testObject = new
+        {
+            name = "Test",
+            value = 42
+        };
+
+        // Act
+        var objectElement = XferConvert.FromObject(testObject);
+
+        // Assert
+        Assert.IsNotNull(objectElement);
+        Assert.IsInstanceOfType(objectElement, typeof(ObjectElement));
+        Assert.IsTrue(objectElement.Dictionary.ContainsKey("name"));
+        Assert.IsTrue(objectElement.Dictionary.ContainsKey("value"));
+    }
+
+    [TestMethod]
+    public void Serialize_WithFormatting_ShouldProduceReadableOutput()
+    {
+        // Arrange
+        var testObject = new
+        {
+            level1 = new
+            {
+                level2 = new
+                {
+                    data = "test"
+                }
+            }
+        };
+
+        // Act
+        var xferString = XferConvert.Serialize(testObject, Formatting.Indented);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        Assert.IsTrue(xferString.Contains("\n")); // Should contain newlines for formatting
+        Assert.IsTrue(xferString.Contains("    ")); // Should contain indentation
+    }
+
+    [TestMethod]
+    public void Serialize_WithNoFormatting_ShouldProduceCompactOutput()
+    {
+        // Arrange
+        var testObject = new
+        {
+            name = "test",
+            value = 42
+        };
+
+        // Act
+        var xferString = XferConvert.Serialize(testObject, Formatting.None);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        // Compact output should not contain unnecessary whitespace
+        Assert.IsFalse(xferString.Contains("\n"));
+    }
+
+    [TestMethod]
+    public void RoundTrip_SerializeAndDeserialize_ShouldWork()
+    {
+        // Arrange
+        var originalObject = new
+        {
+            name = "Test Object",
+            value = 123,
+            isActive = true,
+            tags = new[] { "tag1", "tag2", "tag3" }
+        };
+
+        // Act
+        var serialized = XferConvert.Serialize(originalObject);
+        var deserialized = XferConvert.Deserialize<dynamic>(serialized);
+
+        // Assert
+        Assert.IsNotNull(serialized);
+        Assert.IsNotNull(deserialized);
+        // Round-trip verification would depend on the specific implementation
+        // of dynamic deserialization and object comparison
+    }
+
+    [TestMethod]
+    public void Serialize_EmptyObject_ShouldProduceEmptyXfer()
+    {
+        // Arrange
+        var emptyObject = new { };
+
+        // Act
+        var xferString = XferConvert.Serialize(emptyObject);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        Assert.IsTrue(xferString.Contains("{"));
+        Assert.IsTrue(xferString.Contains("}"));
+    }
+
+    [TestMethod]
+    public void Deserialize_EmptyXfer_ShouldReturnEmptyObject()
+    {
+        // Arrange
+        var emptyXfer = "{}";
+
+        // Act
+        var result = XferConvert.Deserialize<dynamic>(emptyXfer);
+
+        // Assert
+        Assert.IsNotNull(result);
+    }
+}

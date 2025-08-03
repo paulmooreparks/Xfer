@@ -1,0 +1,268 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ParksComputing.Xfer.Lang;
+using ParksComputing.Xfer.Lang.Elements;
+using ParksComputing.Xfer.Lang.Services;
+using System.Text;
+
+namespace ParksComputing.Xfer.Lang.Tests;
+
+[TestClass]
+public class WarningSystemComprehensiveTests
+{
+    private Parser _parser = null!;
+
+    [TestInitialize]
+    public void Setup()
+    {
+        _parser = new Parser();
+    }
+
+    [TestMethod]
+    public void Parse_UnknownCharacterName_ShouldGenerateCharacterResolutionWarning()
+    {
+        // Arrange
+        var input = """
+        {
+            test <\unknown_character_name\>
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        Assert.IsTrue(document.HasWarnings);
+        Assert.AreEqual(1, document.Warnings.Count);
+        Assert.AreEqual(WarningType.CharacterResolutionFailure, document.Warnings[0].Type);
+        Assert.IsTrue(document.Warnings[0].Message.Contains("unknown_character_name"),
+            "Warning message should contain the unknown character name");
+    }
+
+    [TestMethod]
+    public void Parse_EmptyCharacterElement_ShouldGenerateEmptyCharacterWarning()
+    {
+        // Arrange
+        var input = """
+        {
+            test <\\>
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        Assert.IsTrue(document.HasWarnings);
+        Assert.AreEqual(1, document.Warnings.Count);
+        Assert.AreEqual(WarningType.EmptyCharacterElement, document.Warnings[0].Type);
+    }
+
+    [TestMethod]
+    public void Parse_UnregisteredProcessingInstruction_ShouldGenerateUnregisteredPIWarning()
+    {
+        // Arrange
+        var input = """
+        <? unknown_processing_instruction "some value" ?>
+        {
+            data "test"
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        Assert.IsTrue(document.HasWarnings);
+        Assert.AreEqual(1, document.Warnings.Count);
+        Assert.AreEqual(WarningType.UnregisteredProcessingInstruction, document.Warnings[0].Type);
+        Assert.IsTrue(document.Warnings[0].Message.Contains("unknown_processing_instruction"),
+            "Warning message should contain the unknown PI name");
+    }
+
+    [TestMethod]
+    public void Parse_ValidCharacterElement_ShouldNotGenerateWarnings()
+    {
+        // Arrange
+        var input = """
+        {
+            test <\alpha\>
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        Assert.IsFalse(document.HasWarnings);
+        Assert.AreEqual(0, document.Warnings.Count);
+    }
+
+    [TestMethod]
+    public void Parse_KnownProcessingInstruction_ShouldNotGenerateWarnings()
+    {
+        // Arrange
+        var input = """
+        <? xfer "1.0" ?>
+        {
+            data "test"
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        Assert.IsFalse(document.HasWarnings);
+        Assert.AreEqual(0, document.Warnings.Count);
+    }
+
+    [TestMethod]
+    public void Parse_MultipleWarnings_ShouldCollectAllWarnings()
+    {
+        // Arrange
+        var input = """
+        <? unknown_pi "value" ?>
+        {
+            test1 <\unknown_char\>
+            test2 <\\>
+            test3 <\another_unknown\>
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        Assert.IsTrue(document.HasWarnings);
+        Assert.AreEqual(4, document.Warnings.Count);
+
+        var warningTypes = document.Warnings.Select(w => w.Type).ToList();
+        Assert.IsTrue(warningTypes.Contains(WarningType.UnregisteredProcessingInstruction));
+        Assert.IsTrue(warningTypes.Contains(WarningType.CharacterResolutionFailure));
+        Assert.IsTrue(warningTypes.Contains(WarningType.EmptyCharacterElement));
+
+        // Should have 2 character resolution failures
+        var charFailures = warningTypes.Count(t => t == WarningType.CharacterResolutionFailure);
+        Assert.AreEqual(2, charFailures);
+    }
+
+    [TestMethod]
+    public void Parse_MixedValidAndInvalidElements_ShouldGenerateOnlyRelevantWarnings()
+    {
+        // Arrange
+        var input = """
+        <? xfer "1.0" ?>
+        <? unknown_pi "test" ?>
+        {
+            validChar <\alpha\>
+            invalidChar <\unknown\>
+            emptyChar <\\>
+            normalData "test"
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        Assert.IsTrue(document.HasWarnings);
+        Assert.AreEqual(3, document.Warnings.Count);
+
+        var warningTypes = document.Warnings.Select(w => w.Type).ToList();
+        Assert.IsTrue(warningTypes.Contains(WarningType.UnregisteredProcessingInstruction));
+        Assert.IsTrue(warningTypes.Contains(WarningType.CharacterResolutionFailure));
+        Assert.IsTrue(warningTypes.Contains(WarningType.EmptyCharacterElement));
+    }
+
+    [TestMethod]
+    public void WarningProperties_DocumentWithWarnings_ShouldSetPropertiesCorrectly()
+    {
+        // Arrange
+        var input = """
+        {
+            test <\unknown_char\>
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        Assert.IsTrue(document.HasWarnings);
+        Assert.IsFalse(document.IsValid); // Document with warnings is not valid
+        Assert.AreEqual(1, document.Warnings.Count);
+    }
+
+    [TestMethod]
+    public void WarningProperties_DocumentWithoutWarnings_ShouldSetPropertiesCorrectly()
+    {
+        // Arrange
+        var input = """
+        {
+            test "normal data"
+            char <\alpha\>
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsFalse(document.HasError);
+        Assert.IsFalse(document.HasWarnings);
+        Assert.IsTrue(document.IsValid);
+        Assert.AreEqual(0, document.Warnings.Count);
+    }
+
+    [TestMethod]
+    public void WarningInfo_ShouldContainPositionInformation()
+    {
+        // Arrange
+        var input = """
+        {
+            test <\unknown_char\>
+        }
+        """;
+        var bytes = Encoding.UTF8.GetBytes(input);
+
+        // Act
+        var document = _parser.Parse(bytes);
+
+        // Assert
+        Assert.IsNotNull(document);
+        Assert.IsTrue(document.HasWarnings);
+        var warning = document.Warnings[0];
+
+        // Verify warning has position information
+        Assert.IsTrue(warning.Row > 0, "Warning should have row information");
+        Assert.IsTrue(warning.Column >= 0, "Warning should have column information");
+        Assert.IsNotNull(warning.Message, "Warning should have a message");
+        Assert.AreEqual(WarningType.CharacterResolutionFailure, warning.Type);
+    }
+}

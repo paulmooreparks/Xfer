@@ -61,7 +61,7 @@ public class XferSchemaParser {
         }
         // Determine the field's type based on its definition
         if (kvp.Value is ObjectElement fieldObject &&
-            fieldObject.Values.Values.FirstOrDefault(v => v.Key == "element") is { Value: StringElement typeElement }) {
+            fieldObject.Dictionary.Values.FirstOrDefault(v => v.Key == "element") is { Value: StringElement typeElement }) {
             return typeElement.Value;
         }
 
@@ -71,8 +71,8 @@ public class XferSchemaParser {
     private bool CheckRequiredField(KeyValuePairElement kvp) {
         // Check for a "constraints" object containing a "required" key
         if (kvp.Value is ObjectElement fieldObject &&
-            fieldObject.Values.Values.FirstOrDefault(v => v.Key == "constraints")?.Value is ObjectElement constraints &&
-            constraints.Values.Values.FirstOrDefault(v => v.Key == "required")?.Value is BooleanElement boolElement) {
+            fieldObject.Dictionary.Values.FirstOrDefault(v => v.Key == "constraints")?.Value is ObjectElement constraints &&
+            constraints.Dictionary.Values.FirstOrDefault(v => v.Key == "required")?.Value is BooleanElement boolElement) {
             return boolElement.Value;
         }
 

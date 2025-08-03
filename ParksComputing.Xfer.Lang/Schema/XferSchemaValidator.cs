@@ -31,11 +31,11 @@ public class XferSchemaValidator {
 
     private void ValidateObject(ObjectElement obj, SchemaObject schemaObject) {
         foreach (var field in schemaObject.Fields) {
-            if (field.Value.IsRequired && !obj.Values.Any(v => v.Key == field.Key)) {
+            if (field.Value.IsRequired && !obj.Dictionary.Any(v => v.Key == field.Key)) {
                 throw new InvalidOperationException($"Field '{field.Key}' is required in object '{schemaObject.Name}'.");
             }
 
-            if (obj.Values.Values.FirstOrDefault(v => v.Key == field.Key) is { } fieldValue) {
+            if (obj.Dictionary.Values.FirstOrDefault(v => v.Key == field.Key) is { } fieldValue) {
                 ValidateField(fieldValue, field.Value);
             }
         }

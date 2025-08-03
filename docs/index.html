@@ -151,29 +151,17 @@
             <h2>Introduction to XferLang</h2>
             <p>XferLang is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. XferLang is designed with explicit typing, human readability, and safe data embedding at its core.</p>
 
-            <p>XferLang is an <strong>open-source project</strong> hosted on GitHub at <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener">github.com/paulmooreparks/Xfer</a>. The project includes the complete language specification, a .NET library, comprehensive documentation, and development tools.</p>
+            <p>XferLang is an <strong>open-source project</strong> hosted on GitHub at
+                <a href="https://github.com/paulmooreparks/Xfer" target="_blank" rel="noopener">https://github.com/paulmooreparks/Xfer</a>.
+                The project includes the complete language specification, a .NET library, comprehensive documentation, and development tools.</p>
 
-            <p>Here's a quick comparison to JSON:</p>
 
-            <h3>JSON Example:</h3>
-            <pre><code class="json">{
-  "name": "John Doe",
-  "age": 30,
-  "isActive": true,
-  "addresses": [
-    {
-      "type": "home",
-      "street": "123 Main St",
-      "city": "Anytown"
-    }
-  ],
-  "metadata": null
-}</code></pre>
-
-            <h3>XferLang Equivalent:</h3>
+            <h3>XferLang Sample</h3>
+                <p>Here's a simple XferLang document:</p>
             <pre><code class="xfer">{
-    name "John Doe"
-    age #30
+    name "Alice"
+    age 30
+    salary *50000.75
     isActive ~true
     addresses [
         {
@@ -185,11 +173,28 @@
     metadata ?
 }</code></pre>
 
-            <p>In contrast to JSON, XferLang eliminates commas, uses explicit type prefixes (#30 for integers, ~true for booleans, ? for null) while maintaining readability.</p>
+            <h3>JSON Example:</h3>
+                <p>Here's the equivalent document in JSON:</p>
+            <pre><code class="json">{
+    "name": "Alice",
+    "age": 30,
+    "salary": 50000.75,
+    "isActive": true,
+    "addresses": [
+        {
+            "type": "home",
+            "street": "123 Main St",
+            "city": "Anytown"
+        }
+    ],
+    "metadata": null
+}</code></pre>
+
+            <p>In contrast to JSON, XferLang eliminates commas, uses explicit type prefixes for certain types (* for decimal, ~ for Boolean, ? for null) while maintaining readability.</p>
 
             <p>Because whitespace is flexible, the same document can be made extremely compact:</p>
 
-<pre><code class="xfer">{name"Alice"age 30 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00@}}</code></pre>
+<pre><code class="xfer">{name"Alice"age 30 salary*50000.75 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00@}}</code></pre>
         </section>
 
         <section id="philosophy">
@@ -236,8 +241,8 @@ age #30</code></pre>
             <pre><code class="xfer">&lt;! name { key1 value1 key2 value2 ... } !&gt;</code></pre>
 
             <h3>Document Metadata</h3>
-            <p>Use the <code>xfer</code> PI to specify XferLang version and document metadata:</p>
-            <pre><code class="xfer">&lt;! xfer { version "0.12" author "John Doe" created @2023-12-25T10:00:00Z@ } !&gt;</code></pre>
+            <p>Use the <code>document</code> PI to specify XferLang version and document metadata:</p>
+            <pre><code class="xfer">&lt;! document { version "0.12" author "John Doe" created @2023-12-25T10:00:00Z@ } !&gt;</code></pre>
 
             <h3>Schema Association (TO BE IMPLEMENTED)</h3>
             <p>Use the <code>schema</code> PI to associate a document with a schema definition:</p>
@@ -377,49 +382,80 @@ emoji 'I &lt;\$2764\&gt; Xfer &lt;\$1F600\&gt;'  &lt;/ I ❤︎ Xfer 😀 /&gt;<
 
             <section id="xferlang-elements-array">
                 <h3>Array</h3>
-                <p>Represents a typed array of elements.</p>
+                <p>Represents a typed array of elements. Arrays are enclosed in square brackets <code>[ ... ]</code> and all elements must be of the same type.</p>
+                <p><strong>Syntax:</strong></p>
+                <pre><code class="xfer">[ element1 element2 element3 ... ]</code></pre>
+                <p><strong>Examples:</strong></p>
+                <pre><code class="xfer">
+            numbers [1 2 3 4 5]
+            names ["Alice" "Bob" "Charlie"]
+            decimals [*12.3 *45.6 *78.9]
+            booleans [~true ~false ~true]
+            chars [\A \B \C]
+                </code></pre>
+                <p>Arrays can be nested or contain objects:</p>
+                <pre><code class="xfer">
+            matrix [
+                [1 2 3]
+                [4 5 6]
+                [7 8 9]
+            ]
+            users [
+                { name "Alice" age 30 }
+                { name "Bob" age 25 }
+            ]
+                </code></pre>
             </section>
 
             <section id="xferlang-elements-keyvalue">
                 <h3>Key/Value Pair</h3>
-                <p>Represents a single key-value pair.</p>
+                <p>Represents a single key-value pair. The key is usually a keyword or identifier, and the value can be any XferLang element. A keyword does not require any delimiters. It is a special string type that may contain </p>
+                <p><strong>Syntax:</strong></p>
+                <pre><code class="xfer">key "value"</code></pre>
+                <p><strong>Examples:</strong></p>
+                <pre><code class="xfer">
+            name "Alice"
+            age 30
+            isMember ~true
+            score *99.5
+            <:It's Complicated:> <'"It's complicated" is a common phrase used to describe a relationship that is not straightforward or has many complexities.'>
+            </code></pre>
             </section>
 
             <section id="xferlang-elements-object">
                 <h3>Object</h3>
                 <p>Represents a set of named key-value pairs.</p>
-                <pre><code>var element = new ObjectElement();</code></pre>
             </section>
 
             <section id="xferlang-elements-tuple">
                 <h3>Tuple</h3>
                 <p>Represents an ordered collection of elements.</p>
-                <pre><code>var element = new TupleElement();</code></pre>
             </section>
 
             <!-- Structural Elements -->
             <section id="xferlang-elements-comment">
                 <h3>Comment</h3>
-                <p>Comments start with <code>&lt;/</code> and end with <code>/&gt;</code>. They can be placed anywhere in the document and are ignored by the parser.</p>
+                <p>(text here)</p>
                 <pre><code>&lt;/ This is a comment /&gt;</code></pre>
             </section>
 
             <section id="xferlang-elements-dynamic">
                 <h3>Dynamic</h3>
                 <p>Represents a dynamic value that is replaced during parsing or deserialization.</p>
-                <pre><code>var element = new DynamicElement("{value}");</code></pre>
+                <p>Arrays can be nested or contain objects:</p>
+                <pre><code class="xfer">
             </section>
 
             <section id="xferlang-elements-identifier">
                 <h3>Identifier</h3>
                 <p>Represents a symbolic name for an element, used as a key in key-value pairs or as a standalone value.</p>
-                <pre><code>var element = new IdentifierElement("Name");</code></pre>
             </section>
 
             <section id="xferlang-elements-metadata">
                 <h3>Metadata</h3>
                 <p>Represents document-level metadata or processing instructions.</p>
-                <pre><code>var element = new MetadataElement("xfer", new ObjectElement());</code></pre>
+                <p>From the .NET API:</p>
+                <pre><code class="csharp">
             </section>
 
             <!-- Data Elements -->
@@ -518,8 +554,8 @@ emoji 'I &lt;\$2764\&gt; Xfer &lt;\$1F600\&gt;'  &lt;/ I ❤︎ Xfer 😀 /&gt;<
             </section>
 
             <section id="xferlang-elements-datetime">
-                <!-- Date/Time section is user-edited and left as is -->
-                ...existing code...
+                <h3>Date/Time</h3>
+                <p>Represents a date and time value in ISO 8601 format.</p>
             </section>
 
             <section id="xferlang-elements-null">

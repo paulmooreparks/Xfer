@@ -1,0 +1,125 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ParksComputing.Xfer.Lang.Services;
+
+namespace ParksComputing.Xfer.Lang.Tests;
+
+[TestClass]
+public class CharacterDefinitionTests
+{
+    [TestMethod]
+    public void CharacterIdRegistry_Resolve_KnownCharacter_ReturnsCorrectValue()
+    {
+        // Arrange & Act
+        var result = CharacterIdRegistry.Resolve("alpha");
+
+        // Assert
+        Assert.IsNotNull(result);
+        Assert.AreEqual('α', result.Value); // Greek lowercase alpha
+    }
+
+    [TestMethod]
+    public void CharacterIdRegistry_Resolve_UnknownCharacter_ReturnsNull()
+    {
+        // Arrange & Act
+        var result = CharacterIdRegistry.Resolve("unknown_character_name");
+
+        // Assert
+        Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public void CharacterIdRegistry_Resolve_CaseInsensitive_WorksCorrectly()
+    {
+        // Arrange & Act
+        var lowercase = CharacterIdRegistry.Resolve("alpha");
+        var uppercase = CharacterIdRegistry.Resolve("ALPHA");
+        var mixedCase = CharacterIdRegistry.Resolve("Alpha");
+
+        // Assert
+        // All should resolve to the same character (case insensitive)
+        Assert.IsNotNull(lowercase);
+        Assert.IsNotNull(uppercase);
+        Assert.IsNotNull(mixedCase);
+        Assert.AreEqual(lowercase.Value, uppercase.Value);
+        Assert.AreEqual(lowercase.Value, mixedCase.Value);
+    }
+
+    [TestMethod]
+    public void CharacterIdRegistry_Resolve_MultipleCharacters_ReturnsCorrectValues()
+    {
+        // Arrange & Act
+        var alpha = CharacterIdRegistry.Resolve("alpha");
+        var beta = CharacterIdRegistry.Resolve("beta");
+        var gamma = CharacterIdRegistry.Resolve("gamma");
+
+        // Assert
+        Assert.IsNotNull(alpha);
+        Assert.IsNotNull(beta);
+        Assert.IsNotNull(gamma);
+        Assert.AreEqual('α', alpha.Value);
+        Assert.AreEqual('β', beta.Value);
+        Assert.AreEqual('γ', gamma.Value);
+    }
+
+    [TestMethod]
+    public void CharacterIdRegistry_Resolve_SpecialCharacters_ReturnsCorrectValues()
+    {
+        // Arrange & Act
+        var infinity = CharacterIdRegistry.Resolve("infinity");
+        var pi = CharacterIdRegistry.Resolve("pi");
+
+        // Assert
+        Assert.IsNotNull(infinity);
+        Assert.IsNotNull(pi);
+        Assert.AreEqual('∞', infinity.Value);
+        Assert.AreEqual('π', pi.Value);
+    }
+
+    [TestMethod]
+    public void CharacterIdRegistry_Resolve_EmptyString_ReturnsNull()
+    {
+        // Arrange & Act
+        var result = CharacterIdRegistry.Resolve("");
+
+        // Assert
+        Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public void CharacterIdRegistry_Resolve_WhitespaceString_ReturnsNull()
+    {
+        // Arrange & Act
+        var result = CharacterIdRegistry.Resolve("   ");
+
+        // Assert
+        Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public void CharacterIdRegistry_Resolve_CommonCharacters_AreAvailable()
+    {
+        // Arrange
+        var commonCharacterNames = new[] { "alpha", "beta", "gamma", "delta", "pi", "sigma" };
+
+        // Act & Assert
+        foreach (var name in commonCharacterNames)
+        {
+            var result = CharacterIdRegistry.Resolve(name);
+            Assert.IsNotNull(result, $"Character '{name}' should be available in the registry");
+        }
+    }
+
+    [TestMethod]
+    public void CharacterIdRegistry_Resolve_Performance_MultipleCallsWork()
+    {
+        // Arrange
+        var characterNames = new[] { "alpha", "beta", "gamma", "pi", "sigma", "infinity" };
+
+        // Act & Assert
+        foreach (var name in characterNames)
+        {
+            var result = CharacterIdRegistry.Resolve(name);
+            Assert.IsNotNull(result, $"Character '{name}' should resolve successfully");
+        }
+    }
+}

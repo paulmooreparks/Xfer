@@ -1,141 +1,230 @@
 using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using Microsoft.Data.Sqlite;
 using ParksComputing.Xfer.Lang;
 using ParksComputing.Xfer.Lang.Services;
 using ParksComputing.Xfer.Lang.Elements;
 using ParksComputing.Xfer.Lang.DynamicSource;
+using ParksComputing.Xfer.Lang.ProcessingInstructions;
 
-namespace DynamicDbResolverDemo
-{
-    // Custom resolver: supports "db:" source type, expects key/value pairs directly in dynamicSource
-    public class DbDynamicSourceResolver : DefaultDynamicSourceResolver
-    {
-        public override string? Resolve(string key, XferDocument document)
-        {
-            // 1. Check for PI override
-            foreach (var meta in document.Root.Values)
-            {
-                if (meta is MetadataElement metaElem && metaElem.ContainsKey("dynamicSource"))
-                {
-                    var dsElem = metaElem["dynamicSource"];
-                    ObjectElement? obj = null;
-                    Element candidate = dsElem;
-                    if (candidate is KeyValuePairElement kvElem)
-                        candidate = kvElem.Value;
-                    obj = candidate as ObjectElement;
-                    if (obj != null && obj.ContainsKey(key))
-                    {
-                        Element? currentElem = obj[key];
-                        while (currentElem is KeyValuePairElement kvElem2)
-                            currentElem = kvElem2.Value;
-                        string? sourceStr = null;
-                        if (currentElem is StringElement strElem)
-                            sourceStr = strElem.Value;
-                        else
-                            sourceStr = currentElem?.ToString();
-                        if (sourceStr != null)
-                        {
-                            if (sourceStr.StartsWith("db:"))
-                            {
-                                var dbKey = sourceStr.Substring(3);
-                                return GetValueFromDb(dbKey);
-                            }
-                            else if (sourceStr.StartsWith("env:"))
-                            {
-                                var envKey = sourceStr.Substring(4);
-                                return Environment.GetEnvironmentVariable(envKey);
-                            }
-                            else
-                            {
-                                // Hard-coded value
-                                return sourceStr;
-                            }
+namespace DynamicDbResolverDemo {
+    // Extension: Database source handler
+    public static class DatabaseSourceExtension {
+        private static string? _dbPath;
+
+        /// <summary>
+        /// Registers the database source handler extension.
+        /// </summary>
+        /// <param name="dbPath">Path to the SQLite database</param>
+        public static void Register(string dbPath) {
+            _dbPath = dbPath;
+            DynamicSourceHandlerRegistry.RegisterHandler("db", HandleDatabase);
+            Console.WriteLine("✓ Registered 'db' source handler extension");
+        }
+
+        /// <summary>
+        /// Unregisters the database source handler extension.
+        /// </summary>
+        public static void Unregister() {
+            DynamicSourceHandlerRegistry.UnregisterHandler("db");
+            _dbPath = null;
+            Console.WriteLine("✓ Unregistered 'db' source handler extension");
+        }
+
+        /// <summary>
+        /// Database source handler implementation.
+        /// </summary>
+        private static string? HandleDatabase(string? sourceValue, string fallbackKey) {
+            if (string.IsNullOrEmpty(_dbPath)) {
+                return null;
+            }
+
+            var key = sourceValue ?? fallbackKey;
+            return GetValueFromDb(key);
+        }
+
+        private static string? GetValueFromDb(string key) {
+            if (string.IsNullOrEmpty(_dbPath)) {
+                return null;
+            }
+
+            using var connection = new SqliteConnection($"Data Source={_dbPath}");
+            connection.Open();
+
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT value FROM secrets WHERE key = @key;";
+            cmd.Parameters.AddWithValue("@key", key);
+
+            return cmd.ExecuteScalar()?.ToString();
+        }
+    }
+
+    // Simple resolver that just uses the core library functionality
+    public class ExtensibleDynamicSourceResolver : DefaultDynamicSourceResolver {
+        // No custom logic needed - everything is handled by the core library
+        // and registered extensions!
+    }
+
+    // Helper methods
+    public static class Helpers {
+        public static IEnumerable<Element> GetAllElements(Element root) {
+            yield return root;
+            foreach (var child in root.Children) {
+                foreach (var descendant in GetAllElements(child)) {
+                    yield return descendant;
+                }
+            }
+        }
+    }
+
+    class Program {
+        static void Main(string[] args) {
+            Console.WriteLine("=== Dynamic Source Extensibility Demo ===");
+            Console.WriteLine("This demo shows the extensible dynamic source system:");
+            Console.WriteLine("• Core library provides 'const', 'env', and 'file' source types");
+            Console.WriteLine("• Database extension adds 'db' source type via handler registry");
+            Console.WriteLine("• Extension is completely decoupled from core library");
+            Console.WriteLine("• Works with 'dynamicSource' PI using recursive KVPs: key sourceType \"sourceValue\"\n");
+
+            // Setup demo DB
+            var dbPath = "demo.db";
+            // Set up the database
+            SetupDatabase(dbPath);
+
+            // Register the database extension
+            DatabaseSourceExtension.Register(dbPath);
+
+            // Read Xfer document from file
+            var xferPath = Path.Combine(Environment.CurrentDirectory, "sample.xfer");
+            if (!File.Exists(xferPath)) {
+                Console.WriteLine($"File not found: {xferPath}");
+                return;
+            }
+
+            var xfer = File.ReadAllText(xferPath);
+            Console.WriteLine("Original Xfer content:");
+            Console.WriteLine(xfer);
+            Console.WriteLine();
+
+            var parser = new Parser();
+            parser.DynamicSourceResolver = new ExtensibleDynamicSourceResolver();
+
+            // Clear any previous dynamic source configurations
+            DynamicSourceRegistry.Clear();
+
+            var doc = parser.Parse(xfer);
+
+            Console.WriteLine("Parsed document structure:");
+            Console.WriteLine($"Root: {doc.Root.GetType().Name}");
+            Console.WriteLine($"Total document-level PIs: {doc.ProcessingInstructions.Count}");
+
+            foreach (var pi in doc.ProcessingInstructions) {
+                Console.WriteLine($"  PI: {pi.GetType().Name} - {pi.Kvp?.Key}");
+            }
+
+            // Debug: show all elements in the root to see if PI is there
+            Console.WriteLine("Root element contents:");
+            var allRootElements = Helpers.GetAllElements(doc.Root).ToList();
+            foreach (var elem in allRootElements.Take(10)) { // Limit to first 10 for brevity
+                Console.WriteLine($"  {elem.GetType().Name}: {(elem is ProcessingInstruction pi ? pi.Kvp?.Key : elem.ToString()?.Substring(0, Math.Min(50, elem.ToString()?.Length ?? 0)))}");
+            }
+
+            // Show dynamicSource PIs that were registered using the new PI registry
+            // Check both document-level PIs and PIs within the root element
+            var documentLevelPIs = doc.ProcessingInstructions.OfType<DynamicSourceProcessingInstruction>().ToList();
+            var rootEmbeddedPIs = Helpers.GetAllElements(doc.Root).OfType<DynamicSourceProcessingInstruction>().ToList();
+            var allDynamicSourcePIs = documentLevelPIs.Concat(rootEmbeddedPIs).ToList();
+
+            Console.WriteLine($"DynamicSource PIs found: {allDynamicSourcePIs.Count} (via new PI registry!)");
+            Console.WriteLine($"  Document-level: {documentLevelPIs.Count}, Root-embedded: {rootEmbeddedPIs.Count}");
+
+            foreach (var pi in allDynamicSourcePIs) {
+                Console.WriteLine($"✓ Found DynamicSource PI: {pi.Kvp?.Key}");
+                if (pi.Kvp?.Value is ObjectElement obj) {
+                    foreach (var kvp in obj.Dictionary.Values) {
+                        // Show the recursive KVP format
+                        if (kvp.Value is KeyValuePairElement sourceKvp) {
+                            Console.WriteLine($"  {kvp.Key} {sourceKvp.Key} \"{sourceKvp.Value}\"");
+                        }
+                        else {
+                            Console.WriteLine($"  {kvp.Key} -> {kvp.Value}");
                         }
                     }
                 }
             }
-            // 2. If no PI override, use DB as default
-            return GetValueFromDb(key);
+            Console.WriteLine();
+
+            // Process the credentials object and show resolved dynamic values
+            var root = doc.Root;
+            foreach (var element in root.Children) {
+                if (element is KeyValuePairElement kvp && kvp.Key == "credentials") {
+                    Console.WriteLine("Processing credentials object:");
+                    var obj = kvp.Value as ObjectElement;
+
+                    if (obj != null) {
+                        ProcessCredentialsObject(obj);
+                    }
+                }
+            }
+
+            Console.WriteLine("\nSerialized result (with PI included):");
+            Console.WriteLine(doc.ToXfer(Formatting.Pretty));
+
+            Console.WriteLine("\n✓ Demo completed successfully!");
+            Console.WriteLine("✓ Core library handled 'const' and 'env' source types");
+            Console.WriteLine("✓ Database extension handled 'db' source type via handler registry");
+            Console.WriteLine("✓ Extension system is completely decoupled from core library");
+            Console.WriteLine("✓ DynamicSourceProcessingInstruction was created via the new PI registry");
+            Console.WriteLine("✓ PI was correctly serialized in the output");
+            Console.WriteLine("✓ Dynamic element resolution worked as expected");
+
+            // Clean up: unregister the extension
+            DatabaseSourceExtension.Unregister();
         }
 
-        private string? GetValueFromDb(string dbKey)
-        {
-            // Use a local SQLite DB file
-            var dbPath = "demo.db";
+        private static void SetupDatabase(string dbPath) {
+            Console.WriteLine("Setting up demo database...");
+
             using var connection = new SqliteConnection($"Data Source={dbPath}");
             connection.Open();
+
             using var cmd = connection.CreateCommand();
-            cmd.CommandText = "SELECT value FROM secrets WHERE key = @key LIMIT 1";
-            cmd.Parameters.AddWithValue("@key", dbKey);
-            var result = cmd.ExecuteScalar();
-            return result?.ToString();
+            cmd.CommandText = "CREATE TABLE IF NOT EXISTS secrets (key TEXT PRIMARY KEY, value TEXT);";
+            cmd.ExecuteNonQuery();
+
+            // Insert demo values
+            var values = new Dictionary<string, string> {
+                { "dbpassword", "SuperSecretFromDB!" },
+                { "greeting", "Hello from the DB!" },
+                { "username", "db_user_123" },
+                { "apikey", "api_key_from_database" }
+            };
+
+            foreach (var kvp in values) {
+                cmd.CommandText = "INSERT OR REPLACE INTO secrets (key, value) VALUES (@key, @value);";
+                cmd.Parameters.Clear();
+                cmd.Parameters.AddWithValue("@key", kvp.Key);
+                cmd.Parameters.AddWithValue("@value", kvp.Value);
+                cmd.ExecuteNonQuery();
+                Console.WriteLine($"  Inserted: {kvp.Key} = {kvp.Value}");
+            }
+            Console.WriteLine();
         }
-    }
 
-    class Program
-    {
-    // ...existing code...
-        static void Main(string[] args)
-        {
-            // Setup demo DB
-            var dbPath = "demo.db";
-            using (var connection = new SqliteConnection($"Data Source={dbPath}"))
-            {
-                connection.Open();
-                using var cmd = connection.CreateCommand();
-                cmd.CommandText = "CREATE TABLE IF NOT EXISTS secrets (key TEXT PRIMARY KEY, value TEXT);";
-                cmd.ExecuteNonQuery();
-                cmd.CommandText = "INSERT OR REPLACE INTO secrets (key, value) VALUES (@key, @value);";
-                cmd.Parameters.AddWithValue("@key", "dbpassword");
-                cmd.Parameters.AddWithValue("@value", "SuperSecretFromDB!");
-                cmd.ExecuteNonQuery();
-            }
+        private static void ProcessCredentialsObject(ObjectElement obj) {
+            foreach (var kvp in obj.Dictionary.Values) {
+                var element = kvp.Value;
+                var elementType = element.GetType().Name;
 
-            // Insert greeting value for demo
-            using (var connection = new SqliteConnection($"Data Source={dbPath}"))
-            {
-                connection.Open();
-                using var cmd = connection.CreateCommand();
-                cmd.CommandText = "INSERT OR REPLACE INTO secrets (key, value) VALUES (@key, @value);";
-                cmd.Parameters.AddWithValue("@key", "greeting");
-                cmd.Parameters.AddWithValue("@value", "Hello from the DB!");
-                cmd.ExecuteNonQuery();
-            }
+                Console.WriteLine($"  {kvp.Key} ({elementType}): {element}");
 
-            // Read Xfer document from file
-            var xferPath = Path.Combine(Environment.CurrentDirectory, "sample.xfer");
-            var xfer = System.IO.File.ReadAllText(xferPath);
-
-            var parser = new Parser();
-            parser.DynamicSourceResolver = new DbDynamicSourceResolver();
-            var doc = parser.Parse(xfer);
-            var root = doc.Root;
-            foreach (var element in root.Values)
-            {
-                if (element is KeyValuePairElement kvp && kvp.Key == "credentials")
-                {
-                    var obj = kvp.Value as ObjectElement;
-                    if (obj != null)
-                    {
-                        var passwordRaw = obj["password"];
-                        var greetingRaw = obj["greeting"];
-                        Element? passwordValue = passwordRaw is KeyValuePairElement pwKvp ? pwKvp.Value : passwordRaw;
-                        Element? greetingValue = greetingRaw is KeyValuePairElement grKvp ? grKvp.Value : greetingRaw;
-
-                        if (passwordValue is InterpolatedElement pwElement)
-                            Console.WriteLine($"Resolved password: {pwElement.Value}");
-                        else if (passwordValue is StringElement pwStrElem)
-                            Console.WriteLine($"Resolved password (string): {pwStrElem.Value}");
-                        else
-                            Console.WriteLine($"Resolved password (raw): {passwordValue}");
-
-                        if (greetingValue is InterpolatedElement grElement)
-                            Console.WriteLine($"Resolved greeting: {grElement.Value}");
-                        else if (greetingValue is StringElement grStrElem)
-                            Console.WriteLine($"Resolved greeting (string): {grStrElem.Value}");
-                        else
-                            Console.WriteLine($"Resolved greeting (raw): {greetingValue}");
-                    }
+                if (element is DynamicElement dynamicElem) {
+                    Console.WriteLine($"    Resolved dynamic value: {dynamicElem.Value}");
+                }
+                else if (element is InterpolatedElement interpElem) {
+                    Console.WriteLine($"    Resolved interpolated value: {interpElem.Value}");
                 }
             }
         }

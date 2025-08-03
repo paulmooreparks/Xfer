@@ -1,5 +1,6 @@
-﻿using System.Text;
+using System.Text;
 using ParksComputing.Xfer.Lang.Extensions;
+using ParksComputing.Xfer.Lang.ProcessingInstructions;
 using ParksComputing.Xfer.Lang.Services;
 
 namespace ParksComputing.Xfer.Lang.Elements;
@@ -14,7 +15,10 @@ public class ObjectElement : DictionaryElement {
     public const char ClosingSpecifier = '}';
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, style: ElementStyle.Compact);
 
-    public IReadOnlyDictionary<string, KeyValuePairElement> Values => _values;
+    /// <summary>
+    /// Only semantic key-value pairs (not PIs/comments)
+    /// </summary>
+    public IReadOnlyDictionary<string, KeyValuePairElement> Dictionary => _values;
 
     public Element this[string index] {
         get {
@@ -80,13 +84,16 @@ public void AddOrUpdate(KeyValuePairElement value) {
         int idx = Children.FindIndex(e => e is KeyValuePairElement k && k.Key == value.Key);
         if (idx >= 0) {
             Children[idx] = value;
+            value.Parent = this;
         } else {
             Children.Add(value);
+            value.Parent = this;
         }
     }
     else {
         _values.Add(value.Key, value);
         Children.Add(value);
+        value.Parent = this;
     }
 }
 
@@ -95,8 +102,9 @@ public void AddOrUpdate(Element element) {
         case KeyValuePairElement kvp:
             AddOrUpdate(kvp);
             break;
-        case MetadataElement meta:
+        case ProcessingInstruction meta:
             Children.Add(meta);
+            meta.Parent = this;
             break;
         default:
             throw new InvalidOperationException($"Only KeyValuePairElement and MetadataElement can be added to ObjectElement. Attempted: {element.GetType().Name}");

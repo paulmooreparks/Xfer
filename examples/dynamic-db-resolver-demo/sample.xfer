@@ -1,15 +1,21 @@
 </ The dynamic elements in the document below will use the DbDynamicSourceResolver
-class to resolve their values. If you want to override that behavior, uncomment the
-metadata element below. Make sure you define TESTING_PASSWORD in your environment. />
+class to resolve their values. The dynamicSource PI below overrides the default behavior
+for specific keys, showing different source types (db, env, const) using recursive KVPs. />
 
-</ <!
+<!
 dynamicSource {
-    dbpassword "env:TESTING_PASSWORD"
-    greeting "This is a test greeting."
+    dbpassword db "dbpassword"
+    greeting const "This is a test greeting from PI config."
+    username env "USERNAME"
+    apikey db "apikey"
 }
-!> />
+!>
 
-credentials {
-    password '<|dbpassword|>'
-    greeting '<|greeting|>'
-}
+(
+    credentials {
+        password '<|dbpassword|>'
+        greeting '<|greeting|>'
+        username '<|username|>'
+        apikey '<|apikey|>'
+    }
+)

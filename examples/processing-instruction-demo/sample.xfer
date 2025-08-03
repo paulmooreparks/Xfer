@@ -1,0 +1,37 @@
+<!
+document {
+    xfer "11.1"
+    id "top"
+}
+!>
+
+<!
+charDef {
+    fooz \zeta
+    theend \omega
+    pin \pushpin
+    answer \$42
+}
+!>
+
+<! id "root" !>
+(
+    <!id "kvp"!>foo <!id "value"!>"bar"
+    [1 2 3]
+    <\answer\>
+    'I <\heart\><\vsemoji\> XferLang!'
+    'Put a <\pin\> in it!'
+    foo"bar"
+
+    <! id "object" !>
+    alphabet {
+        <! id "testpi" !> a '<\alpha\>'
+        b '<\beta\>'
+        g '<\gamma\>'
+        d '<\delta\>'
+        e '<\epsilon\>'
+        z '<\zeta\>'
+    }
+
+    <! id "array" !> [<! id "one"!> 1 2 3]
+)

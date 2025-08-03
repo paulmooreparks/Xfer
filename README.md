@@ -25,7 +25,9 @@ _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.c
       - [3.3.1. Primitive Types](#331-primitive-types)
       - [3.3.1.1. Hexadecimal and Binary Formatting](#3311-hexadecimal-and-binary-formatting)
       - [3.3.2. Structural Types](#332-structural-types)
+      - [3.3.2.1. Common Document Patterns](#3321-common-document-patterns)
       - [3.3.3. Special-Purpose Types](#333-special-purpose-types)
+    - [3.4. Document Validation and Common Mistakes](#34-document-validation-and-common-mistakes)
   - [4. The `.NET XferLang Library`](#4-the-net-xferlang-library)
     - [4.1. Basic Serialization \& Deserialization](#41-basic-serialization--deserialization)
     - [4.2. Advanced Usage with `XferSerializerSettings`](#42-advanced-usage-with-xferserializersettings)
@@ -49,6 +51,7 @@ XferLang is a data-interchange format designed to support data serialization, da
 *   **Explicit Typing**: All values are explicitly typed. This avoids the type ambiguity that can sometimes occur in formats like JSON, leading to more predictable parsing and less defensive coding.
 *   **Elimination of Escaping**: XferLang does not require escaping of special characters in values. Instead, values are enclosed in unique delimiters. If the content contains a sequence that matches the delimiter, the delimiter character can be repeated as many times as necessary to make it unique, ensuring that data can be embedded without modification.
 *   **Safety in Embedding**: The delimiter-repetition strategy allows for the safe embedding of complex, nested data structures without the risk of delimiter collision.
+*   **Structured Root**: All XferLang documents require a root collection element (Object, Array, or Tuple) to ensure well-defined document structure and unambiguous parsing.
 
 ## 2. XferLang by Example
 
@@ -94,20 +97,27 @@ Because whitespace is flexible, the same document can be made extremely compact:
 
 ### 3.1. Document Structure
 
-An XferLang document consists of two main parts: an optional **Metadata Element** followed by a root **Tuple Element**.
+An XferLang document consists of two main parts: an optional **Metadata Element** followed by a **Root Collection Element**.
 
 *   **Metadata Element**: If present, this must be the very first non-comment element in the document. It is used to store information about the document itself, such as the XferLang version.
-*   **Root Tuple**: The main content of the document is contained within an implicit root tuple. This means an XferLang document can contain a sequence of multiple, distinct elements at its top level.
+*   **Root Collection Element**: The main content of the document must be contained within a single collection element (Object, Array, or Tuple). This ensures the document has a well-defined structure and prevents ambiguity in parsing.
 
 ```xfer
-</ A document metadata element, which is signified with the reserved keyword `xfer` is optional, but if present it must be the first element in the document. />
-<! xfer { version "1.0" } !>
+</ A document metadata element, which is signified with the reserved keyword `document` is optional, but if present it must be the first element in the document. />
+<! document { version "1.0" } !>
 
-</ The rest of the document is a sequence of elements in the root tuple. />
-"Hello, World!"
-42
-{ key "value" }
+</ The document content must be wrapped in a collection element />
+{
+    message "Hello, World!"
+    count 42
+    config { debug ~true }
+}
 ```
+
+**Valid Root Collection Types:**
+- **Object**: `{ key1 value1 key2 value2 }` - Most common for structured data
+- **Array**: `[ element1 element2 element3 ]` - For homogeneous collections
+- **Tuple**: `( element1 element2 element3 )` - For heterogeneous sequences
 
 ### 3.2. Element Syntax Variations
 
@@ -212,12 +222,14 @@ Integer and Long elements support alternative numeric representations for improv
 
 **Examples:**
 ```xfer
-// Decimal 42 in different formats
-decimal: 42
-hex: #$2A
-binary: #%101010
-padded_hex: #$002A    // MinDigits = 4
-padded_binary: #%00101010  // MinBits = 8
+{
+    // Decimal 42 in different formats
+    decimal 42
+    hex #$2A
+    binary #%101010
+    padded_hex #$002A    // MinDigits = 4
+    padded_binary #%00101010  // MinBits = 8
+}
 ```
 
 **Safety Note:** Hex and binary formatting are only supported for integer types (`int`, `long`). Decimal and double types preserve fractional precision and do not support these formats.
@@ -243,12 +255,56 @@ padded_binary: #%00101010  // MinBits = 8
 *   **Description:** A keyword is the key in a key/value pair. If it contains only letters, numbers, and underscores, it can be written implicitly. Otherwise, it must be enclosed in colons (`:`).
 *   **Example:** `name "Paul"`, `:first name: "Alice"`
 
+#### 3.3.2.1. Common Document Patterns
+
+**Configuration Documents**
+Most configuration files use Object as the root collection:
+```xfer
+{
+    database {
+        host "localhost"
+        port 5432
+        ssl ~true
+    }
+    logging {
+        level "info"
+        destinations [ "console" "file" ]
+    }
+}
+```
+
+**Data Collections**
+For homogeneous data, use Array as the root:
+```xfer
+[
+    { name "Alice" age 30 }
+    { name "Bob" age 25 }
+    { name "Charlie" age 35 }
+]
+```
+
+**Mixed Content Documents**
+For documents with heterogeneous top-level content, use Tuple:
+```xfer
+(
+    "Document Title"
+    @2023-12-25T10:00:00@
+    {
+        metadata { version "1.0" author "John Doe" }
+        content {
+            sections [ "intro" "body" "conclusion" ]
+            wordCount 1500
+        }
+    }
+)
+```
+
 #### 3.3.3. Special-Purpose Types
 
 **Metadata Element**
 *   **Specifiers:** `!` (Exclamation Mark)
-*   **Description:** A special object that can only appear at the start of a document. It contains metadata about the document, such as the `xfer` version.
-*   **Example:** `<! xfer {version "1.0"} description "Sample document" !>`
+*   **Description:** A special object that can only appear at the start of a document. It contains metadata about the document, such as the `document` version.
+*   **Example:** `<! document {version "1.0"} description "Sample document" !>`
 
 **Comment Element**
 *   **Specifier:** `/` (Slash)
@@ -260,13 +316,55 @@ padded_binary: #%00101010  // MinBits = 8
 *   **Description:** Represents a value to be substituted at runtime, by default from an environment variable. You can override the default dynamic value resolution by subclassing `DefaultDynamicSourceResolver` or by implementing the `IDynamicSourceResolver` interface. This allows you to provide custom logic for resolving dynamic values in your XferLang documents.
 *   **Example:** `'Hello, <|USERNAME|>!'`
 
+### 3.4. Document Validation and Common Mistakes
+
+**Root Collection Requirement**
+Every XferLang document must have exactly one root collection element after any metadata. This is a fundamental requirement for proper parsing:
+
+```xfer
+// ❌ Invalid - No root collection
+"Hello, World!"
+42
+
+// ❌ Invalid - Multiple top-level elements
+{ config "value" }
+[ 1 2 3 ]
+
+// ✅ Valid - Single root object
+{
+    message "Hello, World!"
+    count 42
+}
+
+// ✅ Valid - Single root array
+[ "Hello, World!" 42 ]
+
+// ✅ Valid - Single root tuple
+( "Hello, World!" 42 { config "value" } )
+```
+
+**With Metadata**
+When using metadata, it must come first, followed by exactly one root collection:
+
+```xfer
+// ✅ Valid - Metadata followed by root object
+<! document { version "1.0" } !>
+{
+    data "example"
+}
+
+// ❌ Invalid - Missing root collection after metadata
+<! document { version "1.0" } !>
+"standalone string"
+```
+
 ## 4. The `.NET XferLang Library`
 
 The primary implementation of XferLang is the `ParksComputing.Xfer.Lang` library for .NET. It provides a comprehensive object model, a robust parser, and a powerful serialization/deserialization utility class, `XferConvert`.
 
 ### 4.1. Basic Serialization & Deserialization
 
-The `XferConvert` class provides a simple, static interface for converting between .NET objects and XferLang strings.
+The `XferConvert` class provides a simple, static interface for converting between .NET objects and XferLang strings. The library automatically ensures that serialized objects are wrapped in a proper root collection element.
 
 ```csharp
 public class MyData {
@@ -276,7 +374,7 @@ public class MyData {
 
 var data = new MyData { Name = "Example", Value = 123 };
 
-// Serialize to an Xfer string
+// Serialize to an Xfer string (automatically creates root object)
 string xfer = XferConvert.Serialize(data, Formatting.Indented);
 
 // {
@@ -433,15 +531,16 @@ This feature makes XferLang highly extensible and adaptable for a wide range of 
 The .NET implementation of XferLang is becoming more robust, with a focus on professional-grade features like custom converters and contract resolvers. However, the project as a whole is still experimental.
 
 The future roadmap includes:
-*   Reimplementing the core library in Rust.
-*   Exposing a C ABI from the Rust implementation.
-*   Creating language wrappers (e.g., for C#, Python, JavaScript) that communicate with the C ABI.
+*   Completing the .NET implementation to achieve a production-quality 1.0 release
+*   Reimplementing the core library in Rust
+*   Exposing a C ABI from the Rust implementation
+*   Creating language wrappers (e.g., for C#, Python, JavaScript) that communicate with the C ABI
 
-This will provide a single, high-performance, and memory-safe core for all future XferLang implementations. I'm looking for contributors and collaborators to get that work started.
+The goal of moving to a Rust core is to provide a single, high-performance, and memory-safe core for all future XferLang implementations. I'm looking for contributors and collaborators to get that work started.
 
 ## 6. Contributing
 
-This is an open-source project, and contributions are always welcome! If you are interested in helping with the Rust implementation, creating language wrappers, improving the existing .NET library, or have other ideas, please feel free to open an issue or a pull request on GitHub. You can also reach out to me directly via email at [paul@parkscomputing.com](mailto:paul@parkscomputing.com).
+This is an open-source project, and contributions are always welcome! If you are interested in helping, please feel free to open an issue or a pull request on GitHub. You can also reach out to me directly via email at [paul@parkscomputing.com](mailto:paul@parkscomputing.com).
 
 ## 7. Grammar
 
