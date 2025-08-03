@@ -13,37 +13,45 @@ _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.c
 ## Table of Contents
 - [The XferLang Data-Interchange Format](#the-xferlang-data-interchange-format)
   - [Table of Contents](#table-of-contents)
-  - [1. Introduction \& Philosophy](#1-introduction--philosophy)
-  - [2. XferLang by Example](#2-xferlang-by-example)
-  - [3. Language Specification](#3-language-specification)
-    - [3.1. Document Structure](#31-document-structure)
-    - [3.2. Element Syntax Variations](#32-element-syntax-variations)
-      - [3.2.1. Implicit Syntax](#321-implicit-syntax)
-      - [3.2.2. Compact Syntax](#322-compact-syntax)
-      - [3.2.3. Explicit Syntax](#323-explicit-syntax)
-    - [3.3. Element Reference](#33-element-reference)
-      - [3.3.1. Primitive Types](#331-primitive-types)
-      - [3.3.1.1. Hexadecimal and Binary Formatting](#3311-hexadecimal-and-binary-formatting)
-      - [3.3.2. Structural Types](#332-structural-types)
-      - [3.3.2.1. Common Document Patterns](#3321-common-document-patterns)
-      - [3.3.3. Special-Purpose Types](#333-special-purpose-types)
-    - [3.4. Document Validation and Common Mistakes](#34-document-validation-and-common-mistakes)
-  - [4. The `.NET XferLang Library`](#4-the-net-xferlang-library)
-    - [4.1. Basic Serialization \& Deserialization](#41-basic-serialization--deserialization)
-    - [4.2. Advanced Usage with `XferSerializerSettings`](#42-advanced-usage-with-xferserializersettings)
-      - [4.2.1. Null Value Handling](#421-null-value-handling)
-      - [4.2.2. Customizing Property Names with `IContractResolver`](#422-customizing-property-names-with-icontractresolver)
-      - [4.2.3. Custom Type Converters with `IXferConverter`](#423-custom-type-converters-with-ixferconverter)
-      - [4.2.4. Numeric Formatting with Attributes](#424-numeric-formatting-with-attributes)
-    - [4.3 DynamicSource PI Override: Powerful and Flexible](#43-dynamicsource-pi-override-powerful-and-flexible)
-      - [How it works](#how-it-works)
-      - [Example](#example)
-      - [Why this matters](#why-this-matters)
-  - [5. Project Status \& Roadmap](#5-project-status--roadmap)
-  - [6. Contributing](#6-contributing)
-  - [7. Grammar](#7-grammar)
+  - [Introduction and Philosophy](#introduction-and-philosophy)
+  - [XferLang by Example](#xferlang-by-example)
+  - [Language Specification](#language-specification)
+    - [Document Structure](#document-structure)
+    - [Element Syntax Variations](#element-syntax-variations)
+      - [Implicit Syntax](#implicit-syntax)
+      - [Compact Syntax](#compact-syntax)
+      - [Explicit Syntax](#explicit-syntax)
+    - [Element Reference](#element-reference)
+      - [Primitive Types](#primitive-types)
+      - [Hexadecimal and Binary Formatting](#hexadecimal-and-binary-formatting)
+      - [Structural Types](#structural-types)
+      - [Common Document Patterns](#common-document-patterns)
+      - [Special-Purpose Types](#special-purpose-types)
+    - [Document Validation and Common Mistakes](#document-validation-and-common-mistakes)
+  - [The `.NET XferLang Library`](#the-net-xferlang-library)
+    - [Basic Serialization \& Deserialization](#basic-serialization--deserialization)
+    - [Advanced Usage with `XferSerializerSettings`](#advanced-usage-with-xferserializersettings)
+      - [Null Value Handling](#null-value-handling)
+      - [Customizing Property Names with `IContractResolver`](#customizing-property-names-with-icontractresolver)
+      - [Custom Type Converters with `IXferConverter`](#custom-type-converters-with-ixferconverter)
+      - [Numeric Formatting with Attributes](#numeric-formatting-with-attributes)
+  - [Processing Instructions \& Dynamic Content](#processing-instructions--dynamic-content)
+    - [Built-in Processing Instructions](#built-in-processing-instructions)
+      - [Document Metadata PI](#document-metadata-pi)
+      - [DynamicSource PI](#dynamicsource-pi)
+      - [CharDef PI](#chardef-pi)
+      - [ID PI](#id-pi)
+    - [Dynamic Elements \& Source Resolution](#dynamic-elements--source-resolution)
+      - [Built-in Source Types](#built-in-source-types)
+      - [Custom Source Handler Registration](#custom-source-handler-registration)
+    - [Extending Processing Instructions](#extending-processing-instructions)
+      - [Creating Custom PIs](#creating-custom-pis)
+      - [PI Registration \& Lifecycle](#pi-registration--lifecycle)
+  - [Project Status \& Roadmap](#project-status--roadmap)
+  - [Contributing](#contributing)
+  - [Grammar](#grammar)
 
-## 1. Introduction & Philosophy
+## Introduction and Philosophy
 
 XferLang is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. Its design philosophy is centered around four key principles:
 
@@ -53,26 +61,11 @@ XferLang is a data-interchange format designed to support data serialization, da
 *   **Safety in Embedding**: The delimiter-repetition strategy allows for the safe embedding of complex, nested data structures without the risk of delimiter collision.
 *   **Structured Root**: All XferLang documents require a root collection element (Object, Array, or Tuple) to ensure well-defined document structure and unambiguous parsing.
 
-## 2. XferLang by Example
+## XferLang by Example
 
 Perhaps the easiest way to understand XferLang is to see it compared to a familiar format like JSON.
 
-Here's a simple JSON document:
-
-```json
-{
-    "name": "Alice",
-    "age": 30,
-    "isMember": true,
-    "scores": [85, 90, 78.5],
-    "profile": {
-        "email": "alice@example.com",
-        "joinedDate": "2023-01-15T12:00:00"
-    }
-}
-```
-
-And here is the equivalent XferLang document:
+Here's a simple XferLang document:
 
 ```xfer
 {
@@ -87,15 +80,32 @@ And here is the equivalent XferLang document:
 }
 ```
 
-Because whitespace is flexible, the same document can be made extremely compact:
+And here is the equivalent JSON document:
+
+```json
+{
+    "name": "Alice",
+    "age": 30,
+    "isMember": true,
+    "scores": [85, 90, 78.5],
+    "profile": {
+        "email": "alice@example.com",
+        "joinedDate": "2023-01-15T12:00:00"
+    }
+}
+```
+
+In contrast to JSON, XferLang eliminates commas, uses explicit type prefixes for certain types (`*` for decimal, `~` for Boolean, `?` for null) while maintaining readability.
+
+Because whitespace is flexible, the same XferLang document can be made extremely compact:
 
 ```xfer
 {name"Alice"age 30 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00@}}
 ```
 
-## 3. Language Specification
+## Language Specification
 
-### 3.1. Document Structure
+### Document Structure
 
 An XferLang document consists of two main parts: an optional **Metadata Element** followed by a **Root Collection Element**.
 
@@ -119,11 +129,11 @@ An XferLang document consists of two main parts: an optional **Metadata Element*
 - **Array**: `[ element1 element2 element3 ]` - For homogeneous collections
 - **Tuple**: `( element1 element2 element3 )` - For heterogeneous sequences
 
-### 3.2. Element Syntax Variations
+### Element Syntax Variations
 
 XferLang elements have a flexible syntax with up to three variations. This allows you to choose the most readable and concise form for your data, only using more verbose syntax when necessary to resolve ambiguity.
 
-#### 3.2.1. Implicit Syntax
+#### Implicit Syntax
 For the most common types, like integers and simple keywords, no special characters are needed at all. The parser infers the type from the content.
 
 ```xfer
@@ -131,7 +141,7 @@ For the most common types, like integers and simple keywords, no special charact
 name "Alice"        </ A key/value pair of a keyword 'name' and a string value />
 ```
 
-#### 3.2.2. Compact Syntax
+#### Compact Syntax
 For most other types, a single specifier character (or a pair for collections) denotes the type. This is the most common syntax.
 
 ```xfer
@@ -141,7 +151,7 @@ For most other types, a single specifier character (or a pair for collections) d
 [ 1 2 3 ]           </ An array of integers />
 ```
 
-#### 3.2.3. Explicit Syntax
+#### Explicit Syntax
 When an element's content might be ambiguous (e.g., a string containing a quote), you can wrap the compact form in angle brackets (`<` and `>`). This is the most verbose but also the most powerful form, as it allows for delimiter repetition to avoid any collision.
 
 ```xfer
@@ -149,11 +159,11 @@ When an element's content might be ambiguous (e.g., a string containing a quote)
 <// A comment containing </another comment/> //>
 ```
 
-### 3.3. Element Reference
+### Element Reference
 
 This section provides a detailed reference for each XferLang element type.
 
-#### 3.3.1. Primitive Types
+#### Primitive Types
 
 **String Element**
 *   **Specifier:** `"` (Quotation Mark)
@@ -205,7 +215,7 @@ This section provides a detailed reference for each XferLang element type.
 *   **Description:** Represents a null value.
 *   **Example:** `?`, `<??>`
 
-#### 3.3.1.1. Hexadecimal and Binary Formatting
+#### Hexadecimal and Binary Formatting
 
 Integer and Long elements support alternative numeric representations for improved readability in specific contexts:
 
@@ -234,7 +244,7 @@ Integer and Long elements support alternative numeric representations for improv
 
 **Safety Note:** Hex and binary formatting are only supported for integer types (`int`, `long`). Decimal and double types preserve fractional precision and do not support these formats.
 
-#### 3.3.2. Structural Types
+#### Structural Types
 
 **Object Element**
 *   **Specifiers:** `{` and `}` (Curly Brackets)
@@ -255,7 +265,7 @@ Integer and Long elements support alternative numeric representations for improv
 *   **Description:** A keyword is the key in a key/value pair. If it contains only letters, numbers, and underscores, it can be written implicitly. Otherwise, it must be enclosed in colons (`:`).
 *   **Example:** `name "Paul"`, `:first name: "Alice"`
 
-#### 3.3.2.1. Common Document Patterns
+#### Common Document Patterns
 
 **Configuration Documents**
 Most configuration files use Object as the root collection:
@@ -299,7 +309,7 @@ For documents with heterogeneous top-level content, use Tuple:
 )
 ```
 
-#### 3.3.3. Special-Purpose Types
+#### Special-Purpose Types
 
 **Metadata Element**
 *   **Specifiers:** `!` (Exclamation Mark)
@@ -316,7 +326,7 @@ For documents with heterogeneous top-level content, use Tuple:
 *   **Description:** Represents a value to be substituted at runtime, by default from an environment variable. You can override the default dynamic value resolution by subclassing `DefaultDynamicSourceResolver` or by implementing the `IDynamicSourceResolver` interface. This allows you to provide custom logic for resolving dynamic values in your XferLang documents.
 *   **Example:** `'Hello, <|USERNAME|>!'`
 
-### 3.4. Document Validation and Common Mistakes
+### Document Validation and Common Mistakes
 
 **Root Collection Requirement**
 Every XferLang document must have exactly one root collection element after any metadata. This is a fundamental requirement for proper parsing:
@@ -358,11 +368,11 @@ When using metadata, it must come first, followed by exactly one root collection
 "standalone string"
 ```
 
-## 4. The `.NET XferLang Library`
+## The `.NET XferLang Library`
 
 The primary implementation of XferLang is the `ParksComputing.Xfer.Lang` library for .NET. It provides a comprehensive object model, a robust parser, and a powerful serialization/deserialization utility class, `XferConvert`.
 
-### 4.1. Basic Serialization & Deserialization
+### Basic Serialization & Deserialization
 
 The `XferConvert` class provides a simple, static interface for converting between .NET objects and XferLang strings. The library automatically ensures that serialized objects are wrapped in a proper root collection element.
 
@@ -386,11 +396,11 @@ string xfer = XferConvert.Serialize(data, Formatting.Indented);
 var deserializedData = XferConvert.Deserialize<MyData>(xfer);
 ```
 
-### 4.2. Advanced Usage with `XferSerializerSettings`
+### Advanced Usage with `XferSerializerSettings`
 
 For more control, you can pass an instance of `XferSerializerSettings` to the `Serialize` and `Deserialize` methods.
 
-#### 4.2.1. Null Value Handling
+#### Null Value Handling
 By default, properties with `null` values are included. You can set `NullValueHandling` to `Ignore` to omit them.
 
 ```csharp
@@ -399,7 +409,7 @@ var settings = new XferSerializerSettings {
 };
 ```
 
-#### 4.2.2. Customizing Property Names with `IContractResolver`
+#### Customizing Property Names with `IContractResolver`
 You can change how property names are serialized by creating a custom contract resolver. For example, to make all property names lowercase:
 
 ```csharp
@@ -414,7 +424,7 @@ var settings = new XferSerializerSettings {
 };
 ```
 
-#### 4.2.3. Custom Type Converters with `IXferConverter`
+#### Custom Type Converters with `IXferConverter`
 For complete control over how a specific type is handled, you can create a custom converter. This is useful for types that don't map well to standard object serialization or for creating a more compact representation.
 
 **Example: A custom converter for a `Person` class**
@@ -453,7 +463,7 @@ var person = new Person { Name = "John Doe", Age = 42 };
 string xfer = XferConvert.Serialize(person, settings); // Result: "John Doe,42"
 ```
 
-#### 4.2.4. Numeric Formatting with Attributes
+#### Numeric Formatting with Attributes
 
 The library supports custom numeric formatting for integer and long properties using the `XferNumericFormatAttribute`. This allows you to control how numeric values are serialized in hexadecimal or binary formats.
 
@@ -493,58 +503,201 @@ string xfer = XferConvert.Serialize(config);
 - `decimal` and `double` types ignore formatting attributes to preserve fractional precision
 - Custom formatting respects the configured `ElementStylePreference` for syntax style
 
-### 4.3 DynamicSource PI Override: Powerful and Flexible
+## Processing Instructions & Dynamic Content
 
-XferLang allows you to override dynamic value resolution in your document using the `dynamicSource` processing instruction (PI). This feature provides significant flexibility for configuration, testing, and integration scenarios through an extensible source type system.
+XferLang supports Processing Instructions (PIs) that provide metadata and configuration for documents. PIs are special elements that control parsing behavior, define document metadata, and enable powerful dynamic content features. The PI system is fully extensible, allowing you to create custom instructions for specialized use cases.
 
-#### How it works
-- The library includes built-in source handlers: `const`, `env`, and `file`
-- You can register custom source handlers using `DynamicSourceHandlerRegistry.RegisterHandler()`
-- The `dynamicSource` PI uses a specific format: `key sourceType "sourceValue"`
-- Dynamic elements `<|key|>` are resolved according to their configured source type
-- If a key is not found in the PI, resolution falls back to environment variables
+### Built-in Processing Instructions
 
-#### Built-in Source Types
-- **`const`**: Returns the source value as a literal constant
-- **`env`**: Reads from environment variables (uses source value as variable name)
-- **`file`**: Reads content from files (uses source value as file path)
+XferLang includes several built-in PIs that address common document needs:
 
-#### Example
+#### Document Metadata PI
+
+The `document` PI stores metadata about the XferLang document itself and must appear first if present:
+
+```xfer
+<! document {
+    version "1.0"
+    author "John Doe"
+    created @2023-12-01T10:30:00@
+    description "Sample configuration file"
+} !>
+{
+    // Document content follows...
+}
+```
+
+**Key features:**
+- Must be the first non-comment element if present
+- Provides version tracking and document attribution
+- Supports any metadata fields as key-value pairs
+- Accessible programmatically through `XferDocument.ProcessingInstructions`
+
+#### DynamicSource PI
+
+The `dynamicSource` PI configures how dynamic elements `<|key|>` are resolved, providing flexible runtime value substitution:
+
 ```xfer
 <! dynamicSource {
-    greeting const "This is a test greeting from PI config."
+    greeting const "Welcome to our application"
     username env "USERNAME"
-    dbpassword db "dbpassword"
-    config file "config.txt"
+    config file "app.config"
+    secret vault "api-key"
 } !>
 {
     message '<|greeting|>'
     user '<|username|>'
-    password '<|dbpassword|>'
     settings '<|config|>'
+    apiKey '<|secret|>'
 }
 ```
 
+#### CharDef PI
+
+The `chardef` PI allows you to define custom character aliases for use in character elements:
+
+```xfer
+<! chardef {
+    bullet \$2022
+    arrow \$2192
+    check \$2713
+} !>
+{
+    symbols [ \bullet \arrow \check ]
+}
+```
+
+#### ID PI
+
+The `id` PI assigns identifiers to elements for referencing and linking:
+
+```xfer
+{
+    <! id "user-config" !>
+    section {
+        name "User Settings"
+        enabled ~true
+    }
+}
+```
+
+### Dynamic Elements & Source Resolution
+
+Dynamic elements provide runtime value substitution with an extensible source system.
+
+#### Built-in Source Types
+
+XferLang includes three built-in source handlers:
+
+**Constant Sources (`const`)**
+- Returns the configured value as a literal constant
+- Useful for templating and configuration management
+- Example: `greeting const "Hello, World!"`
+
+**Environment Variables (`env`)**
+- Reads from system environment variables
+- Supports fallback values and variable name mapping
+- Example: `username env "USER"` (reads from $USER environment variable)
+
+**File Sources (`file`)**
+- Reads content from files at parse time
+- Supports relative and absolute paths
+- Example: `config file "settings.json"`
+
 #### Custom Source Handler Registration
-You can extend the system with custom source types:
+
+Extend the system with custom source types for databases, web services, or other data sources:
 
 ```csharp
-// Register a custom 'db' source handler
-DynamicSourceHandlerRegistry.RegisterHandler("db", (sourceValue, fallbackKey) => {
+// Register a custom 'vault' source handler
+DynamicSourceHandlerRegistry.RegisterHandler("vault", (sourceValue, fallbackKey) => {
     var key = sourceValue ?? fallbackKey;
-    return GetValueFromDatabase(key);
+    return await SecretVaultClient.GetSecretAsync(key);
+});
+
+// Register a database source handler
+DynamicSourceHandlerRegistry.RegisterHandler("db", (sourceValue, fallbackKey) => {
+    var query = sourceValue ?? $"SELECT value FROM config WHERE key = '{fallbackKey}'";
+    return DatabaseService.ExecuteScalar(query);
 });
 ```
 
-#### Why this matters
-- Enables flexible, testable, and environment-specific configuration
-- Supports secrets, database lookups, file content, and custom sources
-- Completely extensible through the handler registry system
-- Runtime overrides without code changes
+**Resolution Priority:**
+1. Configured source type in `dynamicSource` PI
+2. Fallback to environment variables
+3. Return empty string if not found
 
-This feature makes XferLang highly extensible and adaptable for a wide range of use cases.
+### Extending Processing Instructions
 
-## 5. Project Status & Roadmap
+The PI system is designed for extensibility, allowing you to create custom instructions for specialized parsing and document processing needs.
+
+#### Creating Custom PIs
+
+To create a custom PI, inherit from `ProcessingInstruction` and implement the required behavior:
+
+```csharp
+public class ValidationProcessingInstruction : ProcessingInstruction {
+    public const string Keyword = "validation";
+
+    public ValidationProcessingInstruction(ObjectElement rules) : base(rules, Keyword) { }
+
+    public override void ProcessingInstructionHandler() {
+        if (Value is not ObjectElement obj) {
+            throw new InvalidOperationException($"{Keyword} PI expects an object element");
+        }
+
+        // Process validation rules and store globally
+        foreach (var kv in obj.Dictionary) {
+            var fieldName = kv.Value.Key;
+            var rules = kv.Value.Value;
+            ValidationRegistry.RegisterRules(fieldName, rules);
+        }
+    }
+
+    public override void ElementHandler(Element element) {
+        // Apply validation rules to specific elements
+        ValidationRegistry.ValidateElement(element);
+    }
+}
+```
+
+#### PI Registration & Lifecycle
+
+Register custom PIs with the parser during initialization:
+
+```csharp
+// Register the custom PI processor
+Parser.RegisterPIProcessor(ValidationProcessingInstruction.Keyword,
+    (kvp, parser) => new ValidationProcessingInstruction((ObjectElement)kvp.Value));
+
+// Example usage in XferLang document
+var xferContent = @"
+<! validation {
+    userEmail regex ""^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$""
+    userAge range { min 0 max 120 }
+} !>
+{
+    userEmail ""user@example.com""
+    userAge 25
+}";
+```
+
+**PI Lifecycle:**
+1. **Discovery**: PIs are identified during metadata parsing
+2. **Creation**: Registered processors create PI instances
+3. **Processing**: `ProcessingInstructionHandler()` is called for document-level setup
+4. **Element Processing**: `ElementHandler()` is called for each relevant element
+5. **Cleanup**: PIs can register cleanup logic if needed
+
+**Advanced Features:**
+- **Scoped PIs**: Apply to specific document sections
+- **Cascading PIs**: Inherit behavior from parent elements
+- **Conditional PIs**: Activate based on document content or external conditions
+- **Multi-phase PIs**: Process elements in multiple passes
+
+This extensible PI system makes XferLang highly adaptable for domain-specific needs, from configuration management to data validation and transformation pipelines.
+
+## Project Status & Roadmap
 
 The .NET implementation of XferLang is becoming more robust, with a focus on professional-grade features like custom converters and contract resolvers. However, the project as a whole is still experimental.
 
@@ -556,10 +709,10 @@ The future roadmap includes:
 
 The goal of moving to a Rust core is to provide a single, high-performance, and memory-safe core for all future XferLang implementations. I'm looking for contributors and collaborators to get that work started.
 
-## 6. Contributing
+## Contributing
 
 This is an open-source project, and contributions are always welcome! If you are interested in helping, please feel free to open an issue or a pull request on GitHub. You can also reach out to me directly via email at [paul@parkscomputing.com](mailto:paul@parkscomputing.com).
 
-## 7. Grammar
+## Grammar
 
 The formal Backus–Naur form (BNF) grammar for XferLang can be found in the repository: [xfer.bnf](https://github.com/paulmooreparks/Xfer/blob/master/xfer.bnf).

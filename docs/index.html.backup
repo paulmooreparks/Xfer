@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XferLang Documentation</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="highlightjs/styles/github.min.css">
+    <script src="highlightjs/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+    </script>
+</head>
+<body>
+    <div class="mobile-nav-toggle">
+        ☰
+    </div>
+    <nav class="sidebar">
+        <ul>
+        </ul>
+
+    </nav>
+    <main class="content">
+        <header>
+            <img src="XferLang-lg.png" alt="XferLang Logo" class="logo">
+            <h1>XferLang</h1>
+            <p class="subtitle">A Modern Data-Interchange Format</p>
+        </header>
+
+<hr />
+<h2 id="title-xferlang-documentation-description-documentation-for-the-xferlang-data-interchange-format">title: XferLang Documentation
+description: Documentation for the XferLang data-interchange format</h2>
+<h1 id="xferlang-documentation">XferLang Documentation</h1>
+<h2 id="introduction">Introduction</h2>
+<p>XferLang is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management.</p>
+<pre><code class="language-xfer">{
+    name &quot;Alice&quot;
+    age 30
+    isActive ~true
+}
+</code></pre>
+<h2 id="design-philosophy">Design Philosophy</h2>
+<p>XferLang is built around four core principles:</p>
+<h3 id="clarity-and-readability">1. Clarity and Readability</h3>
+<p>The syntax is designed to be human-readable without requiring separators like commas.</p>
+<h3 id="explicit-typing">2. Explicit Typing</h3>
+<p>All values are explicitly typed using prefixes.</p>
+<h2 id="basic-syntax">Basic Syntax</h2>
+<p>XferLang documents consist of elements separated by whitespace.</p>
+<pre><code class="language-xfer">&lt;/ This is a comment /&gt;
+name &quot;John Doe&quot;
+age 30
+</code></pre>
+</section>
+
+        <footer>
+            <p>Documentation generated on 2025-08-03 19:51:02 UTC</p>
+        </footer>
+    </main>
+</body>
+</html>

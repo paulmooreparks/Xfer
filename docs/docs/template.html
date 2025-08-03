@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}}</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="highlightjs/styles/github.min.css">
+    <script src="highlightjs/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+    </script>
+</head>
+<body>
+    <div class="mobile-nav-toggle">
+        ☰
+    </div>
+    <nav class="sidebar">
+{{NAVIGATION}}
+    </nav>
+    <main class="content">
+        <header>
+            <img src="XferLang-lg.png" alt="XferLang Logo" class="logo">
+            <h1>XferLang</h1>
+            <p class="subtitle">A Modern Data-Interchange Format</p>
+        </header>
+
+{{CONTENT}}
+
+        <footer>
+            <p>Documentation generated on {{GENERATED_DATE}}</p>
+        </footer>
+    </main>
+</body>
+</html>

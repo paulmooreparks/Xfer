@@ -1,8 +1,26 @@
-﻿<document> ::= <opt_whitespace> <metadata_element>? <opt_whitespace> <body_element>* <opt_whitespace>
+﻿/* XferLang Grammar (BNF)
+ *
+ * Key Requirements:
+ * - All XferLang documents must have exactly one root collection element (Object, Array, or Tuple)
+ * - Optional metadata/processing instructions may precede the root collection
+ * - Processing instructions provide document metadata and configuration
+ *
+ * Examples of valid documents:
+ * - { name "Alice" age 30 }                                    (Object root)
+ * - [ 1 2 3 ]                                                 (Array root)
+ * - ( "title" 42 ~true )                                      (Tuple root)
+ * - <! document { version "1.0" } !> { config "value" }       (With metadata)
+ */
 
-<metadata_element> ::= <metadata_element_explicit> | <metadata_element_compact>
-<metadata_element_explicit> ::= <element_open> <metadata_specifier> <key_value_pair>+ <metadata_specifier> <element_close>
-<metadata_element_compact> ::= <metadata_specifier> <key_value_pair>* <metadata_specifier>
+<document> ::= <opt_whitespace> <metadata_element>? <opt_whitespace> <collection_element> <opt_whitespace>
+
+<collection_element> ::= <object_element> | <array_element> | <tuple_element>
+
+<metadata_element> ::= <processing_instruction>+
+
+<processing_instruction> ::= <processing_instruction_explicit> | <processing_instruction_compact>
+<processing_instruction_explicit> ::= <element_open> <metadata_specifier> <opt_whitespace> <key_value_pair>+ <opt_whitespace> <metadata_specifier> <element_close>
+<processing_instruction_compact> ::= <metadata_specifier> <opt_whitespace> <key_value_pair>+ <opt_whitespace> <metadata_specifier>
 
 <body_element> ::= <opt_whitespace> (
       <key_value_pair>
@@ -24,6 +42,7 @@
     | <comment_element>
     | <dynamic_element>
     | <interpolated_element>
+    | <processing_instruction>
     ) <opt_whitespace>
 
 <string_element> ::= <string_element_explicit> | <string_element_compact>
@@ -101,10 +120,12 @@
 <object_element_explicit> ::= <element_open> <object_specifier_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_specifier_close> <element_close>
 <object_element_compact> ::= <object_specifier_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_specifier_close>
 
+/* Arrays should contain homogeneous elements (same type) */
 <array_element> ::= <array_element_explicit> | <array_element_compact>
 <array_element_explicit> ::= <element_open> <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close> <element_close>
 <array_element_compact> ::= <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close>
 
+/* Tuples may contain heterogeneous elements (mixed types) */
 <tuple_element> ::= <tuple_element_explicit> | <tuple_element_compact>
 <tuple_element_explicit> ::= <element_open> <tuple_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <tuple_specifier_close> <element_close>
 <tuple_element_compact> ::= <tuple_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <tuple_specifier_close>
@@ -114,7 +135,7 @@
 
 <metadata_specifier> ::= "!"+
 <string_specifier> ::= "\""+
-<keyword_specifier> ::= "="+
+<keyword_specifier> ::= ":"+
 <character_specifier> ::= "\\"+
 <integer_specifier> ::= "#"+
 <long_specifier> ::= "&"+
