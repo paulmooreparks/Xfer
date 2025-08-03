@@ -2,14 +2,31 @@ using System;
 using System.IO;
 using ParksComputing.Xfer.Lang.Elements;
 using ParksComputing.Xfer.Lang.ProcessingInstructions;
+using ParksComputing.Xfer.Lang.Services;
 
 namespace ParksComputing.Xfer.Lang.DynamicSource {
     public class DefaultDynamicSourceResolver : IDynamicSourceResolver {
+        // Legacy constants for backward compatibility
         private const string DynamicSourceKey = "dynamicSource";
         private const string FileKeyword = "file";
         private const string EnvKeyword = "env";
         private const string ConstKeyword = "const";
+
         public virtual string? Resolve(string key, XferDocument document) {
+            // First, try the new DynamicSourceRegistry (from dynamicSource PIs)
+            var result = DynamicSourceRegistry.Resolve(key);
+            if (result != null) {
+                return result;
+            }
+
+            // Fallback to legacy PI scanning (for backward compatibility)
+            return ResolveLegacy(key, document);
+        }
+
+        /// <summary>
+        /// Legacy resolution method for backward compatibility with old PI format.
+        /// </summary>
+        protected virtual string? ResolveLegacy(string key, XferDocument document) {
             // Look for PI directive: dynamicSource
             foreach (var meta in document.Root.Values) {
                 if (meta is ProcessingInstruction metaElem && metaElem.Kvp?.Key == DynamicSourceKey) {

@@ -26,7 +26,13 @@ public class Parser : IXferParser {
     // Used to hold a pending meta PI to attach as XferMetadata to the next element
     private ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver _dynamicSourceResolver = new ParksComputing.Xfer.Lang.DynamicSource.DefaultDynamicSourceResolver();
 
-    // Extensible PI and element processors
+    // PI processor delegate type
+    public delegate ProcessingInstruction PIProcessor(KeyValuePairElement kvp, Parser parser);
+
+    // Registry for PI processors
+    private readonly Dictionary<string, PIProcessor> _piProcessorRegistry = new(StringComparer.InvariantCultureIgnoreCase);
+
+    // Extensible PI and element processors (existing functionality)
     private readonly Dictionary<string, List<Action<KeyValuePairElement>>> _piProcessors = new();
     private readonly List<Action<Element>> _elementProcessors = new();
 
@@ -41,9 +47,39 @@ public class Parser : IXferParser {
     }
 
     /// <summary>
+    /// Register a processing instruction processor that creates a specific PI type from a KVP.
+    /// </summary>
+    public void RegisterPIProcessor(string piKey, PIProcessor processor) {
+        _piProcessorRegistry[piKey] = processor;
+    }
+
+    /// <summary>
+    /// Unregister a processing instruction processor.
+    /// </summary>
+    public void UnregisterPIProcessor(string piKey) {
+        _piProcessorRegistry.Remove(piKey);
+    }
+
+    /// <summary>
+    /// Check if a processing instruction processor is registered for the given key.
+    /// </summary>
+    public bool HasPIProcessor(string piKey) {
+        return _piProcessorRegistry.ContainsKey(piKey);
+    }
+
+    /// <summary>
     /// Register an element processor. Called with each element as it is constructed.
     /// </summary>
     public void RegisterElementProcessor(Action<Element> processor) => _elementProcessors.Add(processor);
+
+    /// <summary>
+    /// Adds a warning to the current document being parsed.
+    /// </summary>
+    private void AddWarning(WarningType type, string message, string? context = null) {
+        if (_currentDocument != null) {
+            _currentDocument.Warnings.Add(new ParseWarning(type, message, CurrentRow, CurrentColumn, context));
+        }
+    }
 
 
 
@@ -61,6 +97,64 @@ public class Parser : IXferParser {
 
     public Parser(Encoding encoding) {
         Encoding = encoding;
+        RegisterBuiltInPIProcessors();
+    }
+
+    /// <summary>
+    /// Register the built-in processing instruction processors.
+    /// </summary>
+    private void RegisterBuiltInPIProcessors() {
+        RegisterPIProcessor(CharDefProcessingInstruction.Keyword, CreateCharDefProcessingInstruction);
+        RegisterPIProcessor(DocumentProcessingInstruction.Keyword, CreateDocumentProcessingInstruction);
+        RegisterPIProcessor(IdProcessingInstruction.Keyword, CreateIdProcessingInstruction);
+        RegisterPIProcessor(DynamicSourceProcessingInstruction.Keyword, CreateDynamicSourceProcessingInstruction);
+    }
+
+    // Built-in PI processor factory methods
+    private static ProcessingInstruction CreateCharDefProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
+        if (kvp.Value is not ObjectElement obj) {
+            throw new InvalidOperationException($"At row {parser.CurrentRow}, column {parser.CurrentColumn}: CharDef PI must contain an object containing text-to-character-element key/value pairs.");
+        }
+
+        return new CharDefProcessingInstruction(obj);
+    }
+
+    private static ProcessingInstruction CreateIdProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
+        if (kvp.Value is not TextElement textElement) {
+            throw new InvalidOperationException($"At row {parser.CurrentRow}, column {parser.CurrentColumn}: Id PI must contain a text element.");
+        }
+
+        return new IdProcessingInstruction(textElement);
+    }
+
+    private ProcessingInstruction CreateDocumentProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
+        if (kvp.Value is not ObjectElement obj) {
+            throw new InvalidOperationException($"At row {parser.CurrentRow}, column {parser.CurrentColumn}: Document PI must contain an object with metadata.");
+        }
+
+        var pi = new DocumentProcessingInstruction(obj);
+
+        foreach (var innerKvp in obj.Dictionary.Values) {
+            if (_piProcessorRegistry.TryGetValue(innerKvp.Key, out var processor)) {
+                // Call the processor for the KVP
+                processor(innerKvp, this);
+            }
+            else {
+                // If no processors are registered, just log or handle as needed
+                Debug.WriteLine($"No processors registered for key: {innerKvp.Key}");
+            }
+        }
+
+        MapToXferDocumentMetadata(pi);
+        return pi;
+    }
+
+    private static ProcessingInstruction CreateDynamicSourceProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
+        if (kvp.Value is not ObjectElement obj) {
+            throw new InvalidOperationException($"At row {parser.CurrentRow}, column {parser.CurrentColumn}: DynamicSource PI must contain an object with source configuration.");
+        }
+
+        return new DynamicSourceProcessingInstruction(obj);
     }
 
     public Encoding Encoding { get; private set; } = Encoding.UTF8;
@@ -590,27 +684,53 @@ public class Parser : IXferParser {
         var document = new XferDocument();
         _currentDocument = document;
 
-        var element = ParseElement();
+        CollectionElement? rootElement = null;
 
-        if (element is CollectionElement collectionElement)
-        {
-            document.Root = collectionElement;
-        }
-        else if (element is EmptyElement)
-        {
-            document.Root = new TupleElement(); // Default empty document to a tuple
-        }
-        else
-        {
-            throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: A document's root must be a collection element (object, array, or tuple). Found '{element.GetType().Name}'.");
+        // Parse all top-level elements in order
+        while (IsCharAvailable()) {
+            SkipWhitespace();
+
+            if (!IsCharAvailable()) {
+                break;
+            }
+
+            var element = ParseElement();
+
+            if (element is ProcessingInstruction pi) {
+                // PI at document level - store it and set next element as target
+                document.ProcessingInstructions.Add(pi);
+                Console.WriteLine($"[PARSER] Added document-level PI: {pi.GetType().Name} - {pi.Kvp?.Key}");
+            }
+            else if (element is CollectionElement collectionElement) {
+                if (rootElement != null) {
+                    throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Multiple root elements found. A document can only have one root element.");
+                }
+                rootElement = collectionElement;
+
+                // Set any previous document-level PIs to target this root element
+                foreach (var docPI in document.ProcessingInstructions) {
+                    if (docPI.Target == null) {
+                        docPI.Target = rootElement;
+                        Console.WriteLine($"[PARSER] Set PI target: {docPI.Kvp?.Key} -> {rootElement.GetType().Name}");
+                    }
+                }
+
+                Console.WriteLine($"[PARSER] Found root element: {rootElement.GetType().Name}");
+            }
+            else if (element is EmptyElement) {
+                // Skip empty elements
+            }
+            else {
+                throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Invalid top-level element '{element.GetType().Name}'. Top-level elements must be processing instructions or a single collection element (object, array, or tuple).");
+            }
+
+            SkipWhitespace();
         }
 
-        SkipWhitespace();
+        Console.WriteLine($"[PARSER] Total document-level PIs stored: {document.ProcessingInstructions.Count}");
 
-        if (IsCharAvailable())
-        {
-            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected content found after the root element.");
-        }
+        // Set the root element (default to empty tuple if none found)
+        document.Root = rootElement ?? new TupleElement();
 
         return document;
     }
@@ -723,25 +843,7 @@ public class Parser : IXferParser {
                 throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Expected element.");
             }
 
-            if (element is ProcessingInstruction pi) {
-                _pendingPIs.Add(pi);
-                SkipWhitespace();
-                continue; // Loop to find the PI's target element
-            }
-
             SkipWhitespace();
-
-            // Apply pending PIs to non-collection elements
-            // Collection elements handle their own PIs in their respective Parse methods
-            if (element is not EmptyElement and not CollectionElement)
-            {
-                foreach (var pendingPI in _pendingPIs)
-                {
-                    pendingPI.Target = element;
-                    pendingPI.ElementHandler(element);
-                }
-                _pendingPIs.Clear();
-            }
 
             return element ?? new EmptyElement();
         }
@@ -780,22 +882,26 @@ public class Parser : IXferParser {
 
                 ProcessingInstruction? pi;
 
-                if (string.Equals(piKey, CharDefProcessingInstruction.Keyword, StringComparison.InvariantCultureIgnoreCase)) {
-                    pi = ParseCharDefProcessingInstruction(kvp);
-                }
-                else if (string.Equals(piKey, DocumentProcessingInstruction.Keyword, StringComparison.InvariantCultureIgnoreCase)) {
-                    pi = ParseDocumentProcessingInstruction(kvp);
-                }
-                else if (string.Equals(piKey, IdProcessingInstruction.Keyword, StringComparison.InvariantCultureIgnoreCase)) {
-                    pi = ParseIdProcessingInstruction(kvp);
+                // Look up the PI processor in the registry
+                if (_piProcessorRegistry.TryGetValue(piKey, out var processor)) {
+                    pi = processor(kvp, this);
                 }
                 else {
-                    throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Failed to parse processing instruction.");
+                    // Add warning for unregistered PI and create a generic PI to preserve the data
+                    AddWarning(WarningType.UnregisteredProcessingInstruction,
+                              $"Unknown processing instruction '{piKey}'. Creating generic PI to preserve data.",
+                              piKey);
+
+                    // Create a generic ProcessingInstruction to preserve the data structure
+                    pi = new ProcessingInstruction(kvp.Value, piKey);
                 }
 
                 // Call PI processors/handlers with the KVP and its target
                 if (pi is CharDefProcessingInstruction charDefPi) {
                     charDefPi.ProcessingInstructionHandler();
+                }
+                else if (pi is DynamicSourceProcessingInstruction dynamicSourcePi) {
+                    dynamicSourcePi.ProcessingInstructionHandler();
                 }
 
                 return pi;
@@ -819,48 +925,6 @@ public class Parser : IXferParser {
 
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {ProcessingInstruction.ElementName} element.");
 
-    }
-
-    private ProcessingInstruction ParseCharDefProcessingInstruction(KeyValuePairElement kvp) {
-        if (kvp.Value is not ObjectElement obj) {
-            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Document PI must contain an object containing text-to-character-element key/value pairs.");
-        }
-
-        var pi = new CharDefProcessingInstruction(obj);
-        return pi;
-    }
-
-    private ProcessingInstruction ParseIdProcessingInstruction(KeyValuePairElement kvp) {
-        if (kvp.Value is not TextElement textElement) {
-            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Id PI must contain a text element.");
-        }
-
-        var pi = new IdProcessingInstruction(textElement);
-        return pi;
-    }
-
-    private ProcessingInstruction ParseDocumentProcessingInstruction(KeyValuePairElement kvp) {
-        if (kvp.Value is not ObjectElement obj) {
-            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Document PI must contain an object with metadata.");
-        }
-
-        var pi = new DocumentProcessingInstruction(obj);
-
-        foreach (var innerKvp in obj.Dictionary.Values) {
-            if (_piProcessors.TryGetValue(innerKvp.Key, out var processors)) {
-                // Call each processor for the KVP
-                foreach (var processor in processors) {
-                    processor(innerKvp);
-                }
-            }
-            else {
-                // If no processors are registered, just log or handle as needed
-                Debug.WriteLine($"No processors registered for key: {innerKvp.Key}");
-            }
-        }
-
-        MapToXferDocumentMetadata(pi);
-        return pi;
     }
 
     private ArrayElement ParseArrayElement(int specifierCount = 1) {
@@ -1008,32 +1072,30 @@ public class Parser : IXferParser {
         SkipWhitespace();
         var tupleElement = new TupleElement(style);
 
-        // Apply any pending PIs to this tuple element
-        foreach (var pendingPI in _pendingPIs)
-        {
-            pendingPI.Target = tupleElement;
-            pendingPI.ElementHandler(tupleElement);
-        }
-        _pendingPIs.Clear();
+        List<ProcessingInstruction> pendingPIs = new List<ProcessingInstruction>();
 
         while (IsCharAvailable()) {
             if (TupleElementClosing()) {
                 return tupleElement;
             }
 
-            // Handle processing instructions specially in tuples
-            if (ElementOpening(ProcessingInstruction.ElementDelimiter, out int piSpecifierCount)) {
-                var pi = ParseProcessingInstruction(piSpecifierCount);
-                // Add PI to tuple for serialization
-                tupleElement.Add(pi);
-                // Also add to pending PIs for application to next element
-                _pendingPIs.Add(pi);
-                SkipWhitespace();
-                continue;
-            }
-
             var element = ParseElement();
-            tupleElement.Add(element);
+
+            if (element is ProcessingInstruction pi) {
+                // Add PI to tuple and track it for target assignment
+                tupleElement.Add(pi);
+                pendingPIs.Add(pi);
+                Console.WriteLine($"[PARSER] Added PI to tuple: {pi.Kvp?.Key}");
+            } else {
+                // Non-PI element: set it as target for any pending PIs
+                foreach (var pendingPI in pendingPIs) {
+                    pendingPI.Target = element;
+                    Console.WriteLine($"[PARSER] Set PI target: {pendingPI.Kvp?.Key} -> {element.GetType().Name}");
+                }
+                pendingPIs.Clear();
+
+                tupleElement.Add(element);
+            }
         }
 
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {TupleElement.ElementName} element.");
@@ -1204,7 +1266,11 @@ public class Parser : IXferParser {
         }
         string charString = charContent.ToString();
         if (string.IsNullOrEmpty(charString)) {
-            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Empty character element.");
+            // Add warning for empty character element and use replacement character
+            AddWarning(WarningType.EmptyCharacterElement,
+                      "Empty character element, using '?' (U+003F) as replacement",
+                      null);
+            return new CharacterElement('?', specifierCount, style: style);
         }
 
         int codePoint = '?';
@@ -1214,6 +1280,13 @@ public class Parser : IXferParser {
 
             if (resolved.HasValue) {
                 codePoint = resolved.Value;
+            }
+            else {
+                // Add warning for unresolved character name
+                AddWarning(WarningType.CharacterResolutionFailure,
+                          $"Unknown character name '{charString}', using '?' (U+003F) as fallback",
+                          charString);
+                codePoint = '?';
             }
         }
         else {

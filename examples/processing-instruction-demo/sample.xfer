@@ -21,6 +21,7 @@ charDef {
     <\answer\>
     'I <\heart\><\vsemoji\> XferLang!'
     'Put a <\pin\> in it!'
+    foo"bar"
 
     <! id "object" !>
     alphabet {

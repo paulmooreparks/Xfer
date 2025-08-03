@@ -20,6 +20,20 @@ internal class ParseCommand {
         var parser = new Parser();
         var document = parser.Parse(inputBytes);
 
+        // Check for errors and warnings
+        if (document.HasError) {
+            Console.WriteLine($"Parse Error: {document.Error}");
+            return 1; // Error exit code
+        }
+
+        if (document.HasWarnings) {
+            Console.WriteLine($"Parse Warnings ({document.Warnings.Count}):");
+            foreach (var warning in document.Warnings) {
+                Console.WriteLine($"  {warning}");
+            }
+            Console.WriteLine();
+        }
+
         // Find Xfer version from metadata in Root
         var xferVersion = document.Root.Children
             .OfType<ProcessingInstruction>()

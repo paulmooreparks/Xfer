@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Text;
 using ParksComputing.Xfer.Lang.Elements;
+using ParksComputing.Xfer.Lang.ProcessingInstructions;
 
 namespace ParksComputing.Xfer.Lang;
 
@@ -8,6 +10,40 @@ public class XferDocument {
     public CollectionElement Root { get; set; } = new TupleElement();
 
     public XferMetadata? Metadata { get; set; }
+
+    /// <summary>
+    /// Document-level Processing Instructions that appear outside the root element.
+    /// These are conceptually siblings to the root element.
+    /// </summary>
+    public List<ProcessingInstruction> ProcessingInstructions { get; set; } = new List<ProcessingInstruction>();
+
+    /// <summary>
+    /// The first fatal error encountered during parsing, if any.
+    /// When an error is present, parsing stops and the document may be incomplete.
+    /// </summary>
+    public ParseError? Error { get; set; }
+
+    /// <summary>
+    /// Collection of non-fatal warnings encountered during parsing.
+    /// Warnings indicate potential issues but don't prevent successful parsing.
+    /// </summary>
+    public List<ParseWarning> Warnings { get; set; } = new List<ParseWarning>();
+
+    /// <summary>
+    /// Gets a value indicating whether the document has a fatal error.
+    /// </summary>
+    public bool HasError => Error != null;
+
+    /// <summary>
+    /// Gets a value indicating whether the document has any warnings.
+    /// </summary>
+    public bool HasWarnings => Warnings.Count > 0;
+
+    /// <summary>
+    /// Gets a value indicating whether the document is valid (no fatal errors).
+    /// Note: A document can be valid but still have warnings.
+    /// </summary>
+    public bool IsValid => !HasError;
 
     public XferDocument() { }
 
@@ -32,11 +68,24 @@ public class XferDocument {
     }
 
     public virtual string ToXfer() {
-        return Root.ToXfer();
+        return ToXfer(Formatting.None);
     }
 
     public virtual string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
-        return Root.ToXfer(formatting, indentChar, indentation, depth);
+        var sb = new StringBuilder();
+
+        // Serialize document-level PIs first
+        foreach (var pi in ProcessingInstructions) {
+            sb.Append(pi.ToXfer(formatting, indentChar, indentation, depth));
+            if (formatting.HasFlag(Formatting.Indented)) {
+                sb.AppendLine();
+            }
+        }
+
+        // Then serialize the root element
+        sb.Append(Root.ToXfer(formatting, indentChar, indentation, depth));
+
+        return sb.ToString();
     }
 
     public override string ToString() {

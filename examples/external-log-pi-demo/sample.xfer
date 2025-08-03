@@ -1,0 +1,11 @@
+</ This demo shows a completely external Log Processing Instruction
+that logs target elements to different destinations (file, console, etc.)
+using the recursive KVP pattern for configuration />
+
+<! log { level "info" destination "console" format "json" message "Document root logged to console" } !>
+{
+    name "Alice Johnson"
+    email "alice@example.com"
+    <! log { level "debug" destination file "logs/name.log" format "pretty" message "Name logged to file" } !>
+    displayName "Alice"
+}
