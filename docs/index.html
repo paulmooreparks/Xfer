@@ -33,24 +33,112 @@
             </li>
             <li>
                 <details>
+                    <summary>XferLang Elements</summary>
+                    <ul>
+                <li><a href="#array">Array</a></li>
+                <li><a href="#keyvalue-pair">Key/Value Pair</a></li>
+                <li><a href="#object">Object</a></li>
+                <li><a href="#tuple">Tuple</a></li>
+                <li><a href="#comment">Comment</a></li>
+                <li><a href="#dynamic">Dynamic</a></li>
+                <li><a href="#identifier">Identifier</a></li>
+                <li><a href="#integer">Integer</a></li>
+                <li><a href="#long">Long</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>Complete Examples</summary>
+                    <ul>
+                <li><a href="#configuration-file-example">Configuration File Example</a></li>
+                <li><a href="#user-profile-example">User Profile Example</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li><a href="#grammar-reference">Grammar Reference</a></li>
+            <li>
+                <details>
+                    <summary>Getting Started with .NET</summary>
+                    <ul>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#quick-start-example">Quick Start Example</a></li>
+                <li><a href="#working-with-collections">Working with Collections</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
                     <summary>The .NET XferLang Library</summary>
                     <ul>
-                <li><a href="#basic-serialization-andamp-deserialization">Basic Serialization &amp; Deserialization</a></li>
+                <li><a href="#basic-serialization-and-deserialization">Basic Serialization and Deserialization</a></li>
                 <li><a href="#advanced-usage-with-xferserializersettings">Advanced Usage with XferSerializerSettings</a></li>
                     </ul>
                 </details>
             </li>
             <li>
                 <details>
-                    <summary>Processing Instructions &amp; Dynamic Content</summary>
+                    <summary>Serializer Settings</summary>
+                    <ul>
+                <li><a href="#element-style-preferences">Element Style Preferences</a></li>
+                <li><a href="#configuration-example">Configuration Example</a></li>
+                <li><a href="#available-settings">Available Settings</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>Property Attributes</summary>
+                    <ul>
+                <li><a href="#xferpropertyattribute">XferPropertyAttribute</a></li>
+                <li><a href="#xfernumericformatattribute">XferNumericFormatAttribute</a></li>
+                <li><a href="#safety-notes">Safety Notes</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>Processing Instructions and Dynamic Content</summary>
                     <ul>
                 <li><a href="#built-in-processing-instructions">Built-in Processing Instructions</a></li>
-                <li><a href="#dynamic-elements-andamp-source-resolution">Dynamic Elements &amp; Source Resolution</a></li>
+                <li><a href="#dynamic-elements-and-source-resolution">Dynamic Elements and Source Resolution</a></li>
                 <li><a href="#extending-processing-instructions">Extending Processing Instructions</a></li>
                     </ul>
                 </details>
             </li>
-            <li><a href="#project-status-andamp-roadmap">Project Status &amp; Roadmap</a></li>
+            <li>
+                <details>
+                    <summary>Writing Custom Processing Instruction (PI) Processors</summary>
+                    <ul>
+                <li><a href="#conceptual-overview">Conceptual Overview</a></li>
+                <li><a href="#net-api-usage">.NET API Usage</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>Building XferLang</summary>
+                    <ul>
+                <li><a href="#prerequisites">Prerequisites</a></li>
+                <li><a href="#quick-start">Quick Start</a></li>
+                <li><a href="#project-structure">Project Structure</a></li>
+                <li><a href="#development-commands">Development Commands</a></li>
+                <li><a href="#using-the-command-line-tools">Using the Command-Line Tools</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>Community and Resources</summary>
+                    <ul>
+                <li><a href="#learning-resources">Learning Resources</a></li>
+                <li><a href="#getting-help">Getting Help</a></li>
+                <li><a href="#development-status">Development Status</a></li>
+                <li><a href="#language-comparison">Language Comparison</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li><a href="#project-status-and-roadmap">Project Status and Roadmap</a></li>
             <li><a href="#contributing">Contributing</a></li>
             <li><a href="#grammar">Grammar</a></li>
         </ul>
@@ -95,9 +183,36 @@
 <li><a href="#document-validation-and-common-mistakes">Document Validation and Common Mistakes</a></li>
 </ul>
 </li>
+<li><a href="#xferlang-elements">XferLang Elements</a>
+<ul>
+<li><a href="#array">Array</a></li>
+<li><a href="#keyvalue-pair">Key/Value Pair</a></li>
+<li><a href="#object">Object</a></li>
+<li><a href="#tuple">Tuple</a></li>
+<li><a href="#comment">Comment</a></li>
+<li><a href="#dynamic">Dynamic</a></li>
+<li><a href="#identifier">Identifier</a></li>
+<li><a href="#integer">Integer</a></li>
+<li><a href="#long">Long</a></li>
+</ul>
+</li>
+<li><a href="#complete-examples">Complete Examples</a>
+<ul>
+<li><a href="#configuration-file-example">Configuration File Example</a></li>
+<li><a href="#user-profile-example">User Profile Example</a></li>
+</ul>
+</li>
+<li><a href="#grammar-reference">Grammar Reference</a></li>
+<li><a href="#getting-started-with-net">Getting Started with .NET</a>
+<ul>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#quick-start-example">Quick Start Example</a></li>
+<li><a href="#working-with-collections">Working with Collections</a></li>
+</ul>
+</li>
 <li><a href="#the-net-xferlang-library">The <code>.NET XferLang Library</code></a>
 <ul>
-<li><a href="#basic-serialization--deserialization">Basic Serialization &amp; Deserialization</a></li>
+<li><a href="#basic-serialization-and-deserialization">Basic Serialization and Deserialization</a></li>
 <li><a href="#advanced-usage-with-xferserializersettings">Advanced Usage with <code>XferSerializerSettings</code></a>
 <ul>
 <li><a href="#null-value-handling">Null Value Handling</a></li>
@@ -108,7 +223,21 @@
 </li>
 </ul>
 </li>
-<li><a href="#processing-instructions--dynamic-content">Processing Instructions &amp; Dynamic Content</a>
+<li><a href="#serializer-settings">Serializer Settings</a>
+<ul>
+<li><a href="#element-style-preferences">Element Style Preferences</a></li>
+<li><a href="#configuration-example">Configuration Example</a></li>
+<li><a href="#available-settings">Available Settings</a></li>
+</ul>
+</li>
+<li><a href="#property-attributes">Property Attributes</a>
+<ul>
+<li><a href="#xferpropertyattribute">XferPropertyAttribute</a></li>
+<li><a href="#xfernumericformatattribute">XferNumericFormatAttribute</a></li>
+<li><a href="#safety-notes">Safety Notes</a></li>
+</ul>
+</li>
+<li><a href="#processing-instructions-and-dynamic-content">Processing Instructions and Dynamic Content</a>
 <ul>
 <li><a href="#built-in-processing-instructions">Built-in Processing Instructions</a>
 <ul>
@@ -118,7 +247,7 @@
 <li><a href="#id-pi">ID PI</a></li>
 </ul>
 </li>
-<li><a href="#dynamic-elements--source-resolution">Dynamic Elements &amp; Source Resolution</a>
+<li><a href="#dynamic-elements-and-source-resolution">Dynamic Elements and Source Resolution</a>
 <ul>
 <li><a href="#built-in-source-types">Built-in Source Types</a></li>
 <li><a href="#custom-source-handler-registration">Custom Source Handler Registration</a></li>
@@ -127,12 +256,35 @@
 <li><a href="#extending-processing-instructions">Extending Processing Instructions</a>
 <ul>
 <li><a href="#creating-custom-pis">Creating Custom PIs</a></li>
-<li><a href="#pi-registration--lifecycle">PI Registration &amp; Lifecycle</a></li>
+<li><a href="#pi-registration-and-lifecycle">PI Registration and Lifecycle</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#project-status--roadmap">Project Status &amp; Roadmap</a></li>
+<li><a href="#writing-custom-processing-instruction-pi-processors">Writing Custom Processing Instruction (PI) Processors</a>
+<ul>
+<li><a href="#conceptual-overview">Conceptual Overview</a></li>
+<li><a href="#net-api-usage">.NET API Usage</a></li>
+</ul>
+</li>
+<li><a href="#building-xferlang">Building XferLang</a>
+<ul>
+<li><a href="#prerequisites">Prerequisites</a></li>
+<li><a href="#quick-start">Quick Start</a></li>
+<li><a href="#project-structure">Project Structure</a></li>
+<li><a href="#development-commands">Development Commands</a></li>
+<li><a href="#using-the-command-line-tools">Using the Command-Line Tools</a></li>
+</ul>
+</li>
+<li><a href="#community-and-resources">Community and Resources</a>
+<ul>
+<li><a href="#learning-resources">Learning Resources</a></li>
+<li><a href="#getting-help">Getting Help</a></li>
+<li><a href="#development-status">Development Status</a></li>
+<li><a href="#language-comparison">Language Comparison</a></li>
+</ul>
+</li>
+<li><a href="#project-status-and-roadmap">Project Status and Roadmap</a></li>
 <li><a href="#contributing">Contributing</a></li>
 <li><a href="#grammar">Grammar</a></li>
 </ul>
@@ -179,15 +331,21 @@
 </code></pre>
 <section id="language-specification"><h2 id="language-specification">Language Specification</h2>
 <section id="document-structure"><h3 id="document-structure">Document Structure</h3>
-<p>An XferLang document consists of two main parts: an optional <strong>Metadata Element</strong> followed by a <strong>Root Collection Element</strong>.</p>
+<p>An XferLang document consists of two main parts: optional <strong>Processing Instructions</strong> followed by a <strong>Root Collection Element</strong>.</p>
 <ul>
-<li><strong>Metadata Element</strong>: If present, this must be the very first non-comment element in the document. It is used to store information about the document itself, such as the XferLang version.</li>
+<li><strong>Metadata Processing Instruction (<code>document</code>)</strong>: If present, the <code>document</code> processing instruction must be the very first non-comment element in the document. It defines the document's metadata, such as the XferLang version.</li>
+<li><strong>Additiona Processing Instructions</strong>: Other processing instructions besides the <code>document</code> processing instruction may be placed before the root element.</li>
 <li><strong>Root Collection Element</strong>: The main content of the document must be contained within a single collection element (Object, Array, or Tuple). This ensures the document has a well-defined structure and prevents ambiguity in parsing.</li>
 </ul>
-<pre><code class="language-xfer">&lt;/ A document metadata element, which is signified with the reserved keyword `document` is optional, but if present it must be the first element in the document. /&gt;
+<p>Comments (<code>&lt;/ ... /&gt;</code>) may be placed anywhere in the document.</p>
+<pre><code class="language-xfer">&lt;/ A document processing instruction, which is signified with the reserved keyword `document`
+is optional, but if present it must be the first non-comment element in the document. /&gt;
 &lt;! document { version &quot;1.0&quot; } !&gt;
 
-&lt;/ The document content must be wrapped in a collection element /&gt;
+&lt;/ Other processing instructions may be placed into the document before the root node. /&gt;
+&lt;! id &quot;root&quot; !&gt;
+
+&lt;/ The document root node must be a collection element. /&gt;
 {
     message &quot;Hello, World!&quot;
     count 42
@@ -226,74 +384,240 @@ name &quot;Alice&quot;        &lt;/ A key/value pair of a keyword 'name' and a s
 <ul>
 <li><strong>Specifier:</strong> <code>&quot;</code> (Quotation Mark)</li>
 <li><strong>Description:</strong> Contains text data. The content is stored verbatim. To include a <code>&quot;</code> character that would conflict with the closing delimiter, repeat the specifier (e.g., <code>&quot;&quot;...&quot;&quot;</code>) or use explicit syntax (<code>&lt;&quot;...&quot;&quot;&gt;</code>).</li>
-<li><strong>Example:</strong> <code>&quot;Hello, World!&quot;</code>, <code>&quot;&quot;A quote is a &quot; character.&quot;&quot;</code>, <code>&lt;&quot;Alice said, &quot;Boo!&quot;&quot;&gt;</code></li>
-</ul>
-<p><strong>Interpolated Text Element</strong></p>
+<li><strong>Syntax:</strong>
 <ul>
-<li><strong>Specifier:</strong> <code>'</code> (Apostrophe)</li>
-<li><strong>Description:</strong> Similar to a string, but embedded elements are evaluated and their values are interpolated into the final text.</li>
-<li><strong>Example:</strong> <code>'The value is &lt;#42#&gt;'</code> renders as <code>&quot;The value is 42&quot;</code>.</li>
+<li><strong>Compact:</strong> <code>&quot;Hello, World!&quot;</code></li>
+<li><strong>Explicit:</strong> <code>&lt;&quot;Alice said, &quot;Boo!&quot;&quot;&gt;</code> or <code>&lt;&quot;&quot;A quote is a &quot; character.&quot;&quot;&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+message &quot;Hello, World!&quot;
+
+// Explicit syntax with quotes
+quote &lt;&quot;Alice said, &quot;Boo!&quot;&quot;&gt;
+
+// Delimiter repetition
+description &quot;&quot;A quote is a &quot; character.&quot;&quot;
+</code></pre>
+</li>
 </ul>
 <p><strong>Character Element</strong></p>
 <ul>
 <li><strong>Specifier:</strong> <code>\</code> (Backslash)</li>
 <li><strong>Description:</strong> Represents a single character, specified by its Unicode codepoint in decimal, hex (<code>$</code>), or binary (<code>%</code>), or by a predefined keyword (e.g., <code>tab</code>, <code>lf</code>, <code>gt</code>).</li>
-<li><strong>Example:</strong> <code>\65</code>, <code>\$41</code>, <code>\gt</code> (all represent 'A')</li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>\65</code>, <code>\$41</code>, <code>\%01000001</code>, <code>\gt</code></li>
+<li><strong>Explicit:</strong> <code>&lt;\65\&gt;</code>, <code>&lt;\$41\&gt;</code>, <code>&lt;\gt\&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax - decimal codepoint
+letterA \65
+
+// Compact syntax - hex codepoint
+letterB \$42
+
+// Compact syntax - binary codepoint
+letterC \%01000011
+
+// Compact syntax - keyword
+tabChar \tab
+newlineChar \lf
+
+// Explicit syntax
+specialChar &lt;\$2665\&gt;  // Heart symbol
+</code></pre>
+</li>
 </ul>
 <p><strong>Integer Element</strong></p>
 <ul>
 <li><strong>Specifier:</strong> <code>#</code> (Number Sign)</li>
 <li><strong>Description:</strong> A 32-bit signed integer. Can be written in decimal, hex (<code>$</code>), or binary (<code>%</code>). The specifier is optional if the syntax is unambiguous (implicit syntax).</li>
-<li><strong>Example:</strong> <code>42</code>, <code>#$2A</code>, <code>#%00101010</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Implicit:</strong> <code>42</code>, <code>-123</code> (when unambiguous)</li>
+<li><strong>Compact:</strong> <code>#42</code>, <code>#$2A</code>, <code>#%-123</code>, <code>#%00101010</code></li>
+<li><strong>Explicit:</strong> <code>&lt;#42#&gt;</code>, <code>&lt;#$2A#&gt;</code>, <code>&lt;#%00101010#&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Implicit syntax (most common)
+age 30
+count 1000
+negative -42
+
+// Compact syntax
+port #8080
+timeout #30
+colorRed #$FF
+permissions #%11110000
+
+// Explicit syntax
+maxValue &lt;#2147483647#&gt;
+hexValue &lt;#$DEADBEEF#&gt;
+binaryFlags &lt;#%11110000#&gt;
+</code></pre>
+</li>
 </ul>
 <p><strong>Long Element</strong></p>
 <ul>
 <li><strong>Specifier:</strong> <code>&amp;</code> (Ampersand)</li>
 <li><strong>Description:</strong> A 64-bit signed integer. Can be written in decimal, hex (<code>$</code>), or binary (<code>%</code>).</li>
-<li><strong>Example:</strong> <code>&amp;5000000000</code>, <code>&amp;$12A05F200</code>, <code>&amp;%1001010100000010111110010000000000</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>&amp;5000000000</code>, <code>&amp;$12A05F200</code>, <code>&amp;%1001010100000010111110010000000000</code></li>
+<li><strong>Explicit:</strong> <code>&lt;&amp;5000000000&amp;&gt;</code>, <code>&lt;&amp;$12A05F200&amp;&gt;</code>, <code>&lt;&amp;%1001010100000010111110010000000000&amp;&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+population &amp;7800000000
+fileSize &amp;5368709120
+timestamp &amp;1672531200000
+
+// Compact syntax - hexadecimal
+userId &amp;$1A2B3C4D5E6F
+memoryOffset &amp;$7FF6C2E40000
+
+// Compact syntax - binary
+featureFlags &amp;%1111000011110000111100001111
+
+// Explicit syntax
+maxLong &lt;&amp;9223372036854775807&amp;&gt;
+hexAddress &lt;&amp;$7FFFFFFFFFFFFFFF&amp;&gt;
+binaryMask &lt;&amp;%1111111111111111111111111111111111111111111111111111111111111111&amp;&gt;
+</code></pre>
+</li>
 </ul>
 <p><strong>Double Element</strong></p>
 <ul>
 <li><strong>Specifier:</strong> <code>^</code> (Caret)</li>
 <li><strong>Description:</strong> A 64-bit floating-point number.</li>
-<li><strong>Example:</strong> <code>^3.14159</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>^3.14159</code>, <code>^-2.5</code></li>
+<li><strong>Explicit:</strong> <code>&lt;^3.14159^&gt;</code>, <code>&lt;^-2.5^&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+pi ^3.14159
+temperature ^-2.5
+radius ^12.75
+
+// Explicit syntax
+preciseValue &lt;^3.141592653589793^&gt;
+measurement &lt;^123.456789^&gt;
+ratio &lt;^0.618033988749^&gt;
+</code></pre>
+</li>
 </ul>
 <p><strong>Decimal Element</strong></p>
 <ul>
 <li><strong>Specifier:</strong> <code>*</code> (Asterisk)</li>
-<li><strong>Description:</strong> A 128-bit high-precision decimal value.</li>
-<li><strong>Example:</strong> <code>*123.45</code></li>
+<li><strong>Description:</strong> A high-precision decimal value.</li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>*123.45</code>, <code>*-456.789</code>, <code>*0.000001</code></li>
+<li><strong>Explicit:</strong> <code>&lt;*123.45*&gt;</code>, <code>&lt;*-456.789*&gt;</code>, <code>&lt;*0.000001*&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+price *123.45
+balance *-456.789
+precision *0.000001
+
+// Explicit syntax
+currency &lt;*1234567.89*&gt;
+percentage &lt;*99.999*&gt;
+calculation &lt;*0.123456789012345*&gt;
+</code></pre>
+</li>
 </ul>
 <p><strong>Boolean Element</strong></p>
 <ul>
 <li><strong>Specifier:</strong> <code>~</code> (Tilde)</li>
 <li><strong>Description:</strong> Represents a <code>true</code> or <code>false</code> value.</li>
-<li><strong>Example:</strong> <code>~true</code>, <code>~false</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>~true</code>, <code>~false</code></li>
+<li><strong>Explicit:</strong> <code>&lt;~true~&gt;</code>, <code>&lt;~false~&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+isActive ~true
+isDeleted ~false
+hasPermission ~true
+
+// Explicit syntax
+confirmed &lt;~true~&gt;
+disabled &lt;~false~&gt;
+verified &lt;~true~&gt;
+</code></pre>
+</li>
 </ul>
 <p><strong>Date/Time Element</strong></p>
 <ul>
 <li><strong>Specifier:</strong> <code>@</code> (At Sign)</li>
 <li><strong>Description:</strong> Represents a date and time value in ISO 8601 format.</li>
-<li><strong>Example:</strong> <code>@2025-07-23T10:00:00@</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>@2025-07-23T10:00:00@</code>, <code>@2023-12-25@</code>, <code>@2023-01-01T00:00:00Z@</code></li>
+<li><strong>Explicit:</strong> <code>&lt;@2025-07-23T10:00:00@&gt;</code>, <code>&lt;@2023-12-25@&gt;</code>, <code>&lt;@2023-01-01T00:00:00Z@&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+created @2023-12-01T10:30:00@
+birthDate @1990-05-15@
+lastLogin @2023-12-25T09:30:00Z@
+
+// Explicit syntax
+timestamp &lt;@2025-07-23T10:00:00@&gt;
+scheduledDate &lt;@2024-01-01T00:00:00Z@&gt;
+eventTime &lt;@2023-12-31T23:59:59.999@&gt;
+</code></pre>
+</li>
 </ul>
 <p><strong>Null Element</strong></p>
 <ul>
 <li><strong>Specifier:</strong> <code>?</code> (Question Mark)</li>
 <li><strong>Description:</strong> Represents a null value.</li>
-<li><strong>Example:</strong> <code>?</code>, <code>&lt;??&gt;</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>?</code></li>
+<li><strong>Explicit:</strong> <code>&lt;??&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+optionalValue ?
+middleName ?
+description ?
+
+// Explicit syntax
+nullField &lt;??&gt;
+emptyData &lt;????&gt;
+missingInfo &lt;??&gt;
+</code></pre>
+</li>
 </ul>
 <section id="hexadecimal-and-binary-formatting"><h4 id="hexadecimal-and-binary-formatting">Hexadecimal and Binary Formatting</h4>
 <p>Integer and Long elements support alternative numeric representations for improved readability in specific contexts:</p>
 <p><strong>Hexadecimal Format</strong></p>
 <ul>
-<li><strong>Syntax:</strong> <code>#$</code> prefix followed by hexadecimal digits (e.g., <code>#$2A</code>, <code>&amp;$12A05F200</code>)</li>
+<li><strong>Syntax:</strong> <code>$</code> prefix followed by hexadecimal digits (e.g., <code>#$2A</code>, <code>&amp;$12A05F200</code>)</li>
 <li><strong>Use Cases:</strong> Memory addresses, color values, bitmasks, low-level programming</li>
 <li><strong>Parsing:</strong> Case-insensitive (<code>#$2A</code> equals <code>#$2a</code>)</li>
 <li><strong>Attributes:</strong> Use <code>[XferNumericFormat(XferNumericFormat.Hexadecimal, MinDigits = 4)]</code> for zero-padding</li>
 </ul>
 <p><strong>Binary Format</strong></p>
 <ul>
-<li><strong>Syntax:</strong> <code>#%</code> prefix followed by binary digits (e.g., <code>#%101010</code>, <code>&amp;%1001010100000010111110010000000000</code>)</li>
+<li><strong>Syntax:</strong> <code>%</code> prefix followed by binary digits (e.g., <code>#%101010</code>, <code>&amp;%1001010100000010111110010000000000</code>)</li>
 <li><strong>Use Cases:</strong> Bit manipulation, flags, educational purposes, embedded systems</li>
 <li><strong>Attributes:</strong> Use <code>[XferNumericFormat(XferNumericFormat.Binary, MinBits = 8)]</code> for zero-padding</li>
 </ul>
@@ -313,24 +637,91 @@ name &quot;Alice&quot;        &lt;/ A key/value pair of a keyword 'name' and a s
 <ul>
 <li><strong>Specifiers:</strong> <code>{</code> and <code>}</code> (Curly Brackets)</li>
 <li><strong>Description:</strong> A collection of key/value pairs. Keys are typically implicit keywords, and values can be any XferLang element.</li>
-<li><strong>Example:</strong> <code>{ name &quot;Alice&quot; age 30 }</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>{ name &quot;Alice&quot; age 30 }</code></li>
+<li><strong>Explicit:</strong> <code>&lt;{ name &quot;Alice&quot; age 30 }&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+user { name &quot;Alice&quot; age 30 active ~true }
+config { host &quot;localhost&quot; port 8080 ssl ~true }
+
+// Explicit syntax
+metadata &lt;{ version &quot;1.0&quot; author &quot;John Doe&quot; }&gt;
+settings &lt;{ theme &quot;dark&quot; notifications ~true }&gt;
+</code></pre>
+</li>
 </ul>
 <p><strong>Array Element</strong></p>
 <ul>
 <li><strong>Specifiers:</strong> <code>[</code> and <code>]</code> (Square Brackets)</li>
 <li><strong>Description:</strong> A collection of elements of the <strong>same type</strong>.</li>
-<li><strong>Example:</strong> <code>[ 1 2 3 ]</code>, <code>[ &quot;a&quot; &quot;b&quot; &quot;c&quot; ]</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>[ 1 2 3 ]</code>, <code>[ &quot;a&quot; &quot;b&quot; &quot;c&quot; ]</code></li>
+<li><strong>Explicit:</strong> <code>&lt;[ 1 2 3 ]&gt;</code>, <code>&lt;[ &quot;a&quot; &quot;b&quot; &quot;c&quot; ]&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+numbers [ 1 2 3 4 5 ]
+names [ &quot;Alice&quot; &quot;Bob&quot; &quot;Charlie&quot; ]
+booleans [ ~true ~false ~true ]
+
+// Explicit syntax
+ports &lt;[ #80 #443 #8080 ]&gt;
+colors &lt;[ &quot;red&quot; &quot;green&quot; &quot;blue&quot; ]&gt;
+flags &lt;[ ~true ~true ~false ]&gt;
+</code></pre>
+</li>
 </ul>
 <p><strong>Tuple Element</strong></p>
 <ul>
 <li><strong>Specifiers:</strong> <code>(</code> and <code>)</code> (Parentheses)</li>
 <li><strong>Description:</strong> A collection of elements of <strong>any type</strong>, similar to a JSON array.</li>
-<li><strong>Example:</strong> <code>( &quot;Alice&quot; 30 ~true )</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>( &quot;Alice&quot; 30 ~true )</code></li>
+<li><strong>Explicit:</strong> <code>&lt;( &quot;Alice&quot; 30 ~true )&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+userRecord ( &quot;John Doe&quot; 30 ~true )
+coordinates ( *42.3601 *-71.0589 )
+mixedData ( &quot;Sample&quot; @2023-12-25@ *99.5 )
+
+// Explicit syntax
+complexTuple &lt;( &quot;Alice&quot; 30 ~true [ &quot;admin&quot; &quot;user&quot; ] )&gt;
+dataPoint &lt;( &quot;Experiment A&quot; @2023-12-01T10:00:00@ *98.7 )&gt;
+</code></pre>
+</li>
 </ul>
 <p><strong>Keyword Element and Key/Value Pairs</strong></p>
 <ul>
 <li><strong>Description:</strong> A keyword is the key in a key/value pair. If it contains only letters, numbers, and underscores, it can be written implicitly. Otherwise, it must be enclosed in colons (<code>:</code>).</li>
-<li><strong>Example:</strong> <code>name &quot;Paul&quot;</code>, <code>:first name: &quot;Alice&quot;</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Implicit:</strong> <code>name</code>, <code>user_id</code>, <code>isActive</code> (letters, numbers, underscores only)</li>
+<li><strong>Explicit:</strong> <code>:first name:</code>, <code>:email-address:</code>, <code>:API Key:</code> (any characters)</li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Implicit syntax
+name &quot;Paul&quot;
+age 30
+user_id 12345
+isActive ~true
+
+// Explicit syntax
+:first name: &quot;Alice&quot;
+:email-address: &quot;user@example.com&quot;
+:API Key: &quot;secret123&quot;
+:content-type: &quot;application/json&quot;
+</code></pre>
+</li>
 </ul>
 <section id="common-document-patterns"><h4 id="common-document-patterns">Common Document Patterns</h4>
 <p><strong>Configuration Documents</strong>
@@ -370,62 +761,724 @@ For documents with heterogeneous top-level content, use Tuple:</p>
 )
 </code></pre>
 <section id="special-purpose-types"><h4 id="special-purpose-types">Special-Purpose Types</h4>
-<p><strong>Metadata Element</strong></p>
+<p><strong>Processing Instruction Element</strong></p>
 <ul>
-<li><strong>Specifiers:</strong> <code>!</code> (Exclamation Mark)</li>
-<li><strong>Description:</strong> A special object that can only appear at the start of a document. It contains metadata about the document, such as the <code>document</code> version.</li>
-<li><strong>Example:</strong> <code>&lt;! document {version &quot;1.0&quot;} description &quot;Sample document&quot; !&gt;</code></li>
+<li><strong>Specifier:</strong> <code>!</code> (Exclamation Mark)</li>
+<li><strong>Description:</strong> Contains processing instructions for the document, such as the <code>document</code> PI which stores document metadata.</li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>! document { version &quot;1.0&quot; } !</code></li>
+<li><strong>Explicit:</strong> <code>&lt;! document { version &quot;1.0&quot; } !&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+! document { version &quot;1.0&quot; author &quot;John Doe&quot; } !
+! id &quot;user-config&quot; !
+! chardef { bullet \$2022 arrow \$2192 } !
+
+// Explicit syntax
+&lt;! document { version &quot;1.0&quot; description &quot;Sample document&quot; } !&gt;
+&lt;! dynamicSource { username env &quot;USER&quot; } !&gt;
+</code></pre>
+</li>
 </ul>
 <p><strong>Comment Element</strong></p>
 <ul>
 <li><strong>Specifier:</strong> <code>/</code> (Slash)</li>
 <li><strong>Description:</strong> A comment that is ignored by the parser. It always requires explicit syntax.</li>
-<li><strong>Example:</strong> <code>&lt;/ This is a comment. /&gt;</code>, <code>&lt;// Nested &lt;/comment/&gt; //&gt;</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Explicit:</strong> <code>&lt;/ comment /&gt;</code>, <code>&lt;// nested &lt;/comment/&gt; //&gt;</code> (delimiter repetition)</li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Basic comments
+&lt;/ This is a simple comment /&gt;
+&lt;/ Multi-line comment
+   spanning several lines /&gt;
+
+// Delimiter repetition for nested content
+&lt;// This comment contains / characters and nested &lt;/comments/&gt; //&gt;
+&lt;/// Multi-level nesting for complex content ///&gt;
+</code></pre>
+</li>
 </ul>
 <p><strong>Dynamic Element</strong></p>
 <ul>
 <li><strong>Specifier:</strong> <code>|</code> (Pipe)</li>
 <li><strong>Description:</strong> Represents a value to be substituted at runtime, by default from an environment variable. You can override the default dynamic value resolution by subclassing <code>DefaultDynamicSourceResolver</code> or by implementing the <code>IDynamicSourceResolver</code> interface. This allows you to provide custom logic for resolving dynamic values in your XferLang documents.</li>
-<li><strong>Example:</strong> <code>'Hello, &lt;|USERNAME|&gt;!'</code></li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>|USERNAME|</code>, <code>|DB_PASSWORD|</code></li>
+<li><strong>Explicit:</strong> <code>&lt;|USERNAME|&gt;</code>, <code>&lt;|DB_PASSWORD|&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+username |USER|
+password |DB_PASSWORD|
+apiKey |vault:api-key|
+
+// Explicit syntax
+greeting &lt;|USERNAME|&gt;
+config &lt;|file:app.config|&gt;
+
+// Within interpolated strings
+message 'Hello, &lt;|USERNAME|&gt;!'
+</code></pre>
+</li>
+</ul>
+<p><strong>Interpolated Text Element</strong></p>
+<ul>
+<li><strong>Specifier:</strong> <code>'</code> (Apostrophe)</li>
+<li><strong>Description:</strong> Similar to a string, but embedded elements are evaluated and their values are interpolated into the final text.</li>
+<li><strong>Syntax:</strong>
+<ul>
+<li><strong>Compact:</strong> <code>'The value is &lt;#42#&gt;'</code>, <code>'Hello, &lt;|NAME|&gt;!'</code></li>
+<li><strong>Explicit:</strong> <code>&lt;'The value is &lt;#42#&gt;'&gt;</code>, <code>&lt;'Hello, &lt;|NAME|&gt;!'&gt;</code></li>
+</ul>
+</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">// Compact syntax
+message 'The value is &lt;#42#&gt;'
+greeting 'Hello, &lt;|USERNAME|&gt;!'
+template 'User &lt;&quot;Alice&quot;&gt; has &lt;#5#&gt; items'
+
+// Explicit syntax
+complexMessage &lt;'The result is &lt;*99.5*&gt; and status is &lt;~true~&gt;'&gt;
+dynamicContent &lt;'Welcome to &lt;|APP_NAME|&gt; version &lt;&quot;1.0&quot;&gt;'&gt;
+</code></pre>
+</li>
 </ul>
 <section id="document-validation-and-common-mistakes"><h3 id="document-validation-and-common-mistakes">Document Validation and Common Mistakes</h3>
-<p><strong>Root Collection Requirement</strong>
-Every XferLang document must have exactly one root collection element after any metadata. This is a fundamental requirement for proper parsing:</p>
-<pre><code class="language-xfer">// ❌ Invalid - No root collection
-&quot;Hello, World!&quot;
-42
-
-// ❌ Invalid - Multiple top-level elements
-{ config &quot;value&quot; }
-[ 1 2 3 ]
-
-// ✅ Valid - Single root object
-{
-    message &quot;Hello, World!&quot;
-    count 42
-}
-
-// ✅ Valid - Single root array
-[ &quot;Hello, World!&quot; 42 ]
-
-// ✅ Valid - Single root tuple
-( &quot;Hello, World!&quot; 42 { config &quot;value&quot; } )
+<section id="xferlang-elements"><h2 id="xferlang-elements">XferLang Elements</h2>
+<p>XferLang supports a rich set of data types designed for clarity, explicitness, and flexibility. Each type is chosen to represent a distinct kind of value, making data both human-readable and machine-precise. The main categories are:</p>
+<ul>
+<li><strong>Numbers</strong>: Integers, longs, decimals, and doubles for numeric values.</li>
+<li><strong>Booleans</strong>: True/false values for logic and state.</li>
+<li><strong>Characters</strong>: Character data with a large set of pre-defined character keywords and facilities to define custom keywords.</li>
+<li><strong>Strings</strong>: Textual data, including interpolated strings.</li>
+<li><strong>Dates and Times</strong>: ISO Date/time values.</li>
+<li><strong>Nulls</strong>: Explicit representation of missing or undefined values.</li>
+<li><strong>Objects</strong>: Named key-value pairs for structured records.</li>
+<li><strong>Arrays and Tuples</strong>: Collections, either typed (arrays) or mixed (tuples).</li>
+<li><strong>Dynamic</strong>: Values that can be resolved at runtime, such as environment variables or secrets.</li>
+<li><strong>Processing Instructions</strong>: Document-level processing instructions for configuration and extensibility.</li>
+</ul>
+<section id="array"><h3 id="array">Array</h3>
+<p>Represents a typed array of elements. Arrays are enclosed in square brackets <code>[ ... ]</code> and all elements must be of the same type.</p>
+<p><strong>Syntax:</strong> <code>[ element1 element2 element3 ... ]</code></p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-xfer">numbers [1 2 3 4 5]
+names [&quot;Alice&quot; &quot;Bob&quot; &quot;Charlie&quot;]
+decimals [*12.3 *45.6 *78.9]
+booleans [~true ~false ~true]
+chars [\A \B \C]
 </code></pre>
-<p><strong>With Metadata</strong>
-When using metadata, it must come first, followed by exactly one root collection:</p>
-<pre><code class="language-xfer">// ✅ Valid - Metadata followed by root object
-&lt;! document { version &quot;1.0&quot; } !&gt;
-{
-    data &quot;example&quot;
+<p>Arrays can be nested or contain objects:</p>
+<pre><code class="language-xfer">matrix [
+    [1 2 3]
+    [4 5 6]
+    [7 8 9]
+]
+users [
+    { name &quot;Alice&quot; age 30 }
+    { name &quot;Bob&quot; age 25 }
+]
+</code></pre>
+<section id="keyvalue-pair"><h3 id="keyvalue-pair">Key/Value Pair</h3>
+<p>Represents the fundamental building block of XferLang objects - a key-value association. The key is typically an identifier (keyword), and the value can be any XferLang element. Key-value pairs form the basis of structured data in objects.</p>
+<p><strong>Syntax:</strong> <code>key value</code></p>
+<p><strong>Key Types:</strong></p>
+<ul>
+<li>Implicit identifier: <code>name &quot;Alice&quot;</code></li>
+<li>Explicit identifier: <code>:first-name: &quot;Alice&quot;</code></li>
+<li>Complex keys: <code>:API Key: &quot;secret123&quot;</code></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-xfer">// Basic key-value pairs
+name &quot;Alice&quot;
+age 30
+isActive ~true
+score *99.5
+lastLogin @2023-12-25T10:30:00Z@
+
+// Keys with special characters
+:first-name: &quot;John&quot;
+:email-address: &quot;user@example.com&quot;
+:content-type: &quot;application/json&quot;
+:user-id: 12345
+
+// Complex values
+profile {
+    personal {
+        name &quot;Alice Smith&quot;
+        birth_date @1990-05-15@
+    }
+    settings {
+        theme &quot;dark&quot;
+        notifications ~true
+    }
 }
 
-// ❌ Invalid - Missing root collection after metadata
-&lt;! document { version &quot;1.0&quot; } !&gt;
-&quot;standalone string&quot;
+// Arrays as values
+roles [ &quot;admin&quot; &quot;user&quot; &quot;moderator&quot; ]
+scores [ *85.5 *92.0 *78.3 ]
+
+// Mixed data types
+metadata {
+    created @2023-12-25T10:30:00Z@
+    version &quot;1.0&quot;
+    enabled ~true
+    priority 5
+    tags [ &quot;important&quot; &quot;urgent&quot; ]
+    config ?
+}
+</code></pre>
+<p><strong>Rules:</strong> Keys must be unique within the same object, and whitespace separates the key from its value.</p>
+<section id="object"><h3 id="object">Object</h3>
+<p>Represents a collection of key-value pairs enclosed in curly braces. Objects are the most common structural element in XferLang, equivalent to objects in JSON or dictionaries in Python.</p>
+<p><strong>Syntax:</strong> <code>{ key1 value1 key2 value2 ... }</code></p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-xfer">// Simple object
+user {
+    name &quot;Alice&quot;
+    age 30
+    active ~true
+}
+
+// Nested objects
+config {
+    database {
+        host &quot;localhost&quot;
+        port 5432
+        ssl ~true
+    }
+    cache {
+        enabled ~true
+        ttl 3600
+    }
+}
+
+// Compact form
+profile { name &quot;Bob&quot; role &quot;admin&quot; verified ~true }
+</code></pre>
+<section id="tuple"><h3 id="tuple">Tuple</h3>
+<p>Represents an ordered collection of elements that can be of <strong>any type</strong>, similar to arrays in JSON. Tuples are enclosed in parentheses and are perfect for heterogeneous data like coordinates, records, or mixed-type sequences.</p>
+<p><strong>Syntax:</strong> <code>( element1 element2 element3 ... )</code></p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-xfer">// Geographic coordinates (latitude, longitude)
+location (*42.3601 *-71.0589)
+
+// Mixed types: name, age, active status
+userRecord (&quot;John Doe&quot; 30 ~true)
+
+// Complex tuple with various types
+dataPoint (
+    &quot;Sample A&quot;
+    @2023-12-25T10:30:00@
+    *98.7
+    ~true
+    [ &quot;tag1&quot; &quot;tag2&quot; &quot;tag3&quot; ]
+    { metadata &quot;experimental&quot; }
+)
+
+// Compact form
+rgb (#255 #128 #64)
+</code></pre>
+<p><strong>Key Difference:</strong> Tuples allow mixed types, while Arrays require all elements to be the same type.</p>
+<section id="comment"><h3 id="comment">Comment</h3>
+<p>Comments provide documentation and annotations within XferLang documents. They are ignored during parsing and can be used for explanations, notes, or temporarily disabling content.</p>
+<p><strong>Syntax:</strong> Always requires explicit form: <code>&lt;/ comment text /&gt;</code></p>
+<p><strong>Delimiter Repetition:</strong> For comments containing <code>/</code> characters, repeat the delimiter:</p>
+<pre><code class="language-xfer">&lt;/ This is a simple comment /&gt;
+
+&lt;// This comment contains / characters and nested &lt;/comments/&gt; //&gt;
+
+&lt;/// Multi-level nesting for complex content ///&gt;
+
+&lt;/
+Multi-line comments
+can span several lines
+and include any content
+/&gt;
+</code></pre>
+<p><strong>Inline Usage:</strong></p>
+<pre><code class="language-xfer">name &quot;Alice&quot; &lt;/ User's display name /&gt;
+port 8080     &lt;/ Development server port /&gt;
+</code></pre>
+<section id="dynamic"><h3 id="dynamic">Dynamic</h3>
+<p>Dynamic elements represent values that are resolved at parse-time or runtime, typically from environment variables, configuration files, or custom sources. They provide powerful templating and configuration capabilities.</p>
+<p><strong>Syntax:</strong> <code>|identifier|</code> or <code>&lt;|identifier|&gt;</code></p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-xfer">// Environment variable substitution
+username |USER|
+password |DB_PASSWORD|
+
+// Within interpolated strings
+greeting 'Hello, &lt;|USERNAME|&gt;!'
+message 'Server running on port &lt;|PORT|&gt;'
+
+// Custom sources (configured via dynamicSource PI)
+apiKey |vault:api-key|
+config |file:app.config|
+</code></pre>
+<p><strong>Configuration via Processing Instructions:</strong></p>
+<pre><code class="language-xfer">&lt;! dynamicSource {
+    greeting const &quot;Welcome to XferLang&quot;
+    username env &quot;USER&quot;
+    config file &quot;settings.json&quot;
+    secret vault &quot;api-token&quot;
+} !&gt;
+{
+    message '&lt;|greeting|&gt;'
+    user '&lt;|username|&gt;'
+    settings '&lt;|config|&gt;'
+    token '&lt;|secret|&gt;'
+}
+</code></pre>
+<section id="identifier"><h3 id="identifier">Identifier</h3>
+<p>Identifiers represent symbolic names used as keys in key-value pairs. They follow standard programming language identifier rules and can be written in implicit form when they contain only letters, numbers, and underscores.</p>
+<p><strong>Implicit Syntax:</strong> <code>identifier</code> (no delimiters needed)
+<strong>Explicit Syntax:</strong> <code>:text:</code> (for identifiers with special characters)</p>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-xfer">// Simple identifiers (implicit)
+name &quot;Alice&quot;
+age 30
+isActive ~true
+user_id 12345
+
+// Identifiers with special characters (explicit)
+:first-name: &quot;John&quot;
+:email-address: &quot;user@example.com&quot;
+:API Key: &quot;abc123&quot;
+:content-type: &quot;application/json&quot;
+
+// In objects
+config {
+    database_host &quot;localhost&quot;
+    :cache-enabled: ~true
+    :max-connections: 100
+}
+</code></pre>
+<p><strong>Rules:</strong></p>
+<ul>
+<li>Implicit identifiers: letters, numbers, underscore only</li>
+<li>Explicit identifiers: any text between <code>:</code> delimiters</li>
+<li>Case-sensitive</li>
+<li>Must be unique within the same object</li>
+</ul>
+<section id="integer"><h3 id="integer">Integer</h3>
+<p>Represents a 32-bit signed integer value. Integers can be written in decimal, hexadecimal, or binary formats and support implicit syntax when the context is unambiguous.</p>
+<p><strong>Syntax:</strong></p>
+<ul>
+<li>Implicit: <code>42</code> (when unambiguous)</li>
+<li>Explicit: <code>#42</code></li>
+<li>Hexadecimal: <code>#$2A</code></li>
+<li>Binary: <code>#%101010</code></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-xfer">// Implicit form (most common)
+age 30
+count 1000
+negative -42
+
+// Explicit form
+port #8080
+timeout #30
+
+// Alternative number bases
+colorRed #$FF
+permissions #%11110000
+memoryAddress #$DEADBEEF
+
+// In collections
+numbers [ 1 2 3 4 5 ]
+ports [ #80 #443 #8080 ]
+</code></pre>
+<p><strong>Range:</strong> -2,147,483,648 to 2,147,483,647</p>
+<section id="long"><h3 id="long">Long</h3>
+<p>Represents a 64-bit signed integer value for larger numbers that exceed the 32-bit integer range. Always requires the <code>&amp;</code> prefix to distinguish from regular integers.</p>
+<p><strong>Syntax:</strong></p>
+<ul>
+<li>Decimal: <code>&amp;5000000000</code></li>
+<li>Hexadecimal: <code>&amp;$12A05F200</code></li>
+<li>Binary: <code>&amp;%1001010100000010111110010000000000</code></li>
+</ul>
+<p><strong>Examples:</strong></p>
+<pre><code class="language-xfer">// Large numbers
+population &amp;7800000000
+fileSize &amp;5368709120
+timestamp &amp;1672531200000
+
+// Hexadecimal (common for IDs, addresses)
+userId &amp;$1A2B3C4D5E6F
+memoryOffset &amp;$7FF6C2E40000
+
+// Binary (for flags, masks)
+featureFlags &amp;%1111000011110000111100001111
+
+// In configuration
+limits {
+    maxFileSize &amp;2147483648
+    maxUsers &amp;1000000
+}
+</code></pre>
+<section id="complete-examples"><h2 id="complete-examples">Complete Examples</h2>
+<p>Here are comprehensive examples showing XferLang in real-world scenarios:</p>
+<section id="configuration-file-example"><h3 id="configuration-file-example">Configuration File Example</h3>
+<pre><code class="language-xfer">&lt;! document {
+    version &quot;1.2&quot;
+    author &quot;DevOps Team&quot;
+    created @2023-12-01T10:30:00@
+    description &quot;Production API configuration&quot;
+} !&gt;
+
+{
+    server {
+        host &quot;api.example.com&quot;
+        port 8443
+        ssl ~true
+        timeout 30
+    }
+
+    database {
+        primary {
+            host &quot;db1.example.com&quot;
+            port 5432
+            name &quot;production_db&quot;
+            ssl ~true
+            poolSize 20
+        }
+        replica {
+            host &quot;db2.example.com&quot;
+            port 5432
+            readOnly ~true
+        }
+    }
+
+    cache {
+        redis {
+            nodes [
+                { host &quot;cache1.example.com&quot; port 6379 }
+                { host &quot;cache2.example.com&quot; port 6379 }
+                { host &quot;cache3.example.com&quot; port 6379 }
+            ]
+            ttl 3600
+        }
+    }
+
+    logging {
+        level &quot;info&quot;
+        destinations [ &quot;console&quot; &quot;file&quot; &quot;syslog&quot; ]
+        format &quot;{timestamp} [{level}] {message}&quot;
+    }
+
+    features {
+        rateLimiting ~true
+        metrics ~true
+        debugging ~false
+    }
+}
+</code></pre>
+<section id="user-profile-example"><h3 id="user-profile-example">User Profile Example</h3>
+<pre><code class="language-xfer">{
+    user {
+        id &amp;12345678901234
+        username &quot;alice_smith&quot;
+        email &quot;alice@example.com&quot;
+
+        profile {
+            firstName &quot;Alice&quot;
+            lastName &quot;Smith&quot;
+            birthDate @1990-05-15@
+            bio 'Software engineer who loves &lt;\$2615\&gt; and &lt;\$1F4BB\&gt;' &lt;/ coffee and laptop emojis /&gt;
+        }
+
+        preferences {
+            theme &quot;dark&quot;
+            language &quot;en-US&quot;
+            timezone &quot;America/New_York&quot;
+            notifications {
+                email ~true
+                push ~false
+                sms ~true
+            }
+        }
+
+        activity {
+            lastLogin @2023-12-25T09:30:00Z@
+            loginCount #247
+            sessions [
+                {
+                    id &quot;sess_abc123&quot;
+                    startTime @2023-12-25T09:30:00Z@
+                    ipAddress &quot;192.168.1.100&quot;
+                    userAgent &quot;Mozilla/5.0...&quot;
+                }
+            ]
+        }
+    }
+
+    addresses [
+        {
+            type &quot;home&quot;
+            street &quot;123 Main Street&quot;
+            city &quot;Springfield&quot;
+            state &quot;IL&quot;
+            zipCode &quot;62702&quot;
+            country &quot;US&quot;
+            isPrimary ~true
+        }
+        {
+            type &quot;work&quot;
+            street &quot;456 Business Ave&quot;
+            city &quot;Springfield&quot;
+            state &quot;IL&quot;
+            zipCode &quot;62702&quot;
+            country &quot;US&quot;
+            isPrimary ~false
+        }
+    ]
+
+    lastLogin @2023-12-25T09:30:00Z@
+    loginCount #247
+}
+</code></pre>
+<section id="grammar-reference"><h2 id="grammar-reference">Grammar Reference</h2>
+<p>For those who want to implement parsers or need the complete technical specification, here's the formal grammar for XferLang:</p>
+<pre><code class="language-bnf">/* XferLang Grammar (BNF)
+ *
+ * Key Requirements:
+ * - All XferLang documents must have exactly one root collection element (Object, Array, or Tuple)
+ * - Optional processing instructions may precede the root collection
+ * - Processing instructions provide document metadata and configuration
+ *
+ * Examples of valid documents:
+ * - { name &quot;Alice&quot; age 30 }                                    (Object root)
+ * - [ 1 2 3 ]                                                 (Array root)
+ * - ( &quot;title&quot; 42 ~true )                                      (Tuple root)
+ * - &lt;! document { version &quot;1.0&quot; } !&gt; { config &quot;value&quot; }       (With processing instructions)
+ */
+
+&lt;document&gt; ::= &lt;opt_whitespace&gt; &lt;processing_instructions&gt;? &lt;opt_whitespace&gt; &lt;collection_element&gt; &lt;opt_whitespace&gt;
+
+&lt;collection_element&gt; ::= &lt;object_element&gt; | &lt;array_element&gt; | &lt;tuple_element&gt;
+
+&lt;processing_instructions&gt; ::= &lt;processing_instruction&gt;+
+
+&lt;processing_instruction&gt; ::= &lt;processing_instruction_explicit&gt; | &lt;processing_instruction_compact&gt;
+&lt;processing_instruction_explicit&gt; ::= &lt;element_open&gt; &lt;pi_specifier&gt; &lt;opt_whitespace&gt; &lt;key_value_pair&gt;+ &lt;opt_whitespace&gt; &lt;pi_specifier&gt; &lt;element_close&gt;
+&lt;processing_instruction_compact&gt; ::= &lt;pi_specifier&gt; &lt;opt_whitespace&gt; &lt;key_value_pair&gt;+ &lt;opt_whitespace&gt; &lt;pi_specifier&gt;
+
+&lt;body_element&gt; ::= &lt;opt_whitespace&gt; (
+      &lt;key_value_pair&gt;
+    | &lt;string_element&gt;
+    | &lt;character_element&gt;
+    | &lt;integer_element&gt;
+    | &lt;long_element&gt;
+    | &lt;double_element&gt;
+    | &lt;decimal_element&gt;
+    | &lt;boolean_element&gt;
+    | &lt;datetime_element&gt;
+    | &lt;date_element&gt;
+    | &lt;time_element&gt;
+    | &lt;timespan_element&gt;
+    | &lt;null_element&gt;
+    | &lt;object_element&gt;
+    | &lt;array_element&gt;
+    | &lt;tuple_element&gt;
+    | &lt;dynamic_element&gt;
+    | &lt;interpolated_element&gt;
+    | &lt;comment_element&gt;
+    | &lt;identifier_element&gt;
+) &lt;opt_whitespace&gt;
+
+&lt;key_value_pair&gt; ::= &lt;identifier_element&gt; &lt;whitespace&gt; &lt;body_element&gt;
+
+/* Collection Elements */
+&lt;object_element&gt; ::= &lt;object_element_explicit&gt; | &lt;object_element_compact&gt;
+&lt;object_element_explicit&gt; ::= &lt;element_open&gt; &lt;object_open&gt; &lt;opt_whitespace&gt; &lt;key_value_pair&gt;* &lt;opt_whitespace&gt; &lt;object_close&gt; &lt;element_close&gt;
+&lt;object_element_compact&gt; ::= &lt;object_open&gt; &lt;opt_whitespace&gt; &lt;key_value_pair&gt;* &lt;opt_whitespace&gt; &lt;object_close&gt;
+
+&lt;array_element&gt; ::= &lt;array_element_explicit&gt; | &lt;array_element_compact&gt;
+&lt;array_element_explicit&gt; ::= &lt;element_open&gt; &lt;array_open&gt; &lt;opt_whitespace&gt; &lt;body_element&gt;* &lt;opt_whitespace&gt; &lt;array_close&gt; &lt;element_close&gt;
+&lt;array_element_compact&gt; ::= &lt;array_open&gt; &lt;opt_whitespace&gt; &lt;body_element&gt;* &lt;opt_whitespace&gt; &lt;array_close&gt;
+
+&lt;tuple_element&gt; ::= &lt;tuple_element_explicit&gt; | &lt;tuple_element_compact&gt;
+&lt;tuple_element_explicit&gt; ::= &lt;element_open&gt; &lt;tuple_open&gt; &lt;opt_whitespace&gt; &lt;body_element&gt;* &lt;opt_whitespace&gt; &lt;tuple_close&gt; &lt;element_close&gt;
+&lt;tuple_element_compact&gt; ::= &lt;tuple_open&gt; &lt;opt_whitespace&gt; &lt;body_element&gt;* &lt;opt_whitespace&gt; &lt;tuple_close&gt;
+
+/* Basic Data Elements */
+&lt;string_element&gt; ::= &lt;string_element_explicit&gt; | &lt;string_element_compact&gt;
+&lt;string_element_explicit&gt; ::= &lt;element_open&gt; &lt;string_specifier&gt;+ &lt;string_content&gt; &lt;string_specifier&gt;+ &lt;element_close&gt;
+&lt;string_element_compact&gt; ::= &lt;string_specifier&gt;+ &lt;string_content&gt; &lt;string_specifier&gt;+
+
+&lt;character_element&gt; ::= &lt;character_element_explicit&gt; | &lt;character_element_compact&gt;
+&lt;character_element_explicit&gt; ::= &lt;element_open&gt; &lt;character_specifier&gt; &lt;character_content&gt; &lt;element_close&gt;
+&lt;character_element_compact&gt; ::= &lt;character_specifier&gt; &lt;character_content&gt;
+
+&lt;integer_element&gt; ::= &lt;integer_element_explicit&gt; | &lt;integer_element_compact&gt; | &lt;integer_element_implicit&gt;
+&lt;integer_element_explicit&gt; ::= &lt;element_open&gt; &lt;integer_specifier&gt; &lt;integer_content&gt; &lt;element_close&gt;
+&lt;integer_element_compact&gt; ::= &lt;integer_specifier&gt; &lt;integer_content&gt;
+&lt;integer_element_implicit&gt; ::= &lt;integer_content&gt;
+
+&lt;long_element&gt; ::= &lt;long_element_explicit&gt; | &lt;long_element_compact&gt;
+&lt;long_element_explicit&gt; ::= &lt;element_open&gt; &lt;long_specifier&gt; &lt;long_content&gt; &lt;element_close&gt;
+&lt;long_element_compact&gt; ::= &lt;long_specifier&gt; &lt;long_content&gt;
+
+&lt;double_element&gt; ::= &lt;double_element_explicit&gt; | &lt;double_element_compact&gt;
+&lt;double_element_explicit&gt; ::= &lt;element_open&gt; &lt;double_specifier&gt; &lt;double_content&gt; &lt;element_close&gt;
+&lt;double_element_compact&gt; ::= &lt;double_specifier&gt; &lt;double_content&gt;
+
+&lt;decimal_element&gt; ::= &lt;decimal_element_explicit&gt; | &lt;decimal_element_compact&gt;
+&lt;decimal_element_explicit&gt; ::= &lt;element_open&gt; &lt;decimal_specifier&gt; &lt;decimal_content&gt; &lt;element_close&gt;
+&lt;decimal_element_compact&gt; ::= &lt;decimal_specifier&gt; &lt;decimal_content&gt;
+
+&lt;boolean_element&gt; ::= &lt;boolean_element_explicit&gt; | &lt;boolean_element_compact&gt;
+&lt;boolean_element_explicit&gt; ::= &lt;element_open&gt; &lt;boolean_specifier&gt; &lt;boolean_content&gt; &lt;element_close&gt;
+&lt;boolean_element_compact&gt; ::= &lt;boolean_specifier&gt; &lt;boolean_content&gt;
+
+&lt;datetime_element&gt; ::= &lt;datetime_element_explicit&gt; | &lt;datetime_element_compact&gt;
+&lt;datetime_element_explicit&gt; ::= &lt;element_open&gt; &lt;datetime_specifier&gt; &lt;datetime_content&gt; &lt;datetime_specifier&gt; &lt;element_close&gt;
+&lt;datetime_element_compact&gt; ::= &lt;datetime_specifier&gt; &lt;datetime_content&gt; &lt;datetime_specifier&gt;
+
+&lt;null_element&gt; ::= &lt;null_element_explicit&gt; | &lt;null_element_compact&gt;
+&lt;null_element_explicit&gt; ::= &lt;element_open&gt; &lt;null_specifier&gt;+ &lt;element_close&gt;
+&lt;null_element_compact&gt; ::= &lt;null_specifier&gt;+
+
+/* Special Elements */
+&lt;dynamic_element&gt; ::= &lt;dynamic_element_explicit&gt; | &lt;dynamic_element_compact&gt;
+&lt;dynamic_element_explicit&gt; ::= &lt;element_open&gt; &lt;dynamic_specifier&gt; &lt;dynamic_content&gt; &lt;dynamic_specifier&gt; &lt;element_close&gt;
+&lt;dynamic_element_compact&gt; ::= &lt;dynamic_specifier&gt; &lt;dynamic_content&gt; &lt;dynamic_specifier&gt;
+
+&lt;interpolated_element&gt; ::= &lt;interpolated_element_explicit&gt; | &lt;interpolated_element_compact&gt;
+&lt;interpolated_element_explicit&gt; ::= &lt;element_open&gt; &lt;interpolated_specifier&gt;+ &lt;interpolated_content&gt; &lt;interpolated_specifier&gt;+ &lt;element_close&gt;
+&lt;interpolated_element_compact&gt; ::= &lt;interpolated_specifier&gt;+ &lt;interpolated_content&gt; &lt;interpolated_specifier&gt;+
+
+&lt;comment_element&gt; ::= &lt;element_open&gt; &lt;comment_specifier&gt;+ &lt;comment_content&gt; &lt;comment_specifier&gt;+ &lt;element_close&gt;
+
+&lt;identifier_element&gt; ::= &lt;identifier_element_explicit&gt; | &lt;identifier_element_implicit&gt;
+&lt;identifier_element_explicit&gt; ::= &lt;identifier_specifier&gt; &lt;identifier_content&gt; &lt;identifier_specifier&gt;
+&lt;identifier_element_implicit&gt; ::= &lt;identifier_content&gt;
+
+/* Specifiers and Delimiters */
+&lt;element_open&gt; ::= &quot;&lt;&quot;
+&lt;element_close&gt; ::= &quot;&gt;&quot;
+
+&lt;object_open&gt; ::= &quot;{&quot;
+&lt;object_close&gt; ::= &quot;}&quot;
+&lt;array_open&gt; ::= &quot;[&quot;
+&lt;array_close&gt; ::= &quot;]&quot;
+&lt;tuple_open&gt; ::= &quot;(&quot;
+&lt;tuple_close&gt; ::= &quot;)&quot;
+
+&lt;string_specifier&gt; ::= &quot;\&quot;&quot;
+&lt;character_specifier&gt; ::= &quot;\\&quot;
+&lt;integer_specifier&gt; ::= &quot;#&quot;
+&lt;long_specifier&gt; ::= &quot;&amp;&quot;
+&lt;double_specifier&gt; ::= &quot;^&quot;
+&lt;decimal_specifier&gt; ::= &quot;*&quot;
+&lt;boolean_specifier&gt; ::= &quot;~&quot;
+&lt;datetime_specifier&gt; ::= &quot;@&quot;
+&lt;null_specifier&gt; ::= &quot;?&quot;
+&lt;dynamic_specifier&gt; ::= &quot;|&quot;
+&lt;interpolated_specifier&gt; ::= &quot;'&quot;
+&lt;comment_specifier&gt; ::= &quot;/&quot;
+&lt;identifier_specifier&gt; ::= &quot;:&quot;
+&lt;pi_specifier&gt; ::= &quot;!&quot;
+
+/* Content Patterns */
+&lt;string_content&gt; ::= &lt;any_character_except_delimiter&gt;*
+&lt;character_content&gt; ::= &lt;unicode_codepoint&gt; | &lt;character_keyword&gt;
+&lt;integer_content&gt; ::= &lt;decimal_digits&gt; | &lt;hex_digits&gt; | &lt;binary_digits&gt;
+&lt;long_content&gt; ::= &lt;decimal_digits&gt; | &lt;hex_digits&gt; | &lt;binary_digits&gt;
+&lt;double_content&gt; ::= &lt;floating_point_number&gt;
+&lt;decimal_content&gt; ::= &lt;decimal_number&gt;
+&lt;boolean_content&gt; ::= &quot;true&quot; | &quot;false&quot;
+&lt;datetime_content&gt; ::= &lt;iso8601_datetime&gt;
+&lt;dynamic_content&gt; ::= &lt;identifier_chars&gt;
+&lt;interpolated_content&gt; ::= &lt;any_character_or_element&gt;*
+&lt;comment_content&gt; ::= &lt;any_character_except_delimiter&gt;*
+&lt;identifier_content&gt; ::= &lt;identifier_chars&gt;
+
+/* Whitespace */
+&lt;whitespace&gt; ::= &lt;space&gt; | &lt;tab&gt; | &lt;newline&gt; | &lt;carriage_return&gt;
+&lt;opt_whitespace&gt; ::= &lt;whitespace&gt;*
+
+/* Character Classes */
+&lt;decimal_digits&gt; ::= [&quot;-&quot;]? [0-9]+
+&lt;hex_digits&gt; ::= &quot;$&quot; [0-9A-Fa-f]+
+&lt;binary_digits&gt; ::= &quot;%&quot; [01]+
+&lt;floating_point_number&gt; ::= [&quot;-&quot;]? [0-9]+ &quot;.&quot; [0-9]+ ((&quot;e&quot; | &quot;E&quot;) [&quot;-&quot;]? [0-9]+)?
+&lt;decimal_number&gt; ::= [&quot;-&quot;]? [0-9]+ (&quot;.&quot; [0-9]+)?
+&lt;iso8601_datetime&gt; ::= [0-9]{4} &quot;-&quot; [0-9]{2} &quot;-&quot; [0-9]{2} (&quot;T&quot; [0-9]{2} &quot;:&quot; [0-9]{2} &quot;:&quot; [0-9]{2} (&quot;.&quot; [0-9]+)? (&quot;Z&quot; | [+-] [0-9]{2} &quot;:&quot; [0-9]{2})?)?
+&lt;identifier_chars&gt; ::= [a-zA-Z_] [a-zA-Z0-9_]*
+&lt;unicode_codepoint&gt; ::= [0-9]+ | &quot;$&quot; [0-9A-Fa-f]+ | &quot;%&quot; [01]+
+&lt;character_keyword&gt; ::= &quot;tab&quot; | &quot;space&quot; | &quot;newline&quot; | &quot;cr&quot; | &quot;lf&quot; | &quot;crlf&quot; | &quot;null&quot; | &quot;bell&quot; | ...
+&lt;any_character_except_delimiter&gt; ::= &lt;any_unicode_character_except_current_delimiter&gt;
+&lt;any_character_or_element&gt; ::= &lt;any_unicode_character&gt; | &lt;body_element&gt;
+&lt;space&gt; ::= &quot; &quot;
+&lt;tab&gt; ::= &quot;\t&quot;
+&lt;newline&gt; ::= &quot;\n&quot;
+&lt;carriage_return&gt; ::= &quot;\r&quot;
+</code></pre>
+<section id="getting-started-with-net"><h2 id="getting-started-with.net">Getting Started with .NET</h2>
+<p>The XferLang .NET library provides a robust implementation for parsing, generating, and working with XferLang documents programmatically.</p>
+<section id="installation"><h3 id="installation">Installation</h3>
+<p>Install the NuGet package in your .NET project:</p>
+<pre><code class="language-bash">dotnet add package ParksComputing.Xfer.Lang
+</code></pre>
+<p>Or via Package Manager Console in Visual Studio:</p>
+<pre><code class="language-powershell">Install-Package ParksComputing.Xfer.Lang
+</code></pre>
+<section id="quick-start-example"><h3 id="quick-start-example">Quick Start Example</h3>
+<pre><code class="language-csharp">using ParksComputing.Xfer.Lang;
+
+// Define a simple class
+public class Person
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    public bool IsActive { get; set; }
+}
+
+// Serialize to XferLang
+var person = new Person { Name = &quot;Alice&quot;, Age = 30, IsActive = true };
+string xfer = XferConvert.Serialize(person, Formatting.Indented);
+
+Console.WriteLine(xfer);
+// Output:
+// {
+//     Name &quot;Alice&quot;
+//     Age 30
+//     IsActive ~true
+// }
+
+// Deserialize from XferLang
+var deserializedPerson = XferConvert.Deserialize&lt;Person&gt;(xfer);
+Console.WriteLine($&quot;Name: {deserializedPerson.Name}, Age: {deserializedPerson.Age}&quot;);
+</code></pre>
+<section id="working-with-collections"><h3 id="working-with-collections">Working with Collections</h3>
+<pre><code class="language-csharp">// Arrays and Lists
+var numbers = new List&lt;int&gt; { 1, 2, 3, 4, 5 };
+string xferArray = XferConvert.Serialize(numbers);
+// Result: [ 1 2 3 4 5 ]
+
+// Objects and Dictionaries
+var config = new Dictionary&lt;string, object&gt;
+{
+    [&quot;host&quot;] = &quot;localhost&quot;,
+    [&quot;port&quot;] = 8080,
+    [&quot;ssl&quot;] = true
+};
+string xferObject = XferConvert.Serialize(config);
+// Result: { host &quot;localhost&quot; port 8080 ssl ~true }
 </code></pre>
 <section id="the-net-xferlang-library"><h2 id="the.net-xferlang-library">The <code>.NET XferLang Library</code></h2>
 <p>The primary implementation of XferLang is the <code>ParksComputing.Xfer.Lang</code> library for .NET. It provides a comprehensive object model, a robust parser, and a powerful serialization/deserialization utility class, <code>XferConvert</code>.</p>
-<section id="basic-serialization-andamp-deserialization"><h3 id="basic-serialization-deserialization">Basic Serialization &amp; Deserialization</h3>
+<section id="basic-serialization-and-deserialization"><h3 id="basic-serialization-and-deserialization">Basic Serialization and Deserialization</h3>
 <p>The <code>XferConvert</code> class provides a simple, static interface for converting between .NET objects and XferLang strings. The library automatically ensures that serialized objects are wrapped in a proper root collection element.</p>
 <pre><code class="language-csharp">public class MyData {
     public string Name { get; set; }
@@ -538,7 +1591,90 @@ string xfer = XferConvert.Serialize(config);
 <li><code>decimal</code> and <code>double</code> types ignore formatting attributes to preserve fractional precision</li>
 <li>Custom formatting respects the configured <code>ElementStylePreference</code> for syntax style</li>
 </ul>
-<section id="processing-instructions-andamp-dynamic-content"><h2 id="processing-instructions-dynamic-content">Processing Instructions &amp; Dynamic Content</h2>
+<section id="serializer-settings"><h2 id="serializer-settings">Serializer Settings</h2>
+<p>For more control over serialization and deserialization, you can use the <code>XferSerializerSettings</code> class. This allows you to configure element styles, null handling, contract resolvers, and custom converters.</p>
+<section id="element-style-preferences"><h3 id="element-style-preferences">Element Style Preferences</h3>
+<p>Control how elements are serialized using the <code>StylePreference</code> property:</p>
+<ul>
+<li><strong>Explicit</strong> - Maximum safety, uses angle brackets: <code>&lt;&quot;value&quot;&gt;</code></li>
+<li><strong>CompactWhenSafe</strong> - Compact when safe, explicit when necessary: <code>&quot;value&quot;</code> (default)</li>
+<li><strong>MinimalWhenSafe</strong> - Most compact form, including implicit syntax for integers</li>
+<li><strong>ForceCompact</strong> - Always compact (use with caution)</li>
+</ul>
+<section id="configuration-example"><h3 id="configuration-example">Configuration Example</h3>
+<pre><code class="language-csharp">var settings = new XferSerializerSettings
+{
+    StylePreference = ElementStylePreference.CompactWhenSafe,
+    PreferImplicitSyntax = true,  // Use implicit syntax for integers when safe
+    NullValueHandling = NullValueHandling.Ignore,
+    ContractResolver = new CustomContractResolver(),
+    // ... other settings
+};
+
+string xferString = XferConvert.Serialize(user, Formatting.None, settings);
+</code></pre>
+<section id="available-settings"><h3 id="available-settings">Available Settings</h3>
+<ul>
+<li><code>StylePreference</code> - Controls element serialization style</li>
+<li><code>PreferImplicitSyntax</code> - Use implicit syntax for integers when possible</li>
+<li><code>NullValueHandling</code> - How to handle null values (Include/Ignore)</li>
+<li><code>ContractResolver</code> - Custom property name resolution</li>
+<li><code>Converters</code> - Collection of custom type converters</li>
+</ul>
+<section id="property-attributes"><h2 id="property-attributes">Property Attributes</h2>
+<p>The library provides several attributes to control how properties are serialized and deserialized.</p>
+<section id="xferpropertyattribute"><h3 id="xferpropertyattribute">XferPropertyAttribute</h3>
+<p>The <code>XferPropertyAttribute</code> allows you to customize the property name used in the Xfer document, similar to <code>JsonPropertyName</code> in System.Text.Json.</p>
+<pre><code class="language-csharp">public class User
+{
+    [XferProperty(&quot;user_name&quot;)]
+    public string UserName { get; set; }
+
+    [XferProperty(&quot;is_active&quot;)]
+    public bool IsActive { get; set; }
+
+    [XferProperty(&quot;created_at&quot;)]
+    public DateTime CreatedAt { get; set; }
+}
+
+var user = new User
+{
+    UserName = &quot;alice&quot;,
+    IsActive = true,
+    CreatedAt = DateTime.UtcNow
+};
+
+string xfer = XferConvert.Serialize(user);
+// Result: { user_name &quot;alice&quot; is_active ~true created_at @2023-12-25T10:30:00Z@ }
+</code></pre>
+<section id="xfernumericformatattribute"><h3 id="xfernumericformatattribute">XferNumericFormatAttribute</h3>
+<p>The <code>XferNumericFormatAttribute</code> enables custom formatting for integer and long properties, allowing hexadecimal and binary representations with optional padding.</p>
+<pre><code class="language-csharp">public class ConfigurationData
+{
+    [XferNumericFormat(XferNumericFormat.Decimal)]
+    public int Port { get; set; } = 8080;
+
+    [XferNumericFormat(XferNumericFormat.Hexadecimal)]
+    public int ColorValue { get; set; } = 0xFF5733;
+
+    [XferNumericFormat(XferNumericFormat.Binary, MinBits = 8)]
+    public int Flags { get; set; } = 42;
+
+    [XferNumericFormat(XferNumericFormat.Hexadecimal, MinDigits = 8)]
+    public long MemoryAddress { get; set; } = 0x7FF6C2E40000;
+}
+
+var config = new ConfigurationData();
+string xfer = XferConvert.Serialize(config);
+// Result: {Port 8080 ColorValue #$FF5733 Flags #%00101010 MemoryAddress &amp;$7FF6C2E40000}
+</code></pre>
+<section id="safety-notes"><h3 id="safety-notes">Safety Notes</h3>
+<ul>
+<li>Numeric formatting attributes are only applied to <code>int</code> and <code>long</code> properties</li>
+<li><code>decimal</code> and <code>double</code> types ignore formatting attributes to preserve fractional precision</li>
+<li>Custom formatting respects the configured <code>ElementStylePreference</code> for syntax style</li>
+</ul>
+<section id="processing-instructions-and-dynamic-content"><h2 id="processing-instructions-and-dynamic-content">Processing Instructions and Dynamic Content</h2>
 <p>XferLang supports Processing Instructions (PIs) that provide metadata and configuration for documents. PIs are special elements that control parsing behavior, define document metadata, and enable powerful dynamic content features. The PI system is fully extensible, allowing you to create custom instructions for specialized use cases.</p>
 <section id="built-in-processing-instructions"><h3 id="built-in-processing-instructions">Built-in Processing Instructions</h3>
 <p>XferLang includes several built-in PIs that address common document needs:</p>
@@ -597,7 +1733,7 @@ string xfer = XferConvert.Serialize(config);
     }
 }
 </code></pre>
-<section id="dynamic-elements-andamp-source-resolution"><h3 id="dynamic-elements-source-resolution">Dynamic Elements &amp; Source Resolution</h3>
+<section id="dynamic-elements-and-source-resolution"><h3 id="dynamic-elements-and-source-resolution">Dynamic Elements and Source Resolution</h3>
 <p>Dynamic elements provide runtime value substitution with an extensible source system.</p>
 <section id="built-in-source-types"><h4 id="built-in-source-types">Built-in Source Types</h4>
 <p>XferLang includes three built-in source handlers:</p>
@@ -620,7 +1756,7 @@ string xfer = XferConvert.Serialize(config);
 <li>Example: <code>config file &quot;settings.json&quot;</code></li>
 </ul>
 <section id="custom-source-handler-registration"><h4 id="custom-source-handler-registration">Custom Source Handler Registration</h4>
-<p>Extend the system with custom source types for databases, web services, or other data sources:</p>
+<p>You may extend the dynamic-source handler with custom source types for databases, web services, or other data sources:</p>
 <pre><code class="language-csharp">// Register a custom 'vault' source handler
 DynamicSourceHandlerRegistry.RegisterHandler(&quot;vault&quot;, (sourceValue, fallbackKey) =&gt; {
     var key = sourceValue ?? fallbackKey;
@@ -667,7 +1803,7 @@ DynamicSourceHandlerRegistry.RegisterHandler(&quot;db&quot;, (sourceValue, fallb
     }
 }
 </code></pre>
-<section id="pi-registration-andamp-lifecycle"><h4 id="pi-registration-lifecycle">PI Registration &amp; Lifecycle</h4>
+<section id="pi-registration-and-lifecycle"><h4 id="pi-registration-and-lifecycle">PI Registration and Lifecycle</h4>
 <p>Register custom PIs with the parser during initialization:</p>
 <pre><code class="language-csharp">// Register the custom PI processor
 Parser.RegisterPIProcessor(ValidationProcessingInstruction.Keyword,
@@ -700,7 +1836,198 @@ var xferContent = @&quot;
 <li><strong>Multi-phase PIs</strong>: Process elements in multiple passes</li>
 </ul>
 <p>This extensible PI system makes XferLang highly adaptable for domain-specific needs, from configuration management to data validation and transformation pipelines.</p>
-<section id="project-status-andamp-roadmap"><h2 id="project-status-roadmap">Project Status &amp; Roadmap</h2>
+<section id="writing-custom-processing-instruction-pi-processors"><h2 id="writing-custom-processing-instruction-pi-processors">Writing Custom Processing Instruction (PI) Processors</h2>
+<p>XferLang.NET allows you to extend the parser and deserializer by implementing custom logic for Processing Instructions (PIs). This is useful for advanced configuration, runtime directives, schema association, and dynamic value resolution.</p>
+<section id="conceptual-overview"><h3 id="conceptual-overview">Conceptual Overview</h3>
+<ul>
+<li>PIs are metadata blocks that can control parsing, validation, and runtime behavior.</li>
+<li>Custom PI processors let you interpret and act on PIs in your own way.</li>
+<li>Common use cases: environment overrides, feature flags, schema binding, dynamic sources.</li>
+</ul>
+<section id="net-api-usage"><h3 id="net-api-usage">.NET API Usage</h3>
+<p>To handle custom PIs, implement or extend the relevant resolver or processor interface. For example, to handle <code>dynamicSource</code> PIs, implement <code>IDynamicSourceResolver</code> or subclass <code>DefaultDynamicSourceResolver</code>:</p>
+<pre><code class="language-csharp">public class MyDynamicSourceResolver : DefaultDynamicSourceResolver
+{
+    public override string? Resolve(string key)
+    {
+        // Custom logic for dynamic keys
+        if (key == &quot;special&quot;)
+            return &quot;custom-value&quot;;
+        // Fallback to default
+        return base.Resolve(key);
+    }
+}
+
+// Usage:
+var settings = new XferSerializerSettings
+{
+    DynamicSourceResolver = new MyDynamicSourceResolver()
+};
+
+var obj = XferConvert.Deserialize&lt;MyConfig&gt;(xferString, settings);
+</code></pre>
+<section id="building-xferlang"><h2 id="building-xferlang">Building XferLang</h2>
+<p>Information for developers who want to build XferLang from source or contribute to the project.</p>
+<section id="prerequisites"><h3 id="prerequisites">Prerequisites</h3>
+<ul>
+<li><strong>.NET SDK 8.0 or later</strong> - <a href="https://dotnet.microsoft.com/download">Download from Microsoft</a></li>
+<li><strong>Git</strong> - For cloning the repository</li>
+<li><strong>IDE (Optional):</strong> Visual Studio, VS Code, or Rider</li>
+</ul>
+<section id="quick-start"><h3 id="quick-start">Quick Start</h3>
+<pre><code class="language-bash"># Clone the repository
+git clone https://github.com/paulmooreparks/Xfer.git
+cd Xfer
+
+# Build the entire solution
+dotnet build
+
+# Run the tests
+dotnet test
+
+# Create NuGet packages (optional)
+dotnet pack --configuration Release
+</code></pre>
+<section id="project-structure"><h3 id="project-structure">Project Structure</h3>
+<p>The XferLang solution contains several projects:</p>
+<ul>
+<li><strong>ParksComputing.Xfer.Lang</strong> - Main library</li>
+<li><strong>XferTest</strong> - Unit tests and integration tests</li>
+<li><strong>xferc</strong> - Command-line tools and REPL</li>
+<li><strong>XferService</strong> - Web service implementation (optional)</li>
+</ul>
+<section id="development-commands"><h3 id="development-commands">Development Commands</h3>
+<pre><code class="language-bash"># Build in Debug mode
+dotnet build --configuration Debug
+
+# Build in Release mode
+dotnet build --configuration Release
+
+# Run specific test project
+dotnet test XferTest/
+
+# Run with verbose output
+dotnet test --verbosity normal
+
+# Run tests with code coverage
+dotnet test --collect:&quot;XPlat Code Coverage&quot;
+
+# Package for NuGet distribution
+dotnet pack ParksComputing.Xfer.Lang/ --configuration Release --output ./nupkg
+</code></pre>
+<section id="using-the-command-line-tools"><h3 id="using-the-command-line-tools">Using the Command-Line Tools</h3>
+<p>The <code>xferc</code> project provides command-line tools for working with XferLang:</p>
+<pre><code class="language-bash"># Build the command-line tools
+dotnet build xferc/
+
+# Run the XferLang REPL
+dotnet run --project xferc/
+
+# Convert JSON to XferLang
+dotnet run --project xferc/ -- convert input.json output.xfer
+
+# Validate XferLang documents
+dotnet run --project xferc/ -- validate document.xfer
+
+# Pretty-print XferLang documents
+dotnet run --project xferc/ -- format document.xfer
+</code></pre>
+<section id="community-and-resources"><h2 id="community-and-resources">Community and Resources</h2>
+<p>Join the XferLang community and access helpful resources for learning and development.</p>
+<section id="learning-resources"><h3 id="learning-resources">Learning Resources</h3>
+<ul>
+<li>📖 <strong>Documentation:</strong> <a href="https://github.com/paulmooreparks/Xfer">This comprehensive guide</a></li>
+<li>🎯 <strong>Examples:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master/examples">Sample XferLang applications</a> in the repository</li>
+<li>💡 <strong>Tests:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang.Tests">Unit Tests</a> also show how to use the library and provide test coverage</li>
+<li>📄 <strong>Sample Documents:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master">*.xfer files</a> in the repository</li>
+</ul>
+<section id="getting-help"><h3 id="getting-help">Getting Help</h3>
+<ul>
+<li>❓ <strong>Questions:</strong> Open a <a href="https://github.com/paulmooreparks/Xfer/discussions">GitHub Discussion</a></li>
+<li>🐛 <strong>Bug Reports:</strong> Create an <a href="https://github.com/paulmooreparks/Xfer/issues">Issue</a> with details</li>
+<li>💡 <strong>Feature Requests:</strong> Suggest improvements via <a href="https://github.com/paulmooreparks/Xfer/issues">GitHub Issues</a></li>
+<li>📧 <strong>Direct Contact:</strong> Reach out via GitHub for complex questions</li>
+</ul>
+<section id="development-status"><h3 id="development-status">Development Status</h3>
+<p>XferLang is actively developed with regular updates and improvements:</p>
+<ul>
+<li>✅ <strong>Stable Core:</strong> Basic serialization/deserialization is production-ready</li>
+<li>🚧 <strong>Active Development:</strong> Advanced features and optimizations ongoing</li>
+<li>🔄 <strong>Regular Releases:</strong> Check <a href="https://github.com/paulmooreparks/Xfer/releases">releases</a> for updates</li>
+<li>📊 <strong>CI/CD:</strong> Automated testing and quality checks via GitHub Actions</li>
+</ul>
+<section id="language-comparison"><h3 id="language-comparison">Language Comparison</h3>
+<p>See how XferLang compares to other data formats:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>XferLang</th>
+<th>JSON</th>
+<th>XML</th>
+<th>YAML</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Explicit Types</strong></td>
+<td>✅ Built-in</td>
+<td>❌ Limited</td>
+<td>⚠️ Via attributes</td>
+<td>⚠️ Via tags</td>
+</tr>
+<tr>
+<td><strong>Human Readable</strong></td>
+<td>✅ Yes</td>
+<td>✅ Yes</td>
+<td>⚠️ Verbose</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td><strong>Comments</strong></td>
+<td>✅ Native</td>
+<td>❌ No</td>
+<td>✅ Native</td>
+<td>✅ Native</td>
+</tr>
+<tr>
+<td><strong>Safety</strong></td>
+<td>✅ High</td>
+<td>⚠️ Medium</td>
+<td>✅ High</td>
+<td>⚠️ Medium</td>
+</tr>
+<tr>
+<td><strong>Delimiter Escaping</strong></td>
+<td>✅ Not needed</td>
+<td>❌ Required</td>
+<td>❌ Required</td>
+<td>⚠️ Context-dependent</td>
+</tr>
+<tr>
+<td><strong>Type Ambiguity</strong></td>
+<td>✅ None</td>
+<td>❌ High</td>
+<td>⚠️ Medium</td>
+<td>❌ High</td>
+</tr>
+<tr>
+<td><strong>Compact Size</strong></td>
+<td>✅ Good</td>
+<td>✅ Excellent</td>
+<td>❌ Poor</td>
+<td>✅ Good</td>
+</tr>
+<tr>
+<td><strong>Parsing Speed</strong></td>
+<td>✅ Fast</td>
+<td>✅ Fast</td>
+<td>⚠️ Moderate</td>
+<td>⚠️ Moderate</td>
+</tr>
+</tbody>
+</table>
+<section id="project-status-and-roadmap"><h2 id="project-status-and-roadmap">Project Status and Roadmap</h2>
 <p>The .NET implementation of XferLang is becoming more robust, with a focus on professional-grade features like custom converters and contract resolvers. However, the project as a whole is still experimental.</p>
 <p>The future roadmap includes:</p>
 <ul>
@@ -717,7 +2044,7 @@ var xferContent = @&quot;
 </section>
 
         <footer>
-            <p>Documentation generated on 2025-08-03 21:14:27 UTC</p>
+            <p>Documentation generated on 2025-08-03 22:30:10 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>
