@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ParksComputing.Xfer.Lang.ProcessingInstructions;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 public class KeyValuePairElement : TypedElement<Element>
@@ -14,6 +15,30 @@ public class KeyValuePairElement : TypedElement<Element>
 
     public KeyValuePairElement(TextElement keyElement, int specifierCount = 1) : this(keyElement, new EmptyElement(), specifierCount)
     {
+    }
+
+    public override Element Value
+    {
+        get => base.Value;
+        set
+        {
+            // Remove old value from children if it exists
+            if (base.Value != null && Children.Contains(base.Value))
+            {
+                Children.Remove(base.Value);
+                base.Value.Parent = null;
+            }
+
+            // Set new value
+            base.Value = value;
+
+            // Add new value to children
+            if (value != null)
+            {
+                Children.Add(value);
+                value.Parent = this;
+            }
+        }
     }
 
     public KeyValuePairElement(TextElement keyElement, Element value, int specifierCount = 1)
@@ -33,6 +58,8 @@ public class KeyValuePairElement : TypedElement<Element>
         {
             throw new ArgumentException($"Key must be a {nameof(TextElement)} or {nameof(IdentifierElement)} type.");
         }
+
+        // Value is set via base constructor, and Value property setter will handle Children.Add
     }
 
     public override string ToXfer()
@@ -45,6 +72,19 @@ public class KeyValuePairElement : TypedElement<Element>
         bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
         var sb = new StringBuilder();
         sb.Append(KeyElement.ToXfer(formatting, indentChar, indentation, depth));
+
+        // Add any processing instructions that should appear between key and value
+        foreach (var child in Children)
+        {
+            if (child is ProcessingInstruction pi)
+            {
+                if (isSpaced)
+                {
+                    sb.Append(' ');
+                }
+                sb.Append(pi.ToXfer(formatting, indentChar, indentation, depth));
+            }
+        }
 
         if (isSpaced || Value is KeyValuePairElement || Value.Delimiter.Style == ElementStyle.Implicit)
         {

@@ -18,6 +18,9 @@ namespace ParksComputing.Xfer.Lang.ProcessingInstructions {
         public virtual void ProcessingInstructionHandler() {
         }
 
+        public virtual void ElementHandler(Element element) {
+        }
+
         public override string ToXfer() {
             return ToXfer(Formatting.None);
         }

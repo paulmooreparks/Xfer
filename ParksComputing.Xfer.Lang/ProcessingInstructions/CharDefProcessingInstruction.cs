@@ -30,6 +30,7 @@ public class CharDefProcessingInstruction : ProcessingInstruction {
         CharacterIdRegistry.SetCustomIds(charDefRegistry);
     }
 
-    public void ElementHandler(Element element) {
+    public override void ElementHandler(Element element) {
+        element.Id = Value.ToString();
     }
 }

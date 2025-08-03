@@ -25,10 +25,60 @@ namespace ProcessingInstructionDemo {
             var input = File.ReadAllText(filePath);
             var doc = parser.Parse(input);
 
-
             var xfer = doc.ToXfer(Formatting.Pretty);
             Console.WriteLine("Serialized Xfer:");
             Console.WriteLine(xfer);
+
+            var root = doc.GetElementById("root");
+            if (root != null) {
+                Console.WriteLine($"Root Element: {root.ToXfer()}");
+            } else {
+                Console.WriteLine("Root element not found.");
+            }
+
+            var kvp = doc.GetElementById("kvp");
+            if (kvp != null) {
+                Console.WriteLine($"KVP Element: {kvp.ToXfer()}");
+            } else {
+                Console.WriteLine("KVP element not found.");
+            }
+
+            var value = doc.GetElementById("value");
+            if (value != null) {
+                Console.WriteLine($"Value Element: {value.ToXfer()}");
+            } else {
+                Console.WriteLine("Value element not found.");
+            }
+
+            var objectElement = doc.GetElementById("object");
+            if (objectElement != null) {
+                Console.WriteLine($"Object Element: {objectElement.ToXfer()}");
+            }
+            else {
+                Console.WriteLine("Object element not found.");
+            }
+
+            // Test finding element by ID
+            var testpiElement = doc.GetElementById("testpi");
+            if (testpiElement != null) {
+                Console.WriteLine(testpiElement);
+            } else {
+                Console.WriteLine("Element with ID 'testpi' not found.");
+            }
+
+            var array = doc.GetElementById("array");
+            if (array != null) {
+                Console.WriteLine($"Array Element: {array.ToXfer()}");
+            } else {
+                Console.WriteLine("Element with ID 'array' not found.");
+            }
+
+            var one = doc.GetElementById("one");
+            if (one != null) {
+                Console.WriteLine($"Element with ID 'one': {one.ToXfer()}");
+            } else {
+                Console.WriteLine("Element with ID 'one' not found.");
+            }
 
             Console.WriteLine("Document-level metadata:");
 
@@ -90,7 +140,7 @@ namespace ProcessingInstructionDemo {
             }
             // Print only the 'alphabet' object and its children for clarity
             // doc.Root is DocumentElement; search its children for the 'alphabet' KeyValuePairElement
-            var alphabetKvp = (doc.Root as DocumentElement)?.Children
+            var alphabetKvp = doc.Root.Children
                 .OfType<KeyValuePairElement>()
                 .FirstOrDefault(kvp => kvp.Key == "alphabet");
             if (alphabetKvp != null) {
@@ -120,7 +170,7 @@ namespace ProcessingInstructionDemo {
                 }
             }
             // Print only the 'alphabet' object and its children for clarity
-            var alphabetKvp2 = (doc.Root as DocumentElement)?.Children
+            var alphabetKvp2 = doc.Root.Children
                 .OfType<KeyValuePairElement>()
                 .FirstOrDefault(kvp => kvp.Key == "alphabet");
             if (alphabetKvp2 != null) {

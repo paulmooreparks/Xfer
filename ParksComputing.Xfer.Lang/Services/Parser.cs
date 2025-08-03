@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.Contracts;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Text;
 using System.Diagnostics;
@@ -22,6 +22,7 @@ public class Parser : IXferParser {
     public Func<Element, string, int?>? CharDefResolver { get; set; }
     // Used to assign IDs from inline PIs to subsequent elements
     private Queue<string> _pendingIds = new Queue<string>();
+    private readonly List<ProcessingInstruction> _pendingPIs = new();
     // Used to hold a pending meta PI to attach as XferMetadata to the next element
     private ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver _dynamicSourceResolver = new ParksComputing.Xfer.Lang.DynamicSource.DefaultDynamicSourceResolver();
 
@@ -584,35 +585,31 @@ public class Parser : IXferParser {
         return document!;
     }
 
-    internal XferDocument ParseDocument() {
+    internal XferDocument ParseDocument()
+    {
         var document = new XferDocument();
         _currentDocument = document;
 
-        // Create DocumentElement as the root for all top-level elements
-        var docElement = new DocumentElement();
-        document.Root = docElement;
+        var element = ParseElement();
 
-        while (IsCharAvailable()) {
-            var element = ParseElement();
+        if (element is CollectionElement collectionElement)
+        {
+            document.Root = collectionElement;
+        }
+        else if (element is EmptyElement)
+        {
+            document.Root = new TupleElement(); // Default empty document to a tuple
+        }
+        else
+        {
+            throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: A document's root must be a collection element (object, array, or tuple). Found '{element.GetType().Name}'.");
+        }
 
-            if (element is not EmptyElement) {
-                if (element is ProcessingInstruction pi) {
-                    if (pi.Name == DocumentProcessingInstruction.Keyword) {
-                        if (document.Root.Children.Count > 0) {
-                            throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Document metadata must be the first element.");
-                        }
-                    }
+        SkipWhitespace();
 
-                    document.Root.AddChild(element);
-                }
-                else if (element is CollectionElement collectionElement) {
-                    document.Root.AddChild(element);
-                }
-                else {
-                    // For all other elements, add to the root
-                    throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Unexpected element type '{element.GetType().Name}' at the root level.");
-                }
-            }
+        if (IsCharAvailable())
+        {
+            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected content found after the root element.");
         }
 
         return document;
@@ -658,12 +655,9 @@ public class Parser : IXferParser {
         }
     }
 
-    // Track the last PI element(s) for association
-    private readonly Stack<List<ProcessingInstruction>> _piStack = new();
 
     internal Element ParseElement() {
         SkipWhitespace();
-        _piStack.Push(new List<ProcessingInstruction>());
 
         while (IsCharAvailable()) {
             Element? element = null;
@@ -729,37 +723,29 @@ public class Parser : IXferParser {
                 throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Expected element.");
             }
 
+            if (element is ProcessingInstruction pi) {
+                _pendingPIs.Add(pi);
+                SkipWhitespace();
+                continue; // Loop to find the PI's target element
+            }
+
             SkipWhitespace();
 
-            if (element is not null && element is not ProcessingInstruction && element is not EmptyElement) {
-                CloseProcessingInstructionScope(element);
+            // Apply pending PIs to non-collection elements
+            // Collection elements handle their own PIs in their respective Parse methods
+            if (element is not EmptyElement and not CollectionElement)
+            {
+                foreach (var pendingPI in _pendingPIs)
+                {
+                    pendingPI.Target = element;
+                    pendingPI.ElementHandler(element);
+                }
+                _pendingPIs.Clear();
             }
 
             return element ?? new EmptyElement();
         }
         return new EmptyElement();
-    }
-
-    private void OpenProcessingInstructionScope() {
-        _piStack.Push([]);
-    }
-
-    private void CloseProcessingInstructionScope(Element? element) {
-        if (element is not null && element is not EmptyElement) {
-            var pendingPIs = _piStack.Pop();
-
-            foreach (var pi in pendingPIs) {
-                // If this is a document-level PI with an object value, dispatch each KVP to PI processors
-                if (pi.Kvp != null && pi.Kvp.Key == DocumentProcessingInstruction.Keyword) {
-                    pi.Target = _currentDocument?.Root;
-                }
-                else {
-                    pi.Target = element;
-                }
-            }
-
-            pendingPIs.Clear();
-        }
     }
 
     private void ParseCommentElement(int specifierCount = 1) {
@@ -775,6 +761,7 @@ public class Parser : IXferParser {
     private ProcessingInstruction ParseProcessingInstruction(int specifierCount = 1) {
         SkipWhitespace();
         KeyValuePairElement? kvp = null;
+
         while (IsCharAvailable()) {
             if (ProcessingInstructionClosing()) {
                 if (kvp == null) {
@@ -799,6 +786,9 @@ public class Parser : IXferParser {
                 else if (string.Equals(piKey, DocumentProcessingInstruction.Keyword, StringComparison.InvariantCultureIgnoreCase)) {
                     pi = ParseDocumentProcessingInstruction(kvp);
                 }
+                else if (string.Equals(piKey, IdProcessingInstruction.Keyword, StringComparison.InvariantCultureIgnoreCase)) {
+                    pi = ParseIdProcessingInstruction(kvp);
+                }
                 else {
                     throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Failed to parse processing instruction.");
                 }
@@ -808,8 +798,6 @@ public class Parser : IXferParser {
                     charDefPi.ProcessingInstructionHandler();
                 }
 
-                var pendingPIs = _piStack.Peek();
-                pendingPIs.Add(pi);
                 return pi;
             }
 
@@ -835,10 +823,19 @@ public class Parser : IXferParser {
 
     private ProcessingInstruction ParseCharDefProcessingInstruction(KeyValuePairElement kvp) {
         if (kvp.Value is not ObjectElement obj) {
-            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Document PI must contain an object with metadata.");
+            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Document PI must contain an object containing text-to-character-element key/value pairs.");
         }
 
         var pi = new CharDefProcessingInstruction(obj);
+        return pi;
+    }
+
+    private ProcessingInstruction ParseIdProcessingInstruction(KeyValuePairElement kvp) {
+        if (kvp.Value is not TextElement textElement) {
+            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Id PI must contain a text element.");
+        }
+
+        var pi = new IdProcessingInstruction(textElement);
         return pi;
     }
 
@@ -871,7 +868,6 @@ public class Parser : IXferParser {
         var lastElementColumn = LastElementColumn;
         var style = _delimStack.Peek().Style;
         SkipWhitespace();
-        OpenProcessingInstructionScope();
 
         // Always create a simple ArrayElement which can hold any Element type
         ArrayElement arrayElement;
@@ -882,10 +878,27 @@ public class Parser : IXferParser {
             throw new InvalidOperationException($"At row {lastElementRow}, column {lastElementColumn}: Failed to create array element. {ex.Message}", ex);
         }
 
+        // Apply any pending PIs to this array element
+        foreach (var pendingPI in _pendingPIs)
+        {
+            pendingPI.Target = arrayElement;
+            pendingPI.ElementHandler(arrayElement);
+        }
+        _pendingPIs.Clear();
+
         if (IsCharAvailable()) {
             if (ArrayElementClosing()) {
-                CloseProcessingInstructionScope(arrayElement);
                 return arrayElement;
+            }
+
+            // Handle processing instructions specially in arrays
+            if (ElementOpening(ProcessingInstruction.ElementDelimiter, out int piSpecifierCount)) {
+                var pi = ParseProcessingInstruction(piSpecifierCount);
+                // Add PI to array for serialization
+                arrayElement.Add(pi);
+                // Also add to pending PIs for application to next element
+                _pendingPIs.Add(pi);
+                SkipWhitespace();
             }
 
             Element element;
@@ -899,8 +912,18 @@ public class Parser : IXferParser {
 
             while (IsCharAvailable()) {
                 if (ArrayElementClosing()) {
-                    CloseProcessingInstructionScope(arrayElement);
                     return arrayElement;
+                }
+
+                // Handle processing instructions specially in arrays
+                if (ElementOpening(ProcessingInstruction.ElementDelimiter, out int piSpecifierCount2)) {
+                    var pi = ParseProcessingInstruction(piSpecifierCount2);
+                    // Add PI to array for serialization
+                    arrayElement.Add(pi);
+                    // Also add to pending PIs for application to next element
+                    _pendingPIs.Add(pi);
+                    SkipWhitespace();
+                    continue;
                 }
 
                 try {
@@ -928,17 +951,35 @@ public class Parser : IXferParser {
 
     private ObjectElement ParseObjectElement(int specifierCount = 1) {
         SkipWhitespace();
-        OpenProcessingInstructionScope();
         var objectElement = new ObjectElement();
+
+        // Apply any pending PIs to this object element
+        foreach (var pendingPI in _pendingPIs)
+        {
+            pendingPI.Target = objectElement;
+            pendingPI.ElementHandler(objectElement);
+        }
+        _pendingPIs.Clear();
 
         while (IsCharAvailable()) {
             if (ObjectElementClosing()) {
-                CloseProcessingInstructionScope(objectElement);
                 return objectElement;
             }
 
             var lastRow = CurrentRow;
             var lastColumn = CurrentColumn;
+
+            // Handle processing instructions specially in objects
+            if (ElementOpening(ProcessingInstruction.ElementDelimiter, out int piSpecifierCount)) {
+                var pi = ParseProcessingInstruction(piSpecifierCount);
+                // Add PI to object for serialization
+                objectElement.AddOrUpdate(pi);
+                // Also add to pending PIs for application to next element
+                _pendingPIs.Add(pi);
+                SkipWhitespace();
+                continue;
+            }
+
             var element = ParseElement();
 
             if (element is KeyValuePairElement kvp) {
@@ -965,13 +1006,30 @@ public class Parser : IXferParser {
     private TupleElement ParseTupleElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
         SkipWhitespace();
-        OpenProcessingInstructionScope();
         var tupleElement = new TupleElement(style);
+
+        // Apply any pending PIs to this tuple element
+        foreach (var pendingPI in _pendingPIs)
+        {
+            pendingPI.Target = tupleElement;
+            pendingPI.ElementHandler(tupleElement);
+        }
+        _pendingPIs.Clear();
 
         while (IsCharAvailable()) {
             if (TupleElementClosing()) {
-                CloseProcessingInstructionScope(tupleElement);
                 return tupleElement;
+            }
+
+            // Handle processing instructions specially in tuples
+            if (ElementOpening(ProcessingInstruction.ElementDelimiter, out int piSpecifierCount)) {
+                var pi = ParseProcessingInstruction(piSpecifierCount);
+                // Add PI to tuple for serialization
+                tupleElement.Add(pi);
+                // Also add to pending PIs for application to next element
+                _pendingPIs.Add(pi);
+                SkipWhitespace();
+                continue;
             }
 
             var element = ParseElement();
@@ -1090,14 +1148,39 @@ public class Parser : IXferParser {
 
     private KeyValuePairElement ParseKeyValuePairElement(TextElement keyElement) {
         var keyValuePairElement = new KeyValuePairElement(keyElement);
-        OpenProcessingInstructionScope();
 
         if (IsCharAvailable()) {
-            // Assign pending ID to the KeyValuePairElement itself, if present
+            // Store any pending PIs that should be applied to this KVP
+            var savedPendingPIs = new List<ProcessingInstruction>(_pendingPIs);
+            _pendingPIs.Clear();
+
+            // Check for processing instructions that should apply to the value
+            var valuePIs = new List<ProcessingInstruction>();
+            while (ElementOpening(ProcessingInstruction.ElementDelimiter, out int piSpecifierCount)) {
+                var pi = ParseProcessingInstruction(piSpecifierCount);
+                valuePIs.Add(pi);
+                SkipWhitespace();
+            }
+
             Element valueElement = ParseElement();
-            // Do NOT assign pending ID to valueElement here
             keyValuePairElement.Value = valueElement;
-            CloseProcessingInstructionScope(keyValuePairElement);
+
+            // Add value PIs as children of the KVP for serialization
+            foreach (var valuePI in valuePIs) {
+                keyValuePairElement.Children.Add(valuePI);
+                valuePI.Parent = keyValuePairElement;
+                // Also apply the PI to the value element
+                valuePI.Target = valueElement;
+                valuePI.ElementHandler(valueElement);
+            }
+
+            // Apply the saved PIs to this KVP
+            foreach (var pendingPI in savedPendingPIs)
+            {
+                pendingPI.Target = keyValuePairElement;
+                pendingPI.ElementHandler(keyValuePairElement);
+            }
+
             return keyValuePairElement;
         }
 

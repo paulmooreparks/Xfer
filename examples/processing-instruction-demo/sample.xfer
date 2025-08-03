@@ -14,18 +14,23 @@ charDef {
 }
 !>
 
+<! id "root" !>
 (
+    <!id "kvp"!>foo <!id "value"!>"bar"
+    [1 2 3]
     <\answer\>
     'I <\heart\><\vsemoji\> XferLang!'
     'Put a <\pin\> in it!'
-    [1 2 3]
 
+    <! id "object" !>
     alphabet {
-        a '<\alpha\>'
+        <! id "testpi" !> a '<\alpha\>'
         b '<\beta\>'
         g '<\gamma\>'
         d '<\delta\>'
         e '<\epsilon\>'
         z '<\zeta\>'
     }
+
+    <! id "array" !> [<! id "one"!> 1 2 3]
 )

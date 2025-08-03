@@ -10,4 +10,8 @@ namespace ParksComputing.Xfer.Lang.ProcessingInstructions;
 public class IdProcessingInstruction : ProcessingInstruction {
     public const string Keyword = "id";
     public IdProcessingInstruction(TextElement value) : base(value, Keyword) { }
+
+    public override void ElementHandler(Element element) {
+        element.Id = Value.ToString();
+    }
 }
