@@ -78,7 +78,7 @@ public class LogProcessingInstruction : ProcessingInstruction {
         }
 
         // Fallback to string representation
-        return element.ToString();
+        return element.ToString() ?? string.Empty;
     }
 
     public override void ProcessingInstructionHandler() {
