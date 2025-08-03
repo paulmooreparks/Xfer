@@ -90,7 +90,7 @@ public class Parser : IXferParser {
 
     private XferDocument? _currentDocument = null;
 
-    public static readonly string Version = "0.12";
+    public static readonly string Version = "0.13";
 
 
     public Parser() : this(Encoding.UTF8) { }

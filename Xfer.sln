@@ -25,8 +25,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "schemas", "schemas", "{99E4
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.Xfer.Lang", "ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj", "{636E1065-4C9D-4037-BDF1-57E3139EDCAF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XferTest", "XferTest\XferTest.csproj", "{C2F8A38A-F405-46A4-8132-FF054ED55DFC}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "xferc", "xferc\xferc.csproj", "{B3146D5B-7DCD-4DD3-B680-5A7F5B3EF5B2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xfer.Data", "XferService\Xfer.Data\Xfer.Data.csproj", "{2ADAEF07-B433-480D-801C-E32A958EF4E9}"
