@@ -30,6 +30,8 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
+      - name: Clear NuGet cache
+        run: dotnet nuget locals all --clear
       - name: Restore dependencies
         run: dotnet restore --configfile nuget.config
       - name: Read version from csproj

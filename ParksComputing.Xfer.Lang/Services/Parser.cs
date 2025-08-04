@@ -302,6 +302,14 @@ public class Parser : IXferParser {
     private Stack<ElementDelimiter> _delimStack = new();
 
     internal bool KeywordElementOpening(out int specifierCount) {
+        if (KeywordElement.IsKeywordLeadingChar(CurrentChar)) {
+            specifierCount = 1;
+            LastElementRow = CurrentRow;
+            LastElementColumn = CurrentColumn;
+            _delimStack.Push(new ElementDelimiter(KeywordElement.OpeningSpecifier, KeywordElement.ClosingSpecifier, specifierCount, ElementStyle.Implicit));
+            return true;
+        }
+
         return ElementOpening(KeywordElement.ElementDelimiter, out specifierCount);
     }
 
@@ -782,10 +790,7 @@ public class Parser : IXferParser {
         while (IsCharAvailable()) {
             Element? element = null;
             // For containers, create the element, push to stack, parse, then pop
-            if (IdentifierElementOpening(out int identifierSpecifierCount)) {
-                element = ParseIdentifierElement(identifierSpecifierCount);
-            }
-            else if (KeywordElementOpening(out int keywordSpecifierCount)) {
+            if (KeywordElementOpening(out int keywordSpecifierCount)) {
                 element = ParseKeywordElement(keywordSpecifierCount);
             }
             else if (ElementOpening(InterpolatedElement.ElementDelimiter, out int evalSpecifierCount)) {
@@ -826,6 +831,9 @@ public class Parser : IXferParser {
             }
             else if (ElementOpening(DynamicElement.ElementDelimiter, out int phSpecifierCount)) {
                 element = ParseDynamicElement(phSpecifierCount);
+            }
+            else if (IdentifierElementOpening(out int identifierSpecifierCount)) {
+                element = ParseIdentifierElement(identifierSpecifierCount);
             }
             else if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
                 element = ParseNullElement(nullSpecifierCount);
@@ -1170,44 +1178,6 @@ public class Parser : IXferParser {
         return ParseKeyValuePairElement(keyElement);
     }
 
-    private KeyValuePairElement ParseIdentifierElement(int specifierCount = 1) {
-        var lastRow = CurrentRow;
-        var lastColumn = CurrentColumn;
-        var style = _delimStack.Peek().Style;
-        var key = string.Empty;
-
-        if (style == ElementStyle.Implicit) {
-            while (Peek.IsKeywordChar()) {
-                Expand();
-            }
-
-            if (string.IsNullOrEmpty(CurrentString)) {
-                throw new InvalidOperationException($"At row {lastRow}, column {lastColumn}: Key must be a non-empty string.");
-            }
-
-            key = CurrentString;
-            Advance();
-            SkipWhitespace();
-            _delimStack.Pop();
-        }
-        else {
-            StringBuilder valueBuilder = new StringBuilder();
-
-            while (IsCharAvailable()) {
-                if (IdentifierElementClosing()) {
-                    key = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
-                    break;
-                }
-
-                valueBuilder.Append(CurrentChar);
-                Expand();
-            }
-        }
-
-        var keyElement = new IdentifierElement(key, specifierCount, style: style);
-        return ParseKeyValuePairElement(keyElement);
-    }
-
     private KeyValuePairElement ParseKeyValuePairElement(TextElement keyElement) {
         var keyValuePairElement = new KeyValuePairElement(keyElement);
 
@@ -1248,11 +1218,6 @@ public class Parser : IXferParser {
 
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {KeyValuePairElement.ElementName} element.");
     }
-
-    /*
-    The following two methods need a LOT of work to handle the vagaries of Unicode.
-    I'm just trying to get through the basic scenarios first.
-    */
 
     private CharacterElement ParseCharacterElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
@@ -1386,6 +1351,27 @@ public class Parser : IXferParser {
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {InterpolatedElement.ElementName} element.");
     }
 
+    private IdentifierElement ParseIdentifierElement(int specifierCount = 1) {
+        var lastRow = CurrentRow;
+        var lastColumn = CurrentColumn;
+        var style = _delimStack.Peek().Style;
+        var key = string.Empty;
+
+        StringBuilder valueBuilder = new StringBuilder();
+
+        while (IsCharAvailable()) {
+            if (IdentifierElementClosing()) {
+                key = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
+                return new IdentifierElement(key, specifierCount, style: style);
+            }
+
+            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {IdentifierElement.ElementName} element.");
+    }
+
     private StringElement ParseStringElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
         StringBuilder valueBuilder = new StringBuilder();
@@ -1402,6 +1388,7 @@ public class Parser : IXferParser {
         if (valueBuilder.Length > 0 && (style == ElementStyle.Compact || style == ElementStyle.Implicit)) {
             return new StringElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount, style: style);
         }
+
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {StringElement.ElementName} element.");
     }
 

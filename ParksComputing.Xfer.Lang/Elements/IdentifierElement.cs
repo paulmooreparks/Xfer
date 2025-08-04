@@ -2,40 +2,33 @@
 using System.Text.RegularExpressions;
 
 namespace ParksComputing.Xfer.Lang.Elements;
-public class IdentifierElement : TextElement
-{
+
+public class IdentifierElement : TextElement {
     public static readonly string ElementName = "identifier";
-    public const char OpeningSpecifier = '=';
+    public const char OpeningSpecifier = ':';
     public const char ClosingSpecifier = OpeningSpecifier;
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     public IdentifierElement(string text, int specifierCount = 1, ElementStyle style = ElementStyle.Implicit) :
-        base(text, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
-    {
+        base(text, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
     }
 
-    public static bool IsIdentifierLeadingChar(char c)
-    {
+    public static bool IsIdentifierLeadingChar(char c) {
         return char.IsLetter(c) || c == '_';
     }
 
-    /* TODO: This can be more efficient */
-    protected override void CheckAndUpdateDelimiterStyle()
-    {
+    protected override void CheckAndUpdateDelimiterStyle() {
         int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.ClosingSpecifier);
         Delimiter.SpecifierCount = maxConsecutiveSpecifiers + 1;
 
-        if (!Regex.IsMatch(Value, @"^[A-Za-z_\-\.][A-Za-z0-9_\-\.]*$"))
-        {
+        if (!Regex.IsMatch(Value, @"^[A-Za-z_\-\.][A-Za-z0-9_\-\.]*$")) {
             Delimiter.Style = ElementStyle.Compact;
 
-            if (Value.Count() == 0 || Value.Last() == Delimiter.ClosingSpecifier)
-            {
+            if (Value.Count() == 0 || Value.Last() == Delimiter.ClosingSpecifier) {
                 Delimiter.Style = ElementStyle.Explicit;
             }
         }
-        else
-        {
+        else {
             Delimiter.Style = ElementStyle.Implicit;
         }
     }
@@ -55,5 +48,4 @@ public class IdentifierElement : TextElement
 
         return sb.ToString();
     }
-
 }

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}}</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="highlightjs/styles/github.min.css">
+    <script src="highlightjs/highlight.min.js"></script>
+    <script src="highlightjs/languages/xfer.min.js"></script>
+</head>
+<body>
+    <div class="mobile-nav-toggle">
+        ☰
+    </div>
+    <nav class="sidebar">
+{{NAVIGATION}}
+    </nav>
+    <main class="content">
+
+{{CONTENT}}
+
+        <footer>
+            <p>Documentation generated on {{GENERATED_DATE}}</p>
+        </footer>
+    </main>
+    <script>hljs.highlightAll();</script>
+</body>
+</html>

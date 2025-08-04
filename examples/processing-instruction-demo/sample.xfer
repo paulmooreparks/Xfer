@@ -1,3 +1,4 @@
+</ Start your day with a comment! />
 <!
 document {
     xfer "11.1"
@@ -16,6 +17,7 @@ charDef {
 
 <! id "root" !>
 (
+    age $18
     <!id "kvp"!>foo <!id "value"!>"bar"
     [1 2 3]
     <\answer\>
