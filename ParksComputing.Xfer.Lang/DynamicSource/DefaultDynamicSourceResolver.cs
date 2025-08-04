@@ -18,6 +18,13 @@ namespace ParksComputing.Xfer.Lang.DynamicSource {
         private const string EnvKeyword = "env";
         private const string ConstKeyword = "const";
 
+        /// <summary>
+        /// Resolves a dynamic value for the given key using the dynamic source registry and legacy processing instructions.
+        /// First attempts to resolve from the new DynamicSourceRegistry, then falls back to legacy PI scanning for backward compatibility.
+        /// </summary>
+        /// <param name="key">The dynamic key to resolve</param>
+        /// <param name="document">The parsed XferDocument containing processing instructions</param>
+        /// <returns>The resolved value, or null if not found</returns>
         public virtual string? Resolve(string key, XferDocument document) {
             // First, try the new DynamicSourceRegistry (from dynamicSource PIs)
             var result = DynamicSourceRegistry.Resolve(key);

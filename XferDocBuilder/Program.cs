@@ -586,6 +586,39 @@ public class ApiDocumentationGenerator
             sb.AppendLine($"<p>{xmlSummary}</p>");
         }
 
+        // Generate enum members documentation if this is an enum
+        if (type.IsEnum)
+        {
+            var enumFields = type.GetFields(BindingFlags.Public | BindingFlags.Static)
+                .Where(f => f.IsLiteral && f.DeclaringType == type)
+                .OrderBy(f => f.Name)
+                .ToList();
+
+            if (enumFields.Any())
+            {
+                sb.AppendLine("<h4>Members</h4>");
+                sb.AppendLine("<table class=\"api-table\">");
+                sb.AppendLine("<thead><tr><th>Name</th><th>Value</th><th>Description</th></tr></thead>");
+                sb.AppendLine("<tbody>");
+
+                foreach (var field in enumFields)
+                {
+                    var fieldXmlName = $"F:{field.DeclaringType!.FullName}.{field.Name}";
+                    var fieldDoc = GetXmlDocumentation(xmlDoc, fieldXmlName);
+                    var fieldValue = Convert.ToInt32(field.GetValue(null));
+
+                    sb.AppendLine("<tr>");
+                    sb.AppendLine($"<td><code>{field.Name}</code></td>");
+                    sb.AppendLine($"<td><code>{fieldValue}</code></td>");
+                    sb.AppendLine($"<td>{fieldDoc}</td>");
+                    sb.AppendLine("</tr>");
+                }
+
+                sb.AppendLine("</tbody>");
+                sb.AppendLine("</table>");
+            }
+        }
+
         // Generate properties documentation
         var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
             .Where(p => p.DeclaringType == type)
@@ -657,14 +690,22 @@ public class ApiDocumentationGenerator
         else
         {
             xmlMemberName = $"M:{method.DeclaringType!.FullName}.{method.Name}";
+
+            // Handle generic methods
+            if (method.IsGenericMethod)
+            {
+                var genericArgs = method.GetGenericArguments();
+                xmlMemberName += $"``{genericArgs.Length}";
+            }
         }
 
         if (parameters.Length > 0)
         {
-            xmlMemberName += $"({string.Join(",", parameters.Select(p => p.ParameterType.FullName))})";
+            var parameterTypeNames = parameters.Select(p => GetXmlTypeName(p.ParameterType, method));
+            xmlMemberName += $"({string.Join(",", parameterTypeNames)})";
         }
 
-        var methodDoc = GetXmlDocumentation(xmlDoc, xmlMemberName);
+        var methodDocumentation = GetMethodDocumentation(xmlDoc, xmlMemberName);
 
         sb.AppendLine("<div class=\"method-doc\">");
 
@@ -680,12 +721,145 @@ public class ApiDocumentationGenerator
             sb.AppendLine($"<code>{GetTypeName(returnType)} {method.Name}({string.Join(", ", parameters.Select(p => $"{GetTypeName(p.ParameterType)} {p.Name}"))})</code>");
         }
 
-        if (!string.IsNullOrEmpty(methodDoc))
+        // Add method summary
+        if (!string.IsNullOrEmpty(methodDocumentation.Summary))
         {
-            sb.AppendLine($"<p>{methodDoc}</p>");
+            sb.AppendLine($"<p>{methodDocumentation.Summary}</p>");
+        }
+
+        // Add parameter documentation
+        if (methodDocumentation.Parameters.Any())
+        {
+            sb.AppendLine("<h6>Parameters</h6>");
+            sb.AppendLine("<table class=\"api-table\">");
+            sb.AppendLine("<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>");
+            sb.AppendLine("<tbody>");
+
+            foreach (var param in parameters)
+            {
+                var paramDoc = methodDocumentation.Parameters.TryGetValue(param.Name!, out var doc) ? doc : "";
+                sb.AppendLine("<tr>");
+                sb.AppendLine($"<td><code>{param.Name}</code></td>");
+                sb.AppendLine($"<td><code>{GetTypeName(param.ParameterType)}</code></td>");
+                sb.AppendLine($"<td>{paramDoc}</td>");
+                sb.AppendLine("</tr>");
+            }
+
+            sb.AppendLine("</tbody>");
+            sb.AppendLine("</table>");
+        }
+
+        // Add return value documentation
+        if (!isConstructor && !string.IsNullOrEmpty(methodDocumentation.Returns))
+        {
+            sb.AppendLine("<h6>Returns</h6>");
+            sb.AppendLine($"<p>{methodDocumentation.Returns}</p>");
         }
 
         sb.AppendLine("</div>");
+    }
+
+    public class MethodDocumentation
+    {
+        public string Summary { get; set; } = string.Empty;
+        public Dictionary<string, string> Parameters { get; set; } = new();
+        public string Returns { get; set; } = string.Empty;
+    }
+
+    private MethodDocumentation GetMethodDocumentation(XDocument? xmlDoc, string memberName)
+    {
+        var result = new MethodDocumentation();
+
+        if (xmlDoc == null)
+        {
+            return result;
+        }
+
+        var member = xmlDoc.Descendants("member")
+            .FirstOrDefault(m => m.Attribute("name")?.Value == memberName);
+
+        if (member == null)
+        {
+            return result;
+        }
+
+        // Get summary
+        var summary = member.Element("summary");
+        if (summary != null)
+        {
+            result.Summary = CleanXmlDocText(summary.Value);
+        }
+
+        // Get parameters
+        var paramElements = member.Elements("param");
+        foreach (var param in paramElements)
+        {
+            var nameAttr = param.Attribute("name");
+            if (nameAttr != null)
+            {
+                result.Parameters[nameAttr.Value] = CleanXmlDocText(param.Value);
+            }
+        }
+
+        // Get returns
+        var returns = member.Element("returns");
+        if (returns != null)
+        {
+            result.Returns = CleanXmlDocText(returns.Value);
+        }
+
+        return result;
+    }
+
+    private string CleanXmlDocText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return string.Empty;
+        }
+
+        // Clean up the XML documentation formatting
+        // Remove leading/trailing whitespace and normalize line breaks
+        var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        var cleanedLines = lines.Select(line => line.Trim()).Where(line => !string.IsNullOrEmpty(line));
+
+        return string.Join(" ", cleanedLines);
+    }
+
+    private string GetXmlTypeName(Type type, MethodBase? method = null)
+    {
+        // Handle generic type parameters for methods
+        if (type.IsGenericParameter && method?.IsGenericMethod == true)
+        {
+            var genericArgs = method.GetGenericArguments();
+            for (int i = 0; i < genericArgs.Length; i++)
+            {
+                if (genericArgs[i] == type)
+                {
+                    return $"``{i}";
+                }
+            }
+        }
+
+        // Handle array types
+        if (type.IsArray)
+        {
+            var elementType = type.GetElementType()!;
+            return GetXmlTypeName(elementType, method) + "[]";
+        }
+
+        // Handle generic types
+        if (type.IsGenericType && !type.IsGenericTypeDefinition)
+        {
+            var genericTypeDef = type.GetGenericTypeDefinition();
+            var args = type.GetGenericArguments();
+            var argNames = args.Select(arg => GetXmlTypeName(arg, method));
+
+            return $"{genericTypeDef.FullName!.Split('`')[0]}{{{string.Join(",", argNames)}}}";
+        }
+
+        // For regular types, use full name
+        return type.FullName ?? type.Name;
     }
 
     private string GetXmlDocumentation(XDocument? xmlDoc, string memberName)

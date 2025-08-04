@@ -71,16 +71,39 @@ public class ElementDelimiter
     /// </summary>
     public string MinClosing { get; protected set; }
 
+    /// <summary>
+    /// Initializes a new instance of the ElementDelimiter class with default values.
+    /// Uses null characters and a specifier count of 1.
+    /// </summary>
     public ElementDelimiter() : this(default, default, 1) { }
 
+    /// <summary>
+    /// Initializes a new instance of the ElementDelimiter class with the specified specifier count.
+    /// Uses null characters for the opening and closing specifiers.
+    /// </summary>
+    /// <param name="specifierCount">The number of delimiter characters to use</param>
     public ElementDelimiter(int specifierCount) : this(default, default, specifierCount)
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the ElementDelimiter class with the specified delimiter characters.
+    /// </summary>
+    /// <param name="openingSpecifier">The opening delimiter character</param>
+    /// <param name="closingSpecifier">The closing delimiter character</param>
+    /// <param name="elementStyle">The element style for delimiter handling (default: Explicit)</param>
     public ElementDelimiter(char openingSpecifier, char closingSpecifier, ElementStyle elementStyle = ElementStyle.Explicit) : this(openingSpecifier, closingSpecifier, 1, elementStyle)
     {
     }
 
+    /// <summary>
+    /// Initializes a new instance of the ElementDelimiter class with full configuration.
+    /// </summary>
+    /// <param name="openingSpecifier">The opening delimiter character</param>
+    /// <param name="closingSpecifier">The closing delimiter character</param>
+    /// <param name="specifierCount">The number of delimiter characters to use</param>
+    /// <param name="style">The element style for delimiter handling (default: Explicit)</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when specifierCount is less than 1</exception>
     public ElementDelimiter(char openingSpecifier, char closingSpecifier, int specifierCount, ElementStyle style = ElementStyle.Explicit)
     {
         if (specifierCount < 1)
@@ -113,6 +136,10 @@ public class ElementDelimiter
         }
     }
 
+    /// <summary>
+    /// Returns a string representation of this delimiter showing the opening and closing patterns.
+    /// </summary>
+    /// <returns>A string in the format "Opening...Closing" showing the delimiter pattern</returns>
     public override string ToString()
     {
         return $"{Opening}...{Closing}";

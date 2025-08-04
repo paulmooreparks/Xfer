@@ -11,6 +11,9 @@ namespace ParksComputing.Xfer.Lang.CharDef;
 public class CharDefProcessor {
     // Single global charDef registry (static)
 
+    /// <summary>
+    /// The key used to identify character definition processing instructions in XferLang documents.
+    /// </summary>
     public const string CharDefKey = "charDef";
 
     /// <summary>
@@ -36,10 +39,20 @@ public class CharDefProcessor {
         }
     }
 
+    /// <summary>
+    /// Handles processing instruction elements for character definitions.
+    /// Updates the global character registry with custom character mappings from the PI.
+    /// </summary>
+    /// <param name="charDefKvp">The key-value pair element containing character definition data</param>
     public void PIHandler(KeyValuePairElement charDefKvp) {
         UpdateGlobalRegistryFromPI(charDefKvp);
     }
 
+    /// <summary>
+    /// Handles element processing for character definitions.
+    /// Currently a no-op implementation as character definitions are processed via processing instructions.
+    /// </summary>
+    /// <param name="element">The element to process</param>
     public void ElementHandler(Element element) {
     }
 }

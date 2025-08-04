@@ -2,6 +2,10 @@ using ParksComputing.Xfer.Lang.Elements;
 
 namespace ParksComputing.Xfer.Lang.DynamicSource
 {
+    /// <summary>
+    /// Interface for resolving dynamic values in XferLang documents.
+    /// Implementations can resolve dynamic keys using processing instructions or other mechanisms.
+    /// </summary>
     public interface IDynamicSourceResolver
     {
         /// <summary>

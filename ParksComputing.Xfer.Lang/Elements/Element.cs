@@ -27,12 +27,12 @@ public abstract class Element {
     public const char BinaryPrefix = '%';
 
     /// <summary>
-    /// The character that opens all XferLang elements ('<').
+    /// The character that opens all XferLang elements ('&lt;').
     /// </summary>
     public const char ElementOpeningCharacter = '<';
 
     /// <summary>
-    /// The character that closes all XferLang elements ('>').
+    /// The character that closes all XferLang elements ('&gt;').
     /// </summary>
     public const char ElementClosingCharacter = '>';
 
@@ -52,7 +52,7 @@ public abstract class Element {
     public List<Element> Children => children;
 
     /// <summary>
-    /// Optional ID for this element, settable via inline PI: <! id "myId" !>
+    /// Optional ID for this element, settable via inline PI: &lt;! id "myId" !&gt;
     /// </summary>
     public string? Id { get; set; }
 
@@ -91,9 +91,27 @@ public abstract class Element {
         return null;
     }
 
+    /// <summary>
+    /// Serializes this element to its XferLang string representation using default formatting.
+    /// </summary>
+    /// <returns>The XferLang string representation of this element</returns>
     public abstract string ToXfer();
 
+    /// <summary>
+    /// Serializes this element to its XferLang string representation with specified formatting options.
+    /// </summary>
+    /// <param name="formatting">The formatting style to apply during serialization</param>
+    /// <param name="indentChar">The character to use for indentation (default: space)</param>
+    /// <param name="indentation">The number of indentation characters per level (default: 2)</param>
+    /// <param name="depth">The current nesting depth for indentation calculation (default: 0)</param>
+    /// <returns>The XferLang string representation of this element</returns>
     public abstract string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0);
+
+    /// <summary>
+    /// Adds a child element to this element's children collection.
+    /// Automatically sets the parent relationship and prevents duplicate additions.
+    /// </summary>
+    /// <param name="child">The child element to add</param>
     public virtual void AddChild(Element child) {
         if (!children.Contains(child)) {
             children.Add(child);
