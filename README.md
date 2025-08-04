@@ -150,7 +150,7 @@ Because whitespace is flexible, the same XferLang document can be made extremely
 An XferLang document consists of two main parts: optional **Processing Instructions** followed by a **Root Collection Element**.
 
 *   **Metadata Processing Instruction (`document`)**: If present, the `document` processing instruction must be the very first non-comment element in the document. It defines the document's metadata, such as the XferLang version.
-*   **Additiona Processing Instructions**: Other processing instructions besides the `document` processing instruction may be placed before the root element.
+*   **Additional Processing Instructions**: Other processing instructions besides the `document` processing instruction may be placed before the root element.
 *   **Root Collection Element**: The main content of the document must be contained within a single collection element (Object, Array, or Tuple). This ensures the document has a well-defined structure and prevents ambiguity in parsing.
 
 Comments (`</ ... />`) may be placed anywhere in the document.
@@ -181,21 +181,23 @@ is optional, but if present it must be the first non-comment element in the docu
 XferLang elements have a flexible syntax with up to three variations. This allows you to choose the most readable and concise form for your data, only using more verbose syntax when necessary to resolve ambiguity.
 
 #### Implicit Syntax
-For the most common types, like integers and simple keywords, no special characters are needed at all. The parser infers the type from the content.
+For integers and keywords, no special characters are needed when the context is unambiguous. Keywords appearing as keys in key/value pairs must use the `=` specifier followed by a trailing specifier.
 
 ```xfer
 123                 </ An integer />
-name "Alice"        </ A key/value pair of a keyword 'name' and a string value />
+name "Alice"        </ A key/value pair with implicit keyword 'name' and a string value />
+=first-name= "Alice" </ A key/value pair with compact keyword using = specifiers />
 ```
 
 #### Compact Syntax
-For most other types, a single specifier character (or a pair for collections) denotes the type. This is the most common syntax.
+Most elements use a single specifier character (or a pair for collections) to denote the type. This is the most common syntax. Keywords require the `=` specifier with trailing specifiers, while identifiers require the `:` specifier.
 
 ```xfer
 ~true               </ A boolean />
 *123.45             </ A decimal />
 "Hello, World!"     </ A string />
 [ 1 2 3 ]           </ An array of integers />
+:identifier:        </ An identifier using : specifiers />
 ```
 
 #### Explicit Syntax
@@ -204,6 +206,7 @@ When an element's content might be ambiguous (e.g., a string containing a quote)
 ```xfer
 <"Alice said, "Boo!"">
 <// A comment containing </another comment/> //>
+<=first-name=> "Alice" </ An explicit keyword key with = specifiers />
 ```
 
 ### Element Reference
@@ -217,16 +220,16 @@ This section provides a detailed reference for each XferLang element type.
 *   **Description:** Contains text data. The content is stored verbatim. To include a `"` character that would conflict with the closing delimiter, repeat the specifier (e.g., `""...""`) or use explicit syntax (`<"..."">`).
 *   **Syntax:**
     *   **Compact:** `"Hello, World!"`
-    *   **Explicit:** `<"Alice said, "Boo!"">` or `<""A quote is a " character."">`
+    *   **Explicit:** `<"Alice said, "Boo!"">` or `<""A quote is a " character."">` (delimiter repetition)
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     message "Hello, World!"
 
-    // Explicit syntax with quotes
+    </ Explicit syntax with quotes />
     quote <"Alice said, "Boo!"">
 
-    // Delimiter repetition
+    </ Delimiter repetition />
     description ""A quote is a " character.""
     ```
 
@@ -238,21 +241,21 @@ This section provides a detailed reference for each XferLang element type.
     *   **Explicit:** `<\65\>`, `<\$41\>`, `<\gt\>`
 *   **Examples:**
     ```xfer
-    // Compact syntax - decimal codepoint
+    </ Compact syntax - decimal codepoint />
     letterA \65
 
-    // Compact syntax - hex codepoint
+    </ Compact syntax - hex codepoint />
     letterB \$42
 
-    // Compact syntax - binary codepoint
+    </ Compact syntax - binary codepoint />
     letterC \%01000011
 
-    // Compact syntax - keyword
+    </ Compact syntax - keyword />
     tabChar \tab
     newlineChar \lf
 
-    // Explicit syntax
-    specialChar <\$2665\>  // Heart symbol
+    </ Explicit syntax />
+    specialChar <\$2665\>  </ Heart symbol />
     ```
 
 **Integer Element**
@@ -264,18 +267,18 @@ This section provides a detailed reference for each XferLang element type.
     *   **Explicit:** `<#42#>`, `<#$2A#>`, `<#%00101010#>`
 *   **Examples:**
     ```xfer
-    // Implicit syntax (most common)
+    </ Implicit syntax (most common) />
     age 30
     count 1000
     negative -42
 
-    // Compact syntax
+    </ Compact syntax />
     port #8080
     timeout #30
     colorRed #$FF
     permissions #%11110000
 
-    // Explicit syntax
+    </ Explicit syntax />
     maxValue <#2147483647#>
     hexValue <#$DEADBEEF#>
     binaryFlags <#%11110000#>
@@ -289,19 +292,19 @@ This section provides a detailed reference for each XferLang element type.
     *   **Explicit:** `<&5000000000&>`, `<&$12A05F200&>`, `<&%1001010100000010111110010000000000&>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     population &7800000000
     fileSize &5368709120
     timestamp &1672531200000
 
-    // Compact syntax - hexadecimal
+    </ Compact syntax - hexadecimal />
     userId &$1A2B3C4D5E6F
     memoryOffset &$7FF6C2E40000
 
-    // Compact syntax - binary
+    </ Compact syntax - binary />
     featureFlags &%1111000011110000111100001111
 
-    // Explicit syntax
+    </ Explicit syntax />
     maxLong <&9223372036854775807&>
     hexAddress <&$7FFFFFFFFFFFFFFF&>
     binaryMask <&%1111111111111111111111111111111111111111111111111111111111111111&>
@@ -315,12 +318,12 @@ This section provides a detailed reference for each XferLang element type.
     *   **Explicit:** `<^3.14159^>`, `<^-2.5^>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     pi ^3.14159
     temperature ^-2.5
     radius ^12.75
 
-    // Explicit syntax
+    </ Explicit syntax />
     preciseValue <^3.141592653589793^>
     measurement <^123.456789^>
     ratio <^0.618033988749^>
@@ -334,12 +337,12 @@ This section provides a detailed reference for each XferLang element type.
     *   **Explicit:** `<*123.45*>`, `<*-456.789*>`, `<*0.000001*>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     price *123.45
     balance *-456.789
     precision *0.000001
 
-    // Explicit syntax
+    </ Explicit syntax />
     currency <*1234567.89*>
     percentage <*99.999*>
     calculation <*0.123456789012345*>
@@ -353,12 +356,12 @@ This section provides a detailed reference for each XferLang element type.
     *   **Explicit:** `<~true~>`, `<~false~>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     isActive ~true
     isDeleted ~false
     hasPermission ~true
 
-    // Explicit syntax
+    </ Explicit syntax />
     confirmed <~true~>
     disabled <~false~>
     verified <~true~>
@@ -372,12 +375,12 @@ This section provides a detailed reference for each XferLang element type.
     *   **Explicit:** `<@2025-07-23T10:00:00@>`, `<@2023-12-25@>`, `<@2023-01-01T00:00:00Z@>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     created @2023-12-01T10:30:00@
     birthDate @1990-05-15@
     lastLogin @2023-12-25T09:30:00Z@
 
-    // Explicit syntax
+    </ Explicit syntax />
     timestamp <@2025-07-23T10:00:00@>
     scheduledDate <@2024-01-01T00:00:00Z@>
     eventTime <@2023-12-31T23:59:59.999@>
@@ -391,14 +394,13 @@ This section provides a detailed reference for each XferLang element type.
     *   **Explicit:** `<??>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     optionalValue ?
     middleName ?
     description ?
 
-    // Explicit syntax
+    </ Explicit syntax />
     nullField <??>
-    emptyData <????>
     missingInfo <??>
     ```
 
@@ -420,12 +422,12 @@ Integer and Long elements support alternative numeric representations for improv
 **Examples:**
 ```xfer
 {
-    // Decimal 42 in different formats
+    </ Decimal 42 in different formats />
     decimal 42
     hex #$2A
     binary #%101010
-    padded_hex #$002A    // MinDigits = 4
-    padded_binary #%00101010  // MinBits = 8
+    padded_hex #$002A    </ MinDigits = 4 />
+    padded_binary #%00101010  </ MinBits = 8 />
 }
 ```
 
@@ -441,11 +443,11 @@ Integer and Long elements support alternative numeric representations for improv
     *   **Explicit:** `<{ name "Alice" age 30 }>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     user { name "Alice" age 30 active ~true }
     config { host "localhost" port 8080 ssl ~true }
 
-    // Explicit syntax
+    </ Explicit syntax />
     metadata <{ version "1.0" author "John Doe" }>
     settings <{ theme "dark" notifications ~true }>
     ```
@@ -458,12 +460,12 @@ Integer and Long elements support alternative numeric representations for improv
     *   **Explicit:** `<[ 1 2 3 ]>`, `<[ "a" "b" "c" ]>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     numbers [ 1 2 3 4 5 ]
     names [ "Alice" "Bob" "Charlie" ]
     booleans [ ~true ~false ~true ]
 
-    // Explicit syntax
+    </ Explicit syntax />
     ports <[ #80 #443 #8080 ]>
     colors <[ "red" "green" "blue" ]>
     flags <[ ~true ~true ~false ]>
@@ -477,34 +479,46 @@ Integer and Long elements support alternative numeric representations for improv
     *   **Explicit:** `<( "Alice" 30 ~true )>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     userRecord ( "John Doe" 30 ~true )
     coordinates ( *42.3601 *-71.0589 )
     mixedData ( "Sample" @2023-12-25@ *99.5 )
 
-    // Explicit syntax
+    </ Explicit syntax />
     complexTuple <( "Alice" 30 ~true [ "admin" "user" ] )>
     dataPoint <( "Experiment A" @2023-12-01T10:00:00@ *98.7 )>
     ```
 
 **Keyword Element and Key/Value Pairs**
-*   **Description:** A keyword is the key in a key/value pair. If it contains only letters, numbers, and underscores, it can be written implicitly. Otherwise, it must be enclosed in colons (`:`).
+*   **Description:** A keyword is the key in a key/value pair. If it contains only letters, numbers, and underscores, it can be written implicitly. Keywords used as keys require the `=` specifier. Identifiers (non-key keywords) use the `:` specifier.
 *   **Syntax:**
-    *   **Implicit:** `name`, `user_id`, `isActive` (letters, numbers, underscores only)
-    *   **Explicit:** `:first name:`, `:email-address:`, `:API Key:` (any characters)
+    *   **Implicit:** `name`, `user_id`, `isActive` (letters, numbers, underscores only - valid only as keys)
+    *   **Compact:** `=first-name=`, `=email-address=`, `=API-Key=` (keywords as keys with `=` specifier)
+    *   **Explicit:** `<=first-name=>`, `<=email-address=>`, `<=API-Key=>` (keywords as keys with explicit syntax)
+    *   **Identifier:** `:identifier:`, `<:identifier:>` (identifiers with `:` specifier)
 *   **Examples:**
     ```xfer
-    // Implicit syntax
+    </ Implicit syntax - only valid as keys />
     name "Paul"
     age 30
     user_id 12345
     isActive ~true
 
-    // Explicit syntax
-    :first name: "Alice"
-    :email-address: "user@example.com"
-    :API Key: "secret123"
-    :content-type: "application/json"
+    </ Compact syntax for keywords as keys />
+    =first-name= "Alice"
+    =last-name= "Johnson"
+    =email-address= "user@example.com"
+
+    </ Explicit syntax for keywords as keys />
+    <=first-name=> "Alice"
+    <=email-address=> "user@example.com"
+    <=API-Key=> "secret123"
+    <=content-type=> "application/json"
+
+    </ Identifiers (not keys) />
+    type :user:
+    category :admin:
+    status :active:
     ```
 
 #### Common Document Patterns
@@ -522,6 +536,8 @@ Most configuration files use Object as the root collection:
         level "info"
         destinations [ "console" "file" ]
     }
+    =cache-timeout= 3600
+    =max-connections= 100
 }
 ```
 
@@ -561,12 +577,12 @@ For documents with heterogeneous top-level content, use Tuple:
     *   **Explicit:** `<! document { version "1.0" } !>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     ! document { version "1.0" author "John Doe" } !
     ! id "user-config" !
     ! chardef { bullet \$2022 arrow \$2192 } !
 
-    // Explicit syntax
+    </ Explicit syntax />
     <! document { version "1.0" description "Sample document" } !>
     <! dynamicSource { username env "USER" } !>
     ```
@@ -578,35 +594,38 @@ For documents with heterogeneous top-level content, use Tuple:
     *   **Explicit:** `</ comment />`, `<// nested </comment/> //>` (delimiter repetition)
 *   **Examples:**
     ```xfer
-    // Basic comments
+    </ Basic comments />
     </ This is a simple comment />
     </ Multi-line comment
        spanning several lines />
 
-    // Delimiter repetition for nested content
+    </ Delimiter repetition for nested content />
     <// This comment contains / characters and nested </comments/> //>
     </// Multi-level nesting for complex content ///>
     ```
 
 **Dynamic Element**
 *   **Specifier:** `|` (Pipe)
-*   **Description:** Represents a value to be substituted at runtime, by default from an environment variable. You can override the default dynamic value resolution by subclassing `DefaultDynamicSourceResolver` or by implementing the `IDynamicSourceResolver` interface. This allows you to provide custom logic for resolving dynamic values in your XferLang documents.
+*   **Description:** Represents a value to be substituted at runtime, by default from an environment variable. You can override the default dynamic value resolution by subclassing `DefaultDynamicSourceResolver` or by implementing the `IDynamicSourceResolver` interface. This allows you to provide custom logic for resolving dynamic values in your XferLang documents. Inside dynamic elements, all nested elements must use explicit syntax.
 *   **Syntax:**
     *   **Compact:** `|USERNAME|`, `|DB_PASSWORD|`
     *   **Explicit:** `<|USERNAME|>`, `<|DB_PASSWORD|>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     username |USER|
     password |DB_PASSWORD|
     apiKey |vault:api-key|
 
-    // Explicit syntax
+    </ Explicit syntax />
     greeting <|USERNAME|>
     config <|file:app.config|>
 
-    // Within interpolated strings
+    </ Within interpolated strings />
     message 'Hello, <|USERNAME|>!'
+
+    </ Complex dynamic content with explicit syntax required inside />
+    template |<"Hello, "><|USER|><"!">|
     ```
 
 **Interpolated Text Element**
@@ -617,12 +636,12 @@ For documents with heterogeneous top-level content, use Tuple:
     *   **Explicit:** `<'The value is <#42#>'>`, `<'Hello, <|NAME|>!'>`
 *   **Examples:**
     ```xfer
-    // Compact syntax
+    </ Compact syntax />
     message 'The value is <#42#>'
     greeting 'Hello, <|USERNAME|>!'
     template 'User <"Alice"> has <#5#> items'
 
-    // Explicit syntax
+    </ Explicit syntax />
     complexMessage <'The result is <*99.5*> and status is <~true~>'>
     dynamicContent <'Welcome to <|APP_NAME|> version <"1.0">'>
     ```
@@ -674,31 +693,36 @@ users [
 
 ### Key/Value Pair
 
-Represents the fundamental building block of XferLang objects - a key-value association. The key is typically an identifier (keyword), and the value can be any XferLang element. Key-value pairs form the basis of structured data in objects.
+Represents the fundamental building block of XferLang objects - a key-value association. The key must be a keyword element (not an identifier), and the value can be any XferLang element. Key-value pairs form the basis of structured data in objects.
 
-**Syntax:** `key value`
+**Syntax:** `keyword value`
 
 **Key Types:**
-- Implicit identifier: `name "Alice"`
-- Explicit identifier: `:first-name: "Alice"`
-- Complex keys: `:API Key: "secret123"`
+- Implicit keyword: `name "Alice"` (letters, numbers, underscores only)
+- Compact keyword: `=first-name= "Alice"` (uses `=` specifier)
+- Explicit keyword: `<=first-name=> "Alice"` (explicit syntax with `=` specifier)
 
 **Examples:**
 ```xfer
-// Basic key-value pairs
+</ Basic key-value pairs with implicit keywords />
 name "Alice"
 age 30
 isActive ~true
 score *99.5
 lastLogin @2023-12-25T10:30:00Z@
 
-// Keys with special characters
-:first-name: "John"
-:email-address: "user@example.com"
-:content-type: "application/json"
-:user-id: 12345
+</ Keys with special characters using = specifier />
+=first-name= "John"
+=email-address= "user@example.com"
+=content-type= "application/json"
+=user-id= 12345
 
-// Complex values
+</ Explicit syntax for complex keys />
+<=first-name=> "Alice"
+<=API-Key=> "secret123"
+<=cache-control=> "no-cache"
+
+</ Complex values />
 profile {
     personal {
         name "Alice Smith"
@@ -710,11 +734,11 @@ profile {
     }
 }
 
-// Arrays as values
+</ Arrays as values />
 roles [ "admin" "user" "moderator" ]
 scores [ *85.5 *92.0 *78.3 ]
 
-// Mixed data types
+</ Mixed data types />
 metadata {
     created @2023-12-25T10:30:00Z@
     version "1.0"
@@ -725,7 +749,11 @@ metadata {
 }
 ```
 
-**Rules:** Keys must be unique within the same object, and whitespace separates the key from its value.
+**Rules:**
+- Keys must be keywords (using `=` specifier or implicit syntax), not identifiers (`:` specifier)
+- Keys must be unique within the same object
+- Whitespace separates the key from its value
+- Only keywords can be used as keys; identifiers cannot be keys
 
 ### Object
 
@@ -735,14 +763,14 @@ Represents a collection of key-value pairs enclosed in curly braces. Objects are
 
 **Examples:**
 ```xfer
-// Simple object
+</ Simple object />
 user {
     name "Alice"
     age 30
     active ~true
 }
 
-// Nested objects
+</ Nested objects />
 config {
     database {
         host "localhost"
@@ -755,7 +783,7 @@ config {
     }
 }
 
-// Compact form
+</ Compact form />
 profile { name "Bob" role "admin" verified ~true }
 ```
 
@@ -767,13 +795,13 @@ Represents an ordered collection of elements that can be of **any type**, simila
 
 **Examples:**
 ```xfer
-// Geographic coordinates (latitude, longitude)
+</ Geographic coordinates (latitude, longitude) />
 location (*42.3601 *-71.0589)
 
-// Mixed types: name, age, active status
+</ Mixed types: name, age, active status />
 userRecord ("John Doe" 30 ~true)
 
-// Complex tuple with various types
+</ Complex tuple with various types />
 dataPoint (
     "Sample A"
     @2023-12-25T10:30:00@
@@ -783,7 +811,7 @@ dataPoint (
     { metadata "experimental" }
 )
 
-// Compact form
+</ Compact form />
 rgb (#255 #128 #64)
 ```
 
@@ -818,23 +846,23 @@ port 8080     </ Development server port />
 
 ### Dynamic
 
-Dynamic elements represent values that are resolved at parse-time or runtime, typically from environment variables, configuration files, or custom sources. They provide powerful templating and configuration capabilities.
+Dynamic elements represent values that are resolved at parse-time or runtime, typically from environment variables, configuration files, or custom sources. They provide powerful templating and configuration capabilities. Inside dynamic elements, all nested elements must use explicit syntax.
 
-**Syntax:** `|identifier|` or `<|identifier|>`
+**Syntax:** `|value_key|` or `<|value_key|>`
 
 **Examples:**
 ```xfer
-// Environment variable substitution
+</ Environment variable substitution />
 username |USER|
 password |DB_PASSWORD|
 
-// Within interpolated strings
+</ Within interpolated strings />
 greeting 'Hello, <|USERNAME|>!'
 message 'Server running on port <|PORT|>'
 
-// Custom sources (configured via dynamicSource PI)
-apiKey |vault:api-key|
-config |file:app.config|
+</ Complex dynamic content - explicit syntax required inside />
+dynamicObject |<{<=name=><"Alice"><=age=><#30#>}>|
+dynamicArray |<[<"item1"><"item2"><"item3">]>|
 ```
 
 **Configuration via Processing Instructions:**
@@ -843,50 +871,48 @@ config |file:app.config|
     greeting const "Welcome to XferLang"
     username env "USER"
     config file "settings.json"
-    secret vault "api-token"
 } !>
 {
     message '<|greeting|>'
     user '<|username|>'
     settings '<|config|>'
-    token '<|secret|>'
-}
-```
-
-### Identifier
-
-Identifiers represent symbolic names used as keys in key-value pairs. They follow standard programming language identifier rules and can be written in implicit form when they contain only letters, numbers, and underscores.
-
-**Implicit Syntax:** `identifier` (no delimiters needed)
-**Explicit Syntax:** `:text:` (for identifiers with special characters)
-
-**Examples:**
-```xfer
-// Simple identifiers (implicit)
-name "Alice"
-age 30
-isActive ~true
-user_id 12345
-
-// Identifiers with special characters (explicit)
-:first-name: "John"
-:email-address: "user@example.com"
-:API Key: "abc123"
-:content-type: "application/json"
-
-// In objects
-config {
-    database_host "localhost"
-    :cache-enabled: ~true
-    :max-connections: 100
 }
 ```
 
 **Rules:**
-- Implicit identifiers: letters, numbers, underscore only
-- Explicit identifiers: any text between `:` delimiters
-- Case-sensitive
-- Must be unique within the same object
+- Inside dynamic elements, all nested elements must use explicit syntax
+- This ensures unambiguous parsing when dynamic content is resolved
+
+### Identifier
+
+Identifiers represent symbolic names which are not necessarily string values, semantically. Identifiers use the `:` specifier and cannot be used as keys in key/value pairs.
+
+**Compact Syntax:** `:identifier:`
+**Explicit Syntax:** `<:identifier:>`
+
+**Examples:**
+```xfer
+</ Simple identifiers (compact) />
+option :formatted:
+varname :integer:
+type :user:
+
+</ Explicit syntax />
+category <:admin:>
+status <:active:>
+
+</ In objects as values (not keys) />
+config {
+    logLevel :warning:
+    cacheMode :enabled:
+    userType :premium:
+}
+```
+
+**Rules:**
+- Identifiers always require the `:` specifier with trailing delimiters
+- Identifiers cannot be used as keys in key/value pairs (only keywords can be keys)
+- Use explicit syntax when the identifier content might be ambiguous
 
 ### Integer
 
@@ -894,27 +920,31 @@ Represents a 32-bit signed integer value. Integers can be written in decimal, he
 
 **Syntax:**
 - Implicit: `42` (when unambiguous)
-- Explicit: `#42`
+- Compact: `#42`
+- Explicit: `<#42#>`
 - Hexadecimal: `#$2A`
 - Binary: `#%101010`
 
 **Examples:**
 ```xfer
-// Implicit form (most common)
+</ Implicit form (most common) />
 age 30
 count 1000
 negative -42
 
-// Explicit form
+</ Compact form />
 port #8080
 timeout #30
 
-// Alternative number bases
+</ Explicit form  />
+<'https://<|address|>:<#80#>/'>
+
+</ Alternative number bases />
 colorRed #$FF
 permissions #%11110000
 memoryAddress #$DEADBEEF
 
-// In collections
+</ In collections />
 numbers [ 1 2 3 4 5 ]
 ports [ #80 #443 #8080 ]
 ```
@@ -932,19 +962,19 @@ Represents a 64-bit signed integer value for larger numbers that exceed the 32-b
 
 **Examples:**
 ```xfer
-// Large numbers
+</ Large numbers />
 population &7800000000
 fileSize &5368709120
 timestamp &1672531200000
 
-// Hexadecimal (common for IDs, addresses)
+</ Hexadecimal (common for IDs, addresses) />
 userId &$1A2B3C4D5E6F
 memoryOffset &$7FF6C2E40000
 
-// Binary (for flags, masks)
+</ Binary (for flags, masks) />
 featureFlags &%1111000011110000111100001111
 
-// In configuration
+</ In configuration />
 limits {
     maxFileSize &2147483648
     maxUsers &1000000

@@ -17,6 +17,7 @@ charDef {
 
 <! id "root" !>
 (
+    age $18
     <!id "kvp"!>foo <!id "value"!>"bar"
     [1 2 3]
     <\answer\>
