@@ -13,7 +13,12 @@ namespace ParksComputing.Xfer.Lang.Services;
 /* This parser is ROUGH. I'm trying out a lot of ideas, some of them supported in parallel. Once I
 settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
 
-
+/// <summary>
+/// The main XferLang parser that converts XferLang text into a structured document model.
+/// Supports extensible processing instructions, element processors, and dynamic source resolution.
+/// This parser provides comprehensive parsing capabilities including ID uniqueness validation,
+/// character definition resolution, and flexible element processing.
+/// </summary>
 public class Parser : IXferParser {
     // Stack to track parent elements for context-sensitive parsing
     /// <summary>
@@ -23,6 +28,8 @@ public class Parser : IXferParser {
     // Used to assign IDs from inline PIs to subsequent elements
     private Queue<string> _pendingIds = new Queue<string>();
     private readonly List<ProcessingInstruction> _pendingPIs = new();
+    // Track used IDs to ensure uniqueness
+    private readonly HashSet<string> _usedIds = new(StringComparer.Ordinal);
     // Used to hold a pending meta PI to attach as XferMetadata to the next element
     private ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver _dynamicSourceResolver = new ParksComputing.Xfer.Lang.DynamicSource.DefaultDynamicSourceResolver();
 
@@ -81,6 +88,21 @@ public class Parser : IXferParser {
         }
     }
 
+    /// <summary>
+    /// Validates and registers an ID to ensure uniqueness within the document.
+    /// </summary>
+    /// <param name="id">The ID to validate and register</param>
+    /// <exception cref="InvalidOperationException">Thrown when the ID is already in use</exception>
+    internal void ValidateAndRegisterElementId(string id) {
+        if (string.IsNullOrEmpty(id)) {
+            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Element ID cannot be null or empty.");
+        }
+
+        if (!_usedIds.Add(id)) {
+            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Duplicate element ID '{id}'. Element IDs must be unique within a document.");
+        }
+    }
+
 
 
     public ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver DynamicSourceResolver {
@@ -123,6 +145,9 @@ public class Parser : IXferParser {
         if (kvp.Value is not TextElement textElement) {
             throw new InvalidOperationException($"At row {parser.CurrentRow}, column {parser.CurrentColumn}: Id PI must contain a text element.");
         }
+
+        // Validate ID uniqueness before creating the PI
+        parser.ValidateAndRegisterElementId(textElement.Value);
 
         return new IdProcessingInstruction(textElement);
     }
@@ -691,6 +716,9 @@ public class Parser : IXferParser {
     {
         var document = new XferDocument();
         _currentDocument = document;
+
+        // Clear ID tracking for new document
+        _usedIds.Clear();
 
         CollectionElement? rootElement = null;
 

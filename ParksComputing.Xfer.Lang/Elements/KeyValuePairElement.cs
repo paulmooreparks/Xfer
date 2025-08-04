@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 using ParksComputing.Xfer.Lang.ProcessingInstructions;
 
 namespace ParksComputing.Xfer.Lang.Elements;
+
+/// <summary>
+/// Represents a key-value pair element in XferLang, where the key is a text element
+/// and the value can be any element type. This is the fundamental building block for
+/// object properties and named elements in the XferLang format.
+/// </summary>
 public class KeyValuePairElement : TypedElement<Element>
 {
     public static readonly string ElementName = "keyValuePair";

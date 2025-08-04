@@ -4,6 +4,11 @@ using System.Text;
 
 namespace ParksComputing.Xfer.Lang.Elements
 {
+    /// <summary>
+    /// Represents a date-time element in XferLang using at (@) delimiters.
+    /// DateTime elements store DateTime values with support for various formatting
+    /// and timezone handling options through the DateTimeHandling property.
+    /// </summary>
     public class DateTimeElement : TypedElement<DateTime>
     {
         public static readonly string ElementName = "date";
@@ -16,7 +21,7 @@ namespace ParksComputing.Xfer.Lang.Elements
         public DateTimeElement(string stringValue, DateTimeHandling dateTimeHandling = DateTimeHandling.RoundTrip, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact)
             : this(DateTime.Now, dateTimeHandling, specifierCount, elementStyle)
         {
-            if (!DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime)) 
+            if (!DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dateTime))
             {
                 throw new InvalidOperationException($"Invalid date string '{stringValue}'. Expected ISO 8601 format.");
             }
@@ -26,7 +31,7 @@ namespace ParksComputing.Xfer.Lang.Elements
         }
 
         public DateTimeElement(TimeOnly timeOnly, DateTimeHandling dateTimeHandling = DateTimeHandling.RoundTrip, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact)
-            : this(timeOnly.ToLongTimeString(), dateTimeHandling, specifierCount, elementStyle) 
+            : this(timeOnly.ToLongTimeString(), dateTimeHandling, specifierCount, elementStyle)
         {
             Value = new DateTime(0, 0, 0, timeOnly.Hour, timeOnly.Minute, timeOnly.Second);
         }

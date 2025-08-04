@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta property="og:title" content="XferLang Data-Interchange Language" />
+    <meta property="og:description" content="XferLang is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management." />
+    <meta property="og:image" content="https://xferlang.org/XferLang-sm.png" />
+    <meta property="og:url" content="https://xferlang.org/" />
+    <meta property="og:type" content="website" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParksComputing.Xfer.Lang API Documentation</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="highlightjs/styles/github.min.css">
+    <script src="script.js"></script>
+    <script src="highlightjs/highlight.min.js"></script>
+    <script src="highlightjs/languages/xfer.min.js"></script>
+</head>
+<body>
+    <div class="mobile-nav-toggle">
+        ☰
+    </div>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2><a href="index.html" class="home-link">XferLang</a></h2>
+            <div class="main-nav-links">
+                <a href="index.html" class="nav-link">Guide</a>
+                <a href="api.html" class="nav-link">API</a>
+            </div>
+        </div>
+<ul>
+<li><a href="#api-overview">ParksComputing.Xfer.Lang API</a></li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-datetimehandling">DateTimeHandling</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-formatting">Formatting</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-parseerror">ParseError</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-parsewarning">ParseWarning</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-warningtype">WarningType</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-xferconvert">XferConvert</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-xferdocument">XferDocument</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-xfermetadata">XferMetadata</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-xferparser">XferParser</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Attributes</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-attributes-xferevaluatedattribute">XferEvaluatedAttribute</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-attributes-xfernumericformat">XferNumericFormat</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-attributes-xfernumericformatattribute">XferNumericFormatAttribute</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-attributes-xferpropertyattribute">XferPropertyAttribute</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.CharDef</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-chardef-chardefprocessor">CharDefProcessor</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Configuration</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-configuration-elementstylepreference">ElementStylePreference</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-configuration-nullvaluehandling">NullValueHandling</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-configuration-xferprocessinginstruction">XferProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-configuration-xferserializersettings">XferSerializerSettings</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.ContractResolvers</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-contractresolvers-defaultcontractresolver">DefaultContractResolver</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-contractresolvers-icontractresolver">IContractResolver</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Converters</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-converters-ixferconverter">IXferConverter</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-converters-personconverter">PersonConverter</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-converters-xferconverter-1">XferConverter&lt;T&gt;</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.DynamicSource</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-dynamicsource-defaultdynamicsourceresolver">DefaultDynamicSourceResolver</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-dynamicsource-idynamicsourceresolver">IDynamicSourceResolver</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Elements</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-arrayelement">ArrayElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-booleanelement">BooleanElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-characterelement">CharacterElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-collectionelement">CollectionElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-commentelement">CommentElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-dateelement">DateElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-datetimeelement">DateTimeElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-decimalelement">DecimalElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-dictionaryelement">DictionaryElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-doubleelement">DoubleElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-dynamicelement">DynamicElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-element">Element</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-elementdelimiter">ElementDelimiter</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-elementstyle">ElementStyle</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-emptyelement">EmptyElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-identifierelement">IdentifierElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-integerelement">IntegerElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-interpolatedelement">InterpolatedElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-keyvaluepairelement">KeyValuePairElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-keywordelement">KeywordElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-listelement">ListElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-longelement">LongElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-numericelement-1">NumericElement&lt;T&gt;</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-objectelement">ObjectElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-stringelement">StringElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-textelement">TextElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-timeelement">TimeElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-timespanelement">TimeSpanElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-tupleelement">TupleElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-typedelement-1">TypedElement&lt;T&gt;</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Extensions</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-extensions-charextensions">CharExtensions</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-extensions-objectextensions">ObjectExtensions</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Models</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-models-person">Person</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.ProcessingInstructions</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-chardefprocessinginstruction">CharDefProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-documentprocessinginstruction">DocumentProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-dynamicsourceprocessinginstruction">DynamicSourceProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-idprocessinginstruction">IdProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-metaprocessinginstruction">MetaProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-processinginstruction">ProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-propertiesprocessinginstruction">PropertiesProcessingInstruction</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Schema</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-schema-constraint">Constraint</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-schema-constraintevaluator">ConstraintEvaluator</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-schema-expressionconstraint">ExpressionConstraint</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-schema-schemadefinition">SchemaDefinition</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-schema-schemafield">SchemaField</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-schema-schemaobject">SchemaObject</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-schema-xferschema">XferSchema</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-schema-xferschemaparser">XferSchemaParser</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-schema-xferschemavalidator">XferSchemaValidator</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Services</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-services-characteridregistry">CharacterIdRegistry</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-services-dynamicsourcehandler">DynamicSourceHandler</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-services-dynamicsourcehandlerregistry">DynamicSourceHandlerRegistry</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-services-dynamicsourceregistry">DynamicSourceRegistry</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-services-ixferparser">IXferParser</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-services-parser">Parser</a></li>
+                    </ul>
+                </details>
+            </li>
+</ul>
+
+    </nav>
+    <main class="content">
+
+<section id="api-overview"><h1>ParksComputing.Xfer.Lang API Documentation</h1>
+<p>API documentation for ParksComputing.Xfer.Lang version 0.13.0.0</p></section>
+<section id="namespace-parkscomputing-xfer-lang"><h2>Namespace: ParksComputing.Xfer.Lang</h2>
+<section id="type-parkscomputing-xfer-lang-datetimehandling"><h3>Enum: DateTimeHandling</h3>
+</section>
+<section id="type-parkscomputing-xfer-lang-formatting"><h3>Enum: Formatting</h3>
+</section>
+<section id="type-parkscomputing-xfer-lang-parseerror"><h3>Class: ParseError</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Column</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Context</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Message</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Row</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ParseError(string message, int row, int column, string context)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-parsewarning"><h3>Class: ParseWarning</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Column</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Context</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Message</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Row</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Type</code></td>
+<td><code>WarningType</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ParseWarning(WarningType type, string message, int row, int column, string context)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-warningtype"><h3>Enum: WarningType</h3>
+</section>
+<section id="type-parkscomputing-xfer-lang-xferconvert"><h3>Class: XferConvert</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferConvert()</code>
+</div>
+<div class="method-doc">
+<h5>Deserialize</h5>
+<code>T Deserialize(string xfer)</code>
+</div>
+<div class="method-doc">
+<h5>Deserialize</h5>
+<code>T Deserialize(string xfer, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>Deserialize</h5>
+<code>T Deserialize(XferDocument document)</code>
+</div>
+<div class="method-doc">
+<h5>Deserialize</h5>
+<code>T Deserialize(XferDocument document, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>Deserialize</h5>
+<code>Object Deserialize(XferDocument document, Type targetType)</code>
+</div>
+<div class="method-doc">
+<h5>Deserialize</h5>
+<code>Object Deserialize(XferDocument document, Type targetType, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>Deserialize</h5>
+<code>Object Deserialize(string xfer, Type targetType)</code>
+</div>
+<div class="method-doc">
+<h5>Deserialize</h5>
+<code>Object Deserialize(string xfer, Type targetType, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>Deserialize</h5>
+<code>T Deserialize(Element element)</code>
+</div>
+<div class="method-doc">
+<h5>Deserialize</h5>
+<code>T Deserialize(Element element, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>FromObject</h5>
+<code>ObjectElement FromObject(Object o, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>Serialize</h5>
+<code>string Serialize(Object o, Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+<div class="method-doc">
+<h5>Serialize</h5>
+<code>string Serialize(Object o, XferSerializerSettings settings, Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+<div class="method-doc">
+<h5>SerializeValue</h5>
+<code>Element SerializeValue(Object value)</code>
+</div>
+<div class="method-doc">
+<h5>SerializeValue</h5>
+<code>Element SerializeValue(Object value, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>ToObject</h5>
+<code>T ToObject(ObjectElement element, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>TryFromObject</h5>
+<code>bool TryFromObject(Object o, ObjectElement& result, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>TryToObject</h5>
+<code>bool TryToObject(ObjectElement element, T& result, XferSerializerSettings settings)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-xferdocument"><h3>Class: XferDocument</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Error</code></td>
+<td><code>ParseError</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>HasError</code></td>
+<td><code>bool</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>HasWarnings</code></td>
+<td><code>bool</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>IsValid</code></td>
+<td><code>bool</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Metadata</code></td>
+<td><code>XferMetadata</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ProcessingInstructions</code></td>
+<td><code>List&lt;ProcessingInstruction&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Root</code></td>
+<td><code>CollectionElement</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Warnings</code></td>
+<td><code>List&lt;ParseWarning&gt;</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferDocument()</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferDocument(CollectionElement root)</code>
+</div>
+<div class="method-doc">
+<h5>Add</h5>
+<code>void Add(Element value)</code>
+</div>
+<div class="method-doc">
+<h5>GetElementById</h5>
+<code>Element GetElementById(string id)</code>
+</div>
+<div class="method-doc">
+<h5>ToByteArray</h5>
+<code>Byte[] ToByteArray()</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-xfermetadata"><h3>Class: XferMetadata</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Extensions</code></td>
+<td><code>Dictionary&lt;string, Object&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Version</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Xfer</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferMetadata()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-xferparser"><h3>Class: XferParser</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferParser()</code>
+</div>
+<div class="method-doc">
+<h5>Parse</h5>
+<code>XferDocument Parse(Byte[] input)</code>
+</div>
+<div class="method-doc">
+<h5>Parse</h5>
+<code>XferDocument Parse(string input)</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-attributes"><h2>Namespace: ParksComputing.Xfer.Lang.Attributes</h2>
+<section id="type-parkscomputing-xfer-lang-attributes-xferevaluatedattribute"><h3>Class: XferEvaluatedAttribute</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferEvaluatedAttribute()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-attributes-xfernumericformat"><h3>Enum: XferNumericFormat</h3>
+</section>
+<section id="type-parkscomputing-xfer-lang-attributes-xfernumericformatattribute"><h3>Class: XferNumericFormatAttribute</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Format</code></td>
+<td><code>XferNumericFormat</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MinBits</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MinDigits</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferNumericFormatAttribute(XferNumericFormat format)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-attributes-xferpropertyattribute"><h3>Class: XferPropertyAttribute</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferPropertyAttribute(string name)</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-chardef"><h2>Namespace: ParksComputing.Xfer.Lang.CharDef</h2>
+<section id="type-parkscomputing-xfer-lang-chardef-chardefprocessor"><h3>Class: CharDefProcessor</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>CharDefProcessor()</code>
+</div>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+</div>
+<div class="method-doc">
+<h5>PIHandler</h5>
+<code>void PIHandler(KeyValuePairElement charDefKvp)</code>
+</div>
+<div class="method-doc">
+<h5>UpdateGlobalRegistryFromPI</h5>
+<code>void UpdateGlobalRegistryFromPI(KeyValuePairElement charDefKvp)</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-configuration"><h2>Namespace: ParksComputing.Xfer.Lang.Configuration</h2>
+<section id="type-parkscomputing-xfer-lang-configuration-elementstylepreference"><h3>Enum: ElementStylePreference</h3>
+</section>
+<section id="type-parkscomputing-xfer-lang-configuration-nullvaluehandling"><h3>Enum: NullValueHandling</h3>
+</section>
+<section id="type-parkscomputing-xfer-lang-configuration-xferprocessinginstruction"><h3>Class: XferProcessingInstruction</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>AppliesTo</code></td>
+<td><code>Element</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>DocumentIndex</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Parameters</code></td>
+<td><code>Dictionary&lt;string, Object&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Type</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferProcessingInstruction()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-configuration-xferserializersettings"><h3>Class: XferSerializerSettings</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>ContractResolver</code></td>
+<td><code>IContractResolver</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Converters</code></td>
+<td><code>IList&lt;IXferConverter&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>NullValueHandling</code></td>
+<td><code>NullValueHandling</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>PreferImplicitSyntax</code></td>
+<td><code>bool</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>PreserveDateTimePrecision</code></td>
+<td><code>bool</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>StylePreference</code></td>
+<td><code>ElementStylePreference</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferSerializerSettings()</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-contractresolvers"><h2>Namespace: ParksComputing.Xfer.Lang.ContractResolvers</h2>
+<section id="type-parkscomputing-xfer-lang-contractresolvers-defaultcontractresolver"><h3>Class: DefaultContractResolver</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DefaultContractResolver()</code>
+</div>
+<div class="method-doc">
+<h5>ResolveProperties</h5>
+<code>List&lt;PropertyInfo&gt; ResolveProperties(Type type)</code>
+</div>
+<div class="method-doc">
+<h5>ResolvePropertyName</h5>
+<code>string ResolvePropertyName(string propertyName)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-contractresolvers-icontractresolver"><h3>Interface: IContractResolver</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>ResolveProperties</h5>
+<code>List&lt;PropertyInfo&gt; ResolveProperties(Type type)</code>
+</div>
+<div class="method-doc">
+<h5>ResolvePropertyName</h5>
+<code>string ResolvePropertyName(string propertyName)</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-converters"><h2>Namespace: ParksComputing.Xfer.Lang.Converters</h2>
+<section id="type-parkscomputing-xfer-lang-converters-ixferconverter"><h3>Interface: IXferConverter</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>CanConvert</h5>
+<code>bool CanConvert(Type objectType)</code>
+</div>
+<div class="method-doc">
+<h5>ReadXfer</h5>
+<code>Object ReadXfer(Element element, Type objectType, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>WriteXfer</h5>
+<code>Element WriteXfer(Object value, XferSerializerSettings settings)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-converters-personconverter"><h3>Class: PersonConverter</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>PersonConverter()</code>
+</div>
+<div class="method-doc">
+<h5>ReadXfer</h5>
+<code>Person ReadXfer(Element element, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>WriteXfer</h5>
+<code>Element WriteXfer(Person value, XferSerializerSettings settings)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-converters-xferconverter-1"><h3>Abstract Class: XferConverter&lt;T&gt;</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>CanConvert</h5>
+<code>bool CanConvert(Type objectType)</code>
+</div>
+<div class="method-doc">
+<h5>ReadXfer</h5>
+<code>Object ReadXfer(Element element, Type objectType, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>ReadXfer</h5>
+<code>T ReadXfer(Element element, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>WriteXfer</h5>
+<code>Element WriteXfer(Object value, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>WriteXfer</h5>
+<code>Element WriteXfer(T value, XferSerializerSettings settings)</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-dynamicsource"><h2>Namespace: ParksComputing.Xfer.Lang.DynamicSource</h2>
+<section id="type-parkscomputing-xfer-lang-dynamicsource-defaultdynamicsourceresolver"><h3>Class: DefaultDynamicSourceResolver</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DefaultDynamicSourceResolver()</code>
+</div>
+<div class="method-doc">
+<h5>Resolve</h5>
+<code>string Resolve(string key, XferDocument document)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-dynamicsource-idynamicsourceresolver"><h3>Interface: IDynamicSourceResolver</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Resolve</h5>
+<code>string Resolve(string key, XferDocument document)</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-elements"><h2>Namespace: ParksComputing.Xfer.Lang.Elements</h2>
+<section id="type-parkscomputing-xfer-lang-elements-arrayelement"><h3>Class: ArrayElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>ElementType</code></td>
+<td><code>Type</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Item</code></td>
+<td><code>Element</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ArrayElement(ElementStyle style)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ArrayElement(IEnumerable&lt;Element&gt; values)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ArrayElement(Element[] values)</code>
+</div>
+<div class="method-doc">
+<h5>Add</h5>
+<code>bool Add(Element element)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-booleanelement"><h3>Class: BooleanElement</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>BooleanElement(bool value, int specifierCount, ElementStyle style)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-characterelement"><h3>Class: CharacterElement</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>CharacterElement(int codePoint, int specifierCount, ElementStyle style)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-collectionelement"><h3>Abstract Class: CollectionElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Count</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Values</code></td>
+<td><code>IEnumerable&lt;Element&gt;</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Add</h5>
+<code>bool Add(Element element)</code>
+</div>
+<div class="method-doc">
+<h5>GetElementAt</h5>
+<code>Element GetElementAt(int index)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-commentelement"><h3>Class: CommentElement</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>CommentElement()</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-dateelement"><h3>Class: DateElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>DateTimeHandling</code></td>
+<td><code>DateTimeHandling</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DateElement(DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DateElement(string stringValue, DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DateElement(DateOnly dateOnly, DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>FormatDate</h5>
+<code>string FormatDate(DateOnly dateValue, DateTimeHandling dateTimeHandling)</code>
+</div>
+<div class="method-doc">
+<h5>GetFormatString</h5>
+<code>string GetFormatString(DateTimeHandling dateTimeHandling)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-datetimeelement"><h3>Class: DateTimeElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>DateTimeHandling</code></td>
+<td><code>DateTimeHandling</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DateTimeElement(string stringValue, DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DateTimeElement(TimeOnly timeOnly, DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DateTimeElement(DateTime dateValue, DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>FormatDate</h5>
+<code>string FormatDate(DateTime dateValue, DateTimeHandling dateTimeHandling)</code>
+</div>
+<div class="method-doc">
+<h5>GetFormatString</h5>
+<code>string GetFormatString(DateTimeHandling dateTimeHandling)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-decimalelement"><h3>Class: DecimalElement</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DecimalElement(decimal value, int specifierCount, ElementStyle style)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-dictionaryelement"><h3>Abstract Class: DictionaryElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Count</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Add</h5>
+<code>void Add(string key, KeyValuePairElement value)</code>
+</div>
+<div class="method-doc">
+<h5>Add</h5>
+<code>bool Add(Element element)</code>
+</div>
+<div class="method-doc">
+<h5>GetElementAt</h5>
+<code>Element GetElementAt(int index)</code>
+</div>
+<div class="method-doc">
+<h5>GetValue</h5>
+<code>Element GetValue(string key)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-doubleelement"><h3>Class: DoubleElement</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DoubleElement(double value, int markerCount, ElementStyle style)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-dynamicelement"><h3>Class: DynamicElement</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DynamicElement(string text, int specifierCount, ElementStyle style)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-element"><h3>Abstract Class: Element</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Children</code></td>
+<td><code>List&lt;Element&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Delimiter</code></td>
+<td><code>ElementDelimiter</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Id</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Metadata</code></td>
+<td><code>XferMetadata</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Parent</code></td>
+<td><code>Element</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>Element(string name, ElementDelimiter delimiter)</code>
+</div>
+<div class="method-doc">
+<h5>AddChild</h5>
+<code>void AddChild(Element child)</code>
+</div>
+<div class="method-doc">
+<h5>FindElementById</h5>
+<code>Element FindElementById(string id)</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-elementdelimiter"><h3>Class: ElementDelimiter</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Closing</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ClosingSpecifier</code></td>
+<td><code>Char</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MinClosing</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MinOpening</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Opening</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>OpeningSpecifier</code></td>
+<td><code>Char</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>SpecifierCount</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Style</code></td>
+<td><code>ElementStyle</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ElementDelimiter()</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ElementDelimiter(int specifierCount)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ElementDelimiter(Char openingSpecifier, Char closingSpecifier, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ElementDelimiter(Char openingSpecifier, Char closingSpecifier, int specifierCount, ElementStyle style)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-elementstyle"><h3>Enum: ElementStyle</h3>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-emptyelement"><h3>Class: EmptyElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Value</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>EmptyElement()</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-identifierelement"><h3>Class: IdentifierElement</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>IdentifierElement(string text, int specifierCount, ElementStyle style)</code>
+</div>
+<div class="method-doc">
+<h5>IsIdentifierLeadingChar</h5>
+<code>bool IsIdentifierLeadingChar(Char c)</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-integerelement"><h3>Class: IntegerElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>CustomFormatter</code></td>
+<td><code>Func&lt;int, string&gt;</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>IntegerElement(int value, int specifierCount, ElementStyle elementStyle, Func&lt;int, string&gt; customFormatter)</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-interpolatedelement"><h3>Class: InterpolatedElement</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>InterpolatedElement(string text, int specifierCount, ElementStyle style)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-keyvaluepairelement"><h3>Class: KeyValuePairElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Key</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>KeyElement</code></td>
+<td><code>TextElement</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Value</code></td>
+<td><code>Element</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>KeyValuePairElement(TextElement keyElement, int specifierCount)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>KeyValuePairElement(TextElement keyElement, Element value, int specifierCount)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-keywordelement"><h3>Class: KeywordElement</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>KeywordElement(string text, int specifierCount, ElementStyle style)</code>
+</div>
+<div class="method-doc">
+<h5>IsKeywordLeadingChar</h5>
+<code>bool IsKeywordLeadingChar(Char c)</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-listelement"><h3>Abstract Class: ListElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Count</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Item</code></td>
+<td><code>Element</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Add</h5>
+<code>bool Add(Element element)</code>
+</div>
+<div class="method-doc">
+<h5>GetElementAt</h5>
+<code>Element GetElementAt(int index)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-longelement"><h3>Class: LongElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>CustomFormatter</code></td>
+<td><code>Func&lt;long, string&gt;</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>LongElement(long value, int specifierCount, ElementStyle style, Func&lt;long, string&gt; customFormatter)</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-numericelement-1"><h3>Abstract Class: NumericElement&lt;T&gt;</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>NumericElement`1(T value, string name, ElementDelimiter delimiter)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-objectelement"><h3>Class: ObjectElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Dictionary</code></td>
+<td><code>IReadOnlyDictionary&lt;string, KeyValuePairElement&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Item</code></td>
+<td><code>Element</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>TypedValue</code></td>
+<td><code>List&lt;KeyValuePairElement&gt;</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ObjectElement()</code>
+</div>
+<div class="method-doc">
+<h5>AddOrUpdate</h5>
+<code>void AddOrUpdate(KeyValuePairElement value)</code>
+</div>
+<div class="method-doc">
+<h5>AddOrUpdate</h5>
+<code>void AddOrUpdate(Element element)</code>
+</div>
+<div class="method-doc">
+<h5>ContainsKey</h5>
+<code>bool ContainsKey(string key)</code>
+</div>
+<div class="method-doc">
+<h5>GetElement</h5>
+<code>Element GetElement(string key)</code>
+</div>
+<div class="method-doc">
+<h5>Remove</h5>
+<code>bool Remove(string key)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+<div class="method-doc">
+<h5>TryGetElement</h5>
+<code>bool TryGetElement(string key, TElement& result)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-stringelement"><h3>Class: StringElement</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>StringElement()</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>StringElement(string text, int specifierCount, ElementStyle style)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-textelement"><h3>Abstract Class: TextElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Value</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TextElement(string text, string name, ElementDelimiter delimiter)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-timeelement"><h3>Class: TimeElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>DateTimeHandling</code></td>
+<td><code>DateTimeHandling</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TimeElement(DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TimeElement(string stringValue, DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TimeElement(TimeOnly timeOnly, DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>FormatTime</h5>
+<code>string FormatTime(TimeOnly timeValue, DateTimeHandling dateTimeHandling)</code>
+</div>
+<div class="method-doc">
+<h5>GetFormatString</h5>
+<code>string GetFormatString(DateTimeHandling dateTimeHandling)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-timespanelement"><h3>Class: TimeSpanElement</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>DateTimeHandling</code></td>
+<td><code>DateTimeHandling</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TimeSpanElement(DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TimeSpanElement(string stringValue, DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TimeSpanElement(TimeSpan timeSpan, DateTimeHandling dateTimeHandling, int specifierCount, ElementStyle elementStyle)</code>
+</div>
+<div class="method-doc">
+<h5>FormatTimeSpan</h5>
+<code>string FormatTimeSpan(TimeSpan timespanValue, DateTimeHandling dateTimeHandling)</code>
+</div>
+<div class="method-doc">
+<h5>GetFormatString</h5>
+<code>string GetFormatString(DateTimeHandling dateTimeHandling)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-tupleelement"><h3>Class: TupleElement</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TupleElement(ElementStyle style)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TupleElement(IEnumerable&lt;Element&gt; values)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TupleElement(Element[] values)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-typedelement-1"><h3>Abstract Class: TypedElement&lt;T&gt;</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Value</code></td>
+<td><code>T</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TypedElement`1(T value, string name, ElementDelimiter delimiter)</code>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-extensions"><h2>Namespace: ParksComputing.Xfer.Lang.Extensions</h2>
+<section id="type-parkscomputing-xfer-lang-extensions-charextensions"><h3>Static Class: CharExtensions</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>IsCollectionClosingSpecifier</h5>
+<code>bool IsCollectionClosingSpecifier(Char c)</code>
+</div>
+<div class="method-doc">
+<h5>IsCollectionOpeningSpecifier</h5>
+<code>bool IsCollectionOpeningSpecifier(Char c)</code>
+</div>
+<div class="method-doc">
+<h5>IsElementClosingCharacter</h5>
+<code>bool IsElementClosingCharacter(Char c)</code>
+</div>
+<div class="method-doc">
+<h5>IsElementClosingSpecifier</h5>
+<code>bool IsElementClosingSpecifier(Char c)</code>
+</div>
+<div class="method-doc">
+<h5>IsElementOpeningCharacter</h5>
+<code>bool IsElementOpeningCharacter(Char c)</code>
+</div>
+<div class="method-doc">
+<h5>IsElementOpeningSpecifier</h5>
+<code>bool IsElementOpeningSpecifier(Char c)</code>
+</div>
+<div class="method-doc">
+<h5>IsIntegerLeadingChar</h5>
+<code>bool IsIntegerLeadingChar(Char c)</code>
+</div>
+<div class="method-doc">
+<h5>IsKeywordChar</h5>
+<code>bool IsKeywordChar(Char c)</code>
+</div>
+<div class="method-doc">
+<h5>IsWhiteSpace</h5>
+<code>bool IsWhiteSpace(Char c)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-extensions-objectextensions"><h3>Static Class: ObjectExtensions</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Object obj)</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-models"><h2>Namespace: ParksComputing.Xfer.Lang.Models</h2>
+<section id="type-parkscomputing-xfer-lang-models-person"><h3>Class: Person</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Age</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>Person()</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-processinginstructions"><h2>Namespace: ParksComputing.Xfer.Lang.ProcessingInstructions</h2>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-chardefprocessinginstruction"><h3>Class: CharDefProcessingInstruction</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>CustomCharIds</code></td>
+<td><code>Dictionary&lt;string, int&gt;</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>CharDefProcessingInstruction(ObjectElement value)</code>
+</div>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+</div>
+<div class="method-doc">
+<h5>ProcessingInstructionHandler</h5>
+<code>void ProcessingInstructionHandler()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-documentprocessinginstruction"><h3>Class: DocumentProcessingInstruction</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>CustomCharIds</code></td>
+<td><code>Dictionary&lt;string, int&gt;</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DocumentProcessingInstruction(ObjectElement value)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DocumentProcessingInstruction()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-dynamicsourceprocessinginstruction"><h3>Class: DynamicSourceProcessingInstruction</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DynamicSourceProcessingInstruction(ObjectElement sourceConfig)</code>
+</div>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+</div>
+<div class="method-doc">
+<h5>ProcessingInstructionHandler</h5>
+<code>void ProcessingInstructionHandler()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-idprocessinginstruction"><h3>Class: IdProcessingInstruction</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>IdProcessingInstruction(TextElement value)</code>
+</div>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-metaprocessinginstruction"><h3>Class: MetaProcessingInstruction</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Metadata</code></td>
+<td><code>XferMetadata</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>MetaProcessingInstruction(ObjectElement value)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-processinginstruction"><h3>Class: ProcessingInstruction</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Kvp</code></td>
+<td><code>KeyValuePairElement</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Target</code></td>
+<td><code>Element</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ProcessingInstruction(Element value, string name)</code>
+</div>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+</div>
+<div class="method-doc">
+<h5>ProcessingInstructionHandler</h5>
+<code>void ProcessingInstructionHandler()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-propertiesprocessinginstruction"><h3>Class: PropertiesProcessingInstruction</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>CustomProperties</code></td>
+<td><code>Dictionary&lt;string, string&gt;</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>PropertiesProcessingInstruction(ObjectElement value)</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-schema"><h2>Namespace: ParksComputing.Xfer.Lang.Schema</h2>
+<section id="type-parkscomputing-xfer-lang-schema-constraint"><h3>Class: Constraint</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Value</code></td>
+<td><code>Object</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>Constraint()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-schema-constraintevaluator"><h3>Class: ConstraintEvaluator</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ConstraintEvaluator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>bool Evaluate(Object value, ObjectElement document)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-schema-expressionconstraint"><h3>Class: ExpressionConstraint</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Fields</code></td>
+<td><code>List&lt;string&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Operator</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ExpressionConstraint()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>bool Evaluate(ObjectElement document)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-schema-schemadefinition"><h3>Class: SchemaDefinition</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Constraints</code></td>
+<td><code>List&lt;Constraint&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ElementType</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Fields</code></td>
+<td><code>Dictionary&lt;string, SchemaField&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Type</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>SchemaDefinition()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-schema-schemafield"><h3>Class: SchemaField</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>CustomValidation</code></td>
+<td><code>Func&lt;ListElement, bool&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>IsRequired</code></td>
+<td><code>bool</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Type</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>SchemaField()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-schema-schemaobject"><h3>Class: SchemaObject</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Fields</code></td>
+<td><code>Dictionary&lt;string, SchemaField&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>SchemaObject()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-schema-xferschema"><h3>Class: XferSchema</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Definitions</code></td>
+<td><code>Dictionary&lt;string, SchemaDefinition&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Name</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferSchema()</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-schema-xferschemaparser"><h3>Class: XferSchemaParser</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferSchemaParser()</code>
+</div>
+<div class="method-doc">
+<h5>ParseSchema</h5>
+<code>Dictionary&lt;string, SchemaObject&gt; ParseSchema(ObjectElement schemaObjectElement)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-schema-xferschemavalidator"><h3>Class: XferSchemaValidator</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferSchemaValidator(Dictionary&lt;string, SchemaObject&gt; schemaObjects)</code>
+</div>
+<div class="method-doc">
+<h5>Validate</h5>
+<code>void Validate(TupleElement document)</code>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-services"><h2>Namespace: ParksComputing.Xfer.Lang.Services</h2>
+<section id="type-parkscomputing-xfer-lang-services-characteridregistry"><h3>Static Class: CharacterIdRegistry</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Builtin</code></td>
+<td><code>IReadOnlyDictionary&lt;string, int&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Custom</code></td>
+<td><code>IReadOnlyDictionary&lt;string, int&gt;</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Resolve</h5>
+<code>Nullable&lt;int&gt; Resolve(string id)</code>
+</div>
+<div class="method-doc">
+<h5>SetCustomIds</h5>
+<code>void SetCustomIds(Dictionary&lt;string, int&gt; custom)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-services-dynamicsourcehandler"><h3>Class: DynamicSourceHandler</h3>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DynamicSourceHandler(Object object, IntPtr method)</code>
+</div>
+<div class="method-doc">
+<h5>BeginInvoke</h5>
+<code>IAsyncResult BeginInvoke(string sourceValue, string fallbackKey, AsyncCallback callback, Object object)</code>
+</div>
+<div class="method-doc">
+<h5>EndInvoke</h5>
+<code>string EndInvoke(IAsyncResult result)</code>
+</div>
+<div class="method-doc">
+<h5>Invoke</h5>
+<code>string Invoke(string sourceValue, string fallbackKey)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-services-dynamicsourcehandlerregistry"><h3>Static Class: DynamicSourceHandlerRegistry</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>RegisteredSourceTypes</code></td>
+<td><code>IReadOnlyCollection&lt;string&gt;</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>RegisterHandler</h5>
+<code>void RegisterHandler(string sourceType, DynamicSourceHandler handler)</code>
+</div>
+<div class="method-doc">
+<h5>Resolve</h5>
+<code>string Resolve(string sourceType, string sourceValue, string fallbackKey)</code>
+</div>
+<div class="method-doc">
+<h5>UnregisterHandler</h5>
+<code>bool UnregisterHandler(string sourceType)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-services-dynamicsourceregistry"><h3>Static Class: DynamicSourceRegistry</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Configurations</code></td>
+<td><code>IReadOnlyDictionary&lt;string, Element&gt;</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>AddConfiguration</h5>
+<code>void AddConfiguration(string key, Element sourceConfig)</code>
+</div>
+<div class="method-doc">
+<h5>Clear</h5>
+<code>void Clear()</code>
+</div>
+<div class="method-doc">
+<h5>GetConfiguration</h5>
+<code>Element GetConfiguration(string key)</code>
+</div>
+<div class="method-doc">
+<h5>Resolve</h5>
+<code>string Resolve(string key)</code>
+</div>
+<div class="method-doc">
+<h5>SetConfigurations</h5>
+<code>void SetConfigurations(Dictionary&lt;string, Element&gt; configurations)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-services-ixferparser"><h3>Interface: IXferParser</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Encoding</code></td>
+<td><code>Encoding</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Parse</h5>
+<code>XferDocument Parse(Byte[] input)</code>
+</div>
+<div class="method-doc">
+<h5>Parse</h5>
+<code>XferDocument Parse(string input)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-services-parser"><h3>Class: Parser</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>CharDefResolver</code></td>
+<td><code>Func&lt;Element, string, Nullable&lt;int&gt;&gt;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>DynamicSourceResolver</code></td>
+<td><code>IDynamicSourceResolver</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>Encoding</code></td>
+<td><code>Encoding</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>Parser()</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>Parser(Encoding encoding)</code>
+</div>
+<div class="method-doc">
+<h5>HasPIProcessor</h5>
+<code>bool HasPIProcessor(string piKey)</code>
+</div>
+<div class="method-doc">
+<h5>Parse</h5>
+<code>XferDocument Parse(string input)</code>
+</div>
+<div class="method-doc">
+<h5>Parse</h5>
+<code>XferDocument Parse(Byte[] input)</code>
+</div>
+<div class="method-doc">
+<h5>RegisterElementProcessor</h5>
+<code>void RegisterElementProcessor(Action&lt;Element&gt; processor)</code>
+</div>
+<div class="method-doc">
+<h5>RegisterPIProcessor</h5>
+<code>void RegisterPIProcessor(string piKey, Action&lt;KeyValuePairElement&gt; processor)</code>
+</div>
+<div class="method-doc">
+<h5>RegisterPIProcessor</h5>
+<code>void RegisterPIProcessor(string piKey, PIProcessor processor)</code>
+</div>
+<div class="method-doc">
+<h5>UnregisterPIProcessor</h5>
+<code>void UnregisterPIProcessor(string piKey)</code>
+</div>
+</section>
+</section>
+
+
+        <footer>
+            <p>Documentation generated on 2025-08-04 12:31:58 UTC</p>
+        </footer>
+    </main>
+    <script>hljs.highlightAll();</script>
+</body>
+</html>

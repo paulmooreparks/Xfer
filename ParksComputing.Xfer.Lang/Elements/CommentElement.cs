@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents a comment element in XferLang using forward slash (/) delimiters.
+/// Comments are non-semantic elements that provide documentation or annotations
+/// but are not included in the actual data output. They are preserved during parsing
+/// but excluded from serialization.
+/// </summary>
 public class CommentElement : Element
 {
     public static readonly string ElementName = "comment";

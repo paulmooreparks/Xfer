@@ -1,24 +1,23 @@
 </ Start your day with a comment! />
-<!
-document {
+!document {
     xfer "11.1"
     id "top"
-}
-!>
+}!
 
-<!
-charDef {
+!charDef {
     fooz \zeta
     theend \omega
     pin \pushpin
     answer \$42
-}
-!>
+}!
 
-<! id "root" !>
+
+!id "root"!
 (
+    profile{name"Bob"role"admin"verified~true}
+    mixedData ( "Sample" @2023-12-25@ *99.5 )
     age $18
-    <!id "kvp"!>foo <!id "value"!>"bar"
+    !id "kvp"!foo !id "value"!"bar"
     [1 2 3]
     <\answer\>
     'I <\heart\><\vsemoji\> XferLang!'

@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents a dynamic element in XferLang using pipe (|) delimiters.
+/// Dynamic elements contain text that can be dynamically resolved or evaluated
+/// at runtime, often used for variable substitution or dynamic content generation.
+/// </summary>
 public class DynamicElement : TextElement
 {
     public static readonly string ElementName = "dynamic";

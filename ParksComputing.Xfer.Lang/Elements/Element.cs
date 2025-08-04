@@ -5,16 +5,50 @@ using ParksComputing.Xfer.Lang;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// The abstract base class for all XferLang elements. Provides common functionality
+/// for element hierarchies, metadata, IDs, and serialization.
+/// </summary>
 public abstract class Element {
+    /// <summary>
+    /// Gets or sets the parent element of this element in the document hierarchy.
+    /// </summary>
     public Element? Parent { get; set; }
     private readonly List<Element> children = [];
 
+    /// <summary>
+    /// The character prefix used to indicate hexadecimal numeric literals ('$').
+    /// </summary>
     public const char HexadecimalPrefix = '$';
+
+    /// <summary>
+    /// The character prefix used to indicate binary numeric literals ('%').
+    /// </summary>
     public const char BinaryPrefix = '%';
+
+    /// <summary>
+    /// The character that opens all XferLang elements ('<').
+    /// </summary>
     public const char ElementOpeningCharacter = '<';
+
+    /// <summary>
+    /// The character that closes all XferLang elements ('>').
+    /// </summary>
     public const char ElementClosingCharacter = '>';
+
+    /// <summary>
+    /// Gets the name of this element type.
+    /// </summary>
     public string Name { get; }
+
+    /// <summary>
+    /// Gets or sets the delimiter information for this element, including opening/closing characters and style.
+    /// </summary>
     public ElementDelimiter Delimiter { get; set; } = new ElementDelimiter('\0', '\0');
+
+    /// <summary>
+    /// Gets the collection of child elements contained within this element.
+    /// </summary>
     public List<Element> Children => children;
 
     /// <summary>
@@ -27,6 +61,11 @@ public abstract class Element {
     /// </summary>
     public XferMetadata? Metadata { get; set; }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Element"/> class.
+    /// </summary>
+    /// <param name="name">The name of the element type.</param>
+    /// <param name="delimiter">The delimiter information for this element.</param>
     public Element(string name, ElementDelimiter delimiter) {
         Name = name;
         Delimiter = delimiter;

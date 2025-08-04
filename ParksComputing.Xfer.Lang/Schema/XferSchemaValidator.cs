@@ -8,6 +8,11 @@ using ParksComputing.Xfer.Lang.Elements;
 
 namespace ParksComputing.Xfer.Lang.Schema;
 
+/// <summary>
+/// Validates XferLang documents against defined schemas. Performs structural validation,
+/// type checking, constraint evaluation, and rule enforcement to ensure documents
+/// conform to their specified schema definitions.
+/// </summary>
 public class XferSchemaValidator {
     private readonly Dictionary<string, SchemaObject> _schemaObjects;
 

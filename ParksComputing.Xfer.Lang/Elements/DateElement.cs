@@ -8,6 +8,12 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents a date-only element in XferLang using pipe (|) delimiters.
+/// Date elements store DateOnly values and support various formatting options
+/// through the DateTimeHandling property. This is used for date values without
+/// time components.
+/// </summary>
 public class DateElement : TypedElement<DateOnly> {
     public static readonly string ElementName = DateTimeElement.ElementName;
     public const char OpeningSpecifier = DateTimeElement.OpeningSpecifier;

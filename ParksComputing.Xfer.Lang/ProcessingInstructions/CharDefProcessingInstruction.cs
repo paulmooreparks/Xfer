@@ -3,6 +3,11 @@ using ParksComputing.Xfer.Lang.Services;
 
 namespace ParksComputing.Xfer.Lang.ProcessingInstructions;
 
+/// <summary>
+/// Processing instruction for defining custom character definitions in XferLang.
+/// Allows mapping of custom character names to Unicode code points for use in character elements.
+/// The instruction expects an object containing name-to-codepoint mappings.
+/// </summary>
 // Example: charDef PI
 public class CharDefProcessingInstruction : ProcessingInstruction {
     public const string Keyword = "chardef";

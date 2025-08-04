@@ -73,7 +73,7 @@ _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.c
     - [Extending Processing Instructions](#extending-processing-instructions)
       - [Creating Custom PIs](#creating-custom-pis)
       - [PI Registration and Lifecycle](#pi-registration-and-lifecycle)
-  - [Writing Custom Processing Instruction (PI) Processors](#writing-custom-processing-instruction-pi-processors)
+  - [Writing Custom Processing Instructions](#writing-custom-processing-instructions)
     - [Conceptual Overview](#conceptual-overview)
     - [.NET API Usage](#net-api-usage)
   - [Building XferLang](#building-xferlang)
@@ -81,12 +81,9 @@ _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.c
     - [Quick Start](#quick-start)
     - [Project Structure](#project-structure)
     - [Development Commands](#development-commands)
-    - [Using the Command-Line Tools](#using-the-command-line-tools)
   - [Community and Resources](#community-and-resources)
     - [Learning Resources](#learning-resources)
     - [Getting Help](#getting-help)
-    - [Development Status](#development-status)
-    - [Language Comparison](#language-comparison)
   - [Project Status and Roadmap](#project-status-and-roadmap)
   - [Contributing](#contributing)
   - [Grammar](#grammar)
@@ -220,7 +217,7 @@ This section provides a detailed reference for each XferLang element type.
 *   **Description:** Contains text data. The content is stored verbatim. To include a `"` character that would conflict with the closing delimiter, repeat the specifier (e.g., `""...""`) or use explicit syntax (`<"..."">`).
 *   **Syntax:**
     *   **Compact:** `"Hello, World!"`
-    *   **Explicit:** `<"Alice said, "Boo!"">` or `<""A quote is a " character."">` (delimiter repetition)
+    *   **Explicit:** `<"Alice said, "Boo!"">` or `<"A quote is a " character.">` or `<""XferLang supports <"strings">."">` (delimiter repetition)
 *   **Examples:**
     ```xfer
     </ Compact syntax />
@@ -591,7 +588,7 @@ For documents with heterogeneous top-level content, use Tuple:
 *   **Specifier:** `/` (Slash)
 *   **Description:** A comment that is ignored by the parser. It always requires explicit syntax.
 *   **Syntax:**
-    *   **Explicit:** `</ comment />`, `<// nested </comment/> //>` (delimiter repetition)
+    *   **Explicit:** `</ comment />`, `<// nested </comment/> via delimiter repetition //>`
 *   **Examples:**
     ```xfer
     </ Basic comments />
@@ -646,6 +643,8 @@ For documents with heterogeneous top-level content, use Tuple:
     dynamicContent <'Welcome to <|APP_NAME|> version <"1.0">'>
     ```
 
+It is a good practice to use explicit syntax (`<' ... '>`) when you are unsure whether or not the interpolated values may contain single quotes.
+
 ### Document Validation and Common Mistakes
 
 ## XferLang Elements
@@ -671,11 +670,12 @@ Represents a typed array of elements. Arrays are enclosed in square brackets `[ 
 
 **Examples:**
 ```xfer
-numbers [1 2 3 4 5]
-names ["Alice" "Bob" "Charlie"]
-decimals [*12.3 *45.6 *78.9]
-booleans [~true ~false ~true]
-chars [\A \B \C]
+numbers [1 2 3 4 5]             </ All integer elements />
+names ["Alice" "Bob" "Charlie"] </ All string elements />
+decimals [*12.3 *45.6 *78.9]    </ All decimal elements />
+booleans [~true ~false ~true]   </ All Boolean elements />
+chars [\$41 \$42 \$43]          </ All character elements />
+error [#42 &99]                 </ Error: Mixed types (integer and long) />
 ```
 
 Arrays can be nested or contain objects:
@@ -784,7 +784,7 @@ config {
 }
 
 </ Compact form />
-profile { name "Bob" role "admin" verified ~true }
+profile{name"Bob"role"admin"verified~true}
 ```
 
 ### Tuple
@@ -841,7 +841,7 @@ and include any content
 **Inline Usage:**
 ```xfer
 name "Alice" </ User's display name />
-port 8080     </ Development server port />
+port 8080    </ Development server port />
 ```
 
 ### Dynamic
@@ -857,12 +857,9 @@ username |USER|
 password |DB_PASSWORD|
 
 </ Within interpolated strings />
-greeting 'Hello, <|USERNAME|>!'
+greeting <'Hello, <|USERNAME|>!'>
 message 'Server running on port <|PORT|>'
 
-</ Complex dynamic content - explicit syntax required inside />
-dynamicObject |<{<=name=><"Alice"><=age=><#30#>}>|
-dynamicArray |<[<"item1"><"item2"><"item3">]>|
 ```
 
 **Configuration via Processing Instructions:**
@@ -873,9 +870,9 @@ dynamicArray |<[<"item1"><"item2"><"item3">]>|
     config file "settings.json"
 } !>
 {
-    message '<|greeting|>'
-    user '<|username|>'
-    settings '<|config|>'
+    message <'<|greeting|>'>
+    user <'<|username|>'>
+    settings <'<|config|>'>
 }
 ```
 
@@ -1787,7 +1784,7 @@ var xferContent = @"
 
 This extensible PI system makes XferLang highly adaptable for domain-specific needs, from configuration management to data validation and transformation pipelines.
 
-## Writing Custom Processing Instruction (PI) Processors
+## Writing Custom Processing Instructions
 
 XferLang.NET allows you to extend the parser and deserializer by implementing custom logic for Processing Instructions (PIs). This is useful for advanced configuration, runtime directives, schema association, and dynamic value resolution.
 
@@ -1831,7 +1828,6 @@ Information for developers who want to build XferLang from source or contribute 
 
 - **.NET SDK 8.0 or later** - [Download from Microsoft](https://dotnet.microsoft.com/download)
 - **Git** - For cloning the repository
-- **IDE (Optional):** Visual Studio, VS Code, or Rider
 
 ### Quick Start
 
@@ -1855,9 +1851,9 @@ dotnet pack --configuration Release
 The XferLang solution contains several projects:
 
 - **ParksComputing.Xfer.Lang** - Main library
-- **XferTest** - Unit tests and integration tests
+- **ParksComputing.Xfer.Lang.Tests** - Unit tests and integration tests
 - **xferc** - Command-line tools and REPL
-- **XferService** - Web service implementation (optional)
+- **XferService** - Example web service implementation (optional)
 
 ### Development Commands
 
@@ -1868,38 +1864,11 @@ dotnet build --configuration Debug
 # Build in Release mode
 dotnet build --configuration Release
 
-# Run specific test project
-dotnet test XferTest/
-
-# Run with verbose output
+# Run tests with verbose output
 dotnet test --verbosity normal
 
 # Run tests with code coverage
 dotnet test --collect:"XPlat Code Coverage"
-
-# Package for NuGet distribution
-dotnet pack ParksComputing.Xfer.Lang/ --configuration Release --output ./nupkg
-```
-
-### Using the Command-Line Tools
-
-The `xferc` project provides command-line tools for working with XferLang:
-
-```bash
-# Build the command-line tools
-dotnet build xferc/
-
-# Run the XferLang REPL
-dotnet run --project xferc/
-
-# Convert JSON to XferLang
-dotnet run --project xferc/ -- convert input.json output.xfer
-
-# Validate XferLang documents
-dotnet run --project xferc/ -- validate document.xfer
-
-# Pretty-print XferLang documents
-dotnet run --project xferc/ -- format document.xfer
 ```
 
 ## Community and Resources
@@ -1908,7 +1877,7 @@ Join the XferLang community and access helpful resources for learning and develo
 
 ### Learning Resources
 
-- 📖 **Documentation:** [This comprehensive guide](https://github.com/paulmooreparks/Xfer)
+- 📖 **Documentation:** [This comprehensive guide](https://xferlang.org/)
 - 🎯 **Examples:** [Sample XferLang applications](https://github.com/paulmooreparks/Xfer/tree/master/examples) in the repository
 - 💡 **Tests:** [Unit Tests](https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang.Tests) also show how to use the library and provide test coverage
 - 📄 **Sample Documents:** [*.xfer files](https://github.com/paulmooreparks/Xfer/tree/master) in the repository
@@ -1919,30 +1888,6 @@ Join the XferLang community and access helpful resources for learning and develo
 - 🐛 **Bug Reports:** Create an [Issue](https://github.com/paulmooreparks/Xfer/issues) with details
 - 💡 **Feature Requests:** Suggest improvements via [GitHub Issues](https://github.com/paulmooreparks/Xfer/issues)
 - 📧 **Direct Contact:** Reach out via GitHub for complex questions
-
-### Development Status
-
-XferLang is actively developed with regular updates and improvements:
-
-- ✅ **Stable Core:** Basic serialization/deserialization is production-ready
-- 🚧 **Active Development:** Advanced features and optimizations ongoing
-- 🔄 **Regular Releases:** Check [releases](https://github.com/paulmooreparks/Xfer/releases) for updates
-- 📊 **CI/CD:** Automated testing and quality checks via GitHub Actions
-
-### Language Comparison
-
-See how XferLang compares to other data formats:
-
-| Feature | XferLang | JSON | XML | YAML |
-|---------|----------|------|-----|------|
-| **Explicit Types** | ✅ Built-in | ❌ Limited | ⚠️ Via attributes | ⚠️ Via tags |
-| **Human Readable** | ✅ Yes | ✅ Yes | ⚠️ Verbose | ✅ Yes |
-| **Comments** | ✅ Native | ❌ No | ✅ Native | ✅ Native |
-| **Safety** | ✅ High | ⚠️ Medium | ✅ High | ⚠️ Medium |
-| **Delimiter Escaping** | ✅ Not needed | ❌ Required | ❌ Required | ⚠️ Context-dependent |
-| **Type Ambiguity** | ✅ None | ❌ High | ⚠️ Medium | ❌ High |
-| **Compact Size** | ✅ Good | ✅ Excellent | ❌ Poor | ✅ Good |
-| **Parsing Speed** | ✅ Fast | ✅ Fast | ⚠️ Moderate | ⚠️ Moderate |
 
 ## Project Status and Roadmap
 

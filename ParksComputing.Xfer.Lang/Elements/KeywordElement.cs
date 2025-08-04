@@ -2,6 +2,12 @@
 using System.Text.RegularExpressions;
 
 namespace ParksComputing.Xfer.Lang.Elements;
+
+/// <summary>
+/// Represents a keyword element in XferLang using equals (=) delimiters.
+/// Keywords are reserved words or language constructs that have special meaning
+/// in the XferLang syntax, such as data types, control structures, or built-in functions.
+/// </summary>
 public class KeywordElement : TextElement
 {
     public static readonly string ElementName = "keyword";

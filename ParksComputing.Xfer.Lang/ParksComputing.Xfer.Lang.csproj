@@ -54,7 +54,17 @@
     </PropertyGroup>
     <Message Text="Generating documentation..." Importance="high" />
     <Message Text="Solution directory: $(SolutionDir)" Importance="high" />
-    <Exec Command="dotnet run --project &quot;$(SolutionDir)XferDocBuilder\XferDocBuilder.csproj&quot; &quot;$(SolutionDir)README.md&quot; &quot;$(SolutionDir)docs\index.html&quot;"
+    <Exec Command="dotnet run --project &quot;$(SolutionDir)XferDocBuilder\XferDocBuilder.csproj&quot; md &quot;$(SolutionDir)README.md&quot; &quot;$(SolutionDir)docs\index.html&quot;"
+          ContinueOnError="false"
+          WorkingDirectory="$(SolutionDir)" />
+  </Target>
+
+  <Target Name="GenerateApiDocs" AfterTargets="Build">
+    <PropertyGroup>
+      <SolutionDir Condition="'$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*'">$(MSBuildProjectDirectory)\..\</SolutionDir>
+    </PropertyGroup>
+    <Message Text="Generating API documentation..." Importance="high" />
+    <Exec Command="dotnet run --project &quot;$(SolutionDir)XferDocBuilder\XferDocBuilder.csproj&quot; api &quot;$(OutputPath)$(AssemblyName).dll&quot; &quot;$(SolutionDir)docs\api.html&quot;"
           ContinueOnError="false"
           WorkingDirectory="$(SolutionDir)" />
   </Target>

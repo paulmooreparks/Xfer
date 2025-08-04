@@ -6,12 +6,29 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents the delimiter information for an XferLang element, including opening/closing characters,
+/// specifier count, and element style. This class manages the construction of element delimiters
+/// for different serialization styles.
+/// </summary>
 public class ElementDelimiter
 {
+    /// <summary>
+    /// Gets the character used to open this element type.
+    /// </summary>
     public char OpeningSpecifier { get; }
+
+    /// <summary>
+    /// Gets the character used to close this element type.
+    /// </summary>
     public char ClosingSpecifier { get; }
 
     private int _specifierCount;
+
+    /// <summary>
+    /// Gets or sets the number of specifier characters to repeat in the delimiter.
+    /// Setting this value updates the Opening, Closing, MinOpening, and MinClosing properties.
+    /// </summary>
     public int SpecifierCount
     {
         get => _specifierCount;
@@ -28,12 +45,30 @@ public class ElementDelimiter
             MinClosing = repeatedClosing;
         }
     }
+
+    /// <summary>
+    /// Gets or sets the style of this element (Explicit, Compact, or Implicit).
+    /// </summary>
     public ElementStyle Style { get; set; } = ElementStyle.Explicit;
 
+    /// <summary>
+    /// Gets the full opening delimiter string including angle brackets.
+    /// </summary>
     public string Opening { get; protected set; }
+
+    /// <summary>
+    /// Gets the full closing delimiter string including angle brackets.
+    /// </summary>
     public string Closing { get; protected set; }
 
+    /// <summary>
+    /// Gets the minimal opening delimiter string without angle brackets.
+    /// </summary>
     public string MinOpening { get; protected set; }
+
+    /// <summary>
+    /// Gets the minimal closing delimiter string without angle brackets.
+    /// </summary>
     public string MinClosing { get; protected set; }
 
     public ElementDelimiter() : this(default, default, 1) { }

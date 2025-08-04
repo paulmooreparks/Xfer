@@ -1,6 +1,6 @@
 /* Sidebar Styles */
 .sidebar {
-    width: 260px;
+    width: 420px;
     background-color: #343a40;
     color: #fff;
     position: fixed;
@@ -8,9 +8,11 @@
     left: 0;
     height: 100%;
     padding-top: 20px;
+    padding-bottom: 20px;
     transition: transform 0.3s ease;
     overflow-y: auto;
     overflow-x: hidden;
+    box-sizing: border-box;
     /* Accordion Styles for Sidebar */
     .accordion {
         background-color: #495057;
@@ -41,8 +43,37 @@
 }
 
 .sidebar-header h2 {
-    margin: 0;
+    margin: 0 0 12px 0;
     font-size: 1.5em;
+}
+
+.main-nav-links {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.main-nav-links .nav-link {
+    flex: 1;
+    padding: 8px 12px;
+    background: #495057;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 500;
+    text-align: center;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.main-nav-links .nav-link:hover {
+    background: #0d6efd;
+    transform: translateY(-1px);
+}
+
+.main-nav-links .nav-link:active {
+    transform: translateY(0);
 }
 
 .sidebar ul {
@@ -82,7 +113,34 @@
 
 .sidebar summary {
     padding: 12px 20px;
-    overflow-x:auto;
+    cursor: pointer;
+    color: #adb5bd;
+    transition: background-color 0.2s, color 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar summary::-webkit-details-marker {
+    color: #adb5bd;
+}
+
+.sidebar details[open] > summary::-webkit-details-marker {
+    color: #fff;
+}
+
+.sidebar summary:hover {
+    background-color: #495057;
+    color: #fff;
+}
+
+.sidebar details {
+    border: none;
+}
+
+.sidebar details[open] > summary {
+    background-color: #495057;
+    color: #fff;
 }
 
 .sidebar ul {
@@ -209,9 +267,9 @@ body {
 
 /* Main Content Styles */
 .content {
-    margin-left: 260px;
+    margin-left: 420px;
     padding: 40px 60px;
-    width: calc(100% - 260px);
+    width: calc(100% - 420px);
     box-sizing: border-box; /* Ensures padding is included in width calculation */
 }
 
@@ -276,6 +334,169 @@ footer {
     color: #6c757d;
 }
 
+/* API Documentation Styles */
+.api-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.api-table thead th {
+    background: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.api-table tbody td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f3f4;
+    vertical-align: top;
+}
+
+.api-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.api-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.api-table code {
+    background: #f1f3f4;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: "Fira Code", "Courier New", monospace;
+    font-size: 0.85em;
+    color: #d63384;
+    font-weight: 500;
+}
+
+.method-doc {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 24px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.method-doc h5 {
+    color: #495057;
+    margin: 0 0 12px 0;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.method-doc code {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding: 12px 16px;
+    border-radius: 6px;
+    display: block;
+    margin: 8px 0 16px 0;
+    font-family: "Fira Code", "Courier New", monospace;
+    font-size: 0.9em;
+    line-height: 1.4;
+    color: #495057;
+    overflow-x: auto;
+}
+
+.method-doc p {
+    margin: 0;
+    color: #6c757d;
+    line-height: 1.6;
+}
+
+/* Type documentation sections */
+section[id^="type-"] {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 32px;
+    margin: 32px 0;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+}
+
+section[id^="type-"] h3 {
+    color: #212529;
+    margin: 0 0 16px 0;
+    padding: 0 0 16px 0;
+    border-bottom: 2px solid #e9ecef;
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+section[id^="type-"] h4 {
+    color: #495057;
+    margin: 32px 0 16px 0;
+    font-size: 1.2em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+section[id^="type-"] h4::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: #0d6efd;
+    margin-right: 12px;
+    border-radius: 2px;
+}
+
+section[id^="type-"] > p {
+    color: #6c757d;
+    font-size: 1.05em;
+    line-height: 1.6;
+    margin: 16px 0 24px 0;
+}
+
+/* Namespace sections */
+section[id^="namespace-"] {
+    margin: 40px 0;
+}
+
+section[id^="namespace-"] h2 {
+    color: #212529;
+    font-size: 2.2em;
+    margin: 0 0 32px 0;
+    padding: 0 0 16px 0;
+    border-bottom: 3px solid #0d6efd;
+    font-weight: 700;
+}
+
+/* API Overview section */
+section[id="api-overview"] {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 40px;
+    margin: 0 0 40px 0;
+    text-align: center;
+}
+
+section[id="api-overview"] h1 {
+    margin: 0 0 16px 0;
+    font-size: 2.5em;
+    font-weight: 700;
+}
+
+section[id="api-overview"] p {
+    margin: 0;
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
 /* Mobile Navigation */
 .mobile-nav-toggle {
     display: none;
@@ -284,15 +505,36 @@ footer {
     left: 15px;
     z-index: 1000;
     cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.9);
+    -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.mobile-nav-toggle:hover {
+    background-color: rgba(255, 255, 255, 1);
+    transform: scale(1.05);
+}
+
+.mobile-nav-toggle.active {
+    background-color: rgba(255, 255, 255, 0.95);
 }
 
 .mobile-nav-toggle span {
     display: block;
-    width: 25px;
+    width: 22px;
     height: 3px;
     background-color: #343a40;
-    margin: 5px 0;
-    transition: transform 0.3s, opacity 0.3s;
+    margin: 4px 0;
+    transition: transform 0.3s, opacity 0.3s, background-color 0.3s;
+    border-radius: 2px;
+}
+
+.mobile-nav-toggle.active span {
+    background-color: #212529;
 }
 
 /* Responsive Design */

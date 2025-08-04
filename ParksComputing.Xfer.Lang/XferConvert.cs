@@ -14,6 +14,11 @@ using System.Linq;
 
 namespace ParksComputing.Xfer.Lang;
 
+/// <summary>
+/// Provides static methods for converting between .NET objects and XferLang elements or text.
+/// This class serves as the primary entry point for serialization and deserialization operations,
+/// similar to JsonConvert in Newtonsoft.Json.
+/// </summary>
 public class XferConvert {
     private static readonly XferSerializerSettings DefaultSettings = new();
 

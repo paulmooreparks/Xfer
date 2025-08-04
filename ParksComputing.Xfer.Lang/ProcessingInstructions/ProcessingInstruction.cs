@@ -4,11 +4,31 @@ using System.Text;
 using ParksComputing.Xfer.Lang.Elements;
 
 namespace ParksComputing.Xfer.Lang.ProcessingInstructions {
+    /// <summary>
+    /// Represents a processing instruction in XferLang that provides metadata or processing directives
+    /// for elements in the document. Processing instructions are enclosed in &lt;! ... !&gt; delimiters
+    /// and contain key-value pairs that affect parsing or element behavior.
+    /// </summary>
     // Base ProcessingInstruction: always contains a single KVP and (optionally) a Target
     public class ProcessingInstruction : TypedElement<Element> {
+        /// <summary>
+        /// The element name used for processing instructions.
+        /// </summary>
         public const string ElementName = "processingInstruction";
+
+        /// <summary>
+        /// The character used to open and close processing instruction elements ('!').
+        /// </summary>
         public const char OpeningSpecifier = '!';
+
+        /// <summary>
+        /// The character used to close processing instruction elements (same as opening).
+        /// </summary>
         public const char ClosingSpecifier = OpeningSpecifier;
+
+        /// <summary>
+        /// The element delimiter configuration for processing instructions.
+        /// </summary>
         public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
         public ProcessingInstruction(Element value, string name) : base(value, name, ElementDelimiter) {

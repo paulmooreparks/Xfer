@@ -9,6 +9,12 @@ using ParksComputing.Xfer.Lang.Services;
 
 namespace ParksComputing.Xfer.Lang.ProcessingInstructions;
 
+/// <summary>
+/// Processing instruction for configuring dynamic data sources in XferLang.
+/// Allows specification of external data sources, connection settings, and
+/// dynamic content resolution strategies. The instruction expects an object
+/// containing source configuration parameters.
+/// </summary>
 public class DynamicSourceProcessingInstruction : ProcessingInstruction {
     public const string Keyword = "dynamicSource";
 

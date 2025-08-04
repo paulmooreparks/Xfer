@@ -2,10 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta property="og:title" content="XferLang Data-Interchange Language" />
+    <meta property="og:description" content="XferLang is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management." />
+    <meta property="og:image" content="https://xferlang.org/XferLang-sm.png" />
+    <meta property="og:url" content="https://xferlang.org/" />
+    <meta property="og:type" content="website" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XferLang Documentation</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="highlightjs/styles/github.min.css">
+    <script src="script.js"></script>
     <script src="highlightjs/highlight.min.js"></script>
     <script src="highlightjs/languages/xfer.min.js"></script>
 </head>
@@ -16,6 +22,10 @@
     <nav class="sidebar">
         <div class="sidebar-header">
             <h2><a href="index.html" class="home-link">XferLang</a></h2>
+            <div class="main-nav-links">
+                <a href="index.html" class="nav-link">Guide</a>
+                <a href="api.html" class="nav-link">API</a>
+            </div>
         </div>
         <ul>
             <li><a href="#introduction-and-philosophy">Introduction and Philosophy</a></li>
@@ -108,7 +118,7 @@
             </li>
             <li>
                 <details>
-                    <summary>Writing Custom Processing Instruction (PI) Processors</summary>
+                    <summary>Writing Custom Processing Instructions</summary>
                     <ul>
                 <li><a href="#conceptual-overview">Conceptual Overview</a></li>
                 <li><a href="#net-api-usage">.NET API Usage</a></li>
@@ -123,7 +133,6 @@
                 <li><a href="#quick-start">Quick Start</a></li>
                 <li><a href="#project-structure">Project Structure</a></li>
                 <li><a href="#development-commands">Development Commands</a></li>
-                <li><a href="#using-the-command-line-tools">Using the Command-Line Tools</a></li>
                     </ul>
                 </details>
             </li>
@@ -133,8 +142,6 @@
                     <ul>
                 <li><a href="#learning-resources">Learning Resources</a></li>
                 <li><a href="#getting-help">Getting Help</a></li>
-                <li><a href="#development-status">Development Status</a></li>
-                <li><a href="#language-comparison">Language Comparison</a></li>
                     </ul>
                 </details>
             </li>
@@ -261,7 +268,7 @@
 </li>
 </ul>
 </li>
-<li><a href="#writing-custom-processing-instruction-pi-processors">Writing Custom Processing Instruction (PI) Processors</a>
+<li><a href="#writing-custom-processing-instructions">Writing Custom Processing Instructions</a>
 <ul>
 <li><a href="#conceptual-overview">Conceptual Overview</a></li>
 <li><a href="#net-api-usage">.NET API Usage</a></li>
@@ -273,15 +280,12 @@
 <li><a href="#quick-start">Quick Start</a></li>
 <li><a href="#project-structure">Project Structure</a></li>
 <li><a href="#development-commands">Development Commands</a></li>
-<li><a href="#using-the-command-line-tools">Using the Command-Line Tools</a></li>
 </ul>
 </li>
 <li><a href="#community-and-resources">Community and Resources</a>
 <ul>
 <li><a href="#learning-resources">Learning Resources</a></li>
 <li><a href="#getting-help">Getting Help</a></li>
-<li><a href="#development-status">Development Status</a></li>
-<li><a href="#language-comparison">Language Comparison</a></li>
 </ul>
 </li>
 <li><a href="#project-status-and-roadmap">Project Status and Roadmap</a></li>
@@ -390,7 +394,7 @@ name &quot;Alice&quot;        &lt;/ A key/value pair with implicit keyword 'name
 <li><strong>Syntax:</strong>
 <ul>
 <li><strong>Compact:</strong> <code>&quot;Hello, World!&quot;</code></li>
-<li><strong>Explicit:</strong> <code>&lt;&quot;Alice said, &quot;Boo!&quot;&quot;&gt;</code> or <code>&lt;&quot;&quot;A quote is a &quot; character.&quot;&quot;&gt;</code> (delimiter repetition)</li>
+<li><strong>Explicit:</strong> <code>&lt;&quot;Alice said, &quot;Boo!&quot;&quot;&gt;</code> or <code>&lt;&quot;A quote is a &quot; character.&quot;&gt;</code> or <code>&lt;&quot;&quot;XferLang supports &lt;&quot;strings&quot;&gt;.&quot;&quot;&gt;</code> (delimiter repetition)</li>
 </ul>
 </li>
 <li><strong>Examples:</strong>
@@ -805,7 +809,7 @@ For documents with heterogeneous top-level content, use Tuple:</p>
 <li><strong>Description:</strong> A comment that is ignored by the parser. It always requires explicit syntax.</li>
 <li><strong>Syntax:</strong>
 <ul>
-<li><strong>Explicit:</strong> <code>&lt;/ comment /&gt;</code>, <code>&lt;// nested &lt;/comment/&gt; //&gt;</code> (delimiter repetition)</li>
+<li><strong>Explicit:</strong> <code>&lt;/ comment /&gt;</code>, <code>&lt;// nested &lt;/comment/&gt; via delimiter repetition //&gt;</code></li>
 </ul>
 </li>
 <li><strong>Examples:</strong>
@@ -870,6 +874,7 @@ dynamicContent &lt;'Welcome to &lt;|APP_NAME|&gt; version &lt;&quot;1.0&quot;&gt
 </code></pre>
 </li>
 </ul>
+<p>It is a good practice to use explicit syntax (<code>&lt;' ... '&gt;</code>) when you are unsure whether or not the interpolated values may contain single quotes.</p>
 <section id="document-validation-and-common-mistakes"><h3 id="document-validation-and-common-mistakes">Document Validation and Common Mistakes</h3>
 <section id="xferlang-elements"><h2 id="xferlang-elements">XferLang Elements</h2>
 <p>XferLang supports a rich set of data types designed for clarity, explicitness, and flexibility. Each type is chosen to represent a distinct kind of value, making data both human-readable and machine-precise. The main categories are:</p>
@@ -889,11 +894,12 @@ dynamicContent &lt;'Welcome to &lt;|APP_NAME|&gt; version &lt;&quot;1.0&quot;&gt
 <p>Represents a typed array of elements. Arrays are enclosed in square brackets <code>[ ... ]</code> and all elements must be of the same type.</p>
 <p><strong>Syntax:</strong> <code>[ element1 element2 element3 ... ]</code></p>
 <p><strong>Examples:</strong></p>
-<pre><code class="language-xfer">numbers [1 2 3 4 5]
-names [&quot;Alice&quot; &quot;Bob&quot; &quot;Charlie&quot;]
-decimals [*12.3 *45.6 *78.9]
-booleans [~true ~false ~true]
-chars [\A \B \C]
+<pre><code class="language-xfer">numbers [1 2 3 4 5]             &lt;/ All integer elements /&gt;
+names [&quot;Alice&quot; &quot;Bob&quot; &quot;Charlie&quot;] &lt;/ All string elements /&gt;
+decimals [*12.3 *45.6 *78.9]    &lt;/ All decimal elements /&gt;
+booleans [~true ~false ~true]   &lt;/ All Boolean elements /&gt;
+chars [\$41 \$42 \$43]          &lt;/ All character elements /&gt;
+error [#42 &amp;99]                 &lt;/ Error: Mixed types (integer and long) /&gt;
 </code></pre>
 <p>Arrays can be nested or contain objects:</p>
 <pre><code class="language-xfer">matrix [
@@ -992,7 +998,7 @@ config {
 }
 
 &lt;/ Compact form /&gt;
-profile { name &quot;Bob&quot; role &quot;admin&quot; verified ~true }
+profile{name&quot;Bob&quot;role&quot;admin&quot;verified~true}
 </code></pre>
 <section id="tuple"><h3 id="tuple">Tuple</h3>
 <p>Represents an ordered collection of elements that can be of <strong>any type</strong>, similar to arrays in JSON. Tuples are enclosed in parentheses and are perfect for heterogeneous data like coordinates, records, or mixed-type sequences.</p>
@@ -1036,7 +1042,7 @@ and include any content
 </code></pre>
 <p><strong>Inline Usage:</strong></p>
 <pre><code class="language-xfer">name &quot;Alice&quot; &lt;/ User's display name /&gt;
-port 8080     &lt;/ Development server port /&gt;
+port 8080    &lt;/ Development server port /&gt;
 </code></pre>
 <section id="dynamic"><h3 id="dynamic">Dynamic</h3>
 <p>Dynamic elements represent values that are resolved at parse-time or runtime, typically from environment variables, configuration files, or custom sources. They provide powerful templating and configuration capabilities. Inside dynamic elements, all nested elements must use explicit syntax.</p>
@@ -1047,12 +1053,9 @@ username |USER|
 password |DB_PASSWORD|
 
 &lt;/ Within interpolated strings /&gt;
-greeting 'Hello, &lt;|USERNAME|&gt;!'
+greeting &lt;'Hello, &lt;|USERNAME|&gt;!'&gt;
 message 'Server running on port &lt;|PORT|&gt;'
 
-&lt;/ Complex dynamic content - explicit syntax required inside /&gt;
-dynamicObject |&lt;{&lt;=name=&gt;&lt;&quot;Alice&quot;&gt;&lt;=age=&gt;&lt;#30#&gt;}&gt;|
-dynamicArray |&lt;[&lt;&quot;item1&quot;&gt;&lt;&quot;item2&quot;&gt;&lt;&quot;item3&quot;&gt;]&gt;|
 </code></pre>
 <p><strong>Configuration via Processing Instructions:</strong></p>
 <pre><code class="language-xfer">&lt;! dynamicSource {
@@ -1061,9 +1064,9 @@ dynamicArray |&lt;[&lt;&quot;item1&quot;&gt;&lt;&quot;item2&quot;&gt;&lt;&quot;i
     config file &quot;settings.json&quot;
 } !&gt;
 {
-    message '&lt;|greeting|&gt;'
-    user '&lt;|username|&gt;'
-    settings '&lt;|config|&gt;'
+    message &lt;'&lt;|greeting|&gt;'&gt;
+    user &lt;'&lt;|username|&gt;'&gt;
+    settings &lt;'&lt;|config|&gt;'&gt;
 }
 </code></pre>
 <p><strong>Rules:</strong></p>
@@ -1869,7 +1872,7 @@ var xferContent = @&quot;
 <li><strong>Multi-phase PIs</strong>: Process elements in multiple passes</li>
 </ul>
 <p>This extensible PI system makes XferLang highly adaptable for domain-specific needs, from configuration management to data validation and transformation pipelines.</p>
-<section id="writing-custom-processing-instruction-pi-processors"><h2 id="writing-custom-processing-instruction-pi-processors">Writing Custom Processing Instruction (PI) Processors</h2>
+<section id="writing-custom-processing-instructions"><h2 id="writing-custom-processing-instructions">Writing Custom Processing Instructions</h2>
 <p>XferLang.NET allows you to extend the parser and deserializer by implementing custom logic for Processing Instructions (PIs). This is useful for advanced configuration, runtime directives, schema association, and dynamic value resolution.</p>
 <section id="conceptual-overview"><h3 id="conceptual-overview">Conceptual Overview</h3>
 <ul>
@@ -1905,7 +1908,6 @@ var obj = XferConvert.Deserialize&lt;MyConfig&gt;(xferString, settings);
 <ul>
 <li><strong>.NET SDK 8.0 or later</strong> - <a href="https://dotnet.microsoft.com/download">Download from Microsoft</a></li>
 <li><strong>Git</strong> - For cloning the repository</li>
-<li><strong>IDE (Optional):</strong> Visual Studio, VS Code, or Rider</li>
 </ul>
 <section id="quick-start"><h3 id="quick-start">Quick Start</h3>
 <pre><code class="language-bash"># Clone the repository
@@ -1925,9 +1927,9 @@ dotnet pack --configuration Release
 <p>The XferLang solution contains several projects:</p>
 <ul>
 <li><strong>ParksComputing.Xfer.Lang</strong> - Main library</li>
-<li><strong>XferTest</strong> - Unit tests and integration tests</li>
+<li><strong>ParksComputing.Xfer.Lang.Tests</strong> - Unit tests and integration tests</li>
 <li><strong>xferc</strong> - Command-line tools and REPL</li>
-<li><strong>XferService</strong> - Web service implementation (optional)</li>
+<li><strong>XferService</strong> - Example web service implementation (optional)</li>
 </ul>
 <section id="development-commands"><h3 id="development-commands">Development Commands</h3>
 <pre><code class="language-bash"># Build in Debug mode
@@ -1936,40 +1938,17 @@ dotnet build --configuration Debug
 # Build in Release mode
 dotnet build --configuration Release
 
-# Run specific test project
-dotnet test XferTest/
-
-# Run with verbose output
+# Run tests with verbose output
 dotnet test --verbosity normal
 
 # Run tests with code coverage
 dotnet test --collect:&quot;XPlat Code Coverage&quot;
-
-# Package for NuGet distribution
-dotnet pack ParksComputing.Xfer.Lang/ --configuration Release --output ./nupkg
-</code></pre>
-<section id="using-the-command-line-tools"><h3 id="using-the-command-line-tools">Using the Command-Line Tools</h3>
-<p>The <code>xferc</code> project provides command-line tools for working with XferLang:</p>
-<pre><code class="language-bash"># Build the command-line tools
-dotnet build xferc/
-
-# Run the XferLang REPL
-dotnet run --project xferc/
-
-# Convert JSON to XferLang
-dotnet run --project xferc/ -- convert input.json output.xfer
-
-# Validate XferLang documents
-dotnet run --project xferc/ -- validate document.xfer
-
-# Pretty-print XferLang documents
-dotnet run --project xferc/ -- format document.xfer
 </code></pre>
 <section id="community-and-resources"><h2 id="community-and-resources">Community and Resources</h2>
 <p>Join the XferLang community and access helpful resources for learning and development.</p>
 <section id="learning-resources"><h3 id="learning-resources">Learning Resources</h3>
 <ul>
-<li>📖 <strong>Documentation:</strong> <a href="https://github.com/paulmooreparks/Xfer">This comprehensive guide</a></li>
+<li>📖 <strong>Documentation:</strong> <a href="https://xferlang.org/">This comprehensive guide</a></li>
 <li>🎯 <strong>Examples:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master/examples">Sample XferLang applications</a> in the repository</li>
 <li>💡 <strong>Tests:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master/ParksComputing.Xfer.Lang.Tests">Unit Tests</a> also show how to use the library and provide test coverage</li>
 <li>📄 <strong>Sample Documents:</strong> <a href="https://github.com/paulmooreparks/Xfer/tree/master">*.xfer files</a> in the repository</li>
@@ -1981,85 +1960,6 @@ dotnet run --project xferc/ -- format document.xfer
 <li>💡 <strong>Feature Requests:</strong> Suggest improvements via <a href="https://github.com/paulmooreparks/Xfer/issues">GitHub Issues</a></li>
 <li>📧 <strong>Direct Contact:</strong> Reach out via GitHub for complex questions</li>
 </ul>
-<section id="development-status"><h3 id="development-status">Development Status</h3>
-<p>XferLang is actively developed with regular updates and improvements:</p>
-<ul>
-<li>✅ <strong>Stable Core:</strong> Basic serialization/deserialization is production-ready</li>
-<li>🚧 <strong>Active Development:</strong> Advanced features and optimizations ongoing</li>
-<li>🔄 <strong>Regular Releases:</strong> Check <a href="https://github.com/paulmooreparks/Xfer/releases">releases</a> for updates</li>
-<li>📊 <strong>CI/CD:</strong> Automated testing and quality checks via GitHub Actions</li>
-</ul>
-<section id="language-comparison"><h3 id="language-comparison">Language Comparison</h3>
-<p>See how XferLang compares to other data formats:</p>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>XferLang</th>
-<th>JSON</th>
-<th>XML</th>
-<th>YAML</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Explicit Types</strong></td>
-<td>✅ Built-in</td>
-<td>❌ Limited</td>
-<td>⚠️ Via attributes</td>
-<td>⚠️ Via tags</td>
-</tr>
-<tr>
-<td><strong>Human Readable</strong></td>
-<td>✅ Yes</td>
-<td>✅ Yes</td>
-<td>⚠️ Verbose</td>
-<td>✅ Yes</td>
-</tr>
-<tr>
-<td><strong>Comments</strong></td>
-<td>✅ Native</td>
-<td>❌ No</td>
-<td>✅ Native</td>
-<td>✅ Native</td>
-</tr>
-<tr>
-<td><strong>Safety</strong></td>
-<td>✅ High</td>
-<td>⚠️ Medium</td>
-<td>✅ High</td>
-<td>⚠️ Medium</td>
-</tr>
-<tr>
-<td><strong>Delimiter Escaping</strong></td>
-<td>✅ Not needed</td>
-<td>❌ Required</td>
-<td>❌ Required</td>
-<td>⚠️ Context-dependent</td>
-</tr>
-<tr>
-<td><strong>Type Ambiguity</strong></td>
-<td>✅ None</td>
-<td>❌ High</td>
-<td>⚠️ Medium</td>
-<td>❌ High</td>
-</tr>
-<tr>
-<td><strong>Compact Size</strong></td>
-<td>✅ Good</td>
-<td>✅ Excellent</td>
-<td>❌ Poor</td>
-<td>✅ Good</td>
-</tr>
-<tr>
-<td><strong>Parsing Speed</strong></td>
-<td>✅ Fast</td>
-<td>✅ Fast</td>
-<td>⚠️ Moderate</td>
-<td>⚠️ Moderate</td>
-</tr>
-</tbody>
-</table>
 <section id="project-status-and-roadmap"><h2 id="project-status-and-roadmap">Project Status and Roadmap</h2>
 <p>The .NET implementation of XferLang is becoming more robust, with a focus on professional-grade features like custom converters and contract resolvers. However, the project as a whole is still experimental.</p>
 <p>The future roadmap includes:</p>
@@ -2077,7 +1977,7 @@ dotnet run --project xferc/ -- format document.xfer
 </section>
 
         <footer>
-            <p>Documentation generated on 2025-08-04 04:59:25 UTC</p>
+            <p>Documentation generated on 2025-08-04 12:34:58 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

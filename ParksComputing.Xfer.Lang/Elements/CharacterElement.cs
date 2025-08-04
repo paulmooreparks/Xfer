@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents a character element in XferLang using backslash (\) delimiters.
+/// Character elements store Unicode code points as integers and can represent
+/// any valid Unicode character. The value represents the numeric code point
+/// (0 to 0x10FFFF) rather than the character itself.
+/// </summary>
 public class CharacterElement : TypedElement<int> {
     public static readonly string ElementName = "character";
     public const char OpeningSpecifier = '\\';

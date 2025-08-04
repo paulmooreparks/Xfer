@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 using ParksComputing.Xfer.Lang.Elements;
 namespace ParksComputing.Xfer.Lang.Schema;
 
+/// <summary>
+/// Parses XferLang schema definitions from document elements into structured schema objects.
+/// Converts schema syntax into usable schema models for validation and type checking.
+/// </summary>
 public class XferSchemaParser {
     public Dictionary<string, SchemaObject> ParseSchema(ObjectElement schemaObjectElement) {
         if (schemaObjectElement == null) {

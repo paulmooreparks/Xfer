@@ -8,6 +8,12 @@ using ParksComputing.Xfer.Lang.ProcessingInstructions;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents an array element in XferLang, containing an ordered collection of elements
+/// enclosed in square brackets []. Arrays can contain elements of any type and maintain
+/// insertion order. This class extends ListElement to provide array-specific functionality
+/// including type tracking and validation.
+/// </summary>
 public class ArrayElement : ListElement {
     public static readonly string ElementName = "array";
     public const char OpeningSpecifier = '[';

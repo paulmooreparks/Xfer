@@ -3,6 +3,12 @@ using System.Text.RegularExpressions;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents an identifier element in XferLang using colon (:) delimiters.
+/// Identifiers are used for variable names, property keys, and other symbolic references.
+/// They follow standard identifier naming rules (letters, digits, underscores, hyphens, dots)
+/// but must start with a letter or underscore.
+/// </summary>
 public class IdentifierElement : TextElement {
     public static readonly string ElementName = "identifier";
     public const char OpeningSpecifier = ':';

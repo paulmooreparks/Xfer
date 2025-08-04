@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents a boolean element in XferLang using tilde (~) delimiters.
+/// Boolean elements store true/false values and are rendered as "true" or "false"
+/// in the XferLang format. The compact style uses ~ delimiters by default.
+/// </summary>
 public class BooleanElement : TypedElement<bool>
 {
     public static readonly string ElementName = "boolean";

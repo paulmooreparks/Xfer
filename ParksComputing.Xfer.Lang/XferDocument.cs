@@ -5,10 +5,21 @@ using ParksComputing.Xfer.Lang.ProcessingInstructions;
 
 namespace ParksComputing.Xfer.Lang;
 
-
+/// <summary>
+/// Represents a complete XferLang document with its root element, metadata, processing instructions,
+/// and any parsing errors or warnings. This is the primary object model for working with XferLang content.
+/// </summary>
 public class XferDocument {
+    /// <summary>
+    /// Gets or sets the root element of the document. Defaults to an empty tuple element.
+    /// All document content is contained within this root element.
+    /// </summary>
     public CollectionElement Root { get; set; } = new TupleElement();
 
+    /// <summary>
+    /// Gets or sets the document metadata, if specified via document processing instructions.
+    /// Contains information about the XferLang version, document version, and custom metadata.
+    /// </summary>
     public XferMetadata? Metadata { get; set; }
 
     /// <summary>

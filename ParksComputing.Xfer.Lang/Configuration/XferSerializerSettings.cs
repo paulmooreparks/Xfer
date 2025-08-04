@@ -3,6 +3,11 @@ using ParksComputing.Xfer.Lang.Converters;
 using System.Collections.Generic;
 
 namespace ParksComputing.Xfer.Lang.Configuration {
+    /// <summary>
+    /// Configuration settings for XferLang serialization and deserialization.
+    /// Controls how .NET objects are converted to/from XferLang format, including
+    /// null handling, contract resolution, custom converters, and element styling preferences.
+    /// </summary>
     public class XferSerializerSettings {
         public NullValueHandling NullValueHandling { get; set; } = NullValueHandling.Include;
         public IContractResolver ContractResolver { get; set; } = new DefaultContractResolver();

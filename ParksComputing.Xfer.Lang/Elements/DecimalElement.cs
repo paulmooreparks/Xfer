@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents a decimal number element in XferLang using asterisk (*) delimiters.
+/// Decimal elements store high-precision decimal values suitable for financial
+/// calculations and other applications requiring exact decimal representation.
+/// </summary>
 public class DecimalElement : NumericElement<decimal>
 {
     public static readonly string ElementName = "decimal";

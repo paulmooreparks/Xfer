@@ -2,6 +2,8 @@ using Markdig;
 using System.Text;
 using System.Text.RegularExpressions;
 using YamlDotNet.Serialization;
+using System.Xml.Linq;
+using System.Reflection;
 
 namespace XferDocBuilder;
 
@@ -9,16 +11,64 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        if (args.Length != 2)
+        if (args.Length == 0)
         {
-            Console.WriteLine("Usage: XferDocBuilder <source.md> <output.html>");
+            ShowUsage();
+            return;
+        }
+
+        var command = args[0].ToLower();
+
+        switch (command)
+        {
+            case "md":
+            case "markdown":
+                await HandleMarkdownGeneration(args);
+                break;
+            case "api":
+                await HandleApiDocumentationGeneration(args);
+                break;
+            default:
+                // Legacy support - if first arg doesn't match a command, treat as markdown
+                await HandleMarkdownGeneration(args);
+                break;
+        }
+    }
+
+    private static void ShowUsage()
+    {
+        Console.WriteLine("XferDocBuilder - Documentation Generation Tool");
+        Console.WriteLine();
+        Console.WriteLine("Commands:");
+        Console.WriteLine("  md <source.md> <output.html>     Generate HTML from Markdown");
+        Console.WriteLine("  api <assembly.dll> <output.html> Generate API documentation from XML comments");
+        Console.WriteLine();
+        Console.WriteLine("Legacy usage (markdown):");
+        Console.WriteLine("  XferDocBuilder <source.md> <output.html>");
+    }
+
+    private static async Task HandleMarkdownGeneration(string[] args)
+    {
+        string sourceFile, outputFile;
+
+        if (args.Length == 3 && args[0].ToLower() == "md")
+        {
+            sourceFile = args[1];
+            outputFile = args[2];
+        }
+        else if (args.Length == 2)
+        {
+            sourceFile = args[0];
+            outputFile = args[1];
+        }
+        else
+        {
+            Console.WriteLine("Usage: XferDocBuilder md <source.md> <output.html>");
             Console.WriteLine("  source.md  - Markdown source file with YAML front matter");
             Console.WriteLine("  output.html - HTML output file to generate");
             return;
         }
 
-        var sourceFile = args[0];
-        var outputFile = args[1];
         var templateFile = Path.Combine("docs", "template.html");
 
         Console.WriteLine($"Building documentation from {sourceFile} to {outputFile}");
@@ -46,6 +96,47 @@ public class Program
         catch (Exception ex)
         {
             Console.WriteLine($"Error building documentation: {ex.Message}");
+            Environment.Exit(1);
+        }
+    }
+
+    private static async Task HandleApiDocumentationGeneration(string[] args)
+    {
+        if (args.Length != 3)
+        {
+            Console.WriteLine("Usage: XferDocBuilder api <assembly.dll> <output.html>");
+            Console.WriteLine("  assembly.dll - .NET assembly with XML documentation");
+            Console.WriteLine("  output.html  - HTML output file to generate");
+            return;
+        }
+
+        var assemblyPath = args[1];
+        var outputFile = args[2];
+        var templateFile = Path.Combine("docs", "template.html");
+
+        Console.WriteLine($"Generating API documentation from {assemblyPath} to {outputFile}");
+
+        if (!File.Exists(assemblyPath))
+        {
+            Console.WriteLine($"Assembly file not found: {assemblyPath}");
+            return;
+        }
+
+        if (!File.Exists(templateFile))
+        {
+            Console.WriteLine($"Template file not found: {templateFile}");
+            Console.WriteLine("Creating default template...");
+            await CreateDefaultTemplate(templateFile);
+        }
+
+        try
+        {
+            await BuildApiDocumentation(assemblyPath, templateFile, outputFile);
+            Console.WriteLine($"API documentation built successfully: {outputFile}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error building API documentation: {ex.Message}");
             Environment.Exit(1);
         }
     }
@@ -80,6 +171,48 @@ public class Program
             .Replace("{{TITLE}}", frontMatter.ContainsKey("title") ? frontMatter["title"].ToString() : "XferLang Documentation")
             .Replace("{{NAVIGATION}}", navigation)
             .Replace("{{CONTENT}}", processedHtml)
+            .Replace("{{GENERATED_DATE}}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC"));
+
+        // Ensure output directory exists
+        var outputDir = Path.GetDirectoryName(outputFile);
+        if (!string.IsNullOrEmpty(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
+
+        // Write final HTML
+        await File.WriteAllTextAsync(outputFile, finalHtml);
+    }
+
+    private static async Task BuildApiDocumentation(string assemblyPath, string templateFile, string outputFile)
+    {
+        // Load the assembly
+        var assembly = Assembly.LoadFrom(assemblyPath);
+
+        // Find the XML documentation file
+        var xmlDocPath = Path.ChangeExtension(assemblyPath, ".xml");
+        XDocument? xmlDoc = null;
+
+        if (File.Exists(xmlDocPath))
+        {
+            xmlDoc = XDocument.Load(xmlDocPath);
+        }
+
+        // Generate API documentation
+        var apiDoc = new ApiDocumentationGenerator();
+        var htmlContent = apiDoc.GenerateDocumentation(assembly, xmlDoc);
+
+        // Build navigation
+        var navigation = apiDoc.GenerateNavigation(assembly);
+
+        // Read template
+        var template = await File.ReadAllTextAsync(templateFile);
+
+        // Replace placeholders in template
+        var finalHtml = template
+            .Replace("{{TITLE}}", $"{assembly.GetName().Name} API Documentation")
+            .Replace("{{NAVIGATION}}", navigation)
+            .Replace("{{CONTENT}}", htmlContent)
             .Replace("{{GENERATED_DATE}}", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC"));
 
         // Ensure output directory exists
@@ -185,9 +318,6 @@ public class Program
             navItems.Add(new NavItem { Id = id, Level = level, Text = text });
         }
 
-        nav.AppendLine("        <div class=\"sidebar-header\">");
-        nav.AppendLine("            <h2><a href=\"index.html\" class=\"home-link\">XferLang</a></h2>");
-        nav.AppendLine("        </div>");
         nav.AppendLine("        <ul>");
 
         BuildNavigationRecursive(nav, navItems, 0, 2); // Start with level 2 (h2 headings)
@@ -363,5 +493,265 @@ public static class MarkdownPipelineBuilderExtensions
     {
         // Add syntax highlighting support for XferLang
         return builder.UseGenericAttributes();
+    }
+}
+
+public class ApiDocumentationGenerator
+{
+    public string GenerateDocumentation(Assembly assembly, XDocument? xmlDoc)
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine($"<section id=\"api-overview\"><h1>{assembly.GetName().Name} API Documentation</h1>");
+        sb.AppendLine($"<p>API documentation for {assembly.GetName().Name} version {assembly.GetName().Version}</p></section>");
+
+        // Get all public types
+        var publicTypes = assembly.GetTypes()
+            .Where(t => t.IsPublic)
+            .OrderBy(t => t.Namespace)
+            .ThenBy(t => t.Name)
+            .ToList();
+
+        // Group by namespace
+        var namespaceGroups = publicTypes.GroupBy(t => t.Namespace ?? "Global").OrderBy(g => g.Key);
+
+        foreach (var namespaceGroup in namespaceGroups)
+        {
+            var namespaceId = SanitizeId(namespaceGroup.Key);
+            sb.AppendLine($"<section id=\"namespace-{namespaceId}\"><h2>Namespace: {namespaceGroup.Key}</h2>");
+
+            foreach (var type in namespaceGroup)
+            {
+                GenerateTypeDocumentation(sb, type, xmlDoc);
+            }
+
+            sb.AppendLine("</section>");
+        }
+
+        return sb.ToString();
+    }
+
+    public string GenerateNavigation(Assembly assembly)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("<ul>");
+        sb.AppendLine($"<li><a href=\"#api-overview\">{assembly.GetName().Name} API</a></li>");
+
+        // Get all public types grouped by namespace
+        var publicTypes = assembly.GetTypes()
+            .Where(t => t.IsPublic)
+            .OrderBy(t => t.Namespace)
+            .ThenBy(t => t.Name)
+            .ToList();
+
+        var namespaceGroups = publicTypes.GroupBy(t => t.Namespace ?? "Global").OrderBy(g => g.Key);
+
+        foreach (var namespaceGroup in namespaceGroups)
+        {
+            var namespaceId = SanitizeId(namespaceGroup.Key);
+            sb.AppendLine("            <li>");
+            sb.AppendLine("                <details>");
+            sb.AppendLine($"                    <summary>{namespaceGroup.Key}</summary>");
+            sb.AppendLine("                    <ul>");
+
+            foreach (var type in namespaceGroup)
+            {
+                var typeId = SanitizeId($"{type.Namespace}.{type.Name}");
+                var typeName = GetTypeName(type);
+                sb.AppendLine($"                        <li><a href=\"#type-{typeId}\">{typeName}</a></li>");
+            }
+
+            sb.AppendLine("                    </ul>");
+            sb.AppendLine("                </details>");
+            sb.AppendLine("            </li>");
+        }
+
+        sb.AppendLine("</ul>");
+        return sb.ToString();
+    }
+
+    private void GenerateTypeDocumentation(StringBuilder sb, Type type, XDocument? xmlDoc)
+    {
+        var typeId = SanitizeId($"{type.Namespace}.{type.Name}");
+        var typeName = GetTypeName(type);
+        var typeKind = GetTypeKind(type);
+
+        sb.AppendLine($"<section id=\"type-{typeId}\"><h3>{typeKind}: {typeName}</h3>");
+
+        // Get XML documentation for the type
+        var xmlMemberName = $"T:{type.FullName}";
+        var xmlSummary = GetXmlDocumentation(xmlDoc, xmlMemberName);
+        if (!string.IsNullOrEmpty(xmlSummary))
+        {
+            sb.AppendLine($"<p>{xmlSummary}</p>");
+        }
+
+        // Generate properties documentation
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+            .Where(p => p.DeclaringType == type)
+            .OrderBy(p => p.Name)
+            .ToList();
+
+        if (properties.Any())
+        {
+            sb.AppendLine("<h4>Properties</h4>");
+            sb.AppendLine("<table class=\"api-table\">");
+            sb.AppendLine("<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>");
+            sb.AppendLine("<tbody>");
+
+            foreach (var prop in properties)
+            {
+                var propXmlName = $"P:{prop.DeclaringType!.FullName}.{prop.Name}";
+                var propDoc = GetXmlDocumentation(xmlDoc, propXmlName);
+                var propTypeName = GetTypeName(prop.PropertyType);
+
+                sb.AppendLine("<tr>");
+                sb.AppendLine($"<td><code>{prop.Name}</code></td>");
+                sb.AppendLine($"<td><code>{propTypeName}</code></td>");
+                sb.AppendLine($"<td>{propDoc}</td>");
+                sb.AppendLine("</tr>");
+            }
+
+            sb.AppendLine("</tbody>");
+            sb.AppendLine("</table>");
+        }
+
+        // Generate methods documentation (constructors and public methods)
+        var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+            .Where(m => m.DeclaringType == type && !m.IsSpecialName)
+            .OrderBy(m => m.Name)
+            .ToList();
+
+        var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
+            .Where(c => c.DeclaringType == type)
+            .ToList();
+
+        if (constructors.Any() || methods.Any())
+        {
+            sb.AppendLine("<h4>Methods</h4>");
+
+            foreach (var ctor in constructors)
+            {
+                GenerateMethodDocumentation(sb, ctor, xmlDoc, true);
+            }
+
+            foreach (var method in methods)
+            {
+                GenerateMethodDocumentation(sb, method, xmlDoc, false);
+            }
+        }
+
+        sb.AppendLine("</section>");
+    }
+
+    private void GenerateMethodDocumentation(StringBuilder sb, MethodBase method, XDocument? xmlDoc, bool isConstructor)
+    {
+        var parameters = method.GetParameters();
+        var parameterTypes = parameters.Select(p => GetTypeName(p.ParameterType)).ToArray();
+
+        string xmlMemberName;
+        if (isConstructor)
+        {
+            xmlMemberName = $"M:{method.DeclaringType!.FullName}.#ctor";
+        }
+        else
+        {
+            xmlMemberName = $"M:{method.DeclaringType!.FullName}.{method.Name}";
+        }
+
+        if (parameters.Length > 0)
+        {
+            xmlMemberName += $"({string.Join(",", parameters.Select(p => p.ParameterType.FullName))})";
+        }
+
+        var methodDoc = GetXmlDocumentation(xmlDoc, xmlMemberName);
+
+        sb.AppendLine("<div class=\"method-doc\">");
+
+        if (isConstructor)
+        {
+            sb.AppendLine($"<h5>Constructor</h5>");
+            sb.AppendLine($"<code>{method.DeclaringType!.Name}({string.Join(", ", parameters.Select(p => $"{GetTypeName(p.ParameterType)} {p.Name}"))})</code>");
+        }
+        else
+        {
+            var returnType = ((MethodInfo)method).ReturnType;
+            sb.AppendLine($"<h5>{method.Name}</h5>");
+            sb.AppendLine($"<code>{GetTypeName(returnType)} {method.Name}({string.Join(", ", parameters.Select(p => $"{GetTypeName(p.ParameterType)} {p.Name}"))})</code>");
+        }
+
+        if (!string.IsNullOrEmpty(methodDoc))
+        {
+            sb.AppendLine($"<p>{methodDoc}</p>");
+        }
+
+        sb.AppendLine("</div>");
+    }
+
+    private string GetXmlDocumentation(XDocument? xmlDoc, string memberName)
+    {
+        if (xmlDoc == null)
+        {
+            return string.Empty;
+        }
+
+        var member = xmlDoc.Descendants("member")
+            .FirstOrDefault(m => m.Attribute("name")?.Value == memberName);
+
+        var summary = member?.Element("summary")?.Value?.Trim();
+        return summary ?? string.Empty;
+    }
+
+    private string GetTypeName(Type type)
+    {
+        if (type.IsGenericType)
+        {
+            var genericName = type.Name.Substring(0, type.Name.IndexOf('`'));
+            var genericArgs = string.Join(", ", type.GetGenericArguments().Select(GetTypeName));
+            return $"{genericName}&lt;{genericArgs}&gt;";
+        }
+
+        return type.Name switch
+        {
+            "String" => "string",
+            "Int32" => "int",
+            "Int64" => "long",
+            "Boolean" => "bool",
+            "Double" => "double",
+            "Decimal" => "decimal",
+            "DateTime" => "DateTime",
+            "Void" => "void",
+            _ => type.Name
+        };
+    }
+
+    private string GetTypeKind(Type type)
+    {
+        if (type.IsInterface)
+        {
+            return "Interface";
+        }
+        if (type.IsEnum)
+        {
+            return "Enum";
+        }
+        if (type.IsValueType)
+        {
+            return "Struct";
+        }
+        if (type.IsAbstract && type.IsSealed)
+        {
+            return "Static Class";
+        }
+        if (type.IsAbstract)
+        {
+            return "Abstract Class";
+        }
+        return "Class";
+    }
+
+    private string SanitizeId(string input)
+    {
+        return Regex.Replace(input, @"[^a-zA-Z0-9-_]", "-").ToLower();
     }
 }

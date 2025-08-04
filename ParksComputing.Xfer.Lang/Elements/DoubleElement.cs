@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents a double-precision floating-point number element in XferLang using caret (^) delimiters.
+/// Double elements store IEEE 754 double-precision floating-point values suitable for
+/// scientific calculations and general-purpose numeric operations.
+/// </summary>
 public class DoubleElement : NumericElement<double>
 {
     public static readonly string ElementName = "double";
