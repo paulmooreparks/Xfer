@@ -12,7 +12,19 @@ namespace ParksComputing.Xfer.Lang.Schema;
 /// type specifications, and validation metadata.
 /// </summary>
 public class XferSchema {
+    /// <summary>
+    /// Gets or sets the name of the schema.
+    /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets an optional description of the schema's purpose and usage.
+    /// </summary>
     public string? Description { get; set; }
+
+    /// <summary>
+    /// Gets or sets the collection of schema definitions contained in this schema.
+    /// Maps definition names to their corresponding SchemaDefinition objects.
+    /// </summary>
     public Dictionary<string, SchemaDefinition> Definitions { get; set; } = [];
 }

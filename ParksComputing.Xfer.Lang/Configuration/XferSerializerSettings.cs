@@ -9,8 +9,22 @@ namespace ParksComputing.Xfer.Lang.Configuration {
     /// null handling, contract resolution, custom converters, and element styling preferences.
     /// </summary>
     public class XferSerializerSettings {
+        /// <summary>
+        /// Specifies how null values are handled during serialization.
+        /// Controls whether null properties are included or excluded from the output.
+        /// </summary>
         public NullValueHandling NullValueHandling { get; set; } = NullValueHandling.Include;
+
+        /// <summary>
+        /// The contract resolver used to determine which properties to serialize
+        /// and how to resolve property names during serialization.
+        /// </summary>
         public IContractResolver ContractResolver { get; set; } = new DefaultContractResolver();
+
+        /// <summary>
+        /// Collection of custom converters for handling specific types during serialization.
+        /// Converters are checked in order and the first matching converter is used.
+        /// </summary>
         public IList<IXferConverter> Converters { get; } = [];
 
         /// <summary>

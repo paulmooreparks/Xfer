@@ -16,10 +16,19 @@ namespace ParksComputing.Xfer.Lang.Schema;
 public class XferSchemaValidator {
     private readonly Dictionary<string, SchemaObject> _schemaObjects;
 
+    /// <summary>
+    /// Initializes a new instance of the XferSchemaValidator class with the specified schema objects.
+    /// </summary>
+    /// <param name="schemaObjects">A dictionary of schema objects to use for validation, keyed by schema name.</param>
     public XferSchemaValidator(Dictionary<string, SchemaObject> schemaObjects) {
         _schemaObjects = schemaObjects;
     }
 
+    /// <summary>
+    /// Validates a tuple element document against the configured schemas.
+    /// Performs comprehensive validation including structure, types, and constraints.
+    /// </summary>
+    /// <param name="document">The tuple element document to validate.</param>
     public void Validate(TupleElement document) {
 #if false
         if (!_schemaObjects.TryGetValue(schemaName, out var schemaObject)) {

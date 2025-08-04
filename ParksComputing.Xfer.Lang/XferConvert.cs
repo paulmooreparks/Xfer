@@ -30,19 +30,51 @@ public class XferConvert {
         return SerializeObject(o, settings ?? DefaultSettings);
     }
 
+    /// <summary>
+    /// Serializes an object to a XferLang string with formatting options.
+    /// Uses default serializer settings.
+    /// </summary>
+    /// <param name="o">The object to serialize.</param>
+    /// <param name="formatting">Controls indentation and formatting of the output.</param>
+    /// <param name="indentChar">Character to use for indentation (default: space).</param>
+    /// <param name="indentation">Number of indent characters per level (default: 2).</param>
+    /// <param name="depth">Starting depth level for indentation (default: 0).</param>
+    /// <returns>XferLang string representation of the object.</returns>
     public static string Serialize(object? o, Formatting formatting = Formatting.None, char indentChar = ' ', int indentation = 2, int depth = 0) {
         return Serialize(o, DefaultSettings, formatting, indentChar, indentation, depth);
     }
 
+    /// <summary>
+    /// Serializes an object to a XferLang string with custom settings and formatting options.
+    /// </summary>
+    /// <param name="o">The object to serialize.</param>
+    /// <param name="settings">Serializer settings to control conversion behavior.</param>
+    /// <param name="formatting">Controls indentation and formatting of the output.</param>
+    /// <param name="indentChar">Character to use for indentation (default: space).</param>
+    /// <param name="indentation">Number of indent characters per level (default: 2).</param>
+    /// <param name="depth">Starting depth level for indentation (default: 0).</param>
+    /// <returns>XferLang string representation of the object.</returns>
     public static string Serialize(object? o, XferSerializerSettings settings, Formatting formatting = Formatting.None, char indentChar = ' ', int indentation = 2, int depth = 0) {
         Element element = SerializeValue(o, settings);
         return element.ToXfer(formatting, indentChar, indentation, depth);
     }
 
+    /// <summary>
+    /// Converts an object to a XferLang Element using default settings.
+    /// </summary>
+    /// <param name="value">The object to convert.</param>
+    /// <returns>The XferLang Element representation of the object.</returns>
     public static Element SerializeValue(object? value) {
         return SerializeValue(value, DefaultSettings);
     }
 
+    /// <summary>
+    /// Converts an object to a XferLang Element using custom serializer settings.
+    /// Applies custom converters first, then falls back to built-in type conversion logic.
+    /// </summary>
+    /// <param name="value">The object to convert.</param>
+    /// <param name="settings">Serializer settings to control conversion behavior.</param>
+    /// <returns>The XferLang Element representation of the object.</returns>
     public static Element SerializeValue(object? value, XferSerializerSettings settings) {
         if (value != null) {
             foreach (var converter in settings.Converters) {
@@ -184,10 +216,23 @@ public class XferConvert {
         return element;
     }
 
+    /// <summary>
+    /// Deserializes a XferLang string to an object of type T using default settings.
+    /// </summary>
+    /// <typeparam name="T">The target type to deserialize to.</typeparam>
+    /// <param name="xfer">The XferLang string to deserialize.</param>
+    /// <returns>An object of type T, or default(T) if the string is null or empty.</returns>
     public static T? Deserialize<T>(string xfer) {
         return Deserialize<T>(xfer, DefaultSettings);
     }
 
+    /// <summary>
+    /// Deserializes a XferLang string to an object of type T using custom settings.
+    /// </summary>
+    /// <typeparam name="T">The target type to deserialize to.</typeparam>
+    /// <param name="xfer">The XferLang string to deserialize.</param>
+    /// <param name="settings">Serializer settings to control deserialization behavior.</param>
+    /// <returns>An object of type T, or default(T) if the string is null or empty.</returns>
     public static T? Deserialize<T>(string xfer, XferSerializerSettings settings) {
         if (string.IsNullOrWhiteSpace(xfer))
         {
@@ -204,10 +249,23 @@ public class XferConvert {
         return Deserialize<T>(document, settings);
     }
 
+    /// <summary>
+    /// Deserializes a XferDocument to an object of type T using default settings.
+    /// </summary>
+    /// <typeparam name="T">The target type to deserialize to.</typeparam>
+    /// <param name="document">The XferDocument to deserialize.</param>
+    /// <returns>An object of type T, or default(T) if the document has no elements.</returns>
     public static T? Deserialize<T>(XferDocument document) {
         return Deserialize<T>(document, DefaultSettings);
     }
 
+    /// <summary>
+    /// Deserializes a XferDocument to an object of type T using custom settings.
+    /// </summary>
+    /// <typeparam name="T">The target type to deserialize to.</typeparam>
+    /// <param name="document">The XferDocument to deserialize.</param>
+    /// <param name="settings">Serializer settings to control deserialization behavior.</param>
+    /// <returns>An object of type T, or default(T) if the document has no elements.</returns>
     public static T? Deserialize<T>(XferDocument document, XferSerializerSettings settings)
     {
         if (document.Root.Values.FirstOrDefault() is not Element first)
@@ -222,10 +280,23 @@ public class XferConvert {
         return (T?)result;
     }
 
+    /// <summary>
+    /// Deserializes a XferDocument to an object of the specified type using default settings.
+    /// </summary>
+    /// <param name="document">The XferDocument to deserialize.</param>
+    /// <param name="targetType">The target type to deserialize to.</param>
+    /// <returns>An object of the target type, or null if the document has no elements.</returns>
     public static object? Deserialize(XferDocument document, Type targetType) {
         return Deserialize(document, targetType, DefaultSettings);
     }
 
+    /// <summary>
+    /// Deserializes a XferDocument to an object of the specified type using custom settings.
+    /// </summary>
+    /// <param name="document">The XferDocument to deserialize.</param>
+    /// <param name="targetType">The target type to deserialize to.</param>
+    /// <param name="settings">Serializer settings to control deserialization behavior.</param>
+    /// <returns>An object of the target type, or null if the document has no elements.</returns>
     public static object? Deserialize(XferDocument document, Type targetType, XferSerializerSettings settings) {
         if (document.Root.Values.FirstOrDefault() is not Element first)
         {
@@ -235,10 +306,23 @@ public class XferConvert {
         return DeserializeValue(first, targetType, settings);
     }
 
+    /// <summary>
+    /// Deserializes a XferLang string to an object of the specified type using default settings.
+    /// </summary>
+    /// <param name="xfer">The XferLang string to deserialize.</param>
+    /// <param name="targetType">The target type to deserialize to.</param>
+    /// <returns>An object of the target type, or null if the string is null, empty, or invalid.</returns>
     public static object? Deserialize(string xfer, Type targetType) {
         return Deserialize(xfer, targetType, DefaultSettings);
     }
 
+    /// <summary>
+    /// Deserializes a XferLang string to an object of the specified type using custom settings.
+    /// </summary>
+    /// <param name="xfer">The XferLang string to deserialize.</param>
+    /// <param name="targetType">The target type to deserialize to.</param>
+    /// <param name="settings">Serializer settings to control deserialization behavior.</param>
+    /// <returns>An object of the target type, or null if the string is null, empty, or invalid.</returns>
     public static object? Deserialize(string xfer, Type targetType, XferSerializerSettings settings) {
         if (string.IsNullOrWhiteSpace(xfer))
         {
@@ -252,10 +336,25 @@ public class XferConvert {
         return Deserialize(document, targetType, settings);
     }
 
+    /// <summary>
+    /// Deserializes a XferLang Element to an object of type T using default settings.
+    /// </summary>
+    /// <typeparam name="T">The target type to deserialize to.</typeparam>
+    /// <param name="element">The XferLang Element to deserialize.</param>
+    /// <returns>An object of type T.</returns>
+    /// <exception cref="NullReferenceException">Thrown when the element is null.</exception>
     public static T? Deserialize<T>(Element element) {
         return Deserialize<T>(element, DefaultSettings);
     }
 
+    /// <summary>
+    /// Deserializes a XferLang Element to an object of type T using custom settings.
+    /// </summary>
+    /// <typeparam name="T">The target type to deserialize to.</typeparam>
+    /// <param name="element">The XferLang Element to deserialize.</param>
+    /// <param name="settings">Serializer settings to control deserialization behavior.</param>
+    /// <returns>An object of type T.</returns>
+    /// <exception cref="NullReferenceException">Thrown when the element is null.</exception>
     public static T? Deserialize<T>(Element element, XferSerializerSettings settings) {
         if (element is null) {
             throw new NullReferenceException($"Xfer element is null.");

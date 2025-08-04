@@ -12,6 +12,13 @@ namespace ParksComputing.Xfer.Lang.Schema;
 /// Converts schema syntax into usable schema models for validation and type checking.
 /// </summary>
 public class XferSchemaParser {
+    /// <summary>
+    /// Parses a schema object element into a dictionary of schema objects.
+    /// Extracts schema definitions and converts them into structured SchemaObject instances.
+    /// </summary>
+    /// <param name="schemaObjectElement">The object element containing schema definitions to parse.</param>
+    /// <returns>A dictionary mapping schema names to their corresponding SchemaObject definitions.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when schemaObjectElement is null.</exception>
     public Dictionary<string, SchemaObject> ParseSchema(ObjectElement schemaObjectElement) {
         if (schemaObjectElement == null) {
             throw new ArgumentNullException(nameof(schemaObjectElement), "Schema object cannot be null.");

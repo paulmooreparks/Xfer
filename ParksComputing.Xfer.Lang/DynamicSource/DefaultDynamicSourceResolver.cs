@@ -5,6 +5,12 @@ using ParksComputing.Xfer.Lang.ProcessingInstructions;
 using ParksComputing.Xfer.Lang.Services;
 
 namespace ParksComputing.Xfer.Lang.DynamicSource {
+    /// <summary>
+    /// Default implementation of dynamic source resolution for XferLang.
+    /// Resolves dynamic values from files, environment variables, constants,
+    /// and the dynamic source registry. Provides backward compatibility
+    /// with legacy dynamic source processing instructions.
+    /// </summary>
     public class DefaultDynamicSourceResolver : IDynamicSourceResolver {
         // Legacy constants for backward compatibility
         private const string DynamicSourceKey = "dynamicSource";

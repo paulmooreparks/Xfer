@@ -698,8 +698,30 @@ public class ApiDocumentationGenerator
         var member = xmlDoc.Descendants("member")
             .FirstOrDefault(m => m.Attribute("name")?.Value == memberName);
 
-        var summary = member?.Element("summary")?.Value?.Trim();
-        return summary ?? string.Empty;
+        if (member == null)
+        {
+            return string.Empty;
+        }
+
+        var summary = member.Element("summary");
+        if (summary == null)
+        {
+            return string.Empty;
+        }
+
+        // Get the inner text and clean up whitespace
+        var text = summary.Value;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return string.Empty;
+        }
+
+        // Clean up the XML documentation formatting
+        // Remove leading/trailing whitespace and normalize line breaks
+        var lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        var cleanedLines = lines.Select(line => line.Trim()).Where(line => !string.IsNullOrEmpty(line));
+
+        return string.Join(" ", cleanedLines);
     }
 
     private string GetTypeName(Type type)

@@ -209,10 +209,16 @@
 <p>API documentation for ParksComputing.Xfer.Lang version 0.13.0.0</p></section>
 <section id="namespace-parkscomputing-xfer-lang"><h2>Namespace: ParksComputing.Xfer.Lang</h2>
 <section id="type-parkscomputing-xfer-lang-datetimehandling"><h3>Enum: DateTimeHandling</h3>
+<p>Specifies how DateTime values should be handled during serialization and deserialization.
+            Controls time zone information and formatting in the resulting XferLang output.</p>
 </section>
 <section id="type-parkscomputing-xfer-lang-formatting"><h3>Enum: Formatting</h3>
+<p>Specifies formatting options for XferLang document serialization.
+            These options control how the output text is structured and formatted.</p>
 </section>
 <section id="type-parkscomputing-xfer-lang-parseerror"><h3>Class: ParseError</h3>
+<p>Represents an error encountered during XferLang document parsing.
+            Parse errors indicate syntax or structural problems that prevent successful parsing.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -220,22 +226,22 @@
 <tr>
 <td><code>Column</code></td>
 <td><code>int</code></td>
-<td></td>
+<td>Gets or sets the column number where the error occurred (1-based).</td>
 </tr>
 <tr>
 <td><code>Context</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets or sets additional context information related to the error, if available.</td>
 </tr>
 <tr>
 <td><code>Message</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets or sets the error message describing the issue.</td>
 </tr>
 <tr>
 <td><code>Row</code></td>
 <td><code>int</code></td>
-<td></td>
+<td>Gets or sets the row number where the error occurred (1-based).</td>
 </tr>
 </tbody>
 </table>
@@ -243,13 +249,17 @@
 <div class="method-doc">
 <h5>Constructor</h5>
 <code>ParseError(string message, int row, int column, string context)</code>
+<p>Initializes a new instance of the  class.</p>
 </div>
 <div class="method-doc">
 <h5>ToString</h5>
 <code>string ToString()</code>
+<p>Returns a string representation of the error including location information.</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-parsewarning"><h3>Class: ParseWarning</h3>
+<p>Represents a warning encountered during XferLang document parsing.
+            Warnings indicate potential issues that don't prevent parsing but may affect document interpretation.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -257,27 +267,27 @@
 <tr>
 <td><code>Column</code></td>
 <td><code>int</code></td>
-<td></td>
+<td>Gets or sets the column number where the warning occurred (1-based).</td>
 </tr>
 <tr>
 <td><code>Context</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets or sets additional context information related to the warning, if available.</td>
 </tr>
 <tr>
 <td><code>Message</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets or sets the warning message describing the issue.</td>
 </tr>
 <tr>
 <td><code>Row</code></td>
 <td><code>int</code></td>
-<td></td>
+<td>Gets or sets the row number where the warning occurred (1-based).</td>
 </tr>
 <tr>
 <td><code>Type</code></td>
 <td><code>WarningType</code></td>
-<td></td>
+<td>Gets or sets the type of warning that occurred.</td>
 </tr>
 </tbody>
 </table>
@@ -285,15 +295,21 @@
 <div class="method-doc">
 <h5>Constructor</h5>
 <code>ParseWarning(WarningType type, string message, int row, int column, string context)</code>
+<p>Initializes a new instance of the  class.</p>
 </div>
 <div class="method-doc">
 <h5>ToString</h5>
 <code>string ToString()</code>
+<p>Returns a string representation of the warning including location information.</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-warningtype"><h3>Enum: WarningType</h3>
+<p>Specifies the types of warnings that can occur during XferLang parsing.</p>
 </section>
 <section id="type-parkscomputing-xfer-lang-xferconvert"><h3>Class: XferConvert</h3>
+<p>Provides static methods for converting between .NET objects and XferLang elements or text.
+            This class serves as the primary entry point for serialization and deserialization operations,
+            similar to JsonConvert in Newtonsoft.Json.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -342,6 +358,7 @@
 <div class="method-doc">
 <h5>FromObject</h5>
 <code>ObjectElement FromObject(Object o, XferSerializerSettings settings)</code>
+<p>Creates an ObjectElement from a POCO, similar to JObject.FromObject.</p>
 </div>
 <div class="method-doc">
 <h5>Serialize</h5>
@@ -373,6 +390,8 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-xferdocument"><h3>Class: XferDocument</h3>
+<p>Represents a complete XferLang document with its root element, metadata, processing instructions,
+            and any parsing errors or warnings. This is the primary object model for working with XferLang content.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -380,42 +399,48 @@
 <tr>
 <td><code>Error</code></td>
 <td><code>ParseError</code></td>
-<td></td>
+<td>The first fatal error encountered during parsing, if any.
+            When an error is present, parsing stops and the document may be incomplete.</td>
 </tr>
 <tr>
 <td><code>HasError</code></td>
 <td><code>bool</code></td>
-<td></td>
+<td>Gets a value indicating whether the document has a fatal error.</td>
 </tr>
 <tr>
 <td><code>HasWarnings</code></td>
 <td><code>bool</code></td>
-<td></td>
+<td>Gets a value indicating whether the document has any warnings.</td>
 </tr>
 <tr>
 <td><code>IsValid</code></td>
 <td><code>bool</code></td>
-<td></td>
+<td>Gets a value indicating whether the document is valid (no fatal errors).
+            Note: A document can be valid but still have warnings.</td>
 </tr>
 <tr>
 <td><code>Metadata</code></td>
 <td><code>XferMetadata</code></td>
-<td></td>
+<td>Gets or sets the document metadata, if specified via document processing instructions.
+            Contains information about the XferLang version, document version, and custom metadata.</td>
 </tr>
 <tr>
 <td><code>ProcessingInstructions</code></td>
 <td><code>List&lt;ProcessingInstruction&gt;</code></td>
-<td></td>
+<td>Document-level Processing Instructions that appear outside the root element.
+            These are conceptually siblings to the root element.</td>
 </tr>
 <tr>
 <td><code>Root</code></td>
 <td><code>CollectionElement</code></td>
-<td></td>
+<td>Gets or sets the root element of the document. Defaults to an empty tuple element.
+            All document content is contained within this root element.</td>
 </tr>
 <tr>
 <td><code>Warnings</code></td>
 <td><code>List&lt;ParseWarning&gt;</code></td>
-<td></td>
+<td>Collection of non-fatal warnings encountered during parsing.
+            Warnings indicate potential issues but don't prevent successful parsing.</td>
 </tr>
 </tbody>
 </table>
@@ -435,6 +460,7 @@
 <div class="method-doc">
 <h5>GetElementById</h5>
 <code>Element GetElementById(string id)</code>
+<p>Finds an element by its ID within the document.</p>
 </div>
 <div class="method-doc">
 <h5>ToByteArray</h5>
@@ -454,6 +480,8 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-xfermetadata"><h3>Class: XferMetadata</h3>
+<p>Represents metadata information for an XferLang document.
+            Contains standard metadata fields and supports extensible custom metadata.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -461,17 +489,19 @@
 <tr>
 <td><code>Extensions</code></td>
 <td><code>Dictionary&lt;string, Object&gt;</code></td>
-<td></td>
+<td>Gets a dictionary containing user-defined or unknown metadata keys and their values.
+            This allows for extensible metadata beyond the standard fields.</td>
 </tr>
 <tr>
 <td><code>Version</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets or sets the document version specified by the author.</td>
 </tr>
 <tr>
 <td><code>Xfer</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets or sets the XferLang parser version used to create this document.
+            Defaults to the current parser version.</td>
 </tr>
 </tbody>
 </table>
@@ -482,6 +512,8 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-xferparser"><h3>Class: XferParser</h3>
+<p>Provides static convenience methods for parsing XferLang content into document objects.
+            This is a simplified interface to the underlying Parser class for common parsing scenarios.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -490,15 +522,20 @@
 <div class="method-doc">
 <h5>Parse</h5>
 <code>XferDocument Parse(Byte[] input)</code>
+<p>Parses XferLang content from a byte array using a new parser instance.</p>
 </div>
 <div class="method-doc">
 <h5>Parse</h5>
 <code>XferDocument Parse(string input)</code>
+<p>Parses XferLang content from a string using a new parser instance.</p>
 </div>
 </section>
 </section>
 <section id="namespace-parkscomputing-xfer-lang-attributes"><h2>Namespace: ParksComputing.Xfer.Lang.Attributes</h2>
 <section id="type-parkscomputing-xfer-lang-attributes-xferevaluatedattribute"><h3>Class: XferEvaluatedAttribute</h3>
+<p>Indicates that a property should be serialized as an evaluated element in XferLang.
+            Evaluated elements use angle bracket delimiters and their content is processed
+            for dynamic content, variable substitution, or expressions during serialization.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -506,8 +543,10 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-attributes-xfernumericformat"><h3>Enum: XferNumericFormat</h3>
+<p>Specifies the format for numeric serialization in XferLang.</p>
 </section>
 <section id="type-parkscomputing-xfer-lang-attributes-xfernumericformatattribute"><h3>Class: XferNumericFormatAttribute</h3>
+<p>Specifies how a numeric property should be formatted when serialized to XferLang.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -515,17 +554,19 @@
 <tr>
 <td><code>Format</code></td>
 <td><code>XferNumericFormat</code></td>
-<td></td>
+<td>The format to use for numeric serialization.</td>
 </tr>
 <tr>
 <td><code>MinBits</code></td>
 <td><code>int</code></td>
-<td></td>
+<td>For binary format, specifies the minimum number of bits to display.
+            Default is to use the minimum required bits.</td>
 </tr>
 <tr>
 <td><code>MinDigits</code></td>
 <td><code>int</code></td>
-<td></td>
+<td>For hex format, specifies the minimum number of hex digits to display.
+            Default is to use the minimum required digits.</td>
 </tr>
 </tbody>
 </table>
@@ -533,9 +574,12 @@
 <div class="method-doc">
 <h5>Constructor</h5>
 <code>XferNumericFormatAttribute(XferNumericFormat format)</code>
+<p>Initializes a new instance of the XferNumericFormatAttribute.</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-attributes-xferpropertyattribute"><h3>Class: XferPropertyAttribute</h3>
+<p>Specifies the XferLang property name for a .NET property during serialization and deserialization.
+            When applied to a property, it overrides the default property name mapping behavior.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -543,7 +587,8 @@
 <tr>
 <td><code>Name</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets or sets the custom name to use for this property in XferLang serialization.
+            If null or not specified, the property's actual name will be used.</td>
 </tr>
 </tbody>
 </table>
@@ -551,11 +596,14 @@
 <div class="method-doc">
 <h5>Constructor</h5>
 <code>XferPropertyAttribute(string name)</code>
+<p>Initializes a new instance of the  class.</p>
 </div>
 </section>
 </section>
 <section id="namespace-parkscomputing-xfer-lang-chardef"><h2>Namespace: ParksComputing.Xfer.Lang.CharDef</h2>
 <section id="type-parkscomputing-xfer-lang-chardef-chardefprocessor"><h3>Class: CharDefProcessor</h3>
+<p>Handles charDef PI processing and efficient lookup for CharacterElements.
+            Register with Parser.RegisterPIProcessor and RegisterElementProcessor.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -572,15 +620,19 @@
 <div class="method-doc">
 <h5>UpdateGlobalRegistryFromPI</h5>
 <code>void UpdateGlobalRegistryFromPI(KeyValuePairElement charDefKvp)</code>
+<p>Update the global charDef registry with a charDef PI object.</p>
 </div>
 </section>
 </section>
 <section id="namespace-parkscomputing-xfer-lang-configuration"><h2>Namespace: ParksComputing.Xfer.Lang.Configuration</h2>
 <section id="type-parkscomputing-xfer-lang-configuration-elementstylepreference"><h3>Enum: ElementStylePreference</h3>
+<p>Defines preferences for element serialization styles.</p>
 </section>
 <section id="type-parkscomputing-xfer-lang-configuration-nullvaluehandling"><h3>Enum: NullValueHandling</h3>
+<p>Specifies how null values should be handled during XferLang serialization.</p>
 </section>
 <section id="type-parkscomputing-xfer-lang-configuration-xferprocessinginstruction"><h3>Class: XferProcessingInstruction</h3>
+<p>Represents a processing instruction in an XferLang document.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -588,22 +640,22 @@
 <tr>
 <td><code>AppliesTo</code></td>
 <td><code>Element</code></td>
-<td></td>
+<td>Reference to the element this PI applies to (if any).</td>
 </tr>
 <tr>
 <td><code>DocumentIndex</code></td>
 <td><code>int</code></td>
-<td></td>
+<td>Optional: position of the PI in the document.</td>
 </tr>
 <tr>
 <td><code>Parameters</code></td>
 <td><code>Dictionary&lt;string, Object&gt;</code></td>
-<td></td>
+<td>Parameters for the processing instruction, as parsed from the document.</td>
 </tr>
 <tr>
 <td><code>Type</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>The type or name of the processing instruction (e.g., "processor", "id", "culture").</td>
 </tr>
 </tbody>
 </table>
@@ -614,6 +666,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-configuration-xferserializersettings"><h3>Class: XferSerializerSettings</h3>
+<p>Configuration settings for XferLang serialization and deserialization.
+            Controls how .NET objects are converted to/from XferLang format, including
+            null handling, contract resolution, custom converters, and element styling preferences.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -636,17 +691,20 @@
 <tr>
 <td><code>PreferImplicitSyntax</code></td>
 <td><code>bool</code></td>
-<td></td>
+<td>When StylePreference allows it, prefer implicit syntax for simple values.
+            For example, serialize integers as "42" instead of "#42".</td>
 </tr>
 <tr>
 <td><code>PreserveDateTimePrecision</code></td>
 <td><code>bool</code></td>
-<td></td>
+<td>When true, DateTime values preserve original precision instead of adding microseconds.
+            Helps maintain round-trip consistency with original documents.</td>
 </tr>
 <tr>
 <td><code>StylePreference</code></td>
 <td><code>ElementStylePreference</code></td>
-<td></td>
+<td>Controls how elements are serialized for compactness vs safety.
+            Default is CompactWhenSafe for optimal balance of safety and readability.</td>
 </tr>
 </tbody>
 </table>
@@ -659,6 +717,9 @@
 </section>
 <section id="namespace-parkscomputing-xfer-lang-contractresolvers"><h2>Namespace: ParksComputing.Xfer.Lang.ContractResolvers</h2>
 <section id="type-parkscomputing-xfer-lang-contractresolvers-defaultcontractresolver"><h3>Class: DefaultContractResolver</h3>
+<p>Default implementation of contract resolution for XferLang serialization.
+            Resolves public instance properties and preserves original property names
+            without modification. Provides the standard behavior for most serialization scenarios.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -674,6 +735,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-contractresolvers-icontractresolver"><h3>Interface: IContractResolver</h3>
+<p>Defines contract resolution for XferLang serialization. Contract resolvers determine
+            which properties to serialize and how property names should be transformed during
+            the serialization process.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>ResolveProperties</h5>
@@ -687,6 +751,9 @@
 </section>
 <section id="namespace-parkscomputing-xfer-lang-converters"><h2>Namespace: ParksComputing.Xfer.Lang.Converters</h2>
 <section id="type-parkscomputing-xfer-lang-converters-ixferconverter"><h3>Interface: IXferConverter</h3>
+<p>Defines custom conversion logic for XferLang serialization and deserialization.
+            Custom converters enable specialized handling of specific types during the
+            conversion process between .NET objects and XferLang elements.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>CanConvert</h5>
@@ -742,6 +809,10 @@
 </section>
 <section id="namespace-parkscomputing-xfer-lang-dynamicsource"><h2>Namespace: ParksComputing.Xfer.Lang.DynamicSource</h2>
 <section id="type-parkscomputing-xfer-lang-dynamicsource-defaultdynamicsourceresolver"><h3>Class: DefaultDynamicSourceResolver</h3>
+<p>Default implementation of dynamic source resolution for XferLang.
+            Resolves dynamic values from files, environment variables, constants,
+            and the dynamic source registry. Provides backward compatibility
+            with legacy dynamic source processing instructions.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -757,11 +828,16 @@
 <div class="method-doc">
 <h5>Resolve</h5>
 <code>string Resolve(string key, XferDocument document)</code>
+<p>Resolves a dynamic value for the given key using PI directives in the document.</p>
 </div>
 </section>
 </section>
 <section id="namespace-parkscomputing-xfer-lang-elements"><h2>Namespace: ParksComputing.Xfer.Lang.Elements</h2>
 <section id="type-parkscomputing-xfer-lang-elements-arrayelement"><h3>Class: ArrayElement</h3>
+<p>Represents an array element in XferLang, containing an ordered collection of elements
+            enclosed in square brackets []. Arrays can contain elements of any type and maintain
+            insertion order. This class extends ListElement to provide array-specific functionality
+            including type tracking and validation.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -769,7 +845,7 @@
 <tr>
 <td><code>ElementType</code></td>
 <td><code>Type</code></td>
-<td></td>
+<td>Gets the element type for this homogeneous array, or null if empty.</td>
 </tr>
 <tr>
 <td><code>Item</code></td>
@@ -809,6 +885,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-booleanelement"><h3>Class: BooleanElement</h3>
+<p>Represents a boolean element in XferLang using tilde (~) delimiters.
+            Boolean elements store true/false values and are rendered as "true" or "false"
+            in the XferLang format. The compact style uses ~ delimiters by default.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -828,6 +907,10 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-characterelement"><h3>Class: CharacterElement</h3>
+<p>Represents a character element in XferLang using backslash (\) delimiters.
+            Character elements store Unicode code points as integers and can represent
+            any valid Unicode character. The value represents the numeric code point
+            (0 to 0x10FFFF) rather than the character itself.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -874,6 +957,10 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-commentelement"><h3>Class: CommentElement</h3>
+<p>Represents a comment element in XferLang using forward slash (/) delimiters.
+            Comments are non-semantic elements that provide documentation or annotations
+            but are not included in the actual data output. They are preserved during parsing
+            but excluded from serialization.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -893,6 +980,10 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-dateelement"><h3>Class: DateElement</h3>
+<p>Represents a date-only element in XferLang using pipe (|) delimiters.
+            Date elements store DateOnly values and support various formatting options
+            through the DateTimeHandling property. This is used for date values without
+            time components.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -939,6 +1030,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-datetimeelement"><h3>Class: DateTimeElement</h3>
+<p>Represents a date-time element in XferLang using at (@) delimiters.
+            DateTime elements store DateTime values with support for various formatting
+            and timezone handling options through the DateTimeHandling property.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -985,6 +1079,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-decimalelement"><h3>Class: DecimalElement</h3>
+<p>Represents a decimal number element in XferLang using asterisk (*) delimiters.
+            Decimal elements store high-precision decimal values suitable for financial
+            calculations and other applications requiring exact decimal representation.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -1007,6 +1104,7 @@
 <div class="method-doc">
 <h5>Add</h5>
 <code>void Add(string key, KeyValuePairElement value)</code>
+<p>Add a semantic key-value pair. Non-semantic elements (PIs/comments) should be added to Children only.</p>
 </div>
 <div class="method-doc">
 <h5>Add</h5>
@@ -1019,6 +1117,7 @@
 <div class="method-doc">
 <h5>GetValue</h5>
 <code>Element GetValue(string key)</code>
+<p>Get a semantic value by key (returns null if not found)</p>
 </div>
 <div class="method-doc">
 <h5>ToString</h5>
@@ -1026,6 +1125,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-doubleelement"><h3>Class: DoubleElement</h3>
+<p>Represents a double-precision floating-point number element in XferLang using caret (^) delimiters.
+            Double elements store IEEE 754 double-precision floating-point values suitable for
+            scientific calculations and general-purpose numeric operations.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -1033,6 +1135,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-dynamicelement"><h3>Class: DynamicElement</h3>
+<p>Represents a dynamic element in XferLang using pipe (|) delimiters.
+            Dynamic elements contain text that can be dynamically resolved or evaluated
+            at runtime, often used for variable substitution or dynamic content generation.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -1040,6 +1145,8 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-element"><h3>Abstract Class: Element</h3>
+<p>The abstract base class for all XferLang elements. Provides common functionality
+            for element hierarchies, metadata, IDs, and serialization.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -1047,12 +1154,12 @@
 <tr>
 <td><code>Children</code></td>
 <td><code>List&lt;Element&gt;</code></td>
-<td></td>
+<td>Gets the collection of child elements contained within this element.</td>
 </tr>
 <tr>
 <td><code>Delimiter</code></td>
 <td><code>ElementDelimiter</code></td>
-<td></td>
+<td>Gets or sets the delimiter information for this element, including opening/closing characters and style.</td>
 </tr>
 <tr>
 <td><code>Id</code></td>
@@ -1062,17 +1169,17 @@
 <tr>
 <td><code>Metadata</code></td>
 <td><code>XferMetadata</code></td>
-<td></td>
+<td>Optional metadata for this element, set via meta PI.</td>
 </tr>
 <tr>
 <td><code>Name</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets the name of this element type.</td>
 </tr>
 <tr>
 <td><code>Parent</code></td>
 <td><code>Element</code></td>
-<td></td>
+<td>Gets or sets the parent element of this element in the document hierarchy.</td>
 </tr>
 </tbody>
 </table>
@@ -1080,6 +1187,7 @@
 <div class="method-doc">
 <h5>Constructor</h5>
 <code>Element(string name, ElementDelimiter delimiter)</code>
+<p>Initializes a new instance of the  class.</p>
 </div>
 <div class="method-doc">
 <h5>AddChild</h5>
@@ -1088,6 +1196,7 @@
 <div class="method-doc">
 <h5>FindElementById</h5>
 <code>Element FindElementById(string id)</code>
+<p>Recursively finds the first descendant element with the specified ID.</p>
 </div>
 <div class="method-doc">
 <h5>ToXfer</h5>
@@ -1099,6 +1208,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-elementdelimiter"><h3>Class: ElementDelimiter</h3>
+<p>Represents the delimiter information for an XferLang element, including opening/closing characters,
+            specifier count, and element style. This class manages the construction of element delimiters
+            for different serialization styles.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -1106,42 +1218,43 @@
 <tr>
 <td><code>Closing</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets the full closing delimiter string including angle brackets.</td>
 </tr>
 <tr>
 <td><code>ClosingSpecifier</code></td>
 <td><code>Char</code></td>
-<td></td>
+<td>Gets the character used to close this element type.</td>
 </tr>
 <tr>
 <td><code>MinClosing</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets the minimal closing delimiter string without angle brackets.</td>
 </tr>
 <tr>
 <td><code>MinOpening</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets the minimal opening delimiter string without angle brackets.</td>
 </tr>
 <tr>
 <td><code>Opening</code></td>
 <td><code>string</code></td>
-<td></td>
+<td>Gets the full opening delimiter string including angle brackets.</td>
 </tr>
 <tr>
 <td><code>OpeningSpecifier</code></td>
 <td><code>Char</code></td>
-<td></td>
+<td>Gets the character used to open this element type.</td>
 </tr>
 <tr>
 <td><code>SpecifierCount</code></td>
 <td><code>int</code></td>
-<td></td>
+<td>Gets or sets the number of specifier characters to repeat in the delimiter.
+            Setting this value updates the Opening, Closing, MinOpening, and MinClosing properties.</td>
 </tr>
 <tr>
 <td><code>Style</code></td>
 <td><code>ElementStyle</code></td>
-<td></td>
+<td>Gets or sets the style of this element (Explicit, Compact, or Implicit).</td>
 </tr>
 </tbody>
 </table>
@@ -1168,6 +1281,7 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-elementstyle"><h3>Enum: ElementStyle</h3>
+<p>Specifies the different styles in which XferLang elements can be written and parsed.</p>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-emptyelement"><h3>Class: EmptyElement</h3>
 <h4>Properties</h4>
@@ -1200,6 +1314,10 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-identifierelement"><h3>Class: IdentifierElement</h3>
+<p>Represents an identifier element in XferLang using colon (:) delimiters.
+            Identifiers are used for variable names, property keys, and other symbolic references.
+            They follow standard identifier naming rules (letters, digits, underscores, hyphens, dots)
+            but must start with a letter or underscore.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -1222,7 +1340,7 @@
 <tr>
 <td><code>CustomFormatter</code></td>
 <td><code>Func&lt;int, string&gt;</code></td>
-<td></td>
+<td>Custom formatter function for the integer value. If null, uses default formatting.</td>
 </tr>
 </tbody>
 </table>
@@ -1244,6 +1362,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-keyvaluepairelement"><h3>Class: KeyValuePairElement</h3>
+<p>Represents a key-value pair element in XferLang, where the key is a text element
+            and the value can be any element type. This is the fundamental building block for
+            object properties and named elements in the XferLang format.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -1288,6 +1409,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-keywordelement"><h3>Class: KeywordElement</h3>
+<p>Represents a keyword element in XferLang using equals (=) delimiters.
+            Keywords are reserved words or language constructs that have special meaning
+            in the XferLang syntax, such as data types, control structures, or built-in functions.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -1323,6 +1447,7 @@
 <div class="method-doc">
 <h5>Add</h5>
 <code>bool Add(Element element)</code>
+<p>Add a semantic item. Non-semantic elements (PIs/comments) should be added to Children only.</p>
 </div>
 <div class="method-doc">
 <h5>GetElementAt</h5>
@@ -1341,7 +1466,7 @@
 <tr>
 <td><code>CustomFormatter</code></td>
 <td><code>Func&lt;long, string&gt;</code></td>
-<td></td>
+<td>Custom formatter function for the long value. If null, uses default formatting.</td>
 </tr>
 </tbody>
 </table>
@@ -1382,7 +1507,7 @@
 <tr>
 <td><code>Dictionary</code></td>
 <td><code>IReadOnlyDictionary&lt;string, KeyValuePairElement&gt;</code></td>
-<td></td>
+<td>Only semantic key-value pairs (not PIs/comments)</td>
 </tr>
 <tr>
 <td><code>Item</code></td>
@@ -1700,6 +1825,9 @@
 </section>
 <section id="namespace-parkscomputing-xfer-lang-processinginstructions"><h2>Namespace: ParksComputing.Xfer.Lang.ProcessingInstructions</h2>
 <section id="type-parkscomputing-xfer-lang-processinginstructions-chardefprocessinginstruction"><h3>Class: CharDefProcessingInstruction</h3>
+<p>Processing instruction for defining custom character definitions in XferLang.
+            Allows mapping of custom character names to Unicode code points for use in character elements.
+            The instruction expects an object containing name-to-codepoint mappings.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -1726,6 +1854,10 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-processinginstructions-documentprocessinginstruction"><h3>Class: DocumentProcessingInstruction</h3>
+<p>Processing instruction for document-level metadata and configuration in XferLang.
+            Contains document properties, schema information, versioning, and other metadata
+            that applies to the entire XferLang document. The instruction expects an object
+            containing document configuration parameters.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -1748,6 +1880,10 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-processinginstructions-dynamicsourceprocessinginstruction"><h3>Class: DynamicSourceProcessingInstruction</h3>
+<p>Processing instruction for configuring dynamic data sources in XferLang.
+            Allows specification of external data sources, connection settings, and
+            dynamic content resolution strategies. The instruction expects an object
+            containing source configuration parameters.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -1763,6 +1899,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-processinginstructions-idprocessinginstruction"><h3>Class: IdProcessingInstruction</h3>
+<p>Processing instruction for assigning unique identifiers to elements in XferLang.
+            The ID processing instruction associates a string identifier with an element,
+            enabling element referencing and uniqueness validation within the document.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -1792,6 +1931,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-processinginstructions-processinginstruction"><h3>Class: ProcessingInstruction</h3>
+<p>Represents a processing instruction in XferLang that provides metadata or processing directives
+            for elements in the document. Processing instructions are enclosed in <! ... !> delimiters
+            and contain key-value pairs that affect parsing or element behavior.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -2006,6 +2148,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-schema-xferschema"><h3>Class: XferSchema</h3>
+<p>Represents an XferLang schema that defines the structure, validation rules,
+            and constraints for XferLang documents. Contains schema definitions,
+            type specifications, and validation metadata.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -2034,6 +2179,8 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-schema-xferschemaparser"><h3>Class: XferSchemaParser</h3>
+<p>Parses XferLang schema definitions from document elements into structured schema objects.
+            Converts schema syntax into usable schema models for validation and type checking.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -2045,6 +2192,9 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-schema-xferschemavalidator"><h3>Class: XferSchemaValidator</h3>
+<p>Validates XferLang documents against defined schemas. Performs structural validation,
+            type checking, constraint evaluation, and rule enforcement to ensure documents
+            conform to their specified schema definitions.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -2085,6 +2235,7 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-services-dynamicsourcehandler"><h3>Class: DynamicSourceHandler</h3>
+<p>Handler delegate for resolving dynamic source values by source type.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -2104,6 +2255,7 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-services-dynamicsourcehandlerregistry"><h3>Static Class: DynamicSourceHandlerRegistry</h3>
+<p>Registry for dynamic source type handlers, allowing extensions to register custom source types.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -2111,7 +2263,7 @@
 <tr>
 <td><code>RegisteredSourceTypes</code></td>
 <td><code>IReadOnlyCollection&lt;string&gt;</code></td>
-<td></td>
+<td>Gets all registered source types.</td>
 </tr>
 </tbody>
 </table>
@@ -2119,17 +2271,22 @@
 <div class="method-doc">
 <h5>RegisterHandler</h5>
 <code>void RegisterHandler(string sourceType, DynamicSourceHandler handler)</code>
+<p>Registers a handler for a specific source type.</p>
 </div>
 <div class="method-doc">
 <h5>Resolve</h5>
 <code>string Resolve(string sourceType, string sourceValue, string fallbackKey)</code>
+<p>Resolves a value using the registered handler for the given source type.</p>
 </div>
 <div class="method-doc">
 <h5>UnregisterHandler</h5>
 <code>bool UnregisterHandler(string sourceType)</code>
+<p>Unregisters a handler for a specific source type.</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-services-dynamicsourceregistry"><h3>Static Class: DynamicSourceRegistry</h3>
+<p>Global registry for dynamic source configurations from dynamicSource PIs.
+            This allows dynamicSource PIs to affect the entire document scope.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -2137,7 +2294,7 @@
 <tr>
 <td><code>Configurations</code></td>
 <td><code>IReadOnlyDictionary&lt;string, Element&gt;</code></td>
-<td></td>
+<td>Gets all registered configurations (read-only).</td>
 </tr>
 </tbody>
 </table>
@@ -2145,18 +2302,23 @@
 <div class="method-doc">
 <h5>AddConfiguration</h5>
 <code>void AddConfiguration(string key, Element sourceConfig)</code>
+<p>Adds or updates a single dynamic source configuration.</p>
 </div>
 <div class="method-doc">
 <h5>Clear</h5>
 <code>void Clear()</code>
+<p>Clears all dynamic source configurations.
+            Useful for starting fresh between document parses.</p>
 </div>
 <div class="method-doc">
 <h5>GetConfiguration</h5>
 <code>Element GetConfiguration(string key)</code>
+<p>Gets the source configuration for a dynamic element key.</p>
 </div>
 <div class="method-doc">
 <h5>Resolve</h5>
 <code>string Resolve(string key)</code>
+<p>Resolves a dynamic element key using the configured source and registered handlers.</p>
 </div>
 <div class="method-doc">
 <h5>SetConfigurations</h5>
@@ -2164,6 +2326,7 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-services-ixferparser"><h3>Interface: IXferParser</h3>
+<p>Defines the contract for XferLang parsers that convert XferLang text into document objects.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -2171,7 +2334,7 @@
 <tr>
 <td><code>Encoding</code></td>
 <td><code>Encoding</code></td>
-<td></td>
+<td>Gets the text encoding used by this parser.</td>
 </tr>
 </tbody>
 </table>
@@ -2179,13 +2342,19 @@
 <div class="method-doc">
 <h5>Parse</h5>
 <code>XferDocument Parse(Byte[] input)</code>
+<p>Parses XferLang content from a byte array into an XferDocument.</p>
 </div>
 <div class="method-doc">
 <h5>Parse</h5>
 <code>XferDocument Parse(string input)</code>
+<p>Parses XferLang content from a string into an XferDocument.</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-services-parser"><h3>Class: Parser</h3>
+<p>The main XferLang parser that converts XferLang text into a structured document model.
+            Supports extensible processing instructions, element processors, and dynamic source resolution.
+            This parser provides comprehensive parsing capabilities including ID uniqueness validation,
+            character definition resolution, and flexible element processing.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -2193,7 +2362,7 @@
 <tr>
 <td><code>CharDefResolver</code></td>
 <td><code>Func&lt;Element, string, Nullable&lt;int&gt;&gt;</code></td>
-<td></td>
+<td>Optional: A delegate for resolving charDef keywords. Should return the codepoint for a keyword, or null if not found.</td>
 </tr>
 <tr>
 <td><code>DynamicSourceResolver</code></td>
@@ -2219,6 +2388,7 @@
 <div class="method-doc">
 <h5>HasPIProcessor</h5>
 <code>bool HasPIProcessor(string piKey)</code>
+<p>Check if a processing instruction processor is registered for the given key.</p>
 </div>
 <div class="method-doc">
 <h5>Parse</h5>
@@ -2243,13 +2413,14 @@
 <div class="method-doc">
 <h5>UnregisterPIProcessor</h5>
 <code>void UnregisterPIProcessor(string piKey)</code>
+<p>Unregister a processing instruction processor.</p>
 </div>
 </section>
 </section>
 
 
         <footer>
-            <p>Documentation generated on 2025-08-04 12:31:58 UTC</p>
+            <p>Documentation generated on 2025-08-04 12:43:17 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

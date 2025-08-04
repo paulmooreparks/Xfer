@@ -31,20 +31,46 @@ namespace ParksComputing.Xfer.Lang.ProcessingInstructions {
         /// </summary>
         public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
+        /// <summary>
+        /// Initializes a new instance of the ProcessingInstruction class with the specified value and name.
+        /// </summary>
+        /// <param name="value">The element value for the processing instruction.</param>
+        /// <param name="name">The name/keyword for the processing instruction.</param>
         public ProcessingInstruction(Element value, string name) : base(value, name, ElementDelimiter) {
             Kvp = new KeyValuePairElement(new KeywordElement(name), value);
         }
 
+        /// <summary>
+        /// Virtual method for handling processing instruction-specific logic.
+        /// Override this method in derived classes to implement custom processing instruction behavior.
+        /// </summary>
         public virtual void ProcessingInstructionHandler() {
         }
 
+        /// <summary>
+        /// Virtual method for handling element-specific processing.
+        /// Override this method in derived classes to implement custom element handling logic.
+        /// </summary>
+        /// <param name="element">The element to be processed.</param>
         public virtual void ElementHandler(Element element) {
         }
 
+        /// <summary>
+        /// Converts the processing instruction to its XferLang string representation without formatting.
+        /// </summary>
+        /// <returns>The XferLang representation of the processing instruction.</returns>
         public override string ToXfer() {
             return ToXfer(Formatting.None);
         }
 
+        /// <summary>
+        /// Converts the processing instruction to its XferLang string representation with specified formatting options.
+        /// </summary>
+        /// <param name="formatting">The formatting options to apply.</param>
+        /// <param name="indentChar">The character to use for indentation (default is space).</param>
+        /// <param name="indentation">The number of indent characters per level (default is 2).</param>
+        /// <param name="depth">The current nesting depth (default is 0).</param>
+        /// <returns>The formatted XferLang representation of the processing instruction.</returns>
         public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
             bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
             bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
@@ -93,7 +119,17 @@ namespace ParksComputing.Xfer.Lang.ProcessingInstructions {
 
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Gets or sets the target element that this processing instruction applies to.
+        /// Can be null if the processing instruction applies globally or has no specific target.
+        /// </summary>
         public Element? Target { get; set; }
+
+        /// <summary>
+        /// Gets or sets the key-value pair element that contains the processing instruction's name and value.
+        /// This represents the structured data of the processing instruction.
+        /// </summary>
         public KeyValuePairElement Kvp { get; set; }
     }
 }

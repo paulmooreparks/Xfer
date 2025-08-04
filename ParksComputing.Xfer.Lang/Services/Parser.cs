@@ -33,7 +33,13 @@ public class Parser : IXferParser {
     // Used to hold a pending meta PI to attach as XferMetadata to the next element
     private ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver _dynamicSourceResolver = new ParksComputing.Xfer.Lang.DynamicSource.DefaultDynamicSourceResolver();
 
-    // PI processor delegate type
+    /// <summary>
+    /// Delegate type for processing instruction processors.
+    /// Defines the signature for custom processing instruction handlers.
+    /// </summary>
+    /// <param name="kvp">The key-value pair element containing the processing instruction data.</param>
+    /// <param name="parser">The parser instance processing the document.</param>
+    /// <returns>A ProcessingInstruction instance representing the processed instruction.</returns>
     public delegate ProcessingInstruction PIProcessor(KeyValuePairElement kvp, Parser parser);
 
     // Registry for PI processors
@@ -105,6 +111,10 @@ public class Parser : IXferParser {
 
 
 
+    /// <summary>
+    /// Gets or sets the dynamic source resolver used for resolving dynamic content references in XferLang documents.
+    /// If set to null, defaults to the DefaultDynamicSourceResolver implementation.
+    /// </summary>
     public ParksComputing.Xfer.Lang.DynamicSource.IDynamicSourceResolver DynamicSourceResolver {
         get => _dynamicSourceResolver;
         set => _dynamicSourceResolver = value ?? new ParksComputing.Xfer.Lang.DynamicSource.DefaultDynamicSourceResolver();
@@ -112,11 +122,20 @@ public class Parser : IXferParser {
 
     private XferDocument? _currentDocument = null;
 
+    /// <summary>
+    /// Gets the version of the XferLang parser.
+    /// </summary>
     public static readonly string Version = "0.13";
 
-
+    /// <summary>
+    /// Initializes a new instance of the Parser class with UTF-8 encoding.
+    /// </summary>
     public Parser() : this(Encoding.UTF8) { }
 
+    /// <summary>
+    /// Initializes a new instance of the Parser class with the specified encoding.
+    /// </summary>
+    /// <param name="encoding">The text encoding to use for parsing input data.</param>
     public Parser(Encoding encoding) {
         Encoding = encoding;
         RegisterBuiltInPIProcessors();
@@ -182,6 +201,9 @@ public class Parser : IXferParser {
         return new DynamicSourceProcessingInstruction(obj);
     }
 
+    /// <summary>
+    /// Gets the text encoding used by this parser instance for converting byte arrays to strings.
+    /// </summary>
     public Encoding Encoding { get; private set; } = Encoding.UTF8;
 
     private string _scanString = string.Empty;
@@ -683,6 +705,12 @@ public class Parser : IXferParser {
         return char.IsLetterOrDigit(c) | c == '_' | c == '-';
     }
 
+    /// <summary>
+    /// Parses a string containing XferLang content into an XferDocument.
+    /// </summary>
+    /// <param name="input">The XferLang content to parse as a string.</param>
+    /// <returns>An XferDocument containing the parsed elements and metadata.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when input is null or empty.</exception>
     public XferDocument Parse(string input) {
         if (string.IsNullOrEmpty(input)) {
             throw new ArgumentNullException(nameof(input));
@@ -691,6 +719,13 @@ public class Parser : IXferParser {
         return Parse(Encoding.UTF8.GetBytes(input));
     }
 
+    /// <summary>
+    /// Parses a byte array containing XferLang content into an XferDocument.
+    /// Uses the parser's configured encoding to convert bytes to text before parsing.
+    /// </summary>
+    /// <param name="input">The XferLang content to parse as a byte array.</param>
+    /// <returns>An XferDocument containing the parsed elements and metadata.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when input is null or has zero length.</exception>
     public XferDocument Parse(byte[] input) {
         if (input == null || input.Length == 0) {
             throw new ArgumentNullException(nameof(input));

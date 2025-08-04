@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 namespace ParksComputing.Xfer.Lang.Services;
 
+/// <summary>
+/// Provides a registry for mapping character IDs to Unicode code points in XferLang.
+/// Manages both built-in character definitions (ASCII control characters, common symbols)
+/// and custom character mappings defined by users or documents.
+/// </summary>
 public static class CharacterIdRegistry {
     private static readonly Dictionary<string, int> _builtin = new(StringComparer.OrdinalIgnoreCase) {
         // ASCII control characters
@@ -227,10 +232,21 @@ public static class CharacterIdRegistry {
 
     private static Dictionary<string, int> _custom = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Sets the custom character ID mappings for the registry.
+    /// This replaces any existing custom mappings with the provided dictionary.
+    /// </summary>
+    /// <param name="custom">A dictionary mapping custom character IDs to their Unicode code points.</param>
     public static void SetCustomIds(Dictionary<string, int> custom) {
         _custom = new Dictionary<string, int>(custom, StringComparer.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Resolves a character ID to its corresponding Unicode code point.
+    /// Searches first in custom mappings, then in built-in mappings.
+    /// </summary>
+    /// <param name="id">The character ID to resolve (case-insensitive).</param>
+    /// <returns>The Unicode code point if found; otherwise, null.</returns>
     public static int? Resolve(string id) {
         if (_custom.TryGetValue(id, out int value)) {
             return value;
@@ -243,6 +259,15 @@ public static class CharacterIdRegistry {
         return null;
     }
 
+    /// <summary>
+    /// Gets a read-only view of the built-in character ID mappings.
+    /// Contains standard ASCII control characters and common symbols.
+    /// </summary>
     public static IReadOnlyDictionary<string, int> Builtin => _builtin;
+
+    /// <summary>
+    /// Gets a read-only view of the custom character ID mappings.
+    /// Contains user-defined or document-specific character definitions.
+    /// </summary>
     public static IReadOnlyDictionary<string, int> Custom => _custom;
 }
