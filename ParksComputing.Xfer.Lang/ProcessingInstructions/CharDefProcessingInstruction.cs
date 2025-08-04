@@ -10,10 +10,28 @@ namespace ParksComputing.Xfer.Lang.ProcessingInstructions;
 /// </summary>
 // Example: charDef PI
 public class CharDefProcessingInstruction : ProcessingInstruction {
+    /// <summary>
+    /// The keyword used to identify character definition processing instructions.
+    /// </summary>
     public const string Keyword = "chardef";
+
+    /// <summary>
+    /// Gets a dictionary of custom character IDs defined by this processing instruction.
+    /// Maps custom character names to their corresponding Unicode code points.
+    /// </summary>
     public Dictionary<string, int> CustomCharIds { get; } = new Dictionary<string, int>();
+
+    /// <summary>
+    /// Initializes a new instance of the CharDefProcessingInstruction class with the specified character definitions.
+    /// </summary>
+    /// <param name="value">The object element containing character name-to-codepoint mappings.</param>
     public CharDefProcessingInstruction(ObjectElement value) : base(value, Keyword) { }
 
+    /// <summary>
+    /// Handles the processing of character definitions by registering the custom character mappings globally.
+    /// Validates that all values are character elements and updates the CharacterIdRegistry.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when the value is not an ObjectElement or contains invalid character definitions.</exception>
     public override void ProcessingInstructionHandler() {
         var charDefRegistry = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
@@ -35,6 +53,11 @@ public class CharDefProcessingInstruction : ProcessingInstruction {
         CharacterIdRegistry.SetCustomIds(charDefRegistry);
     }
 
+    /// <summary>
+    /// Handles element processing by assigning the processing instruction's value as the element's ID.
+    /// This provides element identification functionality for character definition contexts.
+    /// </summary>
+    /// <param name="element">The element to assign the ID to.</param>
     public override void ElementHandler(Element element) {
         element.Id = Value.ToString();
     }
