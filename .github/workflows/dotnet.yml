@@ -2,7 +2,7 @@ name: .NET CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "v13" ]
   pull_request:
     branches: [ "master" ]
   workflow_dispatch:
@@ -30,6 +30,9 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.x'
+
+    - name: Clear NuGet cache
+      run: dotnet nuget locals all --clear
 
     - name: Restore dependencies
       run: dotnet restore --configfile nuget.config
