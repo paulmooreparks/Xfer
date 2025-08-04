@@ -54,7 +54,7 @@
     </PropertyGroup>
     <Message Text="Generating documentation..." Importance="high" />
     <Message Text="Solution directory: $(SolutionDir)" Importance="high" />
-    <Exec Command="dotnet run --project &quot;$(SolutionDir)XferDocBuilder\XferDocBuilder.csproj&quot; &quot;$(SolutionDir)docs\content.md&quot; &quot;$(SolutionDir)docs\index.html&quot;"
+    <Exec Command="dotnet run --project &quot;$(SolutionDir)XferDocBuilder\XferDocBuilder.csproj&quot; &quot;$(SolutionDir)README.md&quot; &quot;$(SolutionDir)docs\index.html&quot;"
           ContinueOnError="false"
           WorkingDirectory="$(SolutionDir)" />
   </Target>
