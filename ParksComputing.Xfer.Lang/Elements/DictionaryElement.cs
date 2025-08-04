@@ -42,6 +42,11 @@ public abstract class DictionaryElement : CollectionElement {
     public override Element? GetElementAt(int index) => index >= 0 && index < Count ? _values.Values.ElementAt(index) : null;
 
     /// <summary>
+    /// Gets an enumerable view of all key-value pair elements in this dictionary.
+    /// </summary>
+    public override IEnumerable<Element> Values => _values.Values;
+
+    /// <summary>
     /// Add a semantic key-value pair. Non-semantic elements (PIs/comments) should be added to Children only.
     /// </summary>
     public void Add(string key, KeyValuePairElement value) => _values[key] = value;

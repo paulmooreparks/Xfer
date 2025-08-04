@@ -268,16 +268,32 @@ public class XferConvert {
     /// <returns>An object of type T, or default(T) if the document has no elements.</returns>
     public static T? Deserialize<T>(XferDocument document, XferSerializerSettings settings)
     {
-        if (document.Root.Values.FirstOrDefault() is not Element first)
+        if (!document.Root.Values.Any())
         {
             return default;
         }
 
         // PI-driven deserialization customization
         var parser = new ParksComputing.Xfer.Lang.Services.Parser();
-        var result = DeserializeValue(first, typeof(T), settings);
 
-        return (T?)result;
+        // If the root is an ObjectElement and we're deserializing to a custom type,
+        // pass the ObjectElement itself, not its first value
+        if (document.Root is ObjectElement objectElement && !typeof(T).IsPrimitive && typeof(T) != typeof(string))
+        {
+            var result = DeserializeValue(objectElement, typeof(T), settings);
+            return (T?)result;
+        }
+        else
+        {
+            // For primitive types or when root is not an ObjectElement, use the first value
+            var first = document.Root.Values.FirstOrDefault();
+            if (first == null)
+            {
+                return default;
+            }
+            var result = DeserializeValue(first, typeof(T), settings);
+            return (T?)result;
+        }
     }
 
     /// <summary>
