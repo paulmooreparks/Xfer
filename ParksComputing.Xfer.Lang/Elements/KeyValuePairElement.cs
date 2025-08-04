@@ -14,15 +14,33 @@ namespace ParksComputing.Xfer.Lang.Elements;
 /// </summary>
 public class KeyValuePairElement : TypedElement<Element>
 {
+    /// <summary>
+    /// The element name used in XferLang serialization for key-value pairs.
+    /// </summary>
     public static readonly string ElementName = "keyValuePair";
 
+    /// <summary>
+    /// Gets or sets the text element that represents the key portion of the key-value pair.
+    /// </summary>
     public TextElement KeyElement { get; set; }
+
+    /// <summary>
+    /// Gets the string representation of the key.
+    /// </summary>
     public string Key { get; }
 
+    /// <summary>
+    /// Initializes a new instance of the KeyValuePairElement class with a key element and default empty value.
+    /// </summary>
+    /// <param name="keyElement">The text element representing the key.</param>
+    /// <param name="specifierCount">The number of delimiter characters to use.</param>
     public KeyValuePairElement(TextElement keyElement, int specifierCount = 1) : this(keyElement, new EmptyElement(), specifierCount)
     {
     }
 
+    /// <summary>
+    /// Gets or sets the value element of the key-value pair.
+    /// </summary>
     public override Element Value
     {
         get => base.Value;
@@ -47,6 +65,12 @@ public class KeyValuePairElement : TypedElement<Element>
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of the KeyValuePairElement class with a key element and value element.
+    /// </summary>
+    /// <param name="keyElement">The text element representing the key.</param>
+    /// <param name="value">The element representing the value.</param>
+    /// <param name="specifierCount">The number of delimiter characters to use.</param>
     public KeyValuePairElement(TextElement keyElement, Element value, int specifierCount = 1)
         : base(value, ElementName, new(specifierCount))
     {
@@ -68,11 +92,23 @@ public class KeyValuePairElement : TypedElement<Element>
         // Value is set via base constructor, and Value property setter will handle Children.Add
     }
 
+    /// <summary>
+    /// Converts the key-value pair element to its XferLang string representation without formatting.
+    /// </summary>
+    /// <returns>The XferLang representation of the key-value pair element.</returns>
     public override string ToXfer()
     {
         return ToXfer(Formatting.None);
     }
 
+    /// <summary>
+    /// Converts the key-value pair element to its XferLang string representation with specified formatting options.
+    /// </summary>
+    /// <param name="formatting">The formatting options to apply.</param>
+    /// <param name="indentChar">The character to use for indentation (default is space).</param>
+    /// <param name="indentation">The number of indent characters per level (default is 2).</param>
+    /// <param name="depth">The current nesting depth (default is 0).</param>
+    /// <returns>The formatted XferLang representation of the key-value pair element.</returns>
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
     {
         bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
@@ -101,6 +137,10 @@ public class KeyValuePairElement : TypedElement<Element>
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Returns a string representation of the key-value pair element.
+    /// </summary>
+    /// <returns>The XferLang representation of the key-value pair element.</returns>
     public override string ToString()
     {
         return ToXfer();

@@ -106,14 +106,30 @@ public class ObjectElement : DictionaryElement {
         return false;
     }
 
+    /// <summary>
+    /// Gets the element value associated with the specified key.
+    /// </summary>
+    /// <param name="key">The key of the element to retrieve</param>
+    /// <returns>The element associated with the specified key</returns>
+    /// <exception cref="KeyNotFoundException">Thrown when the key is not found</exception>
     public Element GetElement(string key) {
         return _values[key].Value;
     }
 
+    /// <summary>
+    /// Removes the key-value pair with the specified key from the object.
+    /// </summary>
+    /// <param name="key">The key of the element to remove</param>
+    /// <returns>True if the element was found and removed, false otherwise</returns>
     public bool Remove(string key) {
         return _values.Remove(key);
     }
 
+/// <summary>
+/// Adds a new key-value pair to the object or updates an existing one.
+/// If the key already exists, the existing pair is replaced in both the dictionary and children collection.
+/// </summary>
+/// <param name="value">The key-value pair element to add or update</param>
 public void AddOrUpdate(KeyValuePairElement value) {
     if (_values.TryGetValue(value.Key, out KeyValuePairElement? existing)) {
         _values[value.Key] = value;
@@ -134,6 +150,13 @@ public void AddOrUpdate(KeyValuePairElement value) {
     }
 }
 
+/// <summary>
+/// Adds an element to the object. Supports key-value pairs and processing instructions.
+/// Key-value pairs are added to the object's dictionary, while processing instructions
+/// are added only to the children collection.
+/// </summary>
+/// <param name="element">The element to add (must be KeyValuePairElement or ProcessingInstruction)</param>
+/// <exception cref="InvalidOperationException">Thrown when the element type is not supported</exception>
 public void AddOrUpdate(Element element) {
     switch (element) {
         case KeyValuePairElement kvp:
@@ -148,6 +171,10 @@ public void AddOrUpdate(Element element) {
     }
 }
 
+    /// <summary>
+    /// Gets a list of all key-value pair elements in this object.
+    /// This provides access to all the object's properties as a typed collection.
+    /// </summary>
     public List<KeyValuePairElement> TypedValue {
         get {
             List<KeyValuePairElement> values = [];
