@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ParksComputing.Xfer.Lang;
 using ParksComputing.Xfer.Lang.Elements;
 using ParksComputing.Xfer.Lang.Configuration;
+using ParksComputing.Xfer.Lang.Attributes;
 using System.Text;
 
 namespace ParksComputing.Xfer.Lang.Tests;
@@ -288,4 +289,138 @@ public class XferConvertTests
         // Basic structural validation - ensure the round-trip preserves the document structure
         Assert.AreEqual(originalDocument.Root.GetType(), roundTripDocument.Root.GetType());
     }
+
+    #region XferDecimalPrecisionAttribute Tests
+
+    [TestMethod]
+    public void Serialize_DecimalWithPrecisionAttribute_ShouldRespectDecimalPlaces()
+    {
+        // Arrange
+        var testObject = new DecimalPrecisionTestClass
+        {
+            Price = 123.456789m,
+            Temperature = 98.76543,
+            Interest = 5.25m,
+            Quantity = 150.999m
+        };
+
+        // Act
+        var xferString = XferConvert.Serialize(testObject);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        Assert.IsTrue(xferString.Contains("Price*123.46"), $"Expected Price*123.46 but got: {xferString}");
+        Assert.IsTrue(xferString.Contains("Temperature^98.8"), $"Expected Temperature^98.8 but got: {xferString}");
+        Assert.IsTrue(xferString.Contains("Interest*5.2500"), $"Expected Interest*5.2500 but got: {xferString}");
+        Assert.IsTrue(xferString.Contains("Quantity*151"), $"Expected Quantity*151 but got: {xferString}");
+    }
+
+    [TestMethod]
+    public void Serialize_DecimalWithoutPrecisionAttribute_ShouldUseDefaultPrecision()
+    {
+        // Arrange
+        var testObject = new DecimalPrecisionTestClass
+        {
+            Cost = 99.99999m
+        };
+
+        // Act
+        var xferString = XferConvert.Serialize(testObject);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        Assert.IsTrue(xferString.Contains("Cost*99.99999"), $"Expected Cost*99.99999 but got: {xferString}");
+    }
+
+    [TestMethod]
+    public void Serialize_DecimalWithZeroPrecision_ShouldRemoveDecimalPlaces()
+    {
+        // Arrange
+        var testObject = new DecimalPrecisionTestClass
+        {
+            Quantity = 150.999m
+        };
+
+        // Act
+        var xferString = XferConvert.Serialize(testObject);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        Assert.IsTrue(xferString.Contains("Quantity*151"), $"Expected Quantity*151 but got: {xferString}");
+    }
+
+    [TestMethod]
+    public void Serialize_DecimalWithTrailingZerosPreserved_ShouldKeepTrailingZeros()
+    {
+        // Arrange
+        var testObject = new DecimalPrecisionTestClass
+        {
+            Interest = 5.25m
+        };
+
+        // Act
+        var xferString = XferConvert.Serialize(testObject);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        Assert.IsTrue(xferString.Contains("Interest*5.2500"), $"Expected Interest*5.2500 but got: {xferString}");
+    }
+
+    [TestMethod]
+    public void Deserialize_DecimalWithPrecision_ShouldMaintainOriginalValue()
+    {
+        // Arrange
+        var originalValue = 123.456789m;
+        var testObject = new DecimalPrecisionTestClass { Price = originalValue };
+        var xferString = XferConvert.Serialize(testObject);
+
+        // Act
+        var deserializedObject = XferConvert.Deserialize<DecimalPrecisionTestClass>(xferString);
+
+        // Assert
+        Assert.IsNotNull(deserializedObject);
+        // Note: Due to precision rounding during serialization, we check the rounded value
+        Assert.AreEqual(123.46m, deserializedObject.Price);
+    }
+
+    [TestMethod]
+    public void Serialize_DoubleWithPrecisionAttribute_ShouldRespectPrecision()
+    {
+        // Arrange
+        var testObject = new DecimalPrecisionTestClass
+        {
+            Temperature = 98.76543
+        };
+
+        // Act
+        var xferString = XferConvert.Serialize(testObject);
+
+        // Assert
+        Assert.IsNotNull(xferString);
+        Assert.IsTrue(xferString.Contains("Temperature^98.8"), $"Expected Temperature^98.8 but got: {xferString}");
+    }
+
+    #endregion
+
+    #region Test Helper Classes
+
+    private class DecimalPrecisionTestClass
+    {
+        [XferDecimalPrecision(2)]
+        public decimal Price { get; set; }
+
+        [XferDecimalPrecision(4, RemoveTrailingZeros = false)]
+        public decimal Interest { get; set; }
+
+        [XferDecimalPrecision(1)]
+        public double Temperature { get; set; }
+
+        [XferDecimalPrecision(0)]
+        public decimal Quantity { get; set; }
+
+        // Without attribute - uses default precision
+        public decimal Cost { get; set; }
+    }
+
+    #endregion
 }

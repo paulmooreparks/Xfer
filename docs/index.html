@@ -102,6 +102,7 @@
                     <ul>
                 <li><a href="#xferpropertyattribute">XferPropertyAttribute</a></li>
                 <li><a href="#xfernumericformatattribute">XferNumericFormatAttribute</a></li>
+                <li><a href="#xferdecimalprecisionattribute">XferDecimalPrecisionAttribute</a></li>
                 <li><a href="#safety-notes">Safety Notes</a></li>
                     </ul>
                 </details>
@@ -241,6 +242,7 @@
 <ul>
 <li><a href="#xferpropertyattribute">XferPropertyAttribute</a></li>
 <li><a href="#xfernumericformatattribute">XferNumericFormatAttribute</a></li>
+<li><a href="#xferdecimalprecisionattribute">XferDecimalPrecisionAttribute</a></li>
 <li><a href="#safety-notes">Safety Notes</a></li>
 </ul>
 </li>
@@ -1704,10 +1706,49 @@ var config = new ConfigurationData();
 string xfer = XferConvert.Serialize(config);
 // Result: {Port 8080 ColorValue #$FF5733 Flags #%00101010 MemoryAddress &amp;$7FF6C2E40000}
 </code></pre>
+<section id="xferdecimalprecisionattribute"><h3 id="xferdecimalprecisionattribute">XferDecimalPrecisionAttribute</h3>
+<p>The <code>XferDecimalPrecisionAttribute</code> controls the precision and formatting of decimal and double values during serialization, allowing you to specify the maximum number of decimal places and whether to remove trailing zeros.</p>
+<pre><code class="language-csharp">public class FinancialData
+{
+    [XferDecimalPrecision(2)]
+    public decimal Price { get; set; } = 123.456789m;
+
+    [XferDecimalPrecision(4, RemoveTrailingZeros = false)]
+    public decimal Interest { get; set; } = 5.25m;
+
+    [XferDecimalPrecision(1)]
+    public double Temperature { get; set; } = 98.76543;
+
+    [XferDecimalPrecision(0)]
+    public decimal Quantity { get; set; } = 150.999m;
+
+    // Without attribute - uses default precision
+    public decimal Cost { get; set; } = 99.99999m;
+}
+
+var data = new FinancialData();
+string xfer = XferConvert.Serialize(data);
+// Result: {Price *123.46 Interest *5.2500 Temperature ^98.8 Quantity *151 Cost *99.99999}
+</code></pre>
+<p><strong>Key Features:</strong></p>
+<ul>
+<li><strong>Precision Control</strong>: Specify maximum decimal places (0 or greater)</li>
+<li><strong>Trailing Zero Handling</strong>: Choose whether to remove trailing zeros (default: true)</li>
+<li><strong>Type Support</strong>: Works with both <code>decimal</code> and <code>double</code> properties</li>
+<li><strong>Formatting Preservation</strong>: Maintains the appropriate XferLang type specifier (<code>*</code> for decimal, <code>^</code> for double)</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Financial applications requiring specific decimal precision</li>
+<li>Scientific data with controlled significant figures</li>
+<li>Display formatting for user interfaces</li>
+<li>Data export with consistent decimal representation</li>
+</ul>
 <section id="safety-notes"><h3 id="safety-notes">Safety Notes</h3>
 <ul>
-<li>Numeric formatting attributes are only applied to <code>int</code> and <code>long</code> properties</li>
-<li><code>decimal</code> and <code>double</code> types ignore formatting attributes to preserve fractional precision</li>
+<li>Numeric formatting attributes (<code>XferNumericFormatAttribute</code>) are only applied to <code>int</code> and <code>long</code> properties</li>
+<li>Decimal precision attributes (<code>XferDecimalPrecisionAttribute</code>) are only applied to <code>decimal</code> and <code>double</code> properties</li>
+<li><code>decimal</code> and <code>double</code> types ignore numeric formatting attributes to preserve fractional precision</li>
 <li>Custom formatting respects the configured <code>ElementStylePreference</code> for syntax style</li>
 </ul>
 <section id="processing-instructions-and-dynamic-content"><h2 id="processing-instructions-and-dynamic-content">Processing Instructions and Dynamic Content</h2>
@@ -1977,7 +2018,7 @@ dotnet test --collect:&quot;XPlat Code Coverage&quot;
 </section>
 
         <footer>
-            <p>Documentation generated on 2025-08-04 15:43:26 UTC</p>
+            <p>Documentation generated on 2025-08-04 20:50:40 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

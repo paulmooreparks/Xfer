@@ -1,5 +1,6 @@
 using ParksComputing.Xfer.Lang.Attributes;
 using System;
+using System.Globalization;
 
 namespace ParksComputing.Xfer.Lang.Helpers;
 
@@ -37,33 +38,75 @@ internal static class NumericFormatter
     }
 
     /// <summary>
-    /// Formats a decimal according to the specified format.
+    /// Formats a decimal according to the specified format and precision.
     /// Note: Hex and binary formats convert to long, losing fractional precision.
     /// </summary>
-    public static string FormatDecimal(decimal value, XferNumericFormat format, int minBits = 0, int minDigits = 0)
+    public static string FormatDecimal(decimal value, XferNumericFormat format, int minBits = 0, int minDigits = 0, int? decimalPlaces = null, bool removeTrailingZeros = true)
     {
         return format switch
         {
-            XferNumericFormat.Decimal => value.ToString(),
+            XferNumericFormat.Decimal => FormatDecimalValue(value, decimalPlaces, removeTrailingZeros),
             XferNumericFormat.Hexadecimal => FormatHexadecimal((long)value, minDigits),
             XferNumericFormat.Binary => FormatBinary((long)value, minBits),
-            _ => value.ToString()
+            _ => FormatDecimalValue(value, decimalPlaces, removeTrailingZeros)
         };
     }
 
     /// <summary>
-    /// Formats a double according to the specified format.
+    /// Formats a double according to the specified format and precision.
     /// Note: Hex and binary formats convert to long, losing fractional precision.
     /// </summary>
-    public static string FormatDouble(double value, XferNumericFormat format, int minBits = 0, int minDigits = 0)
+    public static string FormatDouble(double value, XferNumericFormat format, int minBits = 0, int minDigits = 0, int? decimalPlaces = null, bool removeTrailingZeros = true)
     {
         return format switch
         {
-            XferNumericFormat.Decimal => value.ToString(),
+            XferNumericFormat.Decimal => FormatDoubleValue(value, decimalPlaces, removeTrailingZeros),
             XferNumericFormat.Hexadecimal => FormatHexadecimal((long)value, minDigits),
             XferNumericFormat.Binary => FormatBinary((long)value, minBits),
-            _ => value.ToString()
+            _ => FormatDoubleValue(value, decimalPlaces, removeTrailingZeros)
         };
+    }
+
+    /// <summary>
+    /// Formats a decimal value with specified precision.
+    /// </summary>
+    private static string FormatDecimalValue(decimal value, int? decimalPlaces, bool removeTrailingZeros)
+    {
+        if (decimalPlaces.HasValue)
+        {
+            string format = $"F{decimalPlaces.Value}";
+            string result = value.ToString(format, CultureInfo.InvariantCulture);
+            
+            if (removeTrailingZeros && decimalPlaces.Value > 0)
+            {
+                result = result.TrimEnd('0').TrimEnd('.');
+            }
+            
+            return result;
+        }
+        
+        return value.ToString(CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// Formats a double value with specified precision.
+    /// </summary>
+    private static string FormatDoubleValue(double value, int? decimalPlaces, bool removeTrailingZeros)
+    {
+        if (decimalPlaces.HasValue)
+        {
+            string format = $"F{decimalPlaces.Value}";
+            string result = value.ToString(format, CultureInfo.InvariantCulture);
+            
+            if (removeTrailingZeros && decimalPlaces.Value > 0)
+            {
+                result = result.TrimEnd('0').TrimEnd('.');
+            }
+            
+            return result;
+        }
+        
+        return value.ToString(CultureInfo.InvariantCulture);
     }
 
     /// <summary>

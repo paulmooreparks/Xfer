@@ -60,6 +60,7 @@ _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.c
   - [Property Attributes](#property-attributes)
     - [XferPropertyAttribute](#xferpropertyattribute)
     - [XferNumericFormatAttribute](#xfernumericformatattribute)
+    - [XferDecimalPrecisionAttribute](#xferdecimalprecisionattribute)
     - [Safety Notes](#safety-notes)
   - [Processing Instructions and Dynamic Content](#processing-instructions-and-dynamic-content)
     - [Built-in Processing Instructions](#built-in-processing-instructions)
@@ -1584,10 +1585,51 @@ string xfer = XferConvert.Serialize(config);
 // Result: {Port 8080 ColorValue #$FF5733 Flags #%00101010 MemoryAddress &$7FF6C2E40000}
 ```
 
+### XferDecimalPrecisionAttribute
+
+The `XferDecimalPrecisionAttribute` controls the precision and formatting of decimal and double values during serialization, allowing you to specify the maximum number of decimal places and whether to remove trailing zeros.
+
+```csharp
+public class FinancialData
+{
+    [XferDecimalPrecision(2)]
+    public decimal Price { get; set; } = 123.456789m;
+
+    [XferDecimalPrecision(4, RemoveTrailingZeros = false)]
+    public decimal Interest { get; set; } = 5.25m;
+
+    [XferDecimalPrecision(1)]
+    public double Temperature { get; set; } = 98.76543;
+
+    [XferDecimalPrecision(0)]
+    public decimal Quantity { get; set; } = 150.999m;
+
+    // Without attribute - uses default precision
+    public decimal Cost { get; set; } = 99.99999m;
+}
+
+var data = new FinancialData();
+string xfer = XferConvert.Serialize(data);
+// Result: {Price *123.46 Interest *5.2500 Temperature ^98.8 Quantity *151 Cost *99.99999}
+```
+
+**Key Features:**
+- **Precision Control**: Specify maximum decimal places (0 or greater)
+- **Trailing Zero Handling**: Choose whether to remove trailing zeros (default: true)
+- **Type Support**: Works with both `decimal` and `double` properties
+- **Formatting Preservation**: Maintains the appropriate XferLang type specifier (`*` for decimal, `^` for double)
+
+**Use Cases:**
+- Financial applications requiring specific decimal precision
+- Scientific data with controlled significant figures
+- Display formatting for user interfaces
+- Data export with consistent decimal representation
+
 ### Safety Notes
 
-- Numeric formatting attributes are only applied to `int` and `long` properties
-- `decimal` and `double` types ignore formatting attributes to preserve fractional precision
+- Numeric formatting attributes (`XferNumericFormatAttribute`) are only applied to `int` and `long` properties
+- Decimal precision attributes (`XferDecimalPrecisionAttribute`) are only applied to `decimal` and `double` properties
+- `decimal` and `double` types ignore numeric formatting attributes to preserve fractional precision
 - Custom formatting respects the configured `ElementStylePreference` for syntax style
 
 ## Processing Instructions and Dynamic Content

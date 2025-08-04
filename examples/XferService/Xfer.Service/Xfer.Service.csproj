@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>905cb2cf-22cf-498a-83bd-a28b8153a6d6</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <!-- Skip XferDocBuilder targets since this is a standalone example solution -->
+    <SkipXferDocGeneration>true</SkipXferDocGeneration>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj" />
+    <ProjectReference Include="..\..\..\ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj" />
     <ProjectReference Include="..\Xfer.Data\Xfer.Data.csproj" />
   </ItemGroup>
 

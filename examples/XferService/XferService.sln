@@ -5,11 +5,11 @@ VisualStudioVersion = 17.10.35201.131
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xfer.Service", "Xfer.Service\Xfer.Service.csproj", "{1A66001F-5BAA-4268-8DF3-F12D962E5DA3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParksComputing.Xfer", "..\xfer\ParksComputing.Xfer\ParksComputing.Xfer.csproj", "{01F6764F-11CD-49A5-B075-CC2664C19A36}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xfer.Data", "Xfer.Data\Xfer.Data.csproj", "{933D6FEA-EC54-41D3-B4E3-F2F79BE277C7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xfer.Client", "Xfer.Client\Xfer.Client.csproj", "{9D0F4CAE-2514-4D61-9C89-CDB82038D6D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParksComputing.Xfer.Lang", "..\ParksComputing.Xfer.Lang\ParksComputing.Xfer.Lang.csproj", "{82632944-8438-B9A0-A4A5-AF19F66788CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,10 +21,6 @@ Global
 		{1A66001F-5BAA-4268-8DF3-F12D962E5DA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A66001F-5BAA-4268-8DF3-F12D962E5DA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A66001F-5BAA-4268-8DF3-F12D962E5DA3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{01F6764F-11CD-49A5-B075-CC2664C19A36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{01F6764F-11CD-49A5-B075-CC2664C19A36}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{01F6764F-11CD-49A5-B075-CC2664C19A36}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{01F6764F-11CD-49A5-B075-CC2664C19A36}.Release|Any CPU.Build.0 = Release|Any CPU
 		{933D6FEA-EC54-41D3-B4E3-F2F79BE277C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{933D6FEA-EC54-41D3-B4E3-F2F79BE277C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{933D6FEA-EC54-41D3-B4E3-F2F79BE277C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +29,10 @@ Global
 		{9D0F4CAE-2514-4D61-9C89-CDB82038D6D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D0F4CAE-2514-4D61-9C89-CDB82038D6D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D0F4CAE-2514-4D61-9C89-CDB82038D6D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82632944-8438-B9A0-A4A5-AF19F66788CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82632944-8438-B9A0-A4A5-AF19F66788CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82632944-8438-B9A0-A4A5-AF19F66788CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82632944-8438-B9A0-A4A5-AF19F66788CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

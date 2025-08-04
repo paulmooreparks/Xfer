@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,13 +34,58 @@ public class DecimalElement : NumericElement<decimal>
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
+    /// Custom formatter function for the decimal value. If null, uses default formatting.
+    /// </summary>
+    public Func<decimal, string>? CustomFormatter { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the DecimalElement class with the specified value and formatting options.
     /// </summary>
     /// <param name="value">The decimal value to represent</param>
     /// <param name="specifierCount">The number of delimiter characters to use (default: 1)</param>
     /// <param name="style">The element style for delimiter handling (default: Compact)</param>
-    public DecimalElement(decimal value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
+    /// <param name="customFormatter">Optional custom formatter function for the decimal value</param>
+    public DecimalElement(decimal value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<decimal, string>? customFormatter = null)
         : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
     {
+        CustomFormatter = customFormatter;
+    }
+
+    /// <summary>
+    /// Serializes this decimal element to its XferLang string representation.
+    /// Uses asterisk delimiters and applies custom formatting if specified.
+    /// </summary>
+    /// <param name="formatting">The formatting style to apply during serialization</param>
+    /// <param name="indentChar">The character to use for indentation (default: space)</param>
+    /// <param name="indentation">The number of indentation characters per level (default: 2)</param>
+    /// <param name="depth">The current nesting depth for indentation calculation (default: 0)</param>
+    /// <returns>The XferLang string representation of this decimal element</returns>
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
+    {
+        var sb = new StringBuilder();
+        string valueString = CustomFormatter?.Invoke(Value) ?? Value.ToString();
+
+        if (Delimiter.Style == ElementStyle.Implicit)
+        {
+            sb.Append($"{valueString} ");
+        }
+        else if (Delimiter.Style == ElementStyle.Compact)
+        {
+            // For custom formatted values (hex/binary), they already include the prefix
+            if (CustomFormatter != null && (valueString.StartsWith("#") || valueString.StartsWith("-#")))
+            {
+                sb.Append($"{valueString} ");
+            }
+            else
+            {
+                sb.Append($"{Delimiter.OpeningSpecifier}{valueString} ");
+            }
+        }
+        else
+        {
+            sb.Append($"{Delimiter.Opening}{valueString}{Delimiter.Closing}");
+        }
+
+        return sb.ToString();
     }
 }

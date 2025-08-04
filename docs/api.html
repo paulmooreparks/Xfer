@@ -49,6 +49,7 @@
                 <details>
                     <summary>ParksComputing.Xfer.Lang.Attributes</summary>
                     <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-attributes-xferdecimalprecisionattribute">XferDecimalPrecisionAttribute</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-attributes-xferevaluatedattribute">XferEvaluatedAttribute</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-attributes-xfernumericformat">XferNumericFormat</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-attributes-xfernumericformatattribute">XferNumericFormatAttribute</a></li>
@@ -1048,6 +1049,42 @@
 </section>
 </section>
 <section id="namespace-parkscomputing-xfer-lang-attributes"><h2>Namespace: ParksComputing.Xfer.Lang.Attributes</h2>
+<section id="type-parkscomputing-xfer-lang-attributes-xferdecimalprecisionattribute"><h3>Class: XferDecimalPrecisionAttribute</h3>
+<p>Specifies the maximum number of decimal places to display when serializing decimal and double values to XferLang. This attribute only affects the string representation and does not modify the underlying value.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>DecimalPlaces</code></td>
+<td><code>int</code></td>
+<td>The maximum number of decimal places to display.</td>
+</tr>
+<tr>
+<td><code>RemoveTrailingZeros</code></td>
+<td><code>bool</code></td>
+<td>Whether to remove trailing zeros after the decimal point. Default is true.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferDecimalPrecisionAttribute(int decimalPlaces)</code>
+<p>Initializes a new instance of the XferDecimalPrecisionAttribute.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>decimalPlaces</code></td>
+<td><code>int</code></td>
+<td>The maximum number of decimal places to display. Must be 0 or greater.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="type-parkscomputing-xfer-lang-attributes-xferevaluatedattribute"><h3>Class: XferEvaluatedAttribute</h3>
 <p>Indicates that a property should be serialized as an evaluated element in XferLang. Evaluated elements use angle bracket delimiters and their content is processed for dynamic content, variable substitution, or expressions during serialization.</p>
 <h4>Methods</h4>
@@ -2497,10 +2534,21 @@
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-decimalelement"><h3>Class: DecimalElement</h3>
 <p>Represents a decimal number element in XferLang using asterisk (*) delimiters. Decimal elements store high-precision decimal values suitable for financial calculations and other applications requiring exact decimal representation.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>CustomFormatter</code></td>
+<td><code>Func&lt;decimal, string&gt;</code></td>
+<td>Custom formatter function for the decimal value. If null, uses default formatting.</td>
+</tr>
+</tbody>
+</table>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
-<code>DecimalElement(decimal value, int specifierCount, ElementStyle style)</code>
+<code>DecimalElement(decimal value, int specifierCount, ElementStyle style, Func&lt;decimal, string&gt; customFormatter)</code>
 <p>Initializes a new instance of the DecimalElement class with the specified value and formatting options.</p>
 <h6>Parameters</h6>
 <table class="api-table">
@@ -2521,8 +2569,46 @@
 <td><code>ElementStyle</code></td>
 <td>The element style for delimiter handling (default: Compact)</td>
 </tr>
+<tr>
+<td><code>customFormatter</code></td>
+<td><code>Func&lt;decimal, string&gt;</code></td>
+<td>Optional custom formatter function for the decimal value</td>
+</tr>
 </tbody>
 </table>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+<p>Serializes this decimal element to its XferLang string representation. Uses asterisk delimiters and applies custom formatting if specified.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>formatting</code></td>
+<td><code>Formatting</code></td>
+<td>The formatting style to apply during serialization</td>
+</tr>
+<tr>
+<td><code>indentChar</code></td>
+<td><code>Char</code></td>
+<td>The character to use for indentation (default: space)</td>
+</tr>
+<tr>
+<td><code>indentation</code></td>
+<td><code>int</code></td>
+<td>The number of indentation characters per level (default: 2)</td>
+</tr>
+<tr>
+<td><code>depth</code></td>
+<td><code>int</code></td>
+<td>The current nesting depth for indentation calculation (default: 0)</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The XferLang string representation of this decimal element</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-dictionaryelement"><h3>Abstract Class: DictionaryElement</h3>
@@ -2595,10 +2681,21 @@
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-doubleelement"><h3>Class: DoubleElement</h3>
 <p>Represents a double-precision floating-point number element in XferLang using caret (^) delimiters. Double elements store IEEE 754 double-precision floating-point values suitable for scientific calculations and general-purpose numeric operations.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>CustomFormatter</code></td>
+<td><code>Func&lt;double, string&gt;</code></td>
+<td>Custom formatter function for the double value. If null, uses default formatting.</td>
+</tr>
+</tbody>
+</table>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
-<code>DoubleElement(double value, int markerCount, ElementStyle style)</code>
+<code>DoubleElement(double value, int markerCount, ElementStyle style, Func&lt;double, string&gt; customFormatter)</code>
 <p>Initializes a new instance of the DoubleElement class with the specified value and formatting options.</p>
 <h6>Parameters</h6>
 <table class="api-table">
@@ -2619,8 +2716,46 @@
 <td><code>ElementStyle</code></td>
 <td>The element style for delimiter handling (default: Compact)</td>
 </tr>
+<tr>
+<td><code>customFormatter</code></td>
+<td><code>Func&lt;double, string&gt;</code></td>
+<td>Optional custom formatter function for the double value</td>
+</tr>
 </tbody>
 </table>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+<p>Serializes this double element to its XferLang string representation. Uses caret delimiters and applies custom formatting if specified.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>formatting</code></td>
+<td><code>Formatting</code></td>
+<td>The formatting style to apply during serialization</td>
+</tr>
+<tr>
+<td><code>indentChar</code></td>
+<td><code>Char</code></td>
+<td>The character to use for indentation (default: space)</td>
+</tr>
+<tr>
+<td><code>indentation</code></td>
+<td><code>int</code></td>
+<td>The number of indentation characters per level (default: 2)</td>
+</tr>
+<tr>
+<td><code>depth</code></td>
+<td><code>int</code></td>
+<td>The current nesting depth for indentation calculation (default: 0)</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The XferLang string representation of this double element</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-dynamicelement"><h3>Class: DynamicElement</h3>
@@ -5638,7 +5773,7 @@
 
 
         <footer>
-            <p>Documentation generated on 2025-08-04 15:44:44 UTC</p>
+            <p>Documentation generated on 2025-08-04 20:50:41 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

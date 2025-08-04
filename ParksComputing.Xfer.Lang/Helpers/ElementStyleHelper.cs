@@ -108,10 +108,29 @@ namespace ParksComputing.Xfer.Lang.Helpers {
         /// </summary>
         public static DecimalElement CreateFormattedDecimalElement(decimal value, PropertyInfo? property, ElementStylePreference preference) {
             var formatAttribute = property?.GetCustomAttribute<XferNumericFormatAttribute>();
+            var precisionAttribute = property?.GetCustomAttribute<XferDecimalPrecisionAttribute>();
             var style = GetDecimalStyle(value, preference);
 
-            // For now, DecimalElement doesn't support custom formatting
-            // Hex/binary formatting would lose fractional precision
+            // Handle precision formatting
+            if (precisionAttribute != null || (formatAttribute != null && formatAttribute.Format == XferNumericFormat.Decimal)) {
+                var formatter = new Func<decimal, string>(v => {
+                    var format = formatAttribute?.Format ?? XferNumericFormat.Decimal;
+                    var minBits = formatAttribute?.MinBits ?? 0;
+                    var minDigits = formatAttribute?.MinDigits ?? 0;
+                    var decimalPlaces = precisionAttribute?.DecimalPlaces;
+                    var removeTrailingZeros = precisionAttribute?.RemoveTrailingZeros ?? true;
+                    
+                    return NumericFormatter.FormatDecimal(v, format, minBits, minDigits, decimalPlaces, removeTrailingZeros);
+                });
+                return new DecimalElement(value, style: style, customFormatter: formatter);
+            }
+            
+            // Handle hex/binary formatting (loses fractional precision)
+            if (formatAttribute != null && formatAttribute.Format != XferNumericFormat.Default && formatAttribute.Format != XferNumericFormat.Decimal) {
+                var formatter = new Func<decimal, string>(v => NumericFormatter.FormatDecimal(v, formatAttribute.Format, formatAttribute.MinBits, formatAttribute.MinDigits));
+                return new DecimalElement(value, style: style, customFormatter: formatter);
+            }
+
             return new DecimalElement(value, style: style);
         }
 
@@ -120,10 +139,29 @@ namespace ParksComputing.Xfer.Lang.Helpers {
         /// </summary>
         public static DoubleElement CreateFormattedDoubleElement(double value, PropertyInfo? property, ElementStylePreference preference) {
             var formatAttribute = property?.GetCustomAttribute<XferNumericFormatAttribute>();
+            var precisionAttribute = property?.GetCustomAttribute<XferDecimalPrecisionAttribute>();
             var style = GetDoubleStyle(value, preference);
 
-            // For now, DoubleElement doesn't support custom formatting
-            // Hex/binary formatting would lose fractional precision
+            // Handle precision formatting
+            if (precisionAttribute != null || (formatAttribute != null && formatAttribute.Format == XferNumericFormat.Decimal)) {
+                var formatter = new Func<double, string>(v => {
+                    var format = formatAttribute?.Format ?? XferNumericFormat.Decimal;
+                    var minBits = formatAttribute?.MinBits ?? 0;
+                    var minDigits = formatAttribute?.MinDigits ?? 0;
+                    var decimalPlaces = precisionAttribute?.DecimalPlaces;
+                    var removeTrailingZeros = precisionAttribute?.RemoveTrailingZeros ?? true;
+                    
+                    return NumericFormatter.FormatDouble(v, format, minBits, minDigits, decimalPlaces, removeTrailingZeros);
+                });
+                return new DoubleElement(value, style: style, customFormatter: formatter);
+            }
+            
+            // Handle hex/binary formatting (loses fractional precision)
+            if (formatAttribute != null && formatAttribute.Format != XferNumericFormat.Default && formatAttribute.Format != XferNumericFormat.Decimal) {
+                var formatter = new Func<double, string>(v => NumericFormatter.FormatDouble(v, formatAttribute.Format, formatAttribute.MinBits, formatAttribute.MinDigits));
+                return new DoubleElement(value, style: style, customFormatter: formatter);
+            }
+
             return new DoubleElement(value, style: style);
         }
 

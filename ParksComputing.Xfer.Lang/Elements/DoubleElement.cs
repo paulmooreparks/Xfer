@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,13 +34,58 @@ public class DoubleElement : NumericElement<double>
     public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
+    /// Custom formatter function for the double value. If null, uses default formatting.
+    /// </summary>
+    public Func<double, string>? CustomFormatter { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the DoubleElement class with the specified value and formatting options.
     /// </summary>
     /// <param name="value">The double-precision floating-point value to represent</param>
     /// <param name="markerCount">The number of delimiter characters to use (default: 1)</param>
     /// <param name="style">The element style for delimiter handling (default: Compact)</param>
-    public DoubleElement(double value, int markerCount = 1, ElementStyle style = ElementStyle.Compact)
+    /// <param name="customFormatter">Optional custom formatter function for the double value</param>
+    public DoubleElement(double value, int markerCount = 1, ElementStyle style = ElementStyle.Compact, Func<double, string>? customFormatter = null)
         : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, markerCount, style))
     {
+        CustomFormatter = customFormatter;
+    }
+
+    /// <summary>
+    /// Serializes this double element to its XferLang string representation.
+    /// Uses caret delimiters and applies custom formatting if specified.
+    /// </summary>
+    /// <param name="formatting">The formatting style to apply during serialization</param>
+    /// <param name="indentChar">The character to use for indentation (default: space)</param>
+    /// <param name="indentation">The number of indentation characters per level (default: 2)</param>
+    /// <param name="depth">The current nesting depth for indentation calculation (default: 0)</param>
+    /// <returns>The XferLang string representation of this double element</returns>
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
+    {
+        var sb = new StringBuilder();
+        string valueString = CustomFormatter?.Invoke(Value) ?? Value.ToString();
+
+        if (Delimiter.Style == ElementStyle.Implicit)
+        {
+            sb.Append($"{valueString} ");
+        }
+        else if (Delimiter.Style == ElementStyle.Compact)
+        {
+            // For custom formatted values (hex/binary), they already include the prefix
+            if (CustomFormatter != null && (valueString.StartsWith("#") || valueString.StartsWith("-#")))
+            {
+                sb.Append($"{valueString} ");
+            }
+            else
+            {
+                sb.Append($"{Delimiter.OpeningSpecifier}{valueString} ");
+            }
+        }
+        else
+        {
+            sb.Append($"{Delimiter.Opening}{valueString}{Delimiter.Closing}");
+        }
+
+        return sb.ToString();
     }
 }
