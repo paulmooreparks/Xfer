@@ -90,7 +90,6 @@
                     <summary>ParksComputing.Xfer.Lang.Converters</summary>
                     <ul>
                         <li><a href="#type-parkscomputing-xfer-lang-converters-ixferconverter">IXferConverter</a></li>
-                        <li><a href="#type-parkscomputing-xfer-lang-converters-personconverter">PersonConverter</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-converters-xferconverter-1">XferConverter&lt;T&gt;</a></li>
                     </ul>
                 </details>
@@ -675,6 +674,159 @@
 <p>An object of type T.</p>
 </div>
 <div class="method-doc">
+<h5>DeserializeAsync</h5>
+<code>Task&lt;T&gt; DeserializeAsync(TextReader reader, CancellationToken cancellationToken)</code>
+<p>Asynchronously deserializes XferLang content from a TextReader to an object of type T using default settings.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>reader</code></td>
+<td><code>TextReader</code></td>
+<td>The TextReader to read from.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous read operation. The task result contains the deserialized object.</p>
+</div>
+<div class="method-doc">
+<h5>DeserializeAsync</h5>
+<code>Task&lt;T&gt; DeserializeAsync(TextReader reader, XferSerializerSettings settings, CancellationToken cancellationToken)</code>
+<p>Asynchronously deserializes XferLang content from a TextReader to an object of type T using custom settings.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>reader</code></td>
+<td><code>TextReader</code></td>
+<td>The TextReader to read from.</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td><code>XferSerializerSettings</code></td>
+<td>Serializer settings to control deserialization behavior.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous read operation. The task result contains the deserialized object.</p>
+</div>
+<div class="method-doc">
+<h5>DeserializeFromFileAsync</h5>
+<code>Task&lt;T&gt; DeserializeFromFileAsync(string filePath, CancellationToken cancellationToken)</code>
+<p>Asynchronously deserializes a XferLang file to an object of type T using default settings.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>filePath</code></td>
+<td><code>string</code></td>
+<td>The path to the file to read.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous read operation. The task result contains the deserialized object.</p>
+</div>
+<div class="method-doc">
+<h5>DeserializeFromFileAsync</h5>
+<code>Task&lt;T&gt; DeserializeFromFileAsync(string filePath, XferSerializerSettings settings, CancellationToken cancellationToken)</code>
+<p>Asynchronously deserializes a XferLang file to an object of type T using custom settings.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>filePath</code></td>
+<td><code>string</code></td>
+<td>The path to the file to read.</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td><code>XferSerializerSettings</code></td>
+<td>Serializer settings to control deserialization behavior.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous read operation. The task result contains the deserialized object.</p>
+</div>
+<div class="method-doc">
+<h5>DeserializeFromStreamAsync</h5>
+<code>Task&lt;T&gt; DeserializeFromStreamAsync(Stream stream, CancellationToken cancellationToken)</code>
+<p>Asynchronously deserializes XferLang content from a Stream to an object of type T using default settings. Assumes UTF-8 encoding.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>stream</code></td>
+<td><code>Stream</code></td>
+<td>The Stream to read from.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous read operation. The task result contains the deserialized object.</p>
+</div>
+<div class="method-doc">
+<h5>DeserializeFromStreamAsync</h5>
+<code>Task&lt;T&gt; DeserializeFromStreamAsync(Stream stream, XferSerializerSettings settings, CancellationToken cancellationToken)</code>
+<p>Asynchronously deserializes XferLang content from a Stream to an object of type T using custom settings. Assumes UTF-8 encoding.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>stream</code></td>
+<td><code>Stream</code></td>
+<td>The Stream to read from.</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td><code>XferSerializerSettings</code></td>
+<td>Serializer settings to control deserialization behavior.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous read operation. The task result contains the deserialized object.</p>
+</div>
+<div class="method-doc">
 <h5>FromObject</h5>
 <code>ObjectElement FromObject(Object o, XferSerializerSettings settings)</code>
 <p>Creates an ObjectElement from a POCO, similar to JObject.FromObject.</p>
@@ -761,6 +913,303 @@
 <p>XferLang string representation of the object.</p>
 </div>
 <div class="method-doc">
+<h5>SerializeAsync</h5>
+<code>Task SerializeAsync(T value, TextWriter writer, CancellationToken cancellationToken)</code>
+<p>Asynchronously serializes an object to a TextWriter with default settings.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>T</code></td>
+<td>The object to serialize.</td>
+</tr>
+<tr>
+<td><code>writer</code></td>
+<td><code>TextWriter</code></td>
+<td>The TextWriter to write to.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous write operation.</p>
+</div>
+<div class="method-doc">
+<h5>SerializeAsync</h5>
+<code>Task SerializeAsync(T value, TextWriter writer, Formatting formatting, CancellationToken cancellationToken)</code>
+<p>Asynchronously serializes an object to a TextWriter with formatting.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>T</code></td>
+<td>The object to serialize.</td>
+</tr>
+<tr>
+<td><code>writer</code></td>
+<td><code>TextWriter</code></td>
+<td>The TextWriter to write to.</td>
+</tr>
+<tr>
+<td><code>formatting</code></td>
+<td><code>Formatting</code></td>
+<td>Controls indentation and formatting of the output.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous write operation.</p>
+</div>
+<div class="method-doc">
+<h5>SerializeAsync</h5>
+<code>Task SerializeAsync(T value, TextWriter writer, XferSerializerSettings settings, Formatting formatting, CancellationToken cancellationToken)</code>
+<p>Asynchronously serializes an object to a TextWriter with custom settings and formatting.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>T</code></td>
+<td>The object to serialize.</td>
+</tr>
+<tr>
+<td><code>writer</code></td>
+<td><code>TextWriter</code></td>
+<td>The TextWriter to write to.</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td><code>XferSerializerSettings</code></td>
+<td>Serializer settings to control serialization behavior.</td>
+</tr>
+<tr>
+<td><code>formatting</code></td>
+<td><code>Formatting</code></td>
+<td>Controls indentation and formatting of the output.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous write operation.</p>
+</div>
+<div class="method-doc">
+<h5>SerializeToFileAsync</h5>
+<code>Task SerializeToFileAsync(T value, string filePath, CancellationToken cancellationToken)</code>
+<p>Asynchronously serializes an object to a XferLang file with default settings.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>T</code></td>
+<td>The object to serialize.</td>
+</tr>
+<tr>
+<td><code>filePath</code></td>
+<td><code>string</code></td>
+<td>The path to the file to write.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous write operation.</p>
+</div>
+<div class="method-doc">
+<h5>SerializeToFileAsync</h5>
+<code>Task SerializeToFileAsync(T value, string filePath, Formatting formatting, CancellationToken cancellationToken)</code>
+<p>Asynchronously serializes an object to a XferLang file with formatting.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>T</code></td>
+<td>The object to serialize.</td>
+</tr>
+<tr>
+<td><code>filePath</code></td>
+<td><code>string</code></td>
+<td>The path to the file to write.</td>
+</tr>
+<tr>
+<td><code>formatting</code></td>
+<td><code>Formatting</code></td>
+<td>Controls indentation and formatting of the output.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous write operation.</p>
+</div>
+<div class="method-doc">
+<h5>SerializeToFileAsync</h5>
+<code>Task SerializeToFileAsync(T value, string filePath, XferSerializerSettings settings, Formatting formatting, CancellationToken cancellationToken)</code>
+<p>Asynchronously serializes an object to a XferLang file with custom settings and formatting.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>T</code></td>
+<td>The object to serialize.</td>
+</tr>
+<tr>
+<td><code>filePath</code></td>
+<td><code>string</code></td>
+<td>The path to the file to write.</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td><code>XferSerializerSettings</code></td>
+<td>Serializer settings to control serialization behavior.</td>
+</tr>
+<tr>
+<td><code>formatting</code></td>
+<td><code>Formatting</code></td>
+<td>Controls indentation and formatting of the output.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous write operation.</p>
+</div>
+<div class="method-doc">
+<h5>SerializeToStreamAsync</h5>
+<code>Task SerializeToStreamAsync(T value, Stream stream, CancellationToken cancellationToken)</code>
+<p>Asynchronously serializes an object to a Stream with UTF-8 encoding using default settings.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>T</code></td>
+<td>The object to serialize.</td>
+</tr>
+<tr>
+<td><code>stream</code></td>
+<td><code>Stream</code></td>
+<td>The Stream to write to.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous write operation.</p>
+</div>
+<div class="method-doc">
+<h5>SerializeToStreamAsync</h5>
+<code>Task SerializeToStreamAsync(T value, Stream stream, Formatting formatting, CancellationToken cancellationToken)</code>
+<p>Asynchronously serializes an object to a Stream with UTF-8 encoding and formatting.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>T</code></td>
+<td>The object to serialize.</td>
+</tr>
+<tr>
+<td><code>stream</code></td>
+<td><code>Stream</code></td>
+<td>The Stream to write to.</td>
+</tr>
+<tr>
+<td><code>formatting</code></td>
+<td><code>Formatting</code></td>
+<td>Controls indentation and formatting of the output.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous write operation.</p>
+</div>
+<div class="method-doc">
+<h5>SerializeToStreamAsync</h5>
+<code>Task SerializeToStreamAsync(T value, Stream stream, XferSerializerSettings settings, Formatting formatting, CancellationToken cancellationToken)</code>
+<p>Asynchronously serializes an object to a Stream with UTF-8 encoding, custom settings and formatting.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>T</code></td>
+<td>The object to serialize.</td>
+</tr>
+<tr>
+<td><code>stream</code></td>
+<td><code>Stream</code></td>
+<td>The Stream to write to.</td>
+</tr>
+<tr>
+<td><code>settings</code></td>
+<td><code>XferSerializerSettings</code></td>
+<td>Serializer settings to control serialization behavior.</td>
+</tr>
+<tr>
+<td><code>formatting</code></td>
+<td><code>Formatting</code></td>
+<td>Controls indentation and formatting of the output.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous write operation.</p>
+</div>
+<div class="method-doc">
 <h5>SerializeValue</h5>
 <code>Element SerializeValue(Object value)</code>
 <p>Converts an object to a XferLang Element using default settings.</p>
@@ -807,8 +1256,110 @@
 <p>Deserializes an ObjectElement to a POCO of type T.</p>
 </div>
 <div class="method-doc">
+<h5>TryDeserializeAsync</h5>
+<code>Task&lt;ValueTuple&lt;bool, T&gt;&gt; TryDeserializeAsync(TextReader reader, CancellationToken cancellationToken)</code>
+<p>Attempts to asynchronously deserialize XferLang content from a TextReader to an object of type T. Returns result with success status without throwing exceptions.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>reader</code></td>
+<td><code>TextReader</code></td>
+<td>The TextReader to read from.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous operation. The task result contains the success status and the deserialized object if successful.</p>
+</div>
+<div class="method-doc">
+<h5>TryDeserializeFromFileAsync</h5>
+<code>Task&lt;ValueTuple&lt;bool, T&gt;&gt; TryDeserializeFromFileAsync(string filePath, CancellationToken cancellationToken)</code>
+<p>Attempts to asynchronously deserialize a file to an object of type T. Returns result with success status without throwing exceptions.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>filePath</code></td>
+<td><code>string</code></td>
+<td>The path to the file to read.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous operation. The task result contains the success status and the deserialized object if successful.</p>
+</div>
+<div class="method-doc">
 <h5>TryFromObject</h5>
 <code>bool TryFromObject(Object o, ObjectElement& result, XferSerializerSettings settings)</code>
+</div>
+<div class="method-doc">
+<h5>TrySerializeAsync</h5>
+<code>Task&lt;bool&gt; TrySerializeAsync(T value, TextWriter writer, CancellationToken cancellationToken)</code>
+<p>Attempts to asynchronously serialize an object to a TextWriter. Returns success status without throwing exceptions.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>T</code></td>
+<td>The object to serialize.</td>
+</tr>
+<tr>
+<td><code>writer</code></td>
+<td><code>TextWriter</code></td>
+<td>The TextWriter to write to.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous operation. The task result indicates success or failure.</p>
+</div>
+<div class="method-doc">
+<h5>TrySerializeToFileAsync</h5>
+<code>Task&lt;bool&gt; TrySerializeToFileAsync(T value, string filePath, CancellationToken cancellationToken)</code>
+<p>Attempts to asynchronously serialize an object to a file. Returns success status without throwing exceptions.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>T</code></td>
+<td>The object to serialize.</td>
+</tr>
+<tr>
+<td><code>filePath</code></td>
+<td><code>string</code></td>
+<td>The path to the file to write.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous operation. The task result indicates success or failure.</p>
 </div>
 <div class="method-doc">
 <h5>TryToObject</h5>
@@ -1045,6 +1596,75 @@
 </table>
 <h6>Returns</h6>
 <p>An XferDocument representing the parsed content.</p>
+</div>
+<div class="method-doc">
+<h5>ParseFileAsync</h5>
+<code>Task&lt;XferDocument&gt; ParseFileAsync(string filePath, CancellationToken cancellationToken)</code>
+<p>Asynchronously parses XferLang content from a file using a new parser instance.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>filePath</code></td>
+<td><code>string</code></td>
+<td>The path to the file containing XferLang content to parse.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous parse operation. The task result contains an XferDocument representing the parsed content.</p>
+</div>
+<div class="method-doc">
+<h5>ParseStreamAsync</h5>
+<code>Task&lt;XferDocument&gt; ParseStreamAsync(Stream stream, CancellationToken cancellationToken)</code>
+<p>Asynchronously parses XferLang content from a stream using a new parser instance. Assumes UTF-8 encoding.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>stream</code></td>
+<td><code>Stream</code></td>
+<td>The stream containing XferLang content to parse.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous parse operation. The task result contains an XferDocument representing the parsed content.</p>
+</div>
+<div class="method-doc">
+<h5>ParseTextReaderAsync</h5>
+<code>Task&lt;XferDocument&gt; ParseTextReaderAsync(TextReader reader, CancellationToken cancellationToken)</code>
+<p>Asynchronously parses XferLang content from a TextReader using a new parser instance.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>reader</code></td>
+<td><code>TextReader</code></td>
+<td>The TextReader containing XferLang content to parse.</td>
+</tr>
+<tr>
+<td><code>cancellationToken</code></td>
+<td><code>CancellationToken</code></td>
+<td>Token to monitor for cancellation requests.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A task that represents the asynchronous parse operation. The task result contains an XferDocument representing the parsed content.</p>
 </div>
 </section>
 </section>
@@ -1528,60 +2148,6 @@
 </table>
 <h6>Returns</h6>
 <p>The XferLang element representation of the object.</p>
-</div>
-</section>
-<section id="type-parkscomputing-xfer-lang-converters-personconverter"><h3>Class: PersonConverter</h3>
-<p>Example custom converter for Person objects. Demonstrates how to implement specialized serialization logic by converting Person objects to/from comma-separated string format.</p>
-<h4>Methods</h4>
-<div class="method-doc">
-<h5>Constructor</h5>
-<code>PersonConverter()</code>
-</div>
-<div class="method-doc">
-<h5>ReadXfer</h5>
-<code>Person ReadXfer(Element element, XferSerializerSettings settings)</code>
-<p>Converts a XferLang element back to a Person object from "Name,Age" format.</p>
-<h6>Parameters</h6>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr>
-<td><code>element</code></td>
-<td><code>Element</code></td>
-<td>The XferLang element to convert (expected to be StringElement).</td>
-</tr>
-<tr>
-<td><code>settings</code></td>
-<td><code>XferSerializerSettings</code></td>
-<td>Serializer settings (not used in this implementation).</td>
-</tr>
-</tbody>
-</table>
-<h6>Returns</h6>
-<p>A Person object with parsed name and age.</p>
-</div>
-<div class="method-doc">
-<h5>WriteXfer</h5>
-<code>Element WriteXfer(Person value, XferSerializerSettings settings)</code>
-<p>Converts a Person object to a XferLang StringElement in "Name,Age" format.</p>
-<h6>Parameters</h6>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr>
-<td><code>value</code></td>
-<td><code>Person</code></td>
-<td>The Person object to convert.</td>
-</tr>
-<tr>
-<td><code>settings</code></td>
-<td><code>XferSerializerSettings</code></td>
-<td>Serializer settings (not used in this implementation).</td>
-</tr>
-</tbody>
-</table>
-<h6>Returns</h6>
-<p>A StringElement containing the comma-separated name and age.</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-converters-xferconverter-1"><h3>Abstract Class: XferConverter&lt;T&gt;</h3>
@@ -5778,7 +6344,7 @@
 
 
         <footer>
-            <p>Documentation generated on 2025-08-05 01:08:21 UTC</p>
+            <p>Documentation generated on 2025-08-05 04:01:14 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

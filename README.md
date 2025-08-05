@@ -138,7 +138,7 @@ In contrast to JSON, XferLang eliminates commas, uses explicit type prefixes for
 Because whitespace is flexible, the same XferLang document can be made extremely compact:
 
 ```xfer
-{name"Alice"age 30 isMember~true scores[*85*90*78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00@}}
+{name"Alice"age 30 isMember~true scores[*85 *90 *78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00@}}
 ```
 
 ## Language Specification

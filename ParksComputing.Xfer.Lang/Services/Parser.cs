@@ -10,9 +10,6 @@ using ParksComputing.Xfer.Lang.ProcessingInstructions;
 
 namespace ParksComputing.Xfer.Lang.Services;
 
-/* This parser is ROUGH. I'm trying out a lot of ideas, some of them supported in parallel. Once I
-settle on a solid grammar, I'll redo the parser or use some kind of tool to generate it. */
-
 /// <summary>
 /// The main XferLang parser that converts XferLang text into a structured document model.
 /// Supports extensible processing instructions, element processors, and dynamic source resolution.
@@ -360,18 +357,6 @@ public class Parser : IXferParser {
         return ElementOpening(KeywordElement.ElementDelimiter, out specifierCount);
     }
 
-    internal bool IdentifierElementOpening(out int specifierCount) {
-        if (IdentifierElement.IsIdentifierLeadingChar(CurrentChar)) {
-            specifierCount = 1;
-            LastElementRow = CurrentRow;
-            LastElementColumn = CurrentColumn;
-            _delimStack.Push(new ElementDelimiter(IdentifierElement.OpeningSpecifier, IdentifierElement.ClosingSpecifier, specifierCount, ElementStyle.Implicit));
-            return true;
-        }
-
-        return ElementOpening(IdentifierElement.ElementDelimiter, out specifierCount);
-    }
-
     internal bool IntegerElementOpening(out int specifierCount) {
         if (CurrentChar.IsIntegerLeadingChar()) {
             specifierCount = 1;
@@ -469,7 +454,7 @@ public class Parser : IXferParser {
 
     internal bool IdentifierElementClosing() {
         Debug.Assert(_delimStack.Peek().ClosingSpecifier == IdentifierElement.ClosingSpecifier);
-        return ElementCompactClosing();
+        return ElementClosing();
     }
 
     internal bool KeywordElementClosing() {
@@ -625,6 +610,10 @@ public class Parser : IXferParser {
             || CurrentChar.IsElementOpeningSpecifier()
             || CurrentChar.IsCollectionClosingSpecifier()
             )) {
+            // If we're closing on the closing specifier, advance past it
+            if (CurrentChar == closingSpecifier) {
+                Advance();
+            }
             _delimStack.Pop();
             return true;
         }
@@ -889,7 +878,7 @@ public class Parser : IXferParser {
             else if (ElementOpening(DynamicElement.ElementDelimiter, out int phSpecifierCount)) {
                 element = ParseDynamicElement(phSpecifierCount);
             }
-            else if (IdentifierElementOpening(out int identifierSpecifierCount)) {
+            else if (ElementOpening(IdentifierElement.ElementDelimiter, out int identifierSpecifierCount)) {
                 element = ParseIdentifierElement(identifierSpecifierCount);
             }
             else if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
@@ -998,7 +987,7 @@ public class Parser : IXferParser {
         var style = _delimStack.Peek().Style;
         SkipWhitespace();
 
-        // Always create a simple ArrayElement which can hold any Element type
+        // Create an ArrayElement with homogeneous type checking enforced by ArrayElement.Add()
         ArrayElement arrayElement;
         try {
             arrayElement = new ArrayElement(style: style);
@@ -1124,8 +1113,13 @@ public class Parser : IXferParser {
                 // Ignore empty elements in objects
                 continue;
             }
+            else if (element is IdentifierElement identifierElement) {
+                // IdentifierElement found without a key - this shouldn't happen in well-formed XferLang
+                // but we'll handle it by creating a temporary KVP
+                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Standalone IdentifierElement '{identifierElement.Value}' found in object. IdentifierElements must be values in key-value pairs.");
+            }
             else {
-                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected element type.");
+                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected element type '{element.GetType().Name}'. Objects can only contain KeyValuePairElement, ProcessingInstruction, or EmptyElement. Found: {element}");
             }
         }
 
@@ -1407,8 +1401,6 @@ public class Parser : IXferParser {
     }
 
     private IdentifierElement ParseIdentifierElement(int specifierCount = 1) {
-        var lastRow = CurrentRow;
-        var lastColumn = CurrentColumn;
         var style = _delimStack.Peek().Style;
         var key = string.Empty;
 
@@ -1416,8 +1408,7 @@ public class Parser : IXferParser {
 
         while (IsCharAvailable()) {
             if (IdentifierElementClosing()) {
-                key = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
-                return new IdentifierElement(key, specifierCount, style: style);
+                return new IdentifierElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);

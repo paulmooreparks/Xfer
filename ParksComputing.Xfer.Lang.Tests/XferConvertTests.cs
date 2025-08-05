@@ -286,7 +286,7 @@ public class XferConvertTests
     public void RoundTrip_MinifiedXferDocument_ShouldMaintainSemanticEquivalence()
     {
         // Arrange
-        var minifiedXfer = "{name\"Alice\"age 30 salary*50000.75 isMember~true scores[*85*90*78.5]profile{email\"alice@example.com\"joinedDate@2023-05-05T20:00:00@}}";
+        var minifiedXfer = "{name\"Alice\"age 30 salary*50000.75 isMember~true scores[*85 *90 *78.5]profile{email\"alice@example.com\"joinedDate@2023-05-05T20:00:00@}}";
 
         // Act - Parse the original document
         var originalDocument = XferParser.Parse(minifiedXfer);

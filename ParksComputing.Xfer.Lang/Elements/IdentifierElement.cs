@@ -83,10 +83,10 @@ public class IdentifierElement : TextElement {
         var sb = new StringBuilder();
 
         if (Delimiter.Style == ElementStyle.Implicit) {
-            sb.Append($"{Value}");
+            sb.Append($":{Value}:");
         }
         else if (Delimiter.Style == ElementStyle.Compact) {
-            sb.Append($"{Delimiter.OpeningSpecifier}{Value}");
+            sb.Append($"{Delimiter.Opening}{Value}{Delimiter.Closing}");
         }
         else {
             sb.Append($"{Delimiter.Opening}{Value}{Delimiter.Closing}");
