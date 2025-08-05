@@ -770,7 +770,6 @@ public class Parser : IXferParser {
             if (element is ProcessingInstruction pi) {
                 // PI at document level - store it and set next element as target
                 document.ProcessingInstructions.Add(pi);
-                Console.WriteLine($"[PARSER] Added document-level PI: {pi.GetType().Name} - {pi.Kvp?.Key}");
             }
             else if (element is CollectionElement collectionElement) {
                 if (rootElement != null) {
@@ -782,11 +781,8 @@ public class Parser : IXferParser {
                 foreach (var docPI in document.ProcessingInstructions) {
                     if (docPI.Target == null) {
                         docPI.Target = rootElement;
-                        Console.WriteLine($"[PARSER] Set PI target: {docPI.Kvp?.Key} -> {rootElement.GetType().Name}");
                     }
                 }
-
-                Console.WriteLine($"[PARSER] Found root element: {rootElement.GetType().Name}");
             }
             else if (element is EmptyElement) {
                 // Skip empty elements
@@ -797,8 +793,6 @@ public class Parser : IXferParser {
 
             SkipWhitespace();
         }
-
-        Console.WriteLine($"[PARSER] Total document-level PIs stored: {document.ProcessingInstructions.Count}");
 
         // Set the root element (default to empty tuple if none found)
         document.Root = rootElement ?? new TupleElement();
@@ -1156,12 +1150,10 @@ public class Parser : IXferParser {
                 // Add PI to tuple and track it for target assignment
                 tupleElement.Add(pi);
                 pendingPIs.Add(pi);
-                Console.WriteLine($"[PARSER] Added PI to tuple: {pi.Kvp?.Key}");
             } else {
                 // Non-PI element: set it as target for any pending PIs
                 foreach (var pendingPI in pendingPIs) {
                     pendingPI.Target = element;
-                    Console.WriteLine($"[PARSER] Set PI target: {pendingPI.Kvp?.Key} -> {element.GetType().Name}");
                 }
                 pendingPIs.Clear();
 
