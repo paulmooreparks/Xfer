@@ -3,6 +3,7 @@ using ParksComputing.Xfer.Lang;
 using ParksComputing.Xfer.Lang.Elements;
 using ParksComputing.Xfer.Lang.Configuration;
 using ParksComputing.Xfer.Lang.Attributes;
+using ParksComputing.Xfer.Lang.Converters;
 using System.Text;
 
 namespace ParksComputing.Xfer.Lang.Tests;
@@ -10,6 +11,30 @@ namespace ParksComputing.Xfer.Lang.Tests;
 [TestClass]
 public class XferConvertTests
 {
+    [TestMethod]
+    public void Debug_UnderstandCurrentBehavior()
+    {
+        // Test numeric formatting
+        var numericObj = new DebugNumericTestClass
+        {
+            DecimalValue = 42,
+            HexValue = 255,
+            BinaryValue = 42
+        };
+
+        string result1 = XferConvert.Serialize(numericObj);
+        Console.WriteLine($"Numeric formatting test: {result1}");
+
+        // Test DateTime
+        var dt = new DateTime(2023, 12, 25, 10, 30, 45, 123);
+        var settings = new XferSerializerSettings { PreserveDateTimePrecision = true };
+        string result2 = XferConvert.Serialize(dt, settings);
+        Console.WriteLine($"DateTime with precision: {result2}");
+
+        // Just ensure it doesn't crash
+        Assert.IsNotNull(result1);
+        Assert.IsNotNull(result2);
+    }
     [TestMethod]
     public void Serialize_SimpleObject_ShouldProduceValidXfer()
     {
@@ -423,4 +448,16 @@ public class XferConvertTests
     }
 
     #endregion
+}
+
+public class DebugNumericTestClass
+{
+    [XferNumericFormat(XferNumericFormat.Decimal)]
+    public int DecimalValue { get; set; }
+
+    [XferNumericFormat(XferNumericFormat.Hexadecimal)]
+    public int HexValue { get; set; }
+
+    [XferNumericFormat(XferNumericFormat.Binary)]
+    public int BinaryValue { get; set; }
 }
