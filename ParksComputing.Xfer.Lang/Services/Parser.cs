@@ -122,7 +122,7 @@ public class Parser : IXferParser {
     /// <summary>
     /// Gets the version of the XferLang parser.
     /// </summary>
-    public static readonly string Version = "0.13";
+    public static readonly string Version = "0.14";
 
     /// <summary>
     /// Initializes a new instance of the Parser class with UTF-8 encoding.

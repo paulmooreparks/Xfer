@@ -47,7 +47,7 @@ Based on the responses in Section 3, the development roadmap for XferLang will p
 
 ### Near-Term Goals (Foundational for Future Features)
 
-1.  **Element ID Processing Instruction**:
+1.  **(COMPLETE) Element ID Processing Instruction**:
     *   **Task**: Implement a new Processing Instruction: `<! id "unique-id" !>`.
     *   **Behavior**: This PI will assign the specified ID to the immediately following element in the document tree. This ID can be used for querying and referencing.
     *   **Rationale**: Enables a robust way to reference specific elements within a document, which is a prerequisite for more advanced querying and data manipulation.
@@ -73,7 +73,7 @@ Based on the responses in Section 3, the development roadmap for XferLang will p
     *   **Task**: Develop a full-featured `LINQ to Xfer` provider.
     *   **Rationale**: To provide a powerful, declarative API for querying and manipulating Xfer documents, making the library significantly more productive for .NET developers.
 
-2.  **Asynchronous APIs**:
+2.  **(COMPLETE) Asynchronous APIs**:
     *   **Task**: Implement `async` versions of all I/O-bound operations, including `SerializeAsync` and `DeserializeAsync`.
     *   **Rationale**: To align with modern .NET best practices for scalability and performance, especially in web and service applications.
 
