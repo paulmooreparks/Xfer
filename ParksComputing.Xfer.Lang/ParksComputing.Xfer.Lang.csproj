@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>XferLang Data-Transfer Language</Title>
     <Company>Paul M. Parks</Company>
@@ -49,48 +49,6 @@
     </None>
   </ItemGroup>
 
-  <!-- Documentation generation targets - only run if XferDocBuilder exists -->
-  <Target Name="GenerateDocs" BeforeTargets="Build" Condition="'$(SkipXferDocGeneration)' != 'true'">
-    <PropertyGroup>
-      <SolutionDir Condition="'$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*'">$(MSBuildProjectDirectory)\..\</SolutionDir>
-      <XferDocBuilderPath>$(SolutionDir)XferDocBuilder\XferDocBuilder.csproj</XferDocBuilderPath>
-    </PropertyGroup>
 
-    <!-- Check if XferDocBuilder exists before trying to run it -->
-    <ItemGroup>
-      <XferDocBuilderExists Include="$(XferDocBuilderPath)" Condition="Exists('$(XferDocBuilderPath)')" />
-    </ItemGroup>
-
-    <Message Text="Generating documentation..." Importance="high" Condition="'@(XferDocBuilderExists)' != ''" />
-    <Message Text="Solution directory: $(SolutionDir)" Importance="high" Condition="'@(XferDocBuilderExists)' != ''" />
-    <Message Text="Skipping documentation generation - XferDocBuilder not found at: $(XferDocBuilderPath)" Importance="normal" Condition="'@(XferDocBuilderExists)' == ''" />
-
-    <!-- Generate main documentation if XferDocBuilder exists -->
-    <Exec Command="dotnet run --project &quot;$(XferDocBuilderPath)&quot; md &quot;$(SolutionDir)README.md&quot; &quot;$(SolutionDir)docs\index.html&quot;"
-          ContinueOnError="false"
-          WorkingDirectory="$(SolutionDir)"
-          Condition="'@(XferDocBuilderExists)' != ''" />
-  </Target>
-
-  <Target Name="GenerateApiDocs" AfterTargets="Build" Condition="'$(SkipXferDocGeneration)' != 'true'">
-    <PropertyGroup>
-      <SolutionDir Condition="'$(SolutionDir)' == '' Or '$(SolutionDir)' == '*Undefined*'">$(MSBuildProjectDirectory)\..\</SolutionDir>
-      <XferDocBuilderPath>$(SolutionDir)XferDocBuilder\XferDocBuilder.csproj</XferDocBuilderPath>
-    </PropertyGroup>
-
-    <!-- Check if XferDocBuilder exists before trying to run it -->
-    <ItemGroup>
-      <XferDocBuilderExists Include="$(XferDocBuilderPath)" Condition="Exists('$(XferDocBuilderPath)')" />
-    </ItemGroup>
-
-    <Message Text="Generating API documentation..." Importance="high" Condition="'@(XferDocBuilderExists)' != ''" />
-    <Message Text="Assembly path: $(TargetPath)" Importance="high" Condition="'@(XferDocBuilderExists)' != ''" />
-    <Message Text="Skipping API documentation generation - XferDocBuilder not found at: $(XferDocBuilderPath)" Importance="normal" Condition="'@(XferDocBuilderExists)' == ''" />
-
-    <Exec Command="dotnet run --project &quot;$(XferDocBuilderPath)&quot; api &quot;$(TargetPath)&quot; &quot;$(SolutionDir)docs\api.html&quot;"
-          ContinueOnError="false"
-          WorkingDirectory="$(SolutionDir)"
-          Condition="'@(XferDocBuilderExists)' != ''" />
-  </Target>
 
 </Project>

@@ -61,7 +61,6 @@ namespace ProcessingInstructionDemo {
                 Console.WriteLine("Object element not found.");
             }
 
-            // Test finding element by ID
             var testpiElement = doc.GetElementById("testpi");
             if (testpiElement != null) {
                 Console.WriteLine(testpiElement);
@@ -145,51 +144,6 @@ namespace ProcessingInstructionDemo {
                     // Only print the value, but do not recurse further (avoid double recursion)
                     PrintElementMetadata(kvp.Value, kvp.Key);
                 }
-            }
-            // Print only the 'alphabet' object and its children for clarity
-            // doc.Root is DocumentElement; search its children for the 'alphabet' KeyValuePairElement
-            var alphabetKvp = doc.Root.Children
-                .OfType<KeyValuePairElement>()
-                .FirstOrDefault(kvp => kvp.Key == "alphabet");
-            if (alphabetKvp != null) {
-                Console.WriteLine("  alphabet:");
-                PrintElementMetadata(alphabetKvp.Value, "alphabet");
-            }
-            else {
-                PrintElementMetadata(doc.Root);
-            }
-
-            Console.WriteLine("\nResolved characters:");
-            void PrintCharacters(Element element, string? label = null) {
-                if (element is CharacterElement charElem) {
-                    Console.WriteLine($"  {(label ?? element.GetType().Name)}: {char.ConvertFromUtf32(charElem.Value)} (U+{charElem.Value:X4})");
-                }
-                // Recurse into children if any
-                if (element is ObjectElement obj) {
-                    foreach (var kv in obj.Dictionary) {
-                        PrintCharacters(kv.Value, kv.Key);
-                    }
-                }
-                else if (element is ArrayElement arr) {
-                    foreach (var item in arr.Values) {
-                        PrintCharacters(item);
-                    }
-                }
-                else if (element is KeyValuePairElement kvp) {
-                    // Only print the value, but do not recurse further (avoid double recursion)
-                    PrintCharacters(kvp.Value, kvp.Key);
-                }
-            }
-            // Print only the 'alphabet' object and its children for clarity
-            var alphabetKvp2 = doc.Root.Children
-                .OfType<KeyValuePairElement>()
-                .FirstOrDefault(kvp => kvp.Key == "alphabet");
-            if (alphabetKvp2 != null) {
-                Console.WriteLine("  alphabet:");
-                PrintCharacters(alphabetKvp2.Value, "alphabet");
-            }
-            else {
-                PrintCharacters(doc.Root);
             }
         }
     }

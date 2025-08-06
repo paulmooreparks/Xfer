@@ -52,7 +52,7 @@ Based on the responses in Section 3, the development roadmap for XferLang will p
     *   **Behavior**: This PI will assign the specified ID to the immediately following element in the document tree. This ID can be used for querying and referencing.
     *   **Rationale**: Enables a robust way to reference specific elements within a document, which is a prerequisite for more advanced querying and data manipulation.
 
-2.  **Basic DOM-Style Querying**:
+2.  **(COMPLETE) Basic DOM-Style Querying**:
     *   **Task**: Introduce a `GetElementById(string id)` method on the `XferDocument` or root `CollectionElement`.
     *   **Behavior**: This method will traverse the element tree and return the first element that has been assigned the specified ID via the `id` PI.
     *   **Rationale**: Provides a foundational querying mechanism, similar to the HTML DOM, and serves as the first step towards a more comprehensive query API like LINQ.

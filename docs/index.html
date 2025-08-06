@@ -367,18 +367,21 @@ is optional, but if present it must be the first non-comment element in the docu
 <section id="element-syntax-variations"><h3 id="element-syntax-variations">Element Syntax Variations</h3>
 <p>XferLang elements have a flexible syntax with up to three variations. This allows you to choose the most readable and concise form for your data, only using more verbose syntax when necessary to resolve ambiguity.</p>
 <section id="implicit-syntax"><h4 id="implicit-syntax">Implicit Syntax</h4>
-<p>For integers and keywords, no special characters are needed when the context is unambiguous. Keywords appearing as keys in key/value pairs must use the <code>=</code> specifier followed by a trailing specifier.</p>
+<p>For integers and keywords, no special characters are needed when the context is unambiguous.</p>
 <pre><code class="language-xfer">123                 &lt;/ An integer /&gt;
 name &quot;Alice&quot;        &lt;/ A key/value pair with implicit keyword 'name' and a string value /&gt;
-=first-name= &quot;Alice&quot; &lt;/ A key/value pair with compact keyword using = specifiers /&gt;
 </code></pre>
 <section id="compact-syntax"><h4 id="compact-syntax">Compact Syntax</h4>
 <p>Most elements use a single specifier character (or a pair for collections) to denote the type. This is the most common syntax. Keywords require the <code>=</code> specifier with trailing specifiers, while identifiers require the <code>:</code> specifier.</p>
-<pre><code class="language-xfer">~true               &lt;/ A boolean /&gt;
-*123.45             &lt;/ A decimal /&gt;
-&quot;Hello, World!&quot;     &lt;/ A string /&gt;
-[ 1 2 3 ]           &lt;/ An array of integers /&gt;
-:identifier:        &lt;/ An identifier using : specifiers /&gt;
+<pre><code class="language-xfer">~true                   &lt;/ A boolean /&gt;
+*123.45                 &lt;/ A decimal /&gt;
+&quot;Hello, World!&quot;         &lt;/ A string /&gt;
+[ 1 2 3 ]               &lt;/ An array of integers /&gt;
+=special keyword= 42    &lt;/ A keyword with an embedded space /&gt;
+:identifier:            &lt;/ An identifier using : specifiers /&gt;
+</code></pre>
+<p>The specifier character may be repeated as many times as necessary to enable an element to contain that same specifier character.</p>
+<pre><code class="language-xfer">&quot;&quot;This string contains a &quot; character with impunity.&quot;&quot;
 </code></pre>
 <section id="explicit-syntax"><h4 id="explicit-syntax">Explicit Syntax</h4>
 <p>When an element's content might be ambiguous (e.g., a string containing a quote), you can wrap the compact form in angle brackets (<code>&lt;</code> and <code>&gt;</code>). This is the most verbose but also the most powerful form, as it allows for delimiter repetition to avoid any collision.</p>
@@ -2018,7 +2021,7 @@ dotnet test --collect:&quot;XPlat Code Coverage&quot;
 </section>
 
         <footer>
-            <p>Documentation generated on 2025-08-05 04:10:01 UTC</p>
+            <p>Documentation generated on 2025-08-06 02:50:31 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

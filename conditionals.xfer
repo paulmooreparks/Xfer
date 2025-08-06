@@ -1,0 +1,6 @@
+{
+<! if eq (<|PLATFORM|> "Linux") !>
+option :foo:
+<! else !>
+option :bar:
+}

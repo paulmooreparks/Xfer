@@ -179,23 +179,29 @@ is optional, but if present it must be the first non-comment element in the docu
 XferLang elements have a flexible syntax with up to three variations. This allows you to choose the most readable and concise form for your data, only using more verbose syntax when necessary to resolve ambiguity.
 
 #### Implicit Syntax
-For integers and keywords, no special characters are needed when the context is unambiguous. Keywords appearing as keys in key/value pairs must use the `=` specifier followed by a trailing specifier.
+For integers and keywords, no special characters are needed when the context is unambiguous.
 
 ```xfer
 123                 </ An integer />
 name "Alice"        </ A key/value pair with implicit keyword 'name' and a string value />
-=first-name= "Alice" </ A key/value pair with compact keyword using = specifiers />
 ```
 
 #### Compact Syntax
 Most elements use a single specifier character (or a pair for collections) to denote the type. This is the most common syntax. Keywords require the `=` specifier with trailing specifiers, while identifiers require the `:` specifier.
 
 ```xfer
-~true               </ A boolean />
-*123.45             </ A decimal />
-"Hello, World!"     </ A string />
-[ 1 2 3 ]           </ An array of integers />
-:identifier:        </ An identifier using : specifiers />
+~true                   </ A boolean />
+*123.45                 </ A decimal />
+"Hello, World!"         </ A string />
+[ 1 2 3 ]               </ An array of integers />
+=special keyword= 42    </ A keyword with an embedded space />
+:identifier:            </ An identifier using : specifiers />
+```
+
+The specifier character may be repeated as many times as necessary to enable an element to contain that same specifier character.
+
+```xfer
+""This string contains a " character with impunity.""
 ```
 
 #### Explicit Syntax

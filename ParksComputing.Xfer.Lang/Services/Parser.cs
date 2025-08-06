@@ -770,6 +770,7 @@ public class Parser : IXferParser {
                 foreach (var docPI in document.ProcessingInstructions) {
                     if (docPI.Target == null) {
                         docPI.Target = rootElement;
+                        docPI.ElementHandler(rootElement);
                     }
                 }
             }
@@ -785,6 +786,13 @@ public class Parser : IXferParser {
 
         // Set the root element (default to empty tuple if none found)
         document.Root = rootElement ?? new TupleElement();
+
+        // Apply any remaining pending PIs to the root element
+        foreach (var pendingPI in _pendingPIs) {
+            pendingPI.Target = document.Root;
+            pendingPI.ElementHandler(document.Root);
+        }
+        _pendingPIs.Clear();
 
         return document;
     }
@@ -1022,6 +1030,14 @@ public class Parser : IXferParser {
             Element element;
             try {
                 element = ParseElement();
+
+                // Apply any pending PIs to this element
+                foreach (var pendingPI in _pendingPIs) {
+                    pendingPI.Target = element;
+                    pendingPI.ElementHandler(element);
+                }
+                _pendingPIs.Clear();
+
                 arrayElement.Add(element);
             }
             catch (Exception ex) {
@@ -1046,6 +1062,14 @@ public class Parser : IXferParser {
 
                 try {
                     element = ParseElement();
+
+                    // Apply any pending PIs to this element
+                    foreach (var pendingPI in _pendingPIs) {
+                        pendingPI.Target = element;
+                        pendingPI.ElementHandler(element);
+                    }
+                    _pendingPIs.Clear();
+
                     arrayElement.Add(element);
                 }
                 catch (Exception ex) {
@@ -1100,6 +1124,15 @@ public class Parser : IXferParser {
 
             var element = ParseElement();
 
+            // Apply any pending PIs to this element (if it's not a PI itself)
+            if (!(element is ProcessingInstruction)) {
+                foreach (var pendingPI in _pendingPIs) {
+                    pendingPI.Target = element;
+                    pendingPI.ElementHandler(element);
+                }
+                _pendingPIs.Clear();
+            }
+
             if (element is KeyValuePairElement kvp) {
                 if (objectElement.ContainsKey(kvp.Key)) {
                     throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Duplicate key '{kvp.Key}' in object.");
@@ -1148,6 +1181,7 @@ public class Parser : IXferParser {
                 // Non-PI element: set it as target for any pending PIs
                 foreach (var pendingPI in pendingPIs) {
                     pendingPI.Target = element;
+                    pendingPI.ElementHandler(element);
                 }
                 pendingPIs.Clear();
 
