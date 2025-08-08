@@ -59,6 +59,122 @@ public abstract class ListElement : CollectionElement {
     }
 
     /// <summary>
+    /// Removes the specified element from this list.
+    /// </summary>
+    /// <param name="element">The element to remove</param>
+    /// <returns>True if the element was found and removed, false otherwise</returns>
+    public virtual bool Remove(Element element) {
+        if (element == null) {
+            return false;
+        }
+
+        bool removedFromItems = _items.Remove(element);
+        bool removedFromChildren = Children.Remove(element);
+
+        if (removedFromItems || removedFromChildren) {
+            element.Parent = null;
+        }
+
+        return removedFromItems || removedFromChildren;
+    }
+
+    /// <summary>
+    /// Removes the element at the specified index.
+    /// </summary>
+    /// <param name="index">The zero-based index of the element to remove</param>
+    /// <returns>True if the element was found and removed, false otherwise</returns>
+    public virtual bool RemoveAt(int index) {
+        if (index < 0 || index >= _items.Count) {
+            return false;
+        }
+
+        var element = _items[index];
+        _items.RemoveAt(index);
+        Children.Remove(element);
+        element.Parent = null;
+
+        return true;
+    }
+
+    /// <summary>
+    /// Removes a specific child element from this list.
+    /// Overrides base implementation to handle both _items and Children collections.
+    /// </summary>
+    /// <param name="child">The child element to remove</param>
+    /// <returns>True if the child was found and removed, false otherwise</returns>
+    public override bool RemoveChild(Element child) {
+        if (child == null) {
+            return false;
+        }
+
+        bool removedFromItems = _items.Remove(child);
+        bool removedFromChildren = Children.Remove(child);
+
+        if (removedFromItems || removedFromChildren) {
+            child.Parent = null;
+        }
+
+        return removedFromItems || removedFromChildren;
+    }
+
+    /// <summary>
+    /// Removes a child element at the specified index.
+    /// Overrides base implementation to handle both _items and Children collections.
+    /// </summary>
+    /// <param name="index">The zero-based index of the child to remove</param>
+    /// <returns>True if the child was successfully removed, false if index was out of range</returns>
+    public override bool RemoveChildAt(int index) {
+        return RemoveAt(index);
+    }
+
+    /// <summary>
+    /// Removes all child elements from this list.
+    /// Overrides base implementation to handle both _items and Children collections.
+    /// </summary>
+    /// <returns>The number of children that were removed</returns>
+    public override int RemoveAllChildren() {
+        var count = _items.Count;
+
+        // Clear parent relationships
+        foreach (var child in _items) {
+            child.Parent = null;
+        }
+
+        _items.Clear();
+        Children.Clear();
+        return count;
+    }
+
+    /// <summary>
+    /// Replaces a child element with a new element.
+    /// Overrides base implementation to handle both _items and Children collections.
+    /// </summary>
+    /// <param name="oldChild">The existing child element to replace</param>
+    /// <param name="newChild">The new child element to add in its place</param>
+    /// <returns>True if the replacement was successful, false if oldChild was not found</returns>
+    public override bool ReplaceChild(Element oldChild, Element newChild) {
+        var index = _items.IndexOf(oldChild);
+        if (index == -1) {
+            return false;
+        }
+
+        // Clear old parent relationship
+        oldChild.Parent = null;
+
+        // Set up new relationships
+        _items[index] = newChild;
+        newChild.Parent = this;
+
+        // Also update Children collection if the old child was there
+        var childIndex = Children.IndexOf(oldChild);
+        if (childIndex != -1) {
+            Children[childIndex] = newChild;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Gets or sets the semantic element at the specified index.
     /// </summary>
     /// <param name="index">The zero-based index of the element to get or set</param>

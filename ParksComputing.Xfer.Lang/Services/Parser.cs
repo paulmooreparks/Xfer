@@ -145,7 +145,9 @@ public class Parser : IXferParser {
         RegisterPIProcessor(CharDefProcessingInstruction.Keyword, CreateCharDefProcessingInstruction);
         RegisterPIProcessor(DocumentProcessingInstruction.Keyword, CreateDocumentProcessingInstruction);
         RegisterPIProcessor(IdProcessingInstruction.Keyword, CreateIdProcessingInstruction);
+        RegisterPIProcessor(TagProcessingInstruction.Keyword, CreateTagProcessingInstruction);
         RegisterPIProcessor(DynamicSourceProcessingInstruction.Keyword, CreateDynamicSourceProcessingInstruction);
+        RegisterPIProcessor(DefinedProcessingInstruction.Keyword, CreateDefinedProcessingInstruction);
     }
 
     // Built-in PI processor factory methods
@@ -166,6 +168,14 @@ public class Parser : IXferParser {
         parser.ValidateAndRegisterElementId(textElement.Value);
 
         return new IdProcessingInstruction(textElement);
+    }
+
+    private static ProcessingInstruction CreateTagProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
+        if (kvp.Value is not TextElement textElement) {
+            throw new InvalidOperationException($"At row {parser.CurrentRow}, column {parser.CurrentColumn}: Tag PI must contain a text element.");
+        }
+
+        return new TagProcessingInstruction(textElement);
     }
 
     private ProcessingInstruction CreateDocumentProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
@@ -196,6 +206,11 @@ public class Parser : IXferParser {
         }
 
         return new DynamicSourceProcessingInstruction(obj);
+    }
+
+    private static ProcessingInstruction CreateDefinedProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
+        // Accept any element type for defined processing instruction
+        return new DefinedProcessingInstruction(kvp.Value);
     }
 
     /// <summary>
@@ -454,7 +469,7 @@ public class Parser : IXferParser {
 
     internal bool IdentifierElementClosing() {
         Debug.Assert(_delimStack.Peek().ClosingSpecifier == IdentifierElement.ClosingSpecifier);
-        return ElementClosing();
+        return ElementCompactClosing();
     }
 
     internal bool KeywordElementClosing() {
@@ -489,6 +504,16 @@ public class Parser : IXferParser {
 
     internal bool TupleElementClosing() {
         Debug.Assert(_delimStack.Peek().ClosingSpecifier == TupleElement.ClosingSpecifier);
+        return ElementClosing();
+    }
+
+    internal bool QueryElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == QueryElement.ClosingSpecifier);
+        return ElementClosing();
+    }
+
+    internal bool ReferenceElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == ReferenceElement.ClosingSpecifier);
         return ElementClosing();
     }
 
@@ -889,6 +914,12 @@ public class Parser : IXferParser {
             else if (ElementOpening(IdentifierElement.ElementDelimiter, out int identifierSpecifierCount)) {
                 element = ParseIdentifierElement(identifierSpecifierCount);
             }
+            else if (ElementOpening(QueryElement.ElementDelimiter, out int querySpecifierCount)) {
+                element = ParseQueryElement(querySpecifierCount);
+            }
+            else if (ElementOpening(ReferenceElement.ElementDelimiter, out int referenceSpecifierCount)) {
+                element = ParseReferenceElement(referenceSpecifierCount);
+            }
             else if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
                 element = ParseNullElement(nullSpecifierCount);
             }
@@ -920,6 +951,66 @@ public class Parser : IXferParser {
 
             Advance();
         }
+    }
+
+    private QueryElement ParseQueryElement(int specifierCount = 1) {
+        var style = _delimStack.Peek().Style;
+
+        KeyValuePairElement? kvpElem = null;
+
+        while (IsCharAvailable()) {
+            if (QueryElementClosing()) {
+                if (kvpElem != null) {
+                    return new QueryElement(kvpElem, specifierCount, style);
+                }
+                else {
+                    throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Unexpected element type.");
+                }
+            }
+
+            if (kvpElem is not null) {
+                throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Unexpected element.");
+            }
+
+            Element element = ParseElement();
+
+            if (element is not KeyValuePairElement kvp) {
+                throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Expected key-value pair element in query.");
+            }
+
+            kvpElem = kvp;
+            var key = kvp.Key ?? string.Empty;
+            if (string.IsNullOrEmpty(key)) {
+                throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Query key cannot be null or empty.");
+            }
+
+            // TODO: Implement query logic here
+        }
+
+        throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {IdentifierElement.ElementName} element.");
+    }
+
+    private ReferenceElement ParseReferenceElement(int specifierCount = 1) {
+        var style = _delimStack.Peek().Style;
+        var key = string.Empty;
+
+        Element? element = null;
+
+        while (IsCharAvailable()) {
+            if (ReferenceElementClosing()) {
+                return new ReferenceElement(element ?? new EmptyElement(), specifierCount, style);
+            }
+
+            if (element is not null) {
+                throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Unexpected element type.");
+            }
+
+            element = ParseElement();
+
+            // TODO: Implement reference logic here
+        }
+
+        throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {IdentifierElement.ElementName} element.");
     }
 
     private ProcessingInstruction ParseProcessingInstruction(int specifierCount = 1) {
@@ -958,13 +1049,8 @@ public class Parser : IXferParser {
                     pi = new ProcessingInstruction(kvp.Value, piKey);
                 }
 
-                // Call PI processors/handlers with the KVP and its target
-                if (pi is CharDefProcessingInstruction charDefPi) {
-                    charDefPi.ProcessingInstructionHandler();
-                }
-                else if (pi is DynamicSourceProcessingInstruction dynamicSourcePi) {
-                    dynamicSourcePi.ProcessingInstructionHandler();
-                }
+                // Call the processing instruction handler generically for all PIs
+                pi.ProcessingInstructionHandler();
 
                 return pi;
             }
@@ -1004,7 +1090,7 @@ public class Parser : IXferParser {
             throw new InvalidOperationException($"At row {lastElementRow}, column {lastElementColumn}: Failed to create array element. {ex.Message}", ex);
         }
 
-        // Apply any pending PIs to this array element
+        // Apply any pending PIs from higher level parsing to this array element
         foreach (var pendingPI in _pendingPIs)
         {
             pendingPI.Target = arrayElement;
@@ -1012,70 +1098,100 @@ public class Parser : IXferParser {
         }
         _pendingPIs.Clear();
 
+        // Local pending PIs for this array's parsing context
+        var localPendingPIs = new List<ProcessingInstruction>();
+
         if (IsCharAvailable()) {
             if (ArrayElementClosing()) {
                 return arrayElement;
             }
 
-            // Handle processing instructions specially in arrays
-            if (ElementOpening(ProcessingInstruction.ElementDelimiter, out int piSpecifierCount)) {
+            // Collect all consecutive processing instructions first
+            while (IsCharAvailable() && ElementOpening(ProcessingInstruction.ElementDelimiter, out int piSpecifierCount)) {
                 var pi = ParseProcessingInstruction(piSpecifierCount);
                 // Add PI to array for serialization
                 arrayElement.Add(pi);
-                // Also add to pending PIs for application to next element
-                _pendingPIs.Add(pi);
+                // Also add to local pending PIs for application to next element
+                localPendingPIs.Add(pi);
                 SkipWhitespace();
             }
 
-            Element element;
-            try {
-                element = ParseElement();
-
-                // Apply any pending PIs to this element
-                foreach (var pendingPI in _pendingPIs) {
-                    pendingPI.Target = element;
-                    pendingPI.ElementHandler(element);
-                }
-                _pendingPIs.Clear();
-
-                arrayElement.Add(element);
-            }
-            catch (Exception ex) {
-                throw new InvalidOperationException($"At row {lastElementRow}, column {lastElementColumn}: Failed to parse first array element. {ex.Message}", ex);
-            }
-
-            while (IsCharAvailable()) {
-                if (ArrayElementClosing()) {
-                    return arrayElement;
-                }
-
-                // Handle processing instructions specially in arrays
-                if (ElementOpening(ProcessingInstruction.ElementDelimiter, out int piSpecifierCount2)) {
-                    var pi = ParseProcessingInstruction(piSpecifierCount2);
-                    // Add PI to array for serialization
-                    arrayElement.Add(pi);
-                    // Also add to pending PIs for application to next element
-                    _pendingPIs.Add(pi);
-                    SkipWhitespace();
-                    continue;
-                }
-
+            // Now parse the target element if available
+            if (IsCharAvailable() && !ArrayElementClosing()) {
+                Element element;
                 try {
                     element = ParseElement();
 
-                    // Apply any pending PIs to this element
-                    foreach (var pendingPI in _pendingPIs) {
+                    // Apply any local pending PIs to this element
+                    bool shouldAddElement = true;
+                    foreach (var pendingPI in localPendingPIs) {
                         pendingPI.Target = element;
-                        pendingPI.ElementHandler(element);
+                        try {
+                            pendingPI.ElementHandler(element);
+                        }
+                        catch (ConditionalElementException) {
+                            // PI indicates this element should not be added
+                            shouldAddElement = false;
+                            break;
+                        }
                     }
-                    _pendingPIs.Clear();
+                    localPendingPIs.Clear();
 
-                    arrayElement.Add(element);
+                    // Only add the element if all PIs approved it
+                    if (shouldAddElement) {
+                        arrayElement.Add(element);
+                    }
+                }
+                catch (Exception ex) {
+                    throw new InvalidOperationException($"At row {lastElementRow}, column {lastElementColumn}: Failed to parse first array element. {ex.Message}", ex);
+                }
+            }
+
+        while (IsCharAvailable()) {
+            if (ArrayElementClosing()) {
+                return arrayElement;
+            }
+
+            // Collect all consecutive processing instructions first
+            while (IsCharAvailable() && ElementOpening(ProcessingInstruction.ElementDelimiter, out int piSpecifierCount2)) {
+                var pi = ParseProcessingInstruction(piSpecifierCount2);
+                // Add PI to array for serialization
+                arrayElement.Add(pi);
+                // Also add to local pending PIs for application to next element
+                localPendingPIs.Add(pi);
+                SkipWhitespace();
+            }
+
+            // Now parse the target element if available
+            if (IsCharAvailable() && !ArrayElementClosing()) {
+                try {
+                    var element = ParseElement();
+
+                    // Apply any local pending PIs to this element
+                    bool shouldAddElement = true;
+                    foreach (var pendingPI in localPendingPIs) {
+                        pendingPI.Target = element;
+                        try {
+                            pendingPI.ElementHandler(element);
+                        }
+                        catch (ConditionalElementException) {
+                            // PI indicates this element should not be added
+                            shouldAddElement = false;
+                            break;
+                        }
+                    }
+                    localPendingPIs.Clear();
+
+                    // Only add the element if all PIs approved it
+                    if (shouldAddElement) {
+                        arrayElement.Add(element);
+                    }
                 }
                 catch (Exception ex) {
                     throw new InvalidOperationException($"At row {lastElementRow}, column {lastElementColumn}: Failed to parse array element. {ex.Message}", ex);
                 }
             }
+        }
         }
 
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {ArrayElement.ElementName} element.");
@@ -1095,13 +1211,16 @@ public class Parser : IXferParser {
         SkipWhitespace();
         var objectElement = new ObjectElement();
 
-        // Apply any pending PIs to this object element
+        // Apply any pending PIs from higher level parsing to this object element
         foreach (var pendingPI in _pendingPIs)
         {
             pendingPI.Target = objectElement;
             pendingPI.ElementHandler(objectElement);
         }
         _pendingPIs.Clear();
+
+        // Local pending PIs for this object's parsing context
+        var localPendingPIs = new List<ProcessingInstruction>();
 
         while (IsCharAvailable()) {
             if (ObjectElementClosing()) {
@@ -1116,43 +1235,54 @@ public class Parser : IXferParser {
                 var pi = ParseProcessingInstruction(piSpecifierCount);
                 // Add PI to object for serialization
                 objectElement.AddOrUpdate(pi);
-                // Also add to pending PIs for application to next element
-                _pendingPIs.Add(pi);
+                // Also add to local pending PIs for application to next element
+                localPendingPIs.Add(pi);
                 SkipWhitespace();
                 continue;
             }
 
             var element = ParseElement();
 
-            // Apply any pending PIs to this element (if it's not a PI itself)
+            // Apply any local pending PIs to this element (if it's not a PI itself)
+            bool shouldAddElement = true;
             if (!(element is ProcessingInstruction)) {
-                foreach (var pendingPI in _pendingPIs) {
+                foreach (var pendingPI in localPendingPIs) {
                     pendingPI.Target = element;
-                    pendingPI.ElementHandler(element);
+                    try {
+                        pendingPI.ElementHandler(element);
+                    }
+                    catch (ConditionalElementException) {
+                        // PI indicates this element should not be added
+                        shouldAddElement = false;
+                        break;
+                    }
                 }
-                _pendingPIs.Clear();
+                localPendingPIs.Clear();
             }
 
-            if (element is KeyValuePairElement kvp) {
-                if (objectElement.ContainsKey(kvp.Key)) {
-                    throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Duplicate key '{kvp.Key}' in object.");
+            // Only process the element if PIs approved it
+            if (shouldAddElement) {
+                if (element is KeyValuePairElement kvp) {
+                    if (objectElement.ContainsKey(kvp.Key)) {
+                        throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Duplicate key '{kvp.Key}' in object.");
+                    }
+                    objectElement.AddOrUpdate(kvp);
                 }
-                objectElement.AddOrUpdate(kvp);
-            }
-            else if (element is ProcessingInstruction meta) {
-                objectElement.AddOrUpdate(meta);
-            }
-            else if (element is EmptyElement) {
-                // Ignore empty elements in objects
-                continue;
-            }
-            else if (element is IdentifierElement identifierElement) {
-                // IdentifierElement found without a key - this shouldn't happen in well-formed XferLang
-                // but we'll handle it by creating a temporary KVP
-                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Standalone IdentifierElement '{identifierElement.Value}' found in object. IdentifierElements must be values in key-value pairs.");
-            }
-            else {
-                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected element type '{element.GetType().Name}'. Objects can only contain KeyValuePairElement, ProcessingInstruction, or EmptyElement. Found: {element}");
+                else if (element is ProcessingInstruction meta) {
+                    objectElement.AddOrUpdate(meta);
+                }
+                else if (element is EmptyElement) {
+                    // Ignore empty elements in objects
+                    continue;
+                }
+                else if (element is IdentifierElement identifierElement) {
+                    // IdentifierElement found without a key - this shouldn't happen in well-formed XferLang
+                    // but we'll handle it by creating a temporary KVP
+                    throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Standalone IdentifierElement '{identifierElement.Value}' found in object. IdentifierElements must be values in key-value pairs.");
+                }
+                else {
+                    throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected element type '{element.GetType().Name}'. Objects can only contain KeyValuePairElement, ProcessingInstruction, or EmptyElement. Found: {element}");
+                }
             }
         }
 
@@ -1179,13 +1309,23 @@ public class Parser : IXferParser {
                 pendingPIs.Add(pi);
             } else {
                 // Non-PI element: set it as target for any pending PIs
+                bool shouldAddElement = true;
                 foreach (var pendingPI in pendingPIs) {
                     pendingPI.Target = element;
-                    pendingPI.ElementHandler(element);
+                    try {
+                        pendingPI.ElementHandler(element);
+                    }
+                    catch (ConditionalElementException) {
+                        // PI indicates this element should not be added
+                        shouldAddElement = false;
+                        break;
+                    }
                 }
                 pendingPIs.Clear();
 
-                tupleElement.Add(element);
+                if (shouldAddElement) {
+                    tupleElement.Add(element);
+                }
             }
         }
 
@@ -1201,26 +1341,42 @@ public class Parser : IXferParser {
 
         StringBuilder valueBuilder = new StringBuilder();
 
+            while (IsCharAvailable()) {
+                if (DynamicElementClosing()) {
+                    var variable = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
+
+                    if (string.IsNullOrEmpty(variable)) {
+                        throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Dynamic variable must be a non-empty string.");
+                    }
+
+                    string? value = null;
+                    if (_currentDocument != null) {
+                        value = _dynamicSourceResolver.Resolve(variable, _currentDocument);
+                    }
+                    return new DynamicElement(value ?? string.Empty, specifierCount, style: style);
+                }            valueBuilder.Append(CurrentChar);
+            Expand();
+        }
+
+        throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {DynamicElement.ElementName} element.");
+    }
+
+    private IdentifierElement ParseIdentifierElement(int specifierCount = 1) {
+        var style = _delimStack.Peek().Style;
+        var key = string.Empty;
+
+        StringBuilder valueBuilder = new StringBuilder();
+
         while (IsCharAvailable()) {
-            if (DynamicElementClosing()) {
-                var variable = valueBuilder.ToString().Normalize(NormalizationForm.FormC);
-
-                if (string.IsNullOrEmpty(variable)) {
-                    throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Dynamic variable must be a non-empty string.");
-                }
-
-                string? value = null;
-                if (_currentDocument != null) {
-                    value = _dynamicSourceResolver.Resolve(variable, _currentDocument);
-                }
-                return new DynamicElement(value ?? string.Empty, specifierCount, style: style);
+            if (IdentifierElementClosing()) {
+                return new IdentifierElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount, style: style);
             }
 
             valueBuilder.Append(CurrentChar);
             Expand();
         }
 
-        throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {DynamicElement.ElementName} element.");
+        throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {IdentifierElement.ElementName} element.");
     }
 
     private KeyValuePairElement ParseKeywordElement(int specifierCount = 1) {
@@ -1265,10 +1421,6 @@ public class Parser : IXferParser {
         var keyValuePairElement = new KeyValuePairElement(keyElement);
 
         if (IsCharAvailable()) {
-            // Store any pending PIs that should be applied to this KVP
-            var savedPendingPIs = new List<ProcessingInstruction>(_pendingPIs);
-            _pendingPIs.Clear();
-
             // Check for processing instructions that should apply to the value
             var valuePIs = new List<ProcessingInstruction>();
             while (ElementOpening(ProcessingInstruction.ElementDelimiter, out int piSpecifierCount)) {
@@ -1289,12 +1441,8 @@ public class Parser : IXferParser {
                 valuePI.ElementHandler(valueElement);
             }
 
-            // Apply the saved PIs to this KVP
-            foreach (var pendingPI in savedPendingPIs)
-            {
-                pendingPI.Target = keyValuePairElement;
-                pendingPI.ElementHandler(keyValuePairElement);
-            }
+            // Note: Any pending PIs from the parent context will be applied by the calling method
+            // We don't interfere with the global _pendingPIs here
 
             return keyValuePairElement;
         }
@@ -1432,24 +1580,6 @@ public class Parser : IXferParser {
         }
 
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {InterpolatedElement.ElementName} element.");
-    }
-
-    private IdentifierElement ParseIdentifierElement(int specifierCount = 1) {
-        var style = _delimStack.Peek().Style;
-        var key = string.Empty;
-
-        StringBuilder valueBuilder = new StringBuilder();
-
-        while (IsCharAvailable()) {
-            if (IdentifierElementClosing()) {
-                return new IdentifierElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount, style: style);
-            }
-
-            valueBuilder.Append(CurrentChar);
-            Expand();
-        }
-
-        throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {IdentifierElement.ElementName} element.");
     }
 
     private StringElement ParseStringElement(int specifierCount = 1) {

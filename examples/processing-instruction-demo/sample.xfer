@@ -12,8 +12,17 @@
 }!
 
 
-<!id "root"!>
 (
+    <! script (
+        let `rootNode` (root (`document`))
+        let `objectNode` (getElementById(document "object"))
+    )!
+
+    let `bazNode` (baz (bar (foo (`rootNode`))))
+
+    _key "value"
+    `query "foo"`
+    `item (`item ("root" 0)` 0)`
     <! if eq["Linux" "<|PLATFORM|>"] !>
     profile{name"Bob"role"admin"verified~true}
 
@@ -39,4 +48,5 @@
     }
 
     <! id "array" !> [<! id "one"!> 1 2 3]
+
 )

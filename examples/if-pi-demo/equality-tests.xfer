@@ -1,0 +1,15 @@
+(
+    </ String equality test />
+    <! if eq (<|PLATFORM|> "Linux") !>
+    linuxConfig {
+        packageManager "apt"
+        shell "/bin/bash"
+    }
+
+    </ This should fail />
+    <! if eq (<|PLATFORM|> "Windows") !>
+    windowsConfig {
+        packageManager "chocolatey" 
+        shell "cmd.exe"
+    }
+)

@@ -1,0 +1,19 @@
+{
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": true,
+        "markdown": true,
+        "scminput": false
+    },
+    "github.copilot.advanced": {
+        "length": 500,
+        "temperature": 0.1
+    },
+    "files.associations": {
+        "*.xfer": "xferlang"
+    },
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.inlineSuggest.enabled": true,
+    "github.copilot.chat.welcomeMessage": "always",
+    "workbench.startupEditor": "readme"
+}

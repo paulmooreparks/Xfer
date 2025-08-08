@@ -29,14 +29,6 @@ namespace ProcessingInstructionDemo {
             Console.WriteLine("Serialized Xfer:");
             Console.WriteLine(xfer);
 
-            var root = doc.GetElementById("root");
-            if (root != null) {
-                Console.WriteLine($"Root Element: {root.ToXfer()}");
-            }
-            else {
-                Console.WriteLine("Root element not found.");
-            }
-
             var kvp = doc.GetElementById("kvp");
             if (kvp != null) {
                 Console.WriteLine($"KVP Element: {kvp.ToXfer()}");
@@ -108,27 +100,6 @@ namespace ProcessingInstructionDemo {
 
             Console.WriteLine("\nElement-level metadata:");
             void PrintElementMetadata(Element element, string? label = null) {
-                var meta = element.Metadata;
-                if (meta != null && (!string.IsNullOrEmpty(meta.Xfer) || !string.IsNullOrEmpty(meta.Version) || meta.Extensions.Count > 0)) {
-                    Console.WriteLine($"  {(label ?? element.GetType().Name)}:");
-                    if (!string.IsNullOrEmpty(meta.Xfer)) {
-                        Console.WriteLine($"    Version: {meta.Xfer}");
-                    }
-                    if (!string.IsNullOrEmpty(meta.Version)) {
-                        Console.WriteLine($"    DocumentVersion: {meta.Version}");
-                    }
-                    foreach (var ext in meta.Extensions) {
-                        if (ext.Value is Dictionary<string, int> dict) {
-                            Console.WriteLine($"    {ext.Key}:");
-                            foreach (var cdef in dict) {
-                                Console.WriteLine($"      {cdef.Key} = U+{cdef.Value:X4}");
-                            }
-                        }
-                        else {
-                            Console.WriteLine($"    {ext.Key}: {ext.Value}");
-                        }
-                    }
-                }
                 // Recurse into children if any
                 if (element is ObjectElement obj) {
                     foreach (var kv in obj.Dictionary) {

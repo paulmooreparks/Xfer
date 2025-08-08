@@ -101,6 +101,61 @@ public class ArrayElement : ListElement {
         }
     }
 
+    /// <summary>
+    /// Removes the specified element from this array.
+    /// If this was the last element and it's removed, the element type constraint is reset.
+    /// </summary>
+    /// <param name="element">The element to remove</param>
+    /// <returns>True if the element was found and removed, false otherwise</returns>
+    public override bool Remove(Element element) {
+        if (element == null) {
+            return false;
+        }
+
+        // Use base class implementation to handle both _items and Children
+        bool removed = base.Remove(element);
+
+        // Reset element type if array becomes empty
+        if (removed && _items.Count == 0) {
+            _elementType = null;
+        }
+
+        return removed;
+    }
+
+    /// <summary>
+    /// Removes the element at the specified index.
+    /// If this was the last element and it's removed, the element type constraint is reset.
+    /// </summary>
+    /// <param name="index">The zero-based index of the element to remove</param>
+    /// <returns>True if the element was found and removed, false otherwise</returns>
+    public override bool RemoveAt(int index) {
+        bool removed = base.RemoveAt(index);
+
+        // Reset element type if array becomes empty
+        if (removed && _items.Count == 0) {
+            _elementType = null;
+        }
+
+        return removed;
+    }
+
+    /// <summary>
+    /// Removes all child elements from this array.
+    /// Resets the element type constraint when the array becomes empty.
+    /// </summary>
+    /// <returns>The number of children that were removed</returns>
+    public override int RemoveAllChildren() {
+        int count = base.RemoveAllChildren();
+
+        // Reset element type when array becomes empty
+        if (count > 0) {
+            _elementType = null;
+        }
+
+        return count;
+    }
+
 
 
     /// <summary>

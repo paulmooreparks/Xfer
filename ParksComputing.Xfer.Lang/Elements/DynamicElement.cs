@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ParksComputing.Xfer.Lang.Services;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
@@ -42,5 +43,20 @@ public class DynamicElement : TextElement
     public DynamicElement(string text, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
         : base(text, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
     {
+    }
+
+    /// <summary>
+    /// Gets the parsed value of this dynamic element, which is the resolved value.
+    /// For dynamic elements, this returns the already-resolved Value.
+    /// Returns null if the dynamic element resolved to an empty or null value.
+    /// For setting, use the Value property to set the resolved value.
+    /// </summary>
+    public override object? ParsedValue {
+        get {
+            // Value already contains the resolved value from the parser
+            // Return null if the value is null or empty, otherwise return the value
+            return string.IsNullOrEmpty(Value) ? null : Value;
+        }
+        set => throw new InvalidOperationException("ParsedValue is read-only for DynamicElement. It is determined by the resolved Value.");
     }
 }

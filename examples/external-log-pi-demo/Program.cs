@@ -73,7 +73,7 @@ log { level ""debug"" destination ""console"" format ""json"" message ""In-memor
     email ""john@example.com""
     preferences {
         theme ""dark""
-        notifications true
+        notifications ~true
     }
 }";
 
@@ -117,7 +117,7 @@ log { level ""debug"" destination ""console"" format ""json"" message ""In-memor
             @"<!
             log { level ""warn"" destination ""console"" format ""compact"" message ""Deprecated API"" }
             !>
-            { deprecated true replacement ""/api/v2/users"" }",
+            { deprecated ~true replacement ""/api/v2/users"" }",
 
             // Info with pretty format using simple console destination
             @"<!

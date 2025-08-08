@@ -1,0 +1,480 @@
+(
+    </ Basic variable existence checks - These test simple defined/undefined variable conditions />
+
+    </ This should succeed - DEBUG_MODE is defined in our test resolver />
+    <! if <|DEBUG_MODE|> !>
+    debugConfig {
+        enabled ~true
+        verboseLogging ~true
+        logLevel "debug"
+    }
+
+    </ This should fail - UNDEFINED_VAR is not in our test resolver />
+    <! if <|UNDEFINED_VAR|> !>
+    undefinedConfig {
+        thisWillNot "appear"
+        becauseVariable "isUndefined"
+    }
+
+    </ This should succeed - PLATFORM is defined />
+    <! if <|PLATFORM|> !>
+    platformInfo {
+        detected "<|PLATFORM|>"
+        timestamp @2025-08-08@
+    }
+
+    </ This should fail - MISSING_ENV is not defined />
+    <! if <|MISSING_ENV|> !>
+    missingEnvConfig {
+        error "This config should not be processed"
+        reason "Variable does not exist"
+    }
+)
+(
+    </ Real-world configuration example />
+    </ Demonstrates practical usage of If PIs in a configuration document />
+
+    </ Application metadata />
+    !document {
+        title "Multi-Environment Application Config"
+        version "2.1.0"
+        generated "2025-08-08T10:30:00Z"
+    }!
+
+    </ Environment-specific database configuration />
+    <! if eq (<|ENVIRONMENT|> "production") !>
+    database {
+        provider "postgresql"
+        server "prod-db.company.com"
+        port #5432
+        database "myapp_prod"
+        ssl ~true
+        connectionPool {
+            minSize #10
+            maxSize #100
+            timeout #30000
+        }
+        backupSchedule "0 2 * * *"
+    }
+
+    <! if eq (<|ENVIRONMENT|> "development") !>
+    database {
+        provider "postgresql"
+        server "localhost"
+        port #5432
+        database "myapp_dev"
+        ssl ~false
+        connectionPool {
+            minSize #2
+            maxSize #10
+            timeout #5000
+        }
+        seedData ~true
+    }
+
+    </ Feature flags based on environment />
+    <! if <|ENABLE_NEW_FEATURE|> !>
+    newFeature {
+        enabled ~true
+        rolloutPercentage #100
+        description "New UI dashboard with enhanced analytics"
+        endpoints ["/api/v2/dashboard" "/api/v2/analytics"]
+    }
+
+    </ Platform-specific settings />
+    <! if eq (<|PLATFORM|> "Linux") !>
+    systemSettings {
+        platform "Linux"
+        processLimit #1024
+        fileDescriptorLimit #65536
+        logPath "/var/log/myapp"
+        pidFile "/var/run/myapp.pid"
+        systemdService ~true
+    }
+
+    <! if eq (<|PLATFORM|> "Windows") !>
+    systemSettings {
+        platform "Windows"
+        processLimit #512
+        fileDescriptorLimit #8192
+        logPath "C:\\ProgramData\\MyApp\\Logs"
+        pidFile "C:\\ProgramData\\MyApp\\myapp.pid"
+        windowsService ~true
+    }
+
+    </ Resource allocation based on system capabilities />
+    <! if gt (<|MEMORY_GB|> #8) !>
+    highMemoryConfig {
+        cacheSettings {
+            enabled ~true
+            maxSize "2GB"
+            ttl #3600
+            compression ~true
+        }
+        workerProcesses <|PROCESSORS|>
+        enableProfiling ~true
+    }
+
+    <! if le (<|MEMORY_GB|> #8) !>
+    lowMemoryConfig {
+        cacheSettings {
+            enabled ~true
+            maxSize "256MB"
+            ttl #1800
+            compression ~true
+        }
+        workerProcesses #2
+        enableProfiling ~false
+    }
+
+    </ SSL/Security configuration />
+    <! if <|SSL_ENABLED|> !>
+    securityConfig {
+        ssl {
+            enabled ~true
+            certificatePath "/etc/ssl/certs/myapp.crt"
+            privateKeyPath "/etc/ssl/private/myapp.key"
+            protocols ["TLSv1.2" "TLSv1.3"]
+            cipherSuites ["ECDHE-RSA-AES256-GCM-SHA384" "ECDHE-RSA-AES128-GCM-SHA256"]
+        }
+        headers {
+            strictTransportSecurity "max-age=31536000; includeSubDomains"
+            contentSecurityPolicy "default-src 'self'"
+            xFrameOptions "DENY"
+        }
+    }
+
+    </ Admin-only features />
+    <! if <|IS_ADMIN|> !>
+    adminFeatures {
+        systemMonitoring ~true
+        userManagement ~true
+        databaseAccess ~true
+        logAccess ~true
+        configModification ~true
+        maintenanceMode ~true
+    }
+
+    </ Debug configuration for development />
+    <! if eq (<|ENVIRONMENT|> "development") !>
+    debugConfig {
+        logging {
+            level "debug"
+            console ~true
+            file ~true
+            format "detailed"
+        }
+        profiling ~true
+        hotReload ~true
+        sourceMapping ~true
+        testData ~true
+    }
+
+    </ Production optimizations />
+    <! if eq (<|ENVIRONMENT|> "production") !>
+    productionConfig {
+        logging {
+            level "info"
+            console ~false
+            file ~true
+            format "json"
+            rotation "daily"
+        }
+        minification ~true
+        compression ~true
+        caching {
+            static #86400
+            dynamic #3600
+            api #300
+        }
+        monitoring {
+            metrics ~true
+            healthChecks ~true
+            alerting ~true
+        }
+    }
+
+    </ Load balancing for high-core systems />
+    <! if gt (<|PROCESSORS|> #4) !>
+    loadBalancing {
+        enabled ~true
+        algorithm "round_robin"
+        healthChecks {
+            interval #30
+            timeout #5
+            retries #3
+        }
+        upstreams [
+            { host "app1.local" port #8001 weight #1 }
+            { host "app2.local" port #8002 weight #1 }
+            { host "app3.local" port #8003 weight #1 }
+        ]
+    }
+)
+(
+    </ Equality comparison tests - These test the eq operator with different value types />
+
+    </ String equality - should succeed (PLATFORM = "Linux") />
+    <! if eq (<|PLATFORM|> "Linux") !>
+    linuxConfig {
+        packageManager "apt"
+        shellDefault "/bin/bash"
+        pathSeparator "/"
+    }
+
+    </ String equality - should fail (PLATFORM != "Windows") />
+    <! if eq ("Windows" <|PLATFORM|>) !>
+    windowsConfig {
+        packageManager "chocolatey"
+        shellDefault "cmd.exe"
+        pathSeparator "\\"
+    }
+
+    </ Numeric equality - should succeed (PROCESSORS = 8) />
+    <! if eq (#8 <|PROCESSORS|>) !>
+    highCoreConfig {
+        parallelTasks #16
+        maxWorkers #8
+        enableMultithreading ~true
+    }
+
+    </ Numeric equality - should fail (SCORE != 100) />
+    <! if eq (#100 <|SCORE|>) !>
+    perfectScoreConfig {
+        achievement "perfect"
+        bonus #1000
+    }
+
+    </ Boolean equality - should succeed (IS_ADMIN = true) />
+    <! if eq (~true <|IS_ADMIN|>) !>
+    adminPrivileges {
+        canModifySystem ~true
+        accessLevel "administrator"
+        specialFeatures ["systemControl" "userManagement"]
+    }
+
+    </ Boolean equality - should fail (MAINTENANCE_MODE = false) />
+    <! if eq (~true <|MAINTENANCE_MODE|>) !>
+    maintenanceConfig {
+        readOnly ~true
+        message "System is under maintenance"
+        estimatedDuration "2 hours"
+    }
+)
+(
+    </ Error conditions and edge cases />
+
+    </ Tests how the If PI handles invalid or problematic conditions />
+
+    </ Invalid operator - should fail gracefully />
+    <! if invalid_operator ("test" "value") !>
+    invalidOperatorConfig {
+        error "This should not appear"
+        reason "Unknown operator should default to false"
+    }
+
+    </ Malformed expression - should fail gracefully />
+    <! if eq ("missing_second_arg") !>
+    malformedExpressionConfig {
+        error "This should not appear"
+        reason "Missing arguments should default to false"
+    }
+
+    </ Empty collection as operator - should fail gracefully />
+    <! if [] !>
+    emptyCollectionConfig {
+        error "This should not appear"
+        reason "Empty collection cannot be an operator"
+    }
+
+    </ Invalid operator syntax - should fail gracefully />
+    <! if not_a_real_operator !>
+    invalidSyntaxConfig {
+        error "This should not appear"
+        reason "Invalid operator should default to false"
+    }
+
+    </ Null/undefined dynamic variable in expression - should fail gracefully />
+    <! if eq ("test" <|COMPLETELY_UNDEFINED_VARIABLE|>) !>
+    undefinedInExpressionConfig {
+        error "This should not appear"
+        reason "Undefined variable in expression should default to false"
+    }
+
+    </ Complex nested expression that should work />
+    <! if eq (<|ENVIRONMENT|> "development") !>
+    validDevelopmentConfig {
+        mode "development"
+        debugging ~true
+        logLevel "verbose"
+        note "This should appear because ENVIRONMENT is set to 'development'"
+    }
+
+    </ Type mismatch - comparing string to number (should handle gracefully) />
+    <! if eq (<|PROCESSORS|> "not_a_number") !>
+    typeMismatchConfig {
+        error "This should not appear"
+        reason "Type mismatch should evaluate to false"
+    }
+
+    </ Very long condition expression (stress test) />
+    <! if eq ("supercalifragilisticexpialidocious_very_long_string_that_tests_parsing_limits" "shorter") !>
+    longStringConfig {
+        error "This should not appear"
+        reason "Long strings that don't match should evaluate to false"
+    }
+
+    </ Recursive/complex object comparison />
+    <! if eq ({ nested { deep { value "test" } } } { different "structure" }) !>
+    complexObjectConfig {
+        error "This should not appear"
+        reason "Complex object comparisons should work but these don't match"
+    }
+)
+(
+    </ Mixed element types as conditions - Tests how different element types behave as conditions />
+
+    </ Direct string value - should succeed (non-empty string is truthy) />
+    <! if "production" !>
+    directStringConfig {
+        type "staticString"
+        truthiness ~true
+        note "Non-empty strings are truthy"
+    }
+
+    </ Empty string - should fail (empty string is falsy) />
+    <! if "" !>
+    emptyStringConfig {
+        type "emptyString" 
+        truthiness ~false
+        note "This should not appear"
+    }
+
+    </ Numeric value - should succeed (non-zero number is truthy) />
+    <! if #42 !>
+    directNumericConfig {
+        type "staticNumber"
+        value #42
+        truthiness ~true
+    }
+
+    </ Zero value - should fail (zero is falsy) />
+    <! if #0 !>
+    zeroValueConfig {
+        type "zeroNumber"
+        truthiness ~false  
+        note "This should not appear"
+    }
+
+    </ Boolean true - should succeed />
+    <! if ~true !>
+    trueBooleanConfig {
+        type "explicitTrue"
+        truthiness ~true
+        reliable ~true
+    }
+
+    </ Boolean false - should fail />
+    <! if ~false !>
+    falseBooleanConfig {
+        type "explicitFalse"
+        truthiness ~false
+        note "This should not appear"
+    }
+
+    </ Collection/Array - should succeed (non-empty collection is truthy) />
+    <! if ["item1" "item2" "item3"] !>
+    collectionConfig {
+        type "array"
+        hasItems ~true
+        count #3
+    }
+
+    </ Object - should succeed (objects are truthy) />
+    <! if { key "value" other #123 } !>
+    objectConfig {
+        type "object" 
+        truthiness ~true
+        properties #2
+    }
+
+    </ Complex expression with nested elements />
+    <! if eq (<|USERNAME|> "demo_user") !>
+    userSpecificConfig {
+        username <|USERNAME|>
+        preferences {
+            language "en"
+            timezone "UTC"
+            theme "auto"
+        }
+        permissions ["read" "write"]
+    }
+)
+(
+    </ Numeric comparison tests />
+    </ These test gt, lt, ge, le operators with numeric values />
+
+    </ Greater than - should succeed (PROCESSORS = 8 > 4) />
+    <! if gt (<|PROCESSORS|> #4) !>
+    multiCoreOptimization {
+        useParallelProcessing ~true
+        threadPoolSize <|PROCESSORS|>
+        enableVectorization ~true
+    }
+
+    </ Greater than - should fail (CURRENT_CONNECTIONS = 45 > 75) />
+    <! if gt (<|CURRENT_CONNECTIONS|> #75) !>
+    highLoadConfig {
+        enableThrottling ~true
+        maxConcurrentRequests #50
+        queueingEnabled ~true
+    }
+
+    </ Less than - should succeed (AGE = 25 < 30) />
+    <! if lt (<|AGE|> #30) !>
+    youngUserConfig {
+        theme "modern"
+        notifications ~true
+        recommendations ["tutorials" "quickStart"]
+    }
+
+    </ Less than - should fail (MEMORY_GB = 16 < 8) />
+    <! if lt (<|MEMORY_GB|> #8) !>
+    lowMemoryConfig {
+        cacheSize #64
+        maxOpenFiles #100
+        swapUsage "aggressive"
+    }
+
+    </ Greater or equal - should succeed (MEMORY_GB = 16 >= 16) />
+    <! if ge (<|MEMORY_GB|> #16) !>
+    highMemoryConfig {
+        cacheSize #2048
+        maxOpenFiles #1000
+        preloadLibraries ~true
+    }
+
+    </ Greater or equal - should fail (SCORE = 85 >= 90) />
+    <! if ge (<|SCORE|> #90) !>
+    excellentPerformance {
+        badge "excellent"
+        rewardPoints #500
+        specialOffers ~true
+    }
+
+    </ Less or equal - should succeed (TEMPERATURE = 22.5 <= 25.0) />
+    <! if le (<|TEMPERATURE|> #25.0) !>
+    comfortableTemp {
+        hvacMode "auto"
+        fanSpeed "low"
+        energySaving ~true
+    }
+
+    </ Less or equal - should fail (DISK_SPACE_GB = 500 <= 100) />
+    <! if le (<|DISK_SPACE_GB|> #100) !>
+    lowDiskSpaceConfig {
+        enableCompression ~true
+        cleanupSchedule "daily"
+        warningThreshold #90
+    }
+)

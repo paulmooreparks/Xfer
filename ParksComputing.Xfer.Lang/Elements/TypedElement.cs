@@ -20,6 +20,15 @@ public abstract class TypedElement<T> : Element
     public virtual T Value { get; set; }
 
     /// <summary>
+    /// Gets the parsed value of this element for external evaluation.
+    /// For typed elements, this returns the strongly-typed Value.
+    /// </summary>
+    public override object? ParsedValue {
+        get => Value;
+        set => throw new InvalidOperationException("ParsedValue is read-only for TypedElement. Set the Value property instead.");
+    }
+
+    /// <summary>
     /// Initializes a new TypedElement with the specified value, name, and delimiter configuration.
     /// </summary>
     /// <param name="value">The value to store in this element.</param>

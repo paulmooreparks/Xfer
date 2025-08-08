@@ -122,7 +122,105 @@ public class ObjectElement : DictionaryElement {
     /// <param name="key">The key of the element to remove</param>
     /// <returns>True if the element was found and removed, false otherwise</returns>
     public bool Remove(string key) {
-        return _values.Remove(key);
+        if (_values.TryGetValue(key, out KeyValuePairElement? kvp)) {
+            bool removedFromDict = _values.Remove(key);
+            bool removedFromChildren = Children.Remove(kvp);
+
+            if (removedFromDict && kvp != null) {
+                kvp.Parent = null;
+                // Also clear parent relationship for the KVP's value
+                if (kvp.Value != null) {
+                    kvp.Value.Parent = null;
+                }
+            }
+
+            return removedFromDict;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Removes a specific child element from this object.
+    /// Overrides base implementation to handle both _values dictionary and Children collection.
+    /// </summary>
+    /// <param name="child">The child element to remove</param>
+    /// <returns>True if the child was found and removed, false otherwise</returns>
+    public override bool RemoveChild(Element child) {
+        if (child is KeyValuePairElement kvp) {
+            return Remove(kvp.Key);
+        }
+
+        // For non-KVP children (like ProcessingInstructions), just remove from Children
+        if (Children.Remove(child)) {
+            child.Parent = null;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Removes a child element at the specified index from the Children collection.
+    /// Note: Objects are not naturally ordered, but this provides access to Children collection by index.
+    /// </summary>
+    /// <param name="index">The zero-based index of the child to remove</param>
+    /// <returns>True if the child was successfully removed, false if index was out of range</returns>
+    public override bool RemoveChildAt(int index) {
+        if (index < 0 || index >= Children.Count) {
+            return false;
+        }
+
+        var child = Children[index];
+        return RemoveChild(child);
+    }
+
+    /// <summary>
+    /// Removes all key-value pairs and children from this object.
+    /// </summary>
+    /// <returns>The number of children that were removed</returns>
+    public override int RemoveAllChildren() {
+        var count = Children.Count;
+
+        // Clear parent relationships
+        foreach (var child in Children) {
+            child.Parent = null;
+        }
+
+        _values.Clear();
+        Children.Clear();
+        return count;
+    }
+
+    /// <summary>
+    /// Replaces a child element with a new element.
+    /// For KeyValuePairElements, replaces the value for the same key.
+    /// </summary>
+    /// <param name="oldChild">The existing child element to replace</param>
+    /// <param name="newChild">The new child element to add in its place</param>
+    /// <returns>True if the replacement was successful, false if oldChild was not found</returns>
+    public override bool ReplaceChild(Element oldChild, Element newChild) {
+        if (oldChild is KeyValuePairElement oldKvp && newChild is KeyValuePairElement newKvp) {
+            // Replace KVP with same key
+            if (newKvp.Key == oldKvp.Key && _values.ContainsKey(oldKvp.Key)) {
+                AddOrUpdate(newKvp);
+                return true;
+            }
+        }
+
+        // For other types of children, use index-based replacement
+        var index = Children.IndexOf(oldChild);
+        if (index == -1) {
+            return false;
+        }
+
+        // Clear old parent relationship
+        oldChild.Parent = null;
+
+        // Set up new relationships
+        Children[index] = newChild;
+        newChild.Parent = this;
+
+        return true;
     }
 
 /// <summary>

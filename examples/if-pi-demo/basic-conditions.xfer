@@ -1,0 +1,28 @@
+(
+    </ Basic variable checks - demonstrating the difference between existence and truthiness />
+
+    </ This should succeed - DEBUG_MODE is defined and truthy />
+    <! if <|DEBUG_MODE|> !>
+    debugConfig {
+        enabled ~true
+        verboseLogging ~true
+        logLevel "debug"
+        note "DEBUG_MODE exists and is truthy"
+    }
+
+    </ This should succeed - EMPTY_STRING exists (even though it's empty) />
+    <! if defined (<|EMPTY_STRING|>) !>
+    emptyStringExistsConfig {
+        exists ~true
+        value <|EMPTY_STRING|>
+        note "Variable exists even though it's empty"
+    }
+
+    </ This should succeed - FALSE_BOOLEAN exists (even though it's false) />
+    <! if defined (<|FALSE_BOOLEAN|>) !>
+    falseBooleanExistsConfig {
+        exists ~true
+        value <|FALSE_BOOLEAN|>
+        note "Variable exists even though it's false"
+    }
+)

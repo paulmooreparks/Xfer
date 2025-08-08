@@ -78,11 +78,11 @@ public class KeyValuePairElement : TypedElement<Element>
 
         if (keyElement is TextElement se)
         {
-            Key = se.Value.ToString() ?? string.Empty;
+            Key = se.Value?.ToString() ?? string.Empty;
         }
         else if (keyElement is IdentifierElement ke)
         {
-            Key = ke.Value.ToString() ?? string.Empty;
+            Key = ke.Value?.ToString() ?? string.Empty;
         }
         else
         {
@@ -128,7 +128,7 @@ public class KeyValuePairElement : TypedElement<Element>
             }
         }
 
-        if (isSpaced || Value is KeyValuePairElement || Value.Delimiter.Style == ElementStyle.Implicit)
+        if (isSpaced || Value is KeyValuePairElement || Value?.Delimiter.Style == ElementStyle.Implicit)
         {
             sb.Append(' ');
         }

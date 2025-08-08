@@ -35,6 +35,15 @@ public abstract class CollectionElement : Element {
     public virtual IEnumerable<Element> Values => _items;
 
     /// <summary>
+    /// Gets the parsed value of this collection element, which is the collection of child elements.
+    /// For collections, this returns the Values enumerable.
+    /// </summary>
+    public override object? ParsedValue {
+        get => Values;
+        set => throw new InvalidOperationException("ParsedValue is read-only for CollectionElement. Use Add() method to modify the collection.");
+    }
+
+    /// <summary>
     /// Retrieves the element at the specified index in the collection.
     /// </summary>
     /// <param name="index">The zero-based index of the element to retrieve.</param>

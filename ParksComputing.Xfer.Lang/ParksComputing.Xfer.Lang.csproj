@@ -18,7 +18,7 @@
     <PackAsTool>False</PackAsTool>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <Version>0.14.0-prerelease</Version>
+    <Version>0.15.0-prerelease</Version>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>

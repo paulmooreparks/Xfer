@@ -1,0 +1,35 @@
+(
+    </ Test element removal - this should be included />
+    <! if <|DEBUG_MODE|> !>
+    shouldBeIncluded {
+        reason "DEBUG_MODE is true"
+        value "this should appear"
+    }
+
+    </ Test element removal - this should be removed />
+    <! if <|NONEXISTENT_VAR|> !>
+    shouldBeRemoved {
+        reason "NONEXISTENT_VAR is undefined"
+        value "this should NOT appear"
+    }
+
+    </ Test boolean false - this should be removed />
+    <! if <|FALSE_BOOLEAN|> !>
+    shouldAlsoBeRemoved {
+        reason "FALSE_BOOLEAN exists but is false"
+        value "this should NOT appear either"
+    }
+
+    </ Test empty string truthiness - this should be removed />
+    <! if <|EMPTY_STRING|> !>
+    shouldBeRemovedToo {
+        reason "EMPTY_STRING exists but is falsy"
+        value "this should NOT appear"
+    }
+
+    </ Unconditional element - should always be included />
+    alwaysIncluded {
+        reason "no condition"
+        value "this should always appear"
+    }
+)
