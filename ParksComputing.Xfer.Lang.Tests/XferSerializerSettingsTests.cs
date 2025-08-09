@@ -115,6 +115,11 @@ public class XferSerializerSettingsTests
 
         // Assert
         Assert.IsNotNull(xferString);
+
+        // DIAGNOSTIC: Let's see the actual output
+        Console.WriteLine($"COMPACT STYLE TEST OUTPUT: '{xferString}'");
+
+        // TODO: Need to determine what compact syntax should actually look like
         // StylePreference settings don't actually change output format - it uses default syntax
         Assert.IsTrue(xferString.Contains("\"Test\""), $"Expected string syntax, got: {xferString}");
         Assert.IsTrue(xferString.Contains("42"), $"Expected integer value, got: {xferString}");

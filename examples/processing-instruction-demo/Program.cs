@@ -25,7 +25,7 @@ namespace ProcessingInstructionDemo {
             var input = File.ReadAllText(filePath);
             var doc = parser.Parse(input);
 
-            var xfer = doc.ToXfer(Formatting.Pretty);
+            var xfer = doc.ToXfer();
             Console.WriteLine("Serialized Xfer:");
             Console.WriteLine(xfer);
 

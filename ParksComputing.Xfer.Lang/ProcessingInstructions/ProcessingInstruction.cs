@@ -30,7 +30,7 @@ public class ProcessingInstruction : TypedElement<Element> {
     /// <summary>
     /// The element delimiter configuration for processing instructions.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, ElementStyle.Explicit);
 
     /// <summary>
     /// Initializes a new instance of the ProcessingInstruction class with the specified value and name.
@@ -87,10 +87,10 @@ public class ProcessingInstruction : TypedElement<Element> {
 
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
-                sb.Append(Delimiter.Opening);
+                sb.Append(Delimiter.ExplicitOpening);
                 break;
             case ElementStyle.Compact:
-                sb.Append(Delimiter.MinOpening);
+                sb.Append(Delimiter.CompactOpening);
                 break;
         }
 
@@ -104,6 +104,9 @@ public class ProcessingInstruction : TypedElement<Element> {
 
         sb.Append(Kvp?.ToXfer(formatting, indentChar, indentation, depth + 1));
 
+        // ProcessingInstructions only contain their core KVP - no additional children
+        // Target is not included in serialization as it's a reference, not content
+
         if (isIndented) {
             sb.Append(Environment.NewLine);
             sb.Append(rootIndent);
@@ -111,10 +114,10 @@ public class ProcessingInstruction : TypedElement<Element> {
 
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
-                sb.Append(Delimiter.Closing);
+                sb.Append(Delimiter.ExplicitClosing);
                 break;
             case ElementStyle.Compact:
-                sb.Append(Delimiter.MinClosing);
+                sb.Append(Delimiter.CompactClosing);
                 break;
         }
 

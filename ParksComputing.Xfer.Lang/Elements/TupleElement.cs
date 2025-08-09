@@ -87,10 +87,10 @@ public class TupleElement : ListElement {
 
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
-                sb.Append(Delimiter.Opening);
+                sb.Append(Delimiter.ExplicitOpening);
                 break;
             case ElementStyle.Compact:
-                sb.Append(Delimiter.MinOpening);
+                sb.Append(Delimiter.CompactOpening);
                 break;
         }
 
@@ -105,7 +105,7 @@ public class TupleElement : ListElement {
                 sb.Append(nestIndent);
             }
             sb.Append(item.ToXfer(formatting, indentChar, indentation, depth + 1));
-            if (!isIndented && item.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i + 1 < Children.Count) {
+            if (!isIndented && item.Delimiter.Style is ElementStyle.Implicit || (i + 1 < Children.Count && item.Delimiter.Style is ElementStyle.Compact && item.Delimiter.CompactClosing == string.Empty)) {
                 sb.Append(' ');
             }
             if (isIndented) {
@@ -119,10 +119,10 @@ public class TupleElement : ListElement {
 
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
-                sb.Append(Delimiter.Closing);
+                sb.Append(Delimiter.ExplicitClosing);
                 break;
             case ElementStyle.Compact:
-                sb.Append(Delimiter.MinClosing);
+                sb.Append(Delimiter.CompactClosing);
                 break;
         }
 

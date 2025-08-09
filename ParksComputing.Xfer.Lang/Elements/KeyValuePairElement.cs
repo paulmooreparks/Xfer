@@ -12,17 +12,16 @@ namespace ParksComputing.Xfer.Lang.Elements;
 /// and the value can be any element type. This is the fundamental building block for
 /// object properties and named elements in the XferLang format.
 /// </summary>
-public class KeyValuePairElement : TypedElement<Element>
-{
+public class KeyValuePairElement : TypedElement<Element> {
     /// <summary>
     /// The element name used in XferLang serialization for key-value pairs.
     /// </summary>
     public static readonly string ElementName = "keyValuePair";
 
     /// <summary>
-    /// Gets or sets the text element that represents the key portion of the key-value pair.
+    /// Gets or sets the keyword element that represents the key portion of the key-value pair.
     /// </summary>
-    public TextElement KeyElement { get; set; }
+    public KeywordElement KeyElement { get; set; }
 
     /// <summary>
     /// Gets the string representation of the key.
@@ -30,25 +29,21 @@ public class KeyValuePairElement : TypedElement<Element>
     public string Key { get; }
 
     /// <summary>
-    /// Initializes a new instance of the KeyValuePairElement class with a key element and default empty value.
+    /// Initializes a new instance of the KeyValuePairElement class with a keyword element and default empty value.
     /// </summary>
-    /// <param name="keyElement">The text element representing the key.</param>
+    /// <param name="keyElement">The keyword element representing the key.</param>
     /// <param name="specifierCount">The number of delimiter characters to use.</param>
-    public KeyValuePairElement(TextElement keyElement, int specifierCount = 1) : this(keyElement, new EmptyElement(), specifierCount)
-    {
+    public KeyValuePairElement(KeywordElement keyElement, int specifierCount = 1) : this(keyElement, new EmptyElement(), specifierCount) {
     }
 
     /// <summary>
     /// Gets or sets the value element of the key-value pair.
     /// </summary>
-    public override Element Value
-    {
+    public override Element Value {
         get => base.Value;
-        set
-        {
+        set {
             // Remove old value from children if it exists
-            if (base.Value != null && Children.Contains(base.Value))
-            {
+            if (base.Value != null && Children.Contains(base.Value)) {
                 Children.Remove(base.Value);
                 base.Value.Parent = null;
             }
@@ -57,8 +52,7 @@ public class KeyValuePairElement : TypedElement<Element>
             base.Value = value;
 
             // Add new value to children
-            if (value != null)
-            {
+            if (value != null) {
                 Children.Add(value);
                 value.Parent = this;
             }
@@ -66,28 +60,15 @@ public class KeyValuePairElement : TypedElement<Element>
     }
 
     /// <summary>
-    /// Initializes a new instance of the KeyValuePairElement class with a key element and value element.
+    /// Initializes a new instance of the KeyValuePairElement class with a keyword element and value element.
     /// </summary>
-    /// <param name="keyElement">The text element representing the key.</param>
+    /// <param name="keyElement">The keyword element representing the key.</param>
     /// <param name="value">The element representing the value.</param>
     /// <param name="specifierCount">The number of delimiter characters to use.</param>
-    public KeyValuePairElement(TextElement keyElement, Element value, int specifierCount = 1)
-        : base(value, ElementName, new(specifierCount))
-    {
+    public KeyValuePairElement(KeywordElement keyElement, Element value, int specifierCount = 1)
+        : base(value, ElementName, new(specifierCount)) {
         KeyElement = keyElement;
-
-        if (keyElement is TextElement se)
-        {
-            Key = se.Value?.ToString() ?? string.Empty;
-        }
-        else if (keyElement is IdentifierElement ke)
-        {
-            Key = ke.Value?.ToString() ?? string.Empty;
-        }
-        else
-        {
-            throw new ArgumentException($"Key must be a {nameof(TextElement)} or {nameof(IdentifierElement)} type.");
-        }
+        Key = keyElement.Value?.ToString() ?? string.Empty;
 
         // Value is set via base constructor, and Value property setter will handle Children.Add
     }
@@ -96,8 +77,7 @@ public class KeyValuePairElement : TypedElement<Element>
     /// Converts the key-value pair element to its XferLang string representation without formatting.
     /// </summary>
     /// <returns>The XferLang representation of the key-value pair element.</returns>
-    public override string ToXfer()
-    {
+    public override string ToXfer() {
         return ToXfer(Formatting.None);
     }
 
@@ -109,27 +89,33 @@ public class KeyValuePairElement : TypedElement<Element>
     /// <param name="indentation">The number of indent characters per level (default is 2).</param>
     /// <param name="depth">The current nesting depth (default is 0).</param>
     /// <returns>The formatted XferLang representation of the key-value pair element.</returns>
-    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
-    {
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
         bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
         var sb = new StringBuilder();
         sb.Append(KeyElement.ToXfer(formatting, indentChar, indentation, depth));
 
         // Add any processing instructions that should appear between key and value
-        foreach (var child in Children)
-        {
-            if (child is ProcessingInstruction pi)
-            {
-                if (isSpaced)
-                {
+        foreach (var child in Children) {
+            if (child is ProcessingInstruction pi) {
+                if (isSpaced) {
                     sb.Append(' ');
                 }
                 sb.Append(pi.ToXfer(formatting, indentChar, indentation, depth));
             }
         }
 
-        if (isSpaced || Value is KeyValuePairElement || Value?.Delimiter.Style == ElementStyle.Implicit)
-        {
+        // Add space between key and value only when needed for disambiguation
+        // No space when value has closing delimiters (unambiguous): name"value"
+        // Space when value is implicit/no delimiters (ambiguous): name active
+        bool needsSpace = false;
+        if (Value != null) {
+            // Add space if value is implicit (no delimiters) or compact with no closing delimiter
+            if (Value.Delimiter.Style == ElementStyle.Implicit) {
+                needsSpace = true;
+            }
+        }
+
+        if (needsSpace) {
             sb.Append(' ');
         }
 
@@ -141,8 +127,7 @@ public class KeyValuePairElement : TypedElement<Element>
     /// Returns a string representation of the key-value pair element.
     /// </summary>
     /// <returns>The XferLang representation of the key-value pair element.</returns>
-    public override string ToString()
-    {
+    public override string ToString() {
         return ToXfer();
     }
 }

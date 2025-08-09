@@ -29,7 +29,7 @@ namespace ParksComputing.Xfer.Lang.Elements
         /// <summary>
         /// The delimiter configuration for date/time elements using at sign characters.
         /// </summary>
-        public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+        public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, 1, ElementStyle.Compact);
 
         /// <summary>
         /// Gets or sets how the DateTime value is formatted during serialization.
@@ -104,7 +104,7 @@ namespace ParksComputing.Xfer.Lang.Elements
         public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
         {
             var sb = new StringBuilder();
-            sb.Append($"{Delimiter.MinOpening}{ToString()}{Delimiter.MinClosing}");
+            sb.Append($"{Delimiter.ExplicitOpening}{ToString()}{Delimiter.ExplicitClosing}");
             return sb.ToString();
         }
 

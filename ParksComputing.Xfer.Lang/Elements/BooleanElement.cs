@@ -86,7 +86,7 @@ public class BooleanElement : TypedElement<bool>
         }
         else
         {
-            sb.Append($"{Delimiter.Opening}{value}{Delimiter.Closing}");
+            sb.Append($"{Delimiter.ExplicitOpening}{value}{Delimiter.ExplicitClosing}");
         }
 
         return sb.ToString();

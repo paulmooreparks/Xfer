@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,7 +30,7 @@ public class IntegerElement : NumericElement<int>
     /// <summary>
     /// The delimiter configuration for integer elements using hash characters.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
     /// Custom formatter function for the integer value. If null, uses default formatting.
@@ -45,7 +45,15 @@ public class IntegerElement : NumericElement<int>
     /// <param name="elementStyle">The element style for delimiter handling (default: Compact)</param>
     /// <param name="customFormatter">Optional custom formatter function for the integer value</param>
     public IntegerElement(int value, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact, Func<int, string>? customFormatter = null)
-        : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, elementStyle))
+        : this(new NumericValue<int>(value), specifierCount, elementStyle)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the IntegerElement class with the specified numeric value.
+    /// </summary>
+    public IntegerElement(NumericValue<int> value, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact, Func<int, string>? customFormatter = null)
+        : base(value, ElementName, new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, elementStyle))
     {
         CustomFormatter = customFormatter;
     }
@@ -62,27 +70,19 @@ public class IntegerElement : NumericElement<int>
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
     {
         var sb = new StringBuilder();
-        string valueString = CustomFormatter?.Invoke(Value) ?? Value.ToString();
+        string valueString = CustomFormatter != null ? CustomFormatter(Value) : NumericValue.ToString();
 
         if (Delimiter.Style == ElementStyle.Implicit)
         {
-            sb.Append($"{valueString} ");
+            sb.Append($"{valueString}");
         }
         else if (Delimiter.Style == ElementStyle.Compact)
         {
-            // For custom formatted values (hex/binary), they already include the # prefix
-            if (CustomFormatter != null && valueString.StartsWith("#"))
-            {
-                sb.Append($"{valueString} ");
-            }
-            else
-            {
-                sb.Append($"{Delimiter.OpeningSpecifier}{valueString} ");
-            }
+            sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing}");
         }
         else
         {
-            sb.Append($"{Delimiter.Opening}{valueString}{Delimiter.Closing}");
+            sb.Append($"{Delimiter.ExplicitOpening}{valueString}{Delimiter.ExplicitClosing}");
         }
 
         return sb.ToString();

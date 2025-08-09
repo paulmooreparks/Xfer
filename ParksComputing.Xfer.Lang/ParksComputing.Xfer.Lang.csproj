@@ -24,10 +24,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\logo\XferLang-sm.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

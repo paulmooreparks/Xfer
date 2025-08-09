@@ -257,10 +257,15 @@ public abstract class Element {
     /// </summary>
     /// <param name="child">The child element to add</param>
     public virtual void AddChild(Element child) {
+        // Remove from previous parent if it exists
+        if (child.Parent != null && child.Parent != this) {
+            child.Parent.RemoveChild(child);
+        }
+
         if (!children.Contains(child)) {
             children.Add(child);
-            child.Parent = this;
         }
+        child.Parent = this;
     }
 
     /// <summary>

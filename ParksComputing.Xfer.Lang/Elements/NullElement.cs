@@ -25,7 +25,7 @@ internal class NullElement : TypedElement<object?>
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
     {
         var sb = new StringBuilder();
-        sb.Append($"{Delimiter.MinOpening}");
+        sb.Append($"{Delimiter.CompactOpening}");
         return sb.ToString();
     }
 

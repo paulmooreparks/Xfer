@@ -39,8 +39,8 @@ public class QueryNavigationTests {
         var title = new StringElement("Test Document") { Id = "title", Tag = "text" };
         var subtitle = new StringElement("Subtitle") { Tag = "text" };
 
-        header.AddOrUpdate(new KeyValuePairElement(new IdentifierElement("title"), title));
-        header.AddOrUpdate(new KeyValuePairElement(new IdentifierElement("subtitle"), subtitle));
+        header.AddOrUpdate(new KeyValuePairElement(new KeywordElement("title"), title));
+        header.AddOrUpdate(new KeyValuePairElement(new KeywordElement("subtitle"), subtitle));
         root.Add(header);
 
         // Content section
@@ -58,7 +58,7 @@ public class QueryNavigationTests {
         var footer = new ObjectElement { Id = "footer", Tag = "section" };
         var copyright = new StringElement("© 2023") { Tag = "text" };
 
-        footer.AddOrUpdate(new KeyValuePairElement(new IdentifierElement("copyright"), copyright));
+        footer.AddOrUpdate(new KeyValuePairElement(new KeywordElement("copyright"), copyright));
         root.Add(footer);
 
         return doc;

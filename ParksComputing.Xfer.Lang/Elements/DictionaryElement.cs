@@ -63,18 +63,29 @@ public abstract class DictionaryElement : CollectionElement {
             if (_values.ContainsKey(kvp.Key)) {
                 return false;
             }
+
+            // Remove from previous parent if it exists
+            if (kvp.Parent != null && kvp.Parent != this) {
+                kvp.Parent.RemoveChild(kvp);
+            }
+
             _values.Add(kvp.Key, kvp);
             if (!Children.Contains(kvp)) {
                 Children.Add(kvp);
-                kvp.Parent = this;
             }
+            kvp.Parent = this;
             return true;
         } else if (element is ParksComputing.Xfer.Lang.ProcessingInstructions.ProcessingInstruction || element is CommentElement) {
             // Non-semantic: add only to Children
+            // Remove from previous parent if it exists
+            if (element.Parent != null && element.Parent != this) {
+                element.Parent.RemoveChild(element);
+            }
+
             if (!Children.Contains(element)) {
                 Children.Add(element);
-                element.Parent = this;
             }
+            element.Parent = this;
             return true;
         }
         return false;

@@ -77,7 +77,7 @@ public class DateElement : TypedElement<DateOnly> {
     /// <param name="specifierCount">The number of delimiter characters to use (default: 1)</param>
     /// <param name="elementStyle">The element style for delimiter handling (default: Compact)</param>
     public DateElement(DateOnly dateOnly, DateTimeHandling dateTimeHandling = DateTimeHandling.RoundTrip, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact)
-        : base(dateOnly, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier)) {
+        : base(dateOnly, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, elementStyle)) {
         DateTimeHandling = dateTimeHandling;
     }
 
@@ -100,7 +100,7 @@ public class DateElement : TypedElement<DateOnly> {
     /// <returns>The XferLang string representation of this date element</returns>
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
         var sb = new StringBuilder();
-        sb.Append($"{Delimiter.MinOpening}{ToString()}{Delimiter.MinClosing}");
+        sb.Append($"{Delimiter.ExplicitOpening}{ToString()}{Delimiter.ExplicitClosing}");
         return sb.ToString();
     }
 

@@ -142,7 +142,7 @@ public class ElementTests
     public void KeyValuePairElement_Constructor_SetsKeyAndValue()
     {
         // Arrange
-        var key = new StringElement("name");
+        var key = new KeywordElement("name");
         var value = new StringElement("Alice");
 
         // Act
@@ -160,7 +160,7 @@ public class ElementTests
     {
         // Arrange
         var obj = new ObjectElement();
-        var key = new StringElement("name");
+        var key = new KeywordElement("name");
         var value = new StringElement("test");
         var kvp = new KeyValuePairElement(key);
         kvp.Value = value;

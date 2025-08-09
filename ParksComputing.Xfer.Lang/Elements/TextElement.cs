@@ -97,10 +97,10 @@ public abstract class TextElement : TypedElement<string> {
             sb.Append(Value);
         }
         else if (Delimiter.Style == ElementStyle.Compact) {
-            sb.Append($"{Delimiter.MinOpening}{Value}{Delimiter.MinClosing}");
+            sb.Append($"{Delimiter.CompactOpening}{Value}{Delimiter.CompactClosing}");
         }
         else {
-            sb.Append($"{Delimiter.Opening}{Value}{Delimiter.Closing}");
+            sb.Append($"{Delimiter.ExplicitOpening}{Value}{Delimiter.ExplicitClosing}");
         }
 
         return sb.ToString();

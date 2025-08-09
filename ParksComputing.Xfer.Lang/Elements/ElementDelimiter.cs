@@ -21,7 +21,7 @@ public class ElementDelimiter
     /// <summary>
     /// Gets the character used to close this element type.
     /// </summary>
-    public char ClosingSpecifier { get; }
+    public virtual char ClosingSpecifier { get; }
 
     private int _specifierCount;
 
@@ -39,37 +39,47 @@ public class ElementDelimiter
             var repeatedOpening = new string(OpeningSpecifier, _specifierCount);
             var repeatedClosing = new string(ClosingSpecifier, _specifierCount);
 
-            Opening = "<" + repeatedOpening;
-            Closing = repeatedClosing + ">";
-            MinOpening = repeatedOpening;
-            MinClosing = repeatedClosing;
+            ExplicitOpening = "<" + repeatedOpening;
+            ExplicitClosing = repeatedClosing + ">";
+            CompactOpening = repeatedOpening;
+            CompactClosing = repeatedClosing;
         }
     }
 
     /// <summary>
     /// Gets or sets the style of this element (Explicit, Compact, or Implicit).
     /// </summary>
-    public ElementStyle Style { get; set; } = ElementStyle.Explicit;
+    public ElementStyle Style { get; set; } = ElementStyle.Compact;
 
     /// <summary>
     /// Gets the full opening delimiter string including angle brackets.
     /// </summary>
-    public string Opening { get; protected set; }
+    public string ExplicitOpening { get; protected set; }
 
     /// <summary>
     /// Gets the full closing delimiter string including angle brackets.
     /// </summary>
-    public string Closing { get; protected set; }
+    public string ExplicitClosing { get; protected set; }
 
     /// <summary>
     /// Gets the minimal opening delimiter string without angle brackets.
     /// </summary>
-    public string MinOpening { get; protected set; }
+    public virtual string CompactOpening { get; protected set; }
 
     /// <summary>
     /// Gets the minimal closing delimiter string without angle brackets.
     /// </summary>
-    public string MinClosing { get; protected set; }
+    public virtual string CompactClosing { get; protected set; }
+
+    /// <summary>
+    /// Gets the implicit opening delimiter string, which is empty by default.
+    /// </summary>
+    public string ImplicitOpening { get; protected set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the implicit closing delimiter string, which is empty by default.
+    /// </summary>
+    public string ImplicitClosing { get; protected set; } = string.Empty;
 
     /// <summary>
     /// Initializes a new instance of the ElementDelimiter class with default values.
@@ -91,8 +101,8 @@ public class ElementDelimiter
     /// </summary>
     /// <param name="openingSpecifier">The opening delimiter character</param>
     /// <param name="closingSpecifier">The closing delimiter character</param>
-    /// <param name="elementStyle">The element style for delimiter handling (default: Explicit)</param>
-    public ElementDelimiter(char openingSpecifier, char closingSpecifier, ElementStyle elementStyle = ElementStyle.Explicit) : this(openingSpecifier, closingSpecifier, 1, elementStyle)
+    /// <param name="elementStyle">The element style for delimiter handling (default: Compact)</param>
+    public ElementDelimiter(char openingSpecifier, char closingSpecifier, ElementStyle elementStyle = ElementStyle.Compact) : this(openingSpecifier, closingSpecifier, 1, elementStyle)
     {
     }
 
@@ -102,9 +112,9 @@ public class ElementDelimiter
     /// <param name="openingSpecifier">The opening delimiter character</param>
     /// <param name="closingSpecifier">The closing delimiter character</param>
     /// <param name="specifierCount">The number of delimiter characters to use</param>
-    /// <param name="style">The element style for delimiter handling (default: Explicit)</param>
+    /// <param name="style">The element style for delimiter handling (default: Compact)</param>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when specifierCount is less than 1</exception>
-    public ElementDelimiter(char openingSpecifier, char closingSpecifier, int specifierCount, ElementStyle style = ElementStyle.Explicit)
+    public ElementDelimiter(char openingSpecifier, char closingSpecifier, int specifierCount, ElementStyle style = ElementStyle.Compact)
     {
         if (specifierCount < 1)
         {
@@ -122,10 +132,10 @@ public class ElementDelimiter
         var repeatedOpening = new string(openingSpecifier, SpecifierCount);
         var repeatedClosing = new string(closingSpecifier, SpecifierCount);
 
-        Opening = "<" + repeatedOpening;
-        Closing = repeatedClosing + ">";
-        MinOpening = repeatedOpening;
-        MinClosing = repeatedClosing;
+        ExplicitOpening = "<" + repeatedOpening;
+        ExplicitClosing = repeatedClosing + ">";
+        CompactOpening = repeatedOpening;
+        CompactClosing = repeatedClosing;
     }
 
     private static void ValidateSpecifier(char specifier, string paramName)
@@ -142,6 +152,6 @@ public class ElementDelimiter
     /// <returns>A string in the format "Opening...Closing" showing the delimiter pattern</returns>
     public override string ToString()
     {
-        return $"{Opening}...{Closing}";
+        return $"{ExplicitOpening}...{ExplicitClosing}";
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +31,16 @@ public class CharacterElement : TypedElement<int> {
     /// <summary>
     /// The default element delimiter configuration for character elements.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+
+
+    private NumericValue<int> _numericValue = new NumericValue<int>(default);
+
+    public NumericValue<int> NumericValue {
+        get { return _numericValue; }
+        set { _numericValue = value; Value = _numericValue.Value; }
+    }
+
 
     /// <summary>
     /// Initializes a new CharacterElement with the specified Unicode code point and formatting options.
@@ -41,10 +50,15 @@ public class CharacterElement : TypedElement<int> {
     /// <param name="style">The element style for formatting (default: Compact).</param>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the code point is outside the valid Unicode range.</exception>
     public CharacterElement(int codePoint, int specifierCount = 1, ElementStyle style = ElementStyle.Compact) :
-        base(codePoint, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
-        if (codePoint < 0 || codePoint > 0x10FFFF) {
-            throw new ArgumentOutOfRangeException(nameof(codePoint), "Code point must be between 0 and 0x10FFFF.");
+        this(new NumericValue<int>(codePoint), specifierCount, style) {
+    }
+
+    public CharacterElement(NumericValue<int> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact) :
+        base(numericValue.Value, ElementName, new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
+        if (numericValue.Value < 0 || numericValue.Value > 0x10FFFF) {
+            throw new ArgumentOutOfRangeException(nameof(numericValue), "Code point must be between 0 and 0x10FFFF.");
         }
+        NumericValue = numericValue;
     }
 
     /// <summary>
@@ -65,7 +79,7 @@ public class CharacterElement : TypedElement<int> {
     /// <returns>The formatted XferLang string representation of the Unicode code point.</returns>
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
         var sb = new StringBuilder();
-        sb.Append($"{Delimiter.MinOpening}${Value:X} ");
+        sb.Append($"{Delimiter.CompactOpening}{NumericValue.ToString()}{Delimiter.CompactClosing}");
         return sb.ToString();
     }
 

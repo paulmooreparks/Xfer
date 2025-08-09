@@ -31,7 +31,7 @@ public class DoubleElement : NumericElement<double>
     /// <summary>
     /// The delimiter configuration for double elements using caret characters.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
     /// Custom formatter function for the double value. If null, uses default formatting.
@@ -42,11 +42,22 @@ public class DoubleElement : NumericElement<double>
     /// Initializes a new instance of the DoubleElement class with the specified value and formatting options.
     /// </summary>
     /// <param name="value">The double-precision floating-point value to represent</param>
-    /// <param name="markerCount">The number of delimiter characters to use (default: 1)</param>
+    /// <param name="specifierCount">The number of delimiter characters to use (default: 1)</param>
     /// <param name="style">The element style for delimiter handling (default: Compact)</param>
     /// <param name="customFormatter">Optional custom formatter function for the double value</param>
-    public DoubleElement(double value, int markerCount = 1, ElementStyle style = ElementStyle.Compact, Func<double, string>? customFormatter = null)
-        : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, markerCount, style))
+    public DoubleElement(double value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<double, string>? customFormatter = null)
+        : this(new NumericValue<double>(value), specifierCount, style) {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the DoubleElement class with the specified numeric value.
+    /// <param name="numericValue">The numeric value to represent as a double</param>
+    /// <param name="specifierCount">The number of delimiter characters to use (default: 1)</param>
+    /// <param name="style">The element style for delimiter handling (default: Compact)</param>
+    /// <param name="customFormatter">Optional custom formatter function for the double value</param>
+    /// </summary>
+    public DoubleElement(NumericValue<double> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<double, string>? customFormatter = null)
+        : base(numericValue, ElementName, new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
     {
         CustomFormatter = customFormatter;
     }
@@ -63,27 +74,19 @@ public class DoubleElement : NumericElement<double>
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
     {
         var sb = new StringBuilder();
-        string valueString = CustomFormatter?.Invoke(Value) ?? Value.ToString();
+        string valueString = CustomFormatter != null ? CustomFormatter(Value) : NumericValue.ToString();
 
         if (Delimiter.Style == ElementStyle.Implicit)
         {
-            sb.Append($"{valueString} ");
+            sb.Append($"{valueString}");
         }
         else if (Delimiter.Style == ElementStyle.Compact)
         {
-            // For custom formatted values (hex/binary), they already include the prefix
-            if (CustomFormatter != null && (valueString.StartsWith("#") || valueString.StartsWith("-#")))
-            {
-                sb.Append($"{valueString} ");
-            }
-            else
-            {
-                sb.Append($"{Delimiter.OpeningSpecifier}{valueString} ");
-            }
+            sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing} ");
         }
         else
         {
-            sb.Append($"{Delimiter.Opening}{valueString}{Delimiter.Closing}");
+            sb.Append($"{Delimiter.ExplicitOpening}{valueString}{Delimiter.ExplicitClosing}");
         }
 
         return sb.ToString();

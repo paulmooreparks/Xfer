@@ -31,7 +31,7 @@ public class DecimalElement : NumericElement<decimal>
     /// <summary>
     /// The delimiter configuration for decimal elements using asterisk characters.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
     /// Custom formatter function for the decimal value. If null, uses default formatting.
@@ -46,7 +46,12 @@ public class DecimalElement : NumericElement<decimal>
     /// <param name="style">The element style for delimiter handling (default: Compact)</param>
     /// <param name="customFormatter">Optional custom formatter function for the decimal value</param>
     public DecimalElement(decimal value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<decimal, string>? customFormatter = null)
-        : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
+        : this(new NumericValue<decimal>(value), specifierCount, style)
+    {
+    }
+
+    public DecimalElement(NumericValue<decimal> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<decimal, string>? customFormatter = null)
+        : base(numericValue, ElementName, new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
     {
         CustomFormatter = customFormatter;
     }
@@ -63,7 +68,7 @@ public class DecimalElement : NumericElement<decimal>
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
     {
         var sb = new StringBuilder();
-        string valueString = CustomFormatter?.Invoke(Value) ?? Value.ToString();
+        string valueString = CustomFormatter != null ? CustomFormatter(Value) : NumericValue.ToString();
 
         if (Delimiter.Style == ElementStyle.Implicit)
         {
@@ -71,19 +76,11 @@ public class DecimalElement : NumericElement<decimal>
         }
         else if (Delimiter.Style == ElementStyle.Compact)
         {
-            // For custom formatted values (hex/binary), they already include the prefix
-            if (CustomFormatter != null && (valueString.StartsWith("#") || valueString.StartsWith("-#")))
-            {
-                sb.Append($"{valueString} ");
-            }
-            else
-            {
-                sb.Append($"{Delimiter.OpeningSpecifier}{valueString} ");
-            }
+            sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing} ");
         }
         else
         {
-            sb.Append($"{Delimiter.Opening}{valueString}{Delimiter.Closing}");
+            sb.Append($"{Delimiter.ExplicitOpening}{valueString}{Delimiter.ExplicitClosing}");
         }
 
         return sb.ToString();

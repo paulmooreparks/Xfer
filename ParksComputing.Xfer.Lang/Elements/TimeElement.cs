@@ -96,7 +96,7 @@ public class TimeElement : TypedElement<TimeOnly> {
     /// <returns>The formatted XferLang representation of the time element.</returns>
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
         var sb = new StringBuilder();
-        sb.Append($"{Delimiter.MinOpening}{ToString()}{Delimiter.MinClosing}");
+        sb.Append($"{Delimiter.ExplicitOpening}{ToString()}{Delimiter.ExplicitClosing}");
         return sb.ToString();
     }
 

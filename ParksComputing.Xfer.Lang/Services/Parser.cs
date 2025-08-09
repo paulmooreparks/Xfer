@@ -16,7 +16,7 @@ namespace ParksComputing.Xfer.Lang.Services;
 /// This parser provides comprehensive parsing capabilities including ID uniqueness validation,
 /// character definition resolution, and flexible element processing.
 /// </summary>
-public class Parser : IXferParser {
+public partial class Parser : IXferParser {
     // Stack to track parent elements for context-sensitive parsing
     /// <summary>
     /// Optional: A delegate for resolving charDef keywords. Should return the codepoint for a keyword, or null if not found.
@@ -1417,7 +1417,7 @@ public class Parser : IXferParser {
         return ParseKeyValuePairElement(keyElement);
     }
 
-    private KeyValuePairElement ParseKeyValuePairElement(TextElement keyElement) {
+    private KeyValuePairElement ParseKeyValuePairElement(KeywordElement keyElement) {
         var keyValuePairElement = new KeyValuePairElement(keyElement);
 
         if (IsCharAvailable()) {
@@ -1460,16 +1460,19 @@ public class Parser : IXferParser {
             charContent.Append(CurrentChar);
             Advance();
         }
+
+        int codePoint = '?';
+        var numericValue = new NumericValue<int>(codePoint, NumericBase.Hexadecimal);
+
         string charString = charContent.ToString();
         if (string.IsNullOrEmpty(charString)) {
             // Add warning for empty character element and use replacement character
             AddWarning(WarningType.EmptyCharacterElement,
-                      "Empty character element, using '?' (U+003F) as replacement",
+                      $"Empty character element, using '?' as replacement",
                       null);
-            return new CharacterElement('?', specifierCount, style: style);
+            return new CharacterElement(numericValue, specifierCount, style: style);
         }
 
-        int codePoint = '?';
 
         if (char.IsLetter(charString[0])) {
             var resolved = CharacterIdRegistry.Resolve(charString);
@@ -1486,10 +1489,21 @@ public class Parser : IXferParser {
             }
         }
         else {
-            codePoint = ParseNumericValue<char>(charString);
+            numericValue = ParseNumericValue<int>(charString);
+
+            if (numericValue.HasValue) {
+                codePoint = numericValue.Value;
+            }
+            else {
+                // Add warning for invalid character value
+                AddWarning(WarningType.InvalidCharacterValue,
+                          $"Invalid character value '{charString}', using '?' (U+003F) as fallback",
+                          charString);
+                codePoint = '?';
+            }
         }
 
-        return new CharacterElement(codePoint, specifierCount, style: style);
+        return new CharacterElement(numericValue, specifierCount, style: style);
     }
 
     private InterpolatedElement ParseInterpolatedElement(int specifierCount = 1) {
@@ -1669,6 +1683,10 @@ public class Parser : IXferParser {
             valueBuilder.Append(dynamicElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<int>(valueBuilder.ToString());
+
+            if (!value.HasValue) {
+                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Invalid integer value '{valueBuilder}'.");
+            }
             return new IntegerElement(value, specifierCount, style);
         }
 
@@ -1703,12 +1721,22 @@ public class Parser : IXferParser {
             valueBuilder.Append(dynamicElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<long>(valueBuilder.ToString());
+
+            if (!value.HasValue) {
+                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Invalid long integer value '{valueBuilder}'.");
+            }
+
             return new LongElement(value, specifierCount, style: style);
         }
 
         while (IsCharAvailable()) {
             if (LongElementClosing()) {
                 var value = ParseNumericValue<long>(valueBuilder.ToString());
+
+                if (!value.HasValue) {
+                    throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Invalid long integer value '{valueBuilder}'.");
+                }
+
                 return new LongElement(value, specifierCount, style: style);
             }
 
@@ -1718,6 +1746,11 @@ public class Parser : IXferParser {
         // If we reach end of input, treat as closed for compact/implicit style
         if (valueBuilder.Length > 0 && (style == ElementStyle.Compact || style == ElementStyle.Implicit)) {
             var value = ParseNumericValue<long>(valueBuilder.ToString());
+
+            if (!value.HasValue) {
+                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Invalid long integer value '{valueBuilder}'.");
+            }
+
             return new LongElement(value, specifierCount, style: style);
         }
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {LongElement.ElementName} element.");
@@ -1737,12 +1770,18 @@ public class Parser : IXferParser {
             valueBuilder.Append(dynamicElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<decimal>(valueBuilder.ToString());
+            if (!value.HasValue) {
+                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Invalid decimal value '{valueBuilder}'.");
+            }
             return new DecimalElement(value, specifierCount, style: style);
         }
 
         while (IsCharAvailable()) {
             if (DecimalElementClosing()) {
                 var value = ParseNumericValue<decimal>(valueBuilder.ToString());
+                if (!value.HasValue) {
+                    throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Invalid decimal value '{valueBuilder}'.");
+                }
                 return new DecimalElement(value, specifierCount, style: style);
             }
 
@@ -1752,6 +1791,9 @@ public class Parser : IXferParser {
         // If we reach end of input, treat as closed for compact/implicit style
         if (valueBuilder.Length > 0 && (style == ElementStyle.Compact || style == ElementStyle.Implicit)) {
             var value = ParseNumericValue<decimal>(valueBuilder.ToString());
+            if (!value.HasValue) {
+                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Invalid decimal value '{valueBuilder}'.");
+            }
             return new DecimalElement(value, specifierCount, style: style);
         }
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {DecimalElement.ElementName} element.");
@@ -1771,12 +1813,22 @@ public class Parser : IXferParser {
             valueBuilder.Append(dynamicElement.Value);
             _delimStack.Pop();
             var value = ParseNumericValue<double>(valueBuilder.ToString());
+
+            if (!value.HasValue) {
+                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Invalid double value '{valueBuilder}'.");
+            }
+
             return new DoubleElement(value, specifierCount, style: style);
         }
 
         while (IsCharAvailable()) {
             if (DoubleElementClosing()) {
                 var value = ParseNumericValue<double>(valueBuilder.ToString());
+
+                if (!value.HasValue) {
+                    throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Invalid double value '{valueBuilder}'.");
+                }
+
                 return new DoubleElement(value, specifierCount, style: style);
             }
 
@@ -1786,6 +1838,11 @@ public class Parser : IXferParser {
         // If we reach end of input, treat as closed for compact/implicit style
         if (valueBuilder.Length > 0 && (style == ElementStyle.Compact || style == ElementStyle.Implicit)) {
             var value = ParseNumericValue<double>(valueBuilder.ToString());
+
+            if (!value.HasValue) {
+                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Invalid double value '{valueBuilder}'.");
+            }
+
             return new DoubleElement(value, specifierCount, style: style);
         }
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {DoubleElement.ElementName} element.");
@@ -1841,9 +1898,11 @@ public class Parser : IXferParser {
         return new BooleanElement(value, specifierCount, style: style);
     }
 
-    private T ParseNumericValue<T>(string valueString) where T : struct, IConvertible {
+    private NumericValue<T> ParseNumericValue<T>(string valueString) where T : struct, IConvertible {
+        var returnValue = new NumericValue<T>();
+
         if (string.IsNullOrEmpty(valueString)) {
-            return default;
+            return returnValue;
         }
 
         char basePrefix = valueString[0];
@@ -1856,6 +1915,8 @@ public class Parser : IXferParser {
             _ => 10
         };
 
+        returnValue.Base = (NumericBase)numberBase;
+
         if (numberBase != 10) {
             numberString = valueString.Substring(1); /* Remove base prefix character */
         }
@@ -1864,39 +1925,48 @@ public class Parser : IXferParser {
             switch (numberBase) {
                 case 10: {
                         if (typeof(T) == typeof(float)) {
-                            return (T) Convert.ChangeType(float.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                            returnValue.Value = (T) Convert.ChangeType(float.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else if (typeof(T) == typeof(double)) {
-                            return (T) Convert.ChangeType(double.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
+                            returnValue.Value = (T) Convert.ChangeType(double.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else if (typeof(T) == typeof(short)) {
-                            return (T) Convert.ChangeType(short.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                            returnValue.Value = (T) Convert.ChangeType(short.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                        }
+                        else if (typeof(T) == typeof(char)) {
+                            returnValue.Value = (T) Convert.ChangeType(int.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else if (typeof(T) == typeof(int)) {
-                            return (T) Convert.ChangeType(int.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                            returnValue.Value = (T) Convert.ChangeType(int.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else if (typeof(T) == typeof(long)) {
-                            return (T) Convert.ChangeType(long.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
+                            returnValue.Value = (T) Convert.ChangeType(long.Parse(numberString, NumberStyles.Integer, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else if (typeof(T) == typeof(decimal)) {
-                            return (T) Convert.ChangeType(decimal.Parse(valueString, CultureInfo.InvariantCulture), typeof(T));
+                            returnValue.Value = (T) Convert.ChangeType(decimal.Parse(numberString, CultureInfo.InvariantCulture), typeof(T));
                         }
                         else {
                             throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unsupported type '{typeof(T)}' for decimal value parsing.");
                         }
+
+                        break;
                     }
                 case 16: {
                         long hexValue = long.Parse(numberString, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-                        return (T) Convert.ChangeType(hexValue, typeof(T));
+                        returnValue.Value = (T) Convert.ChangeType(hexValue, typeof(T));
+                        break;
                     }
                 case 2: {
                         long binaryValue = long.Parse(numberString, NumberStyles.BinaryNumber, CultureInfo.InvariantCulture);
-                        return (T) Convert.ChangeType(binaryValue, typeof(T));
+                        returnValue.Value = (T) Convert.ChangeType(binaryValue, typeof(T));
+                        break;
                     }
                 default: {
                         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unsupported numeric base '{numberBase}'.");
                     }
             }
+
+            return returnValue;
         }
         catch (Exception ex) {
             throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Failed to parse numeric value '{valueString}'. Error: {ex.Message}");

@@ -75,5 +75,10 @@ public enum WarningType {
     /// <summary>
     /// A character element was empty and a replacement character was used.
     /// </summary>
-    EmptyCharacterElement
+    EmptyCharacterElement,
+
+    /// <summary>
+    /// A character value was invalid and a fallback was used.
+    /// </summary>
+    InvalidCharacterValue
 }

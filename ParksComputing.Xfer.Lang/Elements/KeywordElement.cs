@@ -89,7 +89,7 @@ public class KeywordElement : TextElement
             sb.Append($"{Delimiter.OpeningSpecifier}{Value}");
         }
         else {
-            sb.Append($"{Delimiter.Opening}{Value}{Delimiter.Closing}");
+            sb.Append($"{Delimiter.ExplicitOpening}{Value}{Delimiter.ExplicitClosing}");
         }
 
         return sb.ToString();

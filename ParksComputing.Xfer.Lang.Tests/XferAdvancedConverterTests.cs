@@ -23,11 +23,19 @@ public class XferAdvancedConverterTests
         // Act
         var xferString = XferConvert.Serialize(coordinate, settings);
 
+        // DIAGNOSTIC: Let's see what's actually produced
+        Console.WriteLine($"CONVERTER TEST OUTPUT: '{xferString}'");
+
         // Assert
         Assert.IsNotNull(xferString);
-        // Custom converters appear to not be working - test actual behavior
-        Assert.IsTrue(xferString.Contains("40.7128") && xferString.Contains("-74.006"),
-            $"Expected coordinate data in some form, got: {xferString}");
+
+        // FIXED: Custom converter system actually WORKS!
+        // The converter produces a StringElement with coordinate data
+        Assert.AreEqual("\"40.7128,-74.006\"", xferString, "Custom converter should produce coordinate string");
+
+        // Evidence of test compromise - old flexible assertion:
+        // Assert.IsTrue(xferString.Contains("40.7128") && xferString.Contains("-74.006"),
+        //     $"Expected coordinate data in some form, got: {xferString}");
     }
 
     [TestMethod]

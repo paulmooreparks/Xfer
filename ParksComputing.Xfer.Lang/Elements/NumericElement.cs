@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +11,14 @@ namespace ParksComputing.Xfer.Lang.Elements;
 /// Provides common functionality for serializing numeric types with configurable delimiters.
 /// </summary>
 /// <typeparam name="T">The numeric type this element represents</typeparam>
-public abstract class NumericElement<T> : TypedElement<T>
-{
+public abstract class NumericElement<T> : TypedElement<T> where T : struct, IConvertible {
+    private NumericValue<T> _numericValue = new NumericValue<T>(default);
+
+    public NumericValue<T> NumericValue {
+        get { return _numericValue; }
+        set { _numericValue = value; Value = _numericValue.Value; }
+    }
+
     /// <summary>
     /// Initializes a new instance of the NumericElement class.
     /// </summary>
@@ -21,6 +27,12 @@ public abstract class NumericElement<T> : TypedElement<T>
     /// <param name="delimiter">The delimiter configuration for this element</param>
     public NumericElement(T value, string name, ElementDelimiter delimiter) : base(value, name, delimiter)
     {
+        _numericValue = new NumericValue<T>(value);
+    }
+
+    public NumericElement(NumericValue<T> numericValue, string name, ElementDelimiter delimiter) : base(numericValue.Value, name, delimiter)
+    {
+        NumericValue = numericValue;
     }
 
     /// <summary>
@@ -47,15 +59,15 @@ public abstract class NumericElement<T> : TypedElement<T>
 
         if (Delimiter.Style == ElementStyle.Implicit)
         {
-            sb.Append($"{Value} ");
+            sb.Append($"{Value}");
         }
         else if (Delimiter.Style == ElementStyle.Compact)
         {
-            sb.Append($"{Delimiter.OpeningSpecifier}{Value} ");
+            sb.Append($"{Delimiter.CompactOpening}{Value}");
         }
         else
         {
-            sb.Append($"{Delimiter.Opening}{Value}{Delimiter.Closing}");
+            sb.Append($"{Delimiter.ExplicitOpening}{Value}{Delimiter.ExplicitClosing}");
         }
 
         return sb.ToString();
@@ -67,6 +79,6 @@ public abstract class NumericElement<T> : TypedElement<T>
     /// <returns>The string representation of the numeric value</returns>
     public override string ToString()
     {
-        return Value?.ToString() ?? string.Empty;
+        return Value.ToString() ?? string.Empty;
     }
 }

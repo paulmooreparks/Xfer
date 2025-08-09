@@ -77,10 +77,10 @@ public class ReferenceElement : TypedElement<Element> {
 
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
-                sb.Append(Delimiter.Opening);
+                sb.Append(Delimiter.ExplicitOpening);
                 break;
             case ElementStyle.Compact:
-                sb.Append(Delimiter.MinOpening);
+                sb.Append(Delimiter.CompactOpening);
                 break;
         }
 
@@ -101,10 +101,10 @@ public class ReferenceElement : TypedElement<Element> {
 
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
-                sb.Append(Delimiter.Closing);
+                sb.Append(Delimiter.ExplicitClosing);
                 break;
             case ElementStyle.Compact:
-                sb.Append(Delimiter.MinClosing);
+                sb.Append(Delimiter.CompactClosing);
                 break;
         }
 

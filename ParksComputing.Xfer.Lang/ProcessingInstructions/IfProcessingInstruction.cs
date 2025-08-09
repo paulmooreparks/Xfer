@@ -76,7 +76,7 @@ public class IfProcessingInstruction : ProcessingInstruction {
     /// </summary>
     /// <param name="conditionExpression">The condition expression to evaluate (any element type).</param>
     public IfProcessingInstruction(Element conditionExpression) : base(conditionExpression, Keyword) {
-        ConditionExpression = conditionExpression;
+        ConditionExpression = conditionExpression ?? throw new ArgumentNullException(nameof(conditionExpression));
     }
 
     /// <summary>

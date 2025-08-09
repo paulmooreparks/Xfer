@@ -58,19 +58,23 @@ public class ObjectElement : DictionaryElement {
 
     private void SetElement<TElement>(string key, TElement element) where TElement : Element {
         if (_values.TryGetValue(key, out KeyValuePairElement? kvp)) {
-            _values[key] = new KeyValuePairElement(kvp.KeyElement, element);
+            // Remove old KVP from Children collection
+            Children.Remove(kvp);
+            // Update with new KVP using keyword key
+            var newKvp = new KeyValuePairElement(new KeywordElement(key), element);
+            _values[key] = newKvp;
+            // Add new KVP to Children collection
+            Children.Add(newKvp);
+            newKvp.Parent = this;
         }
         else {
-            TextElement keyElement;
-
-            if (key.IsKeywordString()) {
-                keyElement = new IdentifierElement(key, style: ElementStyle.Implicit);
-            }
-            else {
-                keyElement = new StringElement(key);
-            }
-
-            _values.Add(key, new KeyValuePairElement(keyElement, element));
+            // Use KeywordElement for object keys - keywords are the correct key type
+            var keyElement = new KeywordElement(key);
+            var newKvp = new KeyValuePairElement(keyElement, element);
+            _values.Add(key, newKvp);
+            // Add new KVP to Children collection
+            Children.Add(newKvp);
+            newKvp.Parent = this;
         }
     }
 
@@ -261,7 +265,14 @@ public void AddOrUpdate(Element element) {
             AddOrUpdate(kvp);
             break;
         case ProcessingInstruction meta:
-            Children.Add(meta);
+            // Remove from previous parent if it exists
+            if (meta.Parent != null && meta.Parent != this) {
+                meta.Parent.RemoveChild(meta);
+            }
+
+            if (!Children.Contains(meta)) {
+                Children.Add(meta);
+            }
             meta.Parent = this;
             break;
         default:
@@ -277,7 +288,7 @@ public void AddOrUpdate(Element element) {
         get {
             List<KeyValuePairElement> values = [];
             foreach (var value in _values) {
-                values.Append(value.Value);
+                values.Add(value.Value);
             }
             return values;
         }
@@ -315,10 +326,10 @@ public void AddOrUpdate(Element element) {
 
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
-                sb.Append(Delimiter.Opening);
+                sb.Append(Delimiter.ExplicitOpening);
                 break;
             case ElementStyle.Compact:
-                sb.Append(Delimiter.MinOpening);
+                sb.Append(Delimiter.CompactOpening);
                 break;
         }
 
@@ -333,9 +344,14 @@ public void AddOrUpdate(Element element) {
                 sb.Append(nestIndent);
             }
             sb.Append(child.ToXfer(formatting, indentChar, indentation, depth + 1));
-            if ((child.Delimiter.Style == ElementStyle.Implicit || child.Delimiter.Style == ElementStyle.Compact) && i < Children.Count) {
-                sb.Append(' ');
+
+            // Add space between KeyValuePair elements (but not after the last one)
+            if (i < Children.Count && child is KeyValuePairElement item) {
+                if (!isIndented && item.Value.Delimiter.Style is ElementStyle.Implicit || (item.Value.Delimiter.Style is ElementStyle.Compact && item.Value.Delimiter.CompactClosing == string.Empty)) {
+                    sb.Append(' ');
+                }
             }
+
             if (isIndented) {
                 sb.Append(Environment.NewLine);
             }
@@ -347,10 +363,10 @@ public void AddOrUpdate(Element element) {
 
         switch (Delimiter.Style) {
             case ElementStyle.Explicit:
-                sb.Append(Delimiter.Closing);
+                sb.Append(Delimiter.ExplicitClosing);
                 break;
             case ElementStyle.Compact:
-                sb.Append(Delimiter.MinClosing);
+                sb.Append(Delimiter.CompactClosing);
                 break;
         }
 

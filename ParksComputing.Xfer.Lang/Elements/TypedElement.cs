@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,8 +12,7 @@ namespace ParksComputing.Xfer.Lang.Elements;
 /// with appropriate XferLang formatting and delimiter handling.
 /// </summary>
 /// <typeparam name="T">The type of value stored in this element.</typeparam>
-public abstract class TypedElement<T> : Element
-{
+public abstract class TypedElement<T> : Element {
     /// <summary>
     /// Gets or sets the strongly-typed value stored in this element.
     /// </summary>
@@ -46,7 +45,7 @@ public abstract class TypedElement<T> : Element
     /// <returns>The XferLang string representation of the typed value.</returns>
     public override string ToXfer()
     {
-        return $"{Delimiter.Opening}{Value}{Delimiter.Closing}";
+        return $"{Delimiter.ExplicitOpening}{Value}{Delimiter.ExplicitClosing}";
     }
 
     /// <summary>

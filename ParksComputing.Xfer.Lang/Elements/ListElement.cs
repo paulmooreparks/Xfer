@@ -36,17 +36,28 @@ public abstract class ListElement : CollectionElement {
     public override bool Add(Element element) {
         if (element is ParksComputing.Xfer.Lang.ProcessingInstructions.ProcessingInstruction || element is CommentElement) {
             // Non-semantic: add only to Children
+            // Remove from previous parent if it exists
+            if (element.Parent != null && element.Parent != this) {
+                element.Parent.RemoveChild(element);
+            }
+
             if (!Children.Contains(element)) {
                 Children.Add(element);
-                element.Parent = this;
             }
+            element.Parent = this;
             return true;
         }
+
+        // Remove from previous parent if it exists
+        if (element.Parent != null && element.Parent != this) {
+            element.Parent.RemoveChild(element);
+        }
+
         _items.Add(element);
         if (!Children.Contains(element)) {
             Children.Add(element);
-            element.Parent = this;
         }
+        element.Parent = this;
         return true;
     }
 

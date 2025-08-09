@@ -63,10 +63,13 @@ namespace ParksComputing.Xfer.Lang.Tests
             // Act
             string result = XferConvert.Serialize(numericObj);
 
-            // Assert - Look for hex representation in some form
+            // DIAGNOSTIC OUTPUT
+            Console.WriteLine($"HEX FORMAT TEST OUTPUT: '{result}'");
+
+            // Assert - Test exact expected behavior
             Assert.IsTrue(result.Contains("HexValue"), "Should contain HexValue property");
-            Assert.IsTrue(result.Contains("255") || result.Contains("FF") || result.Contains("0xFF") || result.Contains("#$FF"),
-                "Should contain the value 255 in hex or decimal format");
+            // Expected: #$FF format based on XferNumericFormat.Hexadecimal documentation
+            Assert.IsTrue(result.Contains("#$FF"), $"Should produce hex format #$FF, got: {result}");
         }
 
         [TestMethod]
@@ -85,10 +88,13 @@ namespace ParksComputing.Xfer.Lang.Tests
             // Act
             string result = XferConvert.Serialize(numericObj);
 
-            // Assert - Look for binary representation in some form
+            // DIAGNOSTIC OUTPUT
+            Console.WriteLine($"BINARY FORMAT TEST OUTPUT: '{result}'");
+
+            // Assert - Test exact expected behavior
             Assert.IsTrue(result.Contains("BinaryValue"), "Should contain BinaryValue property");
-            Assert.IsTrue(result.Contains("5") || result.Contains("101") || result.Contains("0b101"),
-                "Should contain the value 5 in binary or decimal format");
+            // Expected: #%101 format based on XferNumericFormat.Binary documentation
+            Assert.IsTrue(result.Contains("#%101"), $"Should produce binary format #%101, got: {result}");
         }
 
         [TestMethod]
