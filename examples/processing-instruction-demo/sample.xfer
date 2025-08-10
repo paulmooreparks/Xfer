@@ -32,7 +32,7 @@
     <! if eq["Linux" "<|PLATFORM|>"] !>
     profile{name"Bob"role"admin"verified~true}
 
-    <! if gt[#4 #<|NUMBER_OF_PROCESSORS|>] !>
+    <! if xx[#64 #<|NUMBER_OF_PROCESSORS|>] !>
     mixedData ( "Sample" @2023-12-25@ *99.5 )
     age $18
     <!id "kvp"!>foo <!id "value"!>"bar"

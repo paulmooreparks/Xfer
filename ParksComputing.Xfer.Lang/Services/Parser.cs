@@ -85,7 +85,7 @@ public partial class Parser : IXferParser {
     /// <summary>
     /// Adds a warning to the current document being parsed.
     /// </summary>
-    private void AddWarning(WarningType type, string message, string? context = null) {
+    internal void AddWarning(WarningType type, string message, string? context = null) {
         if (_currentDocument != null) {
             _currentDocument.Warnings.Add(new ParseWarning(type, message, CurrentRow, CurrentColumn, context));
         }
@@ -148,6 +148,8 @@ public partial class Parser : IXferParser {
         RegisterPIProcessor(TagProcessingInstruction.Keyword, CreateTagProcessingInstruction);
         RegisterPIProcessor(DynamicSourceProcessingInstruction.Keyword, CreateDynamicSourceProcessingInstruction);
         RegisterPIProcessor(DefinedProcessingInstruction.Keyword, CreateDefinedProcessingInstruction);
+    // Conditional processing instruction (if) enabling conditional inclusion of the next element
+    RegisterPIProcessor(IfProcessingInstruction.Keyword, CreateIfProcessingInstruction);
     }
 
     // Built-in PI processor factory methods
@@ -211,6 +213,11 @@ public partial class Parser : IXferParser {
     private static ProcessingInstruction CreateDefinedProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
         // Accept any element type for defined processing instruction
         return new DefinedProcessingInstruction(kvp.Value);
+    }
+
+    private static ProcessingInstruction CreateIfProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
+        // Value can be any element representing the condition expression (text, dynamic, collection operator, etc.)
+        return new IfProcessingInstruction(kvp.Value, parser);
     }
 
     /// <summary>
@@ -1135,6 +1142,15 @@ public partial class Parser : IXferParser {
                             break;
                         }
                     }
+                    // If element suppressed, remove any failed conditional IF PIs from the parent container so they don't serialize orphaned
+                    if (!shouldAddElement) {
+                        foreach (var pi in localPendingPIs) {
+                            if (pi is IfProcessingInstruction ifpi && !ifpi.ConditionMet) {
+                                // Remove from arrayElement children (it was previously added for serialization)
+                                arrayElement.Remove(pi);
+                            }
+                        }
+                    }
                     localPendingPIs.Clear();
 
                     // Only add the element if all PIs approved it
@@ -1178,6 +1194,13 @@ public partial class Parser : IXferParser {
                             // PI indicates this element should not be added
                             shouldAddElement = false;
                             break;
+                        }
+                    }
+                    if (!shouldAddElement) {
+                        foreach (var pi in localPendingPIs) {
+                            if (pi is IfProcessingInstruction ifpi && !ifpi.ConditionMet) {
+                                arrayElement.Remove(pi);
+                            }
                         }
                     }
                     localPendingPIs.Clear();
@@ -1257,6 +1280,13 @@ public partial class Parser : IXferParser {
                         break;
                     }
                 }
+                if (!shouldAddElement) {
+                    foreach (var pi in localPendingPIs) {
+                        if (pi is IfProcessingInstruction ifpi && !ifpi.ConditionMet) {
+                            objectElement.RemoveChild(pi);
+                        }
+                    }
+                }
                 localPendingPIs.Clear();
             }
 
@@ -1319,6 +1349,14 @@ public partial class Parser : IXferParser {
                         // PI indicates this element should not be added
                         shouldAddElement = false;
                         break;
+                    }
+                }
+                if (!shouldAddElement) {
+                    // Remove any failed conditional IF PIs so they do not serialize orphaned
+                    foreach (var p in pendingPIs) {
+                        if (p is IfProcessingInstruction ifpi && !ifpi.ConditionMet) {
+                            tupleElement.Remove(p);
+                        }
                     }
                 }
                 pendingPIs.Clear();

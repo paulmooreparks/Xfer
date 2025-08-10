@@ -64,6 +64,7 @@ public class ScriptingEngineTests {
         Assert.IsTrue(engine.IsOperatorRegistered("eq"));
         Assert.IsTrue(engine.IsOperatorRegistered("defined"));
         Assert.IsTrue(engine.IsOperatorRegistered("if"));
+    Assert.IsTrue(engine.IsOperatorRegistered("gt"));
     }
 
     #endregion
@@ -425,10 +426,11 @@ public class ScriptingEngineTests {
         var operators = engine.GetAllOperators().ToList();
 
         // Assert
-        Assert.AreEqual(3, operators.Count);
+    Assert.AreEqual(4, operators.Count);
         Assert.IsTrue(operators.Any(op => op is EqualsOperator));
         Assert.IsTrue(operators.Any(op => op is DefinedOperator));
         Assert.IsTrue(operators.Any(op => op is IfOperator));
+    Assert.IsTrue(operators.Any(op => op.OperatorName == "gt"));
     }
 
     [TestMethod]
@@ -444,8 +446,9 @@ public class ScriptingEngineTests {
         var logicalOps = engine.GetOperatorsByCategory("Logical").ToList();
 
         // Assert
-        Assert.AreEqual(1, comparisonOps.Count);
-        Assert.IsInstanceOfType(comparisonOps[0], typeof(EqualsOperator));
+    Assert.AreEqual(2, comparisonOps.Count); // eq, gt
+    Assert.IsTrue(comparisonOps.Any(o => o is EqualsOperator));
+    Assert.IsTrue(comparisonOps.Any(o => o.OperatorName == "gt"));
 
         Assert.AreEqual(1, utilityOps.Count);
         Assert.IsInstanceOfType(utilityOps[0], typeof(DefinedOperator));
@@ -531,13 +534,14 @@ public class ScriptingEngineTests {
         Assert.IsTrue(diagnostics.ContainsKey("ContextVariables"));
         Assert.IsTrue(diagnostics.ContainsKey("Environment"));
 
-        Assert.AreEqual(3, (int)diagnostics["RegisteredOperatorCount"]);
+    Assert.AreEqual(4, (int)diagnostics["RegisteredOperatorCount"]);
         Assert.AreEqual(1, (int)diagnostics["ContextVariableCount"]);
 
         var operators = (List<string>)diagnostics["RegisteredOperators"];
         Assert.IsTrue(operators.Contains("eq"));
         Assert.IsTrue(operators.Contains("defined"));
-        Assert.IsTrue(operators.Contains("if"));
+    Assert.IsTrue(operators.Contains("if"));
+    Assert.IsTrue(operators.Contains("gt"));
 
         var variables = (List<string>)diagnostics["ContextVariables"];
         Assert.IsTrue(variables.Contains("TEST_VAR"));
@@ -556,7 +560,7 @@ public class ScriptingEngineTests {
 
         // Assert
         Assert.IsNotNull(result);
-        Assert.IsTrue(result.Contains("3 operators"));
+    Assert.IsTrue(result.Contains("4 operators"));
         Assert.IsTrue(result.Contains("1 context variables"));
     }
 

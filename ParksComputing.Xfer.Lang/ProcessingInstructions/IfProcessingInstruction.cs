@@ -75,8 +75,11 @@ public class IfProcessingInstruction : ProcessingInstruction {
     /// Initializes a new instance of the IfProcessingInstruction class.
     /// </summary>
     /// <param name="conditionExpression">The condition expression to evaluate (any element type).</param>
-    public IfProcessingInstruction(Element conditionExpression) : base(conditionExpression, Keyword) {
+    private readonly Services.Parser? _parser; // For emitting warnings
+
+    public IfProcessingInstruction(Element conditionExpression, Services.Parser? parser = null) : base(conditionExpression, Keyword) {
         ConditionExpression = conditionExpression ?? throw new ArgumentNullException(nameof(conditionExpression));
+        _parser = parser;
     }
 
     /// <summary>
@@ -179,6 +182,39 @@ public class IfProcessingInstruction : ProcessingInstruction {
     /// <param name="scriptingEngine">The scripting engine for evaluation.</param>
     /// <returns>True if the condition is met; otherwise, false.</returns>
     private bool EvaluateCondition(Element conditionExpression, ScriptingEngine scriptingEngine) {
+        // Support operator expressed as a key/value pair: op[args...]
+        // e.g. eq["Linux" "<|PLATFORM|>"] parsed as KeyValuePairElement(key='eq', value = ArrayElement)
+    if (conditionExpression is KeyValuePairElement kvpExp && kvpExp.Key is not null) {
+            var opName = kvpExp.Key.Trim();
+            if (!string.IsNullOrEmpty(opName) && IsKnownOperator(opName)) {
+                try {
+                    // Gather arguments from value element
+                    var valueElem = kvpExp.Value;
+                    Element[] args;
+                    if (valueElem is CollectionElement coll) {
+                        args = new Element[coll.Count];
+                        for (int i = 0; i < coll.Count; i++) {
+                            var arg = coll.GetElementAt(i);
+                            if (arg != null) {
+                                args[i] = arg; // default(Element) skipped
+                            }
+                        }
+                    } else {
+                        args = new[] { valueElem };
+                    }
+                    var result = scriptingEngine.Evaluate(opName, args);
+                    return ConvertToBoolean(result);
+                }
+                catch {
+                    return false;
+                }
+            } else if (!string.IsNullOrEmpty(opName)) {
+                // Unknown operator: emit warning and treat as *no-op* (return true so target is preserved, PI remains)
+                _parser?.AddWarning(WarningType.UnknownConditionalOperator, $"Unknown conditional operator '{opName}' in if PI (treated as no-op)");
+                return true;
+            }
+        }
+
         // If the condition is a simple element (like a DynamicElement), treat it as a "defined" check
         if (IsSimpleElement(conditionExpression)) {
             var result = scriptingEngine.Evaluate("defined", conditionExpression);

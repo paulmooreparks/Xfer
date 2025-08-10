@@ -144,8 +144,9 @@ public static class OperatorRegistry {
         RegisterOperator<Comparison.EqualsOperator>();
         RegisterOperator<Logical.IfOperator>();
 
-        // Additional operators will be registered here as they are implemented:
-        // RegisterOperator<Comparison.GreaterThanOperator>();
+    RegisterOperator<Comparison.GreaterThanOperator>();
+
+    // Additional operators will be registered here as they are implemented:
         // RegisterOperator<Comparison.LessThanOperator>();
         // RegisterOperator<Logical.AndOperator>();
         // RegisterOperator<Logical.OrOperator>();

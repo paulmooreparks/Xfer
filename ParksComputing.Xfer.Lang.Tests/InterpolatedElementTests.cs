@@ -303,7 +303,7 @@ public class InterpolatedElementTests
         var testCases = new[]
         {
             "Line 1\nLine 2",
-            "Line 1\r\nLine 2",
+            $"Line 1{Environment.NewLine}Line 2",
             "Multiple\n\nLines",
             "Tab\there",
         };
@@ -400,7 +400,7 @@ public class InterpolatedElementTests
             "  ",
             "\t",
             "\n",
-            "\r\n",
+            Environment.NewLine,
             "   \t\n   ",
         };
 

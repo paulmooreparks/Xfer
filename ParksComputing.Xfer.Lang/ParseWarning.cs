@@ -80,5 +80,10 @@ public enum WarningType {
     /// <summary>
     /// A character value was invalid and a fallback was used.
     /// </summary>
-    InvalidCharacterValue
+    InvalidCharacterValue,
+
+    /// <summary>
+    /// An if processing instruction referenced an unknown/unregistered operator (condition treated as false).
+    /// </summary>
+    UnknownConditionalOperator
 }

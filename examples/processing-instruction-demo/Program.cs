@@ -23,7 +23,33 @@ namespace ProcessingInstructionDemo {
             var charDefProcessor = CharDefProcessorSetup.RegisterWith(parser);
 
             var input = File.ReadAllText(filePath);
-            var doc = parser.Parse(input);
+            XferDocument? doc = null;
+            try {
+                doc = parser.Parse(input);
+            }
+            catch (Exception ex) {
+                Console.WriteLine("Parse error:");
+                Console.WriteLine(ex.Message);
+                if (ex.InnerException != null) {
+                    Console.WriteLine($"Inner: {ex.InnerException.Message}");
+                }
+                return; // Cannot continue without a document
+            }
+
+            // Report warnings (e.g., unknown conditional operators)
+            if (doc.Warnings.Any()) {
+                Console.WriteLine("\nParse Warnings:");
+                foreach (var w in doc.Warnings) {
+                    Console.WriteLine($"  [{w.Type}] {w.Message} (row {w.Row}, col {w.Column})");
+                }
+            }
+            else {
+                Console.WriteLine("\nNo parse warnings.");
+            }
+
+            // Placeholder for future error collection if added to XferDocument
+            // if (doc.Errors?.Any() == true) { ... }
+
 
             var xfer = doc.ToXfer();
             Console.WriteLine("Serialized Xfer:");
