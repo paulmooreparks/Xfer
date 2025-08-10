@@ -465,6 +465,8 @@ public class ObjectElementTests
         // Act
         var result = obj.ToXfer(Formatting.Indented);
 
+        Console.WriteLine(result);
+
         // Assert
         Assert.IsTrue(result.Contains("{\r\n"));
         Assert.IsTrue(result.Contains("  name\"John\"\r\n"));
@@ -481,6 +483,8 @@ public class ObjectElementTests
 
         // Act
         var result = obj.ToXfer(Formatting.Indented, indentChar: '\t', indentation: 1);
+
+        Console.WriteLine(result);
 
         // Assert
         Assert.IsTrue(result.Contains("{\r\n"));
