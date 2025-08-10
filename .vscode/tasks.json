@@ -95,7 +95,6 @@
 			"args": [
 				"watch",
 				"test",
-				"--no-build",
 				"--no-restore",
 				"--configuration",
 				"Release"
