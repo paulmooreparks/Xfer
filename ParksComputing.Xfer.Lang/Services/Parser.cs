@@ -118,6 +118,8 @@ public partial class Parser : IXferParser {
     }
 
     private XferDocument? _currentDocument = null;
+    // Expose current document for internal consumers (e.g., script PI local suppression)
+    internal XferDocument? CurrentDocument => _currentDocument;
     // Legacy reference bindings (removed in favor of scoped stacks)
     private readonly Dictionary<string, Element> _referenceBindings = new(StringComparer.Ordinal); // retained only temporarily for compatibility with any remaining calls
     // Scoped binding stack for script 'let'
@@ -134,9 +136,9 @@ public partial class Parser : IXferParser {
     internal void BindReference(string name, Element valueElement) {
         if (_bindingScopes.Count == 0) { PushBindingScope(); }
         _bindingScopes.Peek()[name] = valueElement; // store original (mutations visible to future clones)
-        // Trace binding (reuse UnresolvedReference type purely for visibility until a Trace type is added)
+        // Trace binding using dedicated Trace warning type
         if (_currentDocument != null) {
-            _currentDocument.Warnings.Add(new ParseWarning(WarningType.UnresolvedReference, $"[trace] bind '{name}' => {valueElement.GetType().Name}", CurrentRow, CurrentColumn, name));
+            _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] bind '{name}' => {valueElement.GetType().Name}", CurrentRow, CurrentColumn, name));
         }
     }
 
@@ -633,7 +635,6 @@ public partial class Parser : IXferParser {
                 return true;
             }
         }
-
         return ElementClosing();
     }
 
@@ -751,9 +752,13 @@ public partial class Parser : IXferParser {
     private bool IsCharAvailable() => CurrentChar != '\0';
 
     private bool IsNumericChar(char c) =>
-        char.IsNumber(c) ||
-        char.IsBetween(c, 'A', 'F') ||
-        char.IsBetween(c, 'a', 'f') ||
+        char.IsDigit(c) ||
+        c == '-' || c == '+' || c == '_' ||
+        c == 'x' || c == 'X' || // hex prefixes
+        c == 'b' || c == 'B' || // binary prefixes
+        c == 'o' || c == 'O' || // octal prefixes
+        (c >= 'A' && c <= 'F') ||
+        (c >= 'a' && c <= 'f') ||
         c == '$' || c == '%' || c == '.' || c == ',';
 
     private bool IsKeywordChar(char c) {
@@ -765,7 +770,6 @@ public partial class Parser : IXferParser {
     /// Parses a string containing XferLang content into an XferDocument.
     /// </summary>
     /// <param name="input">The XferLang content to parse as a string.</param>
-    /// <returns>An XferDocument containing the parsed elements and metadata.</returns>
     /// <exception cref="ArgumentNullException">Thrown when input is null or empty.</exception>
     public XferDocument Parse(string input) {
         if (string.IsNullOrEmpty(input)) {
@@ -912,7 +916,8 @@ public partial class Parser : IXferParser {
                     if (TryResolveBinding(d2.Value, out var bound2)) {
                         kv.Value.Value = Helpers.ElementCloner.Clone(bound2!);
                         if (_currentDocument != null) {
-                            _currentDocument.Warnings.Add(new ParseWarning(WarningType.UnresolvedReference, $"[trace] post-pass resolved '{d2.Value}' in object", CurrentRow, CurrentColumn, d2.Value));
+                            _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] post-pass resolved '{d2.Value}' in object", CurrentRow, CurrentColumn, d2.Value));
+                            SuppressEarlierUnresolvedReferenceWarning(d2.Value);
                         }
                     }
                 } else {
@@ -927,7 +932,8 @@ public partial class Parser : IXferParser {
                     if (TryResolveBinding(d.Value, out var bound)) {
                         coll.Children[i] = Helpers.ElementCloner.Clone(bound!);
                         if (_currentDocument != null) {
-                            _currentDocument.Warnings.Add(new ParseWarning(WarningType.UnresolvedReference, $"[trace] post-pass resolved '{d.Value}' in collection", CurrentRow, CurrentColumn, d.Value));
+                            _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] post-pass resolved '{d.Value}' in collection", CurrentRow, CurrentColumn, d.Value));
+                            SuppressEarlierUnresolvedReferenceWarning(d.Value);
                         }
                     }
                 } else {
@@ -937,6 +943,18 @@ public partial class Parser : IXferParser {
         }
         else {
             // Scalar element: nothing to traverse
+        }
+    }
+
+    private void SuppressEarlierUnresolvedReferenceWarning(string name) {
+        if (_currentDocument == null) { return; }
+        for (int i = 0; i < _currentDocument.Warnings.Count; i++) {
+            var w = _currentDocument.Warnings[i];
+            if (w.Type == WarningType.UnresolvedReference && string.Equals(w.Context, name, StringComparison.Ordinal)) {
+                w.Message += " (resolved later – suppressed)";
+                w.Type = WarningType.Trace;
+                break;
+            }
         }
     }
 
@@ -1950,12 +1968,12 @@ public partial class Parser : IXferParser {
         }
         if (TryResolveBinding(name, out var bound)) {
             if (_currentDocument != null) {
-                _currentDocument.Warnings.Add(new ParseWarning(WarningType.UnresolvedReference, $"[trace] deref '{name}' resolved immediately", CurrentRow, CurrentColumn, name));
+                _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] deref '{name}' resolved immediately", CurrentRow, CurrentColumn, name));
             }
             return Helpers.ElementCloner.Clone(bound!);
         }
         if (_currentDocument != null) {
-            _currentDocument.Warnings.Add(new ParseWarning(WarningType.UnresolvedReference, $"[trace] deref '{name}' unresolved (will attempt post-pass)", CurrentRow, CurrentColumn, name));
+            _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] deref '{name}' unresolved (will attempt post-pass)", CurrentRow, CurrentColumn, name));
         }
         AddWarning(WarningType.UnresolvedReference, $"Unresolved reference '{name}'", name);
         return new DereferenceElement(name, specifierCount, style);

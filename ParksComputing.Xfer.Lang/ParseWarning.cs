@@ -90,5 +90,10 @@ public enum WarningType {
     /// <summary>
     /// A reference element referenced a name that has not been bound via a let binding.
     /// </summary>
-    UnresolvedReference
+    UnresolvedReference,
+
+    /// <summary>
+    /// Non-problem diagnostic trace emitted during parsing (informational only).
+    /// </summary>
+    Trace
 }

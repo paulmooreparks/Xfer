@@ -33,8 +33,8 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
     // TEMP TRACE: verify execution timing and operation enumeration
         try {
             var childSummary = string.Join(";", Operations.Children.Select(c => c.GetType().Name + "=" + c.ToXfer().Replace("\n"," ")));
-            _parser.AddWarning(WarningType.UnresolvedReference, $"[trace] script PI execute begin (ops={Operations.Children.Count}) [{childSummary}]", Keyword);
-        } catch { _parser.AddWarning(WarningType.UnresolvedReference, $"[trace] script PI execute begin (ops={Operations.Children.Count})", Keyword); }
+            _parser.AddWarning(WarningType.Trace, $"[trace] script PI execute begin (ops={Operations.Children.Count}) [{childSummary}]", Keyword);
+        } catch { _parser.AddWarning(WarningType.Trace, $"[trace] script PI execute begin (ops={Operations.Children.Count})", Keyword); }
         for (int i = 0; i < Operations.Children.Count; i++) {
             var child = Operations.Children[i];
 
@@ -54,7 +54,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
                 if (ContainsSelfDereference(valueElem, name)) { throw new InvalidOperationException($"Self reference in let binding '{name}'."); }
                 ResolveDereferences(valueElem, _parser);
                 _parser.BindReference(name, valueElem);
-                _parser.AddWarning(WarningType.UnresolvedReference, $"[trace] script PI let bound '{name}' (valueType={valueElem.GetType().Name})", name);
+                _parser.AddWarning(WarningType.Trace, $"[trace] script PI let bound '{name}' (valueType={valueElem.GetType().Name})", name);
                 i += 2; // skip name + value
                 continue;
             }
@@ -69,7 +69,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
                     if (ContainsSelfDereference(valueElem, name)) { throw new InvalidOperationException($"Self reference in let binding '{name}'."); }
                     ResolveDereferences(valueElem, _parser);
                     _parser.BindReference(name, valueElem);
-                    _parser.AddWarning(WarningType.UnresolvedReference, $"[trace] script PI let bound '{name}' (valueType={valueElem.GetType().Name})", name);
+                    _parser.AddWarning(WarningType.Trace, $"[trace] script PI let bound '{name}' (valueType={valueElem.GetType().Name})", name);
                     continue;
                 }
                 else {
@@ -84,7 +84,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
         if (onlyLets) {
             SuppressSerialization = true; // PI itself disappears
         }
-    _parser.AddWarning(WarningType.UnresolvedReference, $"[trace] script PI execute end (onlyLets={onlyLets})", Keyword);
+    _parser.AddWarning(WarningType.Trace, $"[trace] script PI execute end (onlyLets={onlyLets})", Keyword);
         _operatorsExecuted = true;
     }
 
@@ -96,7 +96,10 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
                 if (v is DereferenceElement d2) {
                     if (_parser.TryResolveBinding(d2.Value, out var bound2)) {
                         kv.Value.Value = Helpers.ElementCloner.Clone(bound2!);
-                        _parser.AddWarning(WarningType.UnresolvedReference, $"[trace] local-pass resolved '{d2.Value}' in object", Keyword);
+                        // local-pass resolution trace
+                        _parser.AddWarning(WarningType.Trace, $"[trace] local-pass resolved '{d2.Value}' in object", Keyword);
+                        // suppress earlier unresolved warning if present
+                        SuppressEarlierUnresolved(d2.Value);
                     }
                 } else {
                     ResolveNewlyAvailableDereferences(v);
@@ -108,11 +111,26 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
                 if (child is DereferenceElement d) {
                     if (_parser.TryResolveBinding(d.Value, out var bound)) {
                         coll.Children[i] = Helpers.ElementCloner.Clone(bound!);
-                        _parser.AddWarning(WarningType.UnresolvedReference, $"[trace] local-pass resolved '{d.Value}' in collection", Keyword);
+                        _parser.AddWarning(WarningType.Trace, $"[trace] local-pass resolved '{d.Value}' in collection", Keyword);
+                        SuppressEarlierUnresolved(d.Value);
                     }
                 } else {
                     ResolveNewlyAvailableDereferences(child);
                 }
+            }
+        }
+    }
+
+    private void SuppressEarlierUnresolved(string name) {
+        var doc = _parser.CurrentDocument;
+        if (doc == null) { return; }
+        // find most recent unresolved warning for this name
+        for (int i = doc.Warnings.Count - 1; i >= 0; i--) {
+            var w = doc.Warnings[i];
+            if (w.Type == WarningType.UnresolvedReference && string.Equals(w.Context, name, StringComparison.Ordinal)) {
+                // convert to trace indicating suppression
+                doc.Warnings[i] = new ParseWarning(WarningType.Trace, w.Message + " (suppressed: resolved in local-pass)", w.Row, w.Column, w.Context);
+                break;
             }
         }
     }
