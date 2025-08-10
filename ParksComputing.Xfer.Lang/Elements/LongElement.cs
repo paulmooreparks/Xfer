@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ParksComputing.Xfer.Lang.Attributes;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
 /// <summary>
 /// Represents a 64-bit signed integer element in XferLang.
-/// Uses ampersand (&amp;) delimiters and supports custom formatting for long values.
+/// Uses ampersand (&) delimiters and supports attribute-driven hexadecimal or binary formatting.
 /// </summary>
 public class LongElement : NumericElement<long> {
     /// <summary>
@@ -31,10 +32,16 @@ public class LongElement : NumericElement<long> {
     /// </summary>
     public static readonly ElementDelimiter ElementDelimiter = new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    /// <summary>
-    /// Custom formatter function for the long value. If null, uses default formatting.
-    /// </summary>
-    public Func<long, string>? CustomFormatter { get; set; }
+    // Formatting metadata (set internally from attributes)
+    private XferNumericFormat _format = XferNumericFormat.Decimal;
+    private int _minBits;        // For binary padding
+    private int _minDigits;      // For hex padding
+
+    internal void SetNumericFormat(XferNumericFormat format, int minBits, int minDigits) {
+        _format = format;
+        _minBits = minBits;
+        _minDigits = minDigits;
+    }
 
     /// <summary>
     /// Initializes a new instance of the LongElement class with the specified value and formatting options.
@@ -42,17 +49,15 @@ public class LongElement : NumericElement<long> {
     /// <param name="value">The long integer value to represent</param>
     /// <param name="specifierCount">The number of delimiter characters to use (default: 1)</param>
     /// <param name="style">The element style for delimiter handling (default: Compact)</param>
-    /// <param name="customFormatter">Optional custom formatter function for the long value</param>
-    public LongElement(long value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<long, string>? customFormatter = null)
-        : this(new NumericValue<long>(value), specifierCount, style, customFormatter) {
+    public LongElement(long value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
+        : this(new NumericValue<long>(value), specifierCount, style) {
     }
 
     /// <summary>
     /// Initializes a new instance of the LongElement class with the specified numeric value.
     /// </summary>
-    public LongElement(NumericValue<long> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<long, string>? customFormatter = null)
+    public LongElement(NumericValue<long> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
         : base(numericValue, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
-        CustomFormatter = customFormatter;
     }
 
     /// <summary>
@@ -66,7 +71,18 @@ public class LongElement : NumericElement<long> {
     /// <returns>The XferLang string representation of this long integer element</returns>
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
         var sb = new StringBuilder();
-        string valueString = CustomFormatter != null ? CustomFormatter(Value) : NumericValue.ToString();
+        string valueString;
+        switch (_format) {
+            case XferNumericFormat.Hexadecimal:
+                valueString = Helpers.NumericFormatter.FormatLong(Value, XferNumericFormat.Hexadecimal, 0, _minDigits);
+                break;
+            case XferNumericFormat.Binary:
+                valueString = Helpers.NumericFormatter.FormatLong(Value, XferNumericFormat.Binary, _minBits, 0);
+                break;
+            default:
+                valueString = Value.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty;
+                break;
+        }
 
         if (Delimiter.Style == ElementStyle.Compact) {
             sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing}");

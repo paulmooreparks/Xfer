@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ParksComputing.Xfer.Lang.Attributes;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
 /// <summary>
 /// Represents a decimal number element in XferLang using asterisk (*) delimiters.
-/// Decimal elements store high-precision decimal values suitable for financial
-/// calculations and other applications requiring exact decimal representation.
+/// Attribute metadata can control precision, trailing zeros, and alternative bases (hex/binary).
 /// </summary>
 public class DecimalElement : NumericElement<decimal> {
     /// <summary>
@@ -32,10 +32,23 @@ public class DecimalElement : NumericElement<decimal> {
     /// </summary>
     public static readonly ElementDelimiter ElementDelimiter = new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
-    /// <summary>
-    /// Custom formatter function for the decimal value. If null, uses default formatting.
-    /// </summary>
-    public Func<decimal, string>? CustomFormatter { get; set; }
+    // Formatting metadata
+    private XferNumericFormat _format = XferNumericFormat.Decimal;
+    private int _minBits;
+    private int _minDigits;
+    private int? _precision;
+    private bool _removeTrailingZeros = true;
+
+    internal void SetNumericFormat(XferNumericFormat format, int minBits, int minDigits) {
+        _format = format;
+        _minBits = minBits;
+        _minDigits = minDigits;
+    }
+
+    internal void SetPrecision(int? precision, bool removeTrailingZeros) {
+        _precision = precision;
+        _removeTrailingZeros = removeTrailingZeros;
+    }
 
     /// <summary>
     /// Initializes a new instance of the DecimalElement class with the specified value and formatting options.
@@ -43,14 +56,12 @@ public class DecimalElement : NumericElement<decimal> {
     /// <param name="value">The decimal value to represent</param>
     /// <param name="specifierCount">The number of delimiter characters to use (default: 1)</param>
     /// <param name="style">The element style for delimiter handling (default: Compact)</param>
-    /// <param name="customFormatter">Optional custom formatter function for the decimal value</param>
-    public DecimalElement(decimal value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<decimal, string>? customFormatter = null)
-        : this(new NumericValue<decimal>(value), specifierCount, style, customFormatter) {
+    public DecimalElement(decimal value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
+        : this(new NumericValue<decimal>(value), specifierCount, style) {
     }
 
-    public DecimalElement(NumericValue<decimal> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<decimal, string>? customFormatter = null)
+    public DecimalElement(NumericValue<decimal> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
         : base(numericValue, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
-        CustomFormatter = customFormatter;
     }
 
     /// <summary>
@@ -64,7 +75,29 @@ public class DecimalElement : NumericElement<decimal> {
     /// <returns>The XferLang string representation of this decimal element</returns>
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
         var sb = new StringBuilder();
-        string valueString = CustomFormatter != null ? CustomFormatter(Value) : NumericValue.ToString();
+        string valueString;
+        switch (_format) {
+            case XferNumericFormat.Hexadecimal:
+                valueString = Helpers.NumericFormatter.FormatDecimal(Value, XferNumericFormat.Hexadecimal, 0, _minDigits);
+                break;
+            case XferNumericFormat.Binary:
+                valueString = Helpers.NumericFormatter.FormatDecimal(Value, XferNumericFormat.Binary, _minBits, 0);
+                break;
+            default:
+                // Decimal formatting with optional precision
+                if (_precision.HasValue) {
+                    var rounded = Math.Round(Value, _precision.Value, MidpointRounding.AwayFromZero);
+                    string raw = rounded.ToString($"F{_precision.Value}", System.Globalization.CultureInfo.InvariantCulture);
+                    if (_removeTrailingZeros && _precision.Value > 0) {
+                        raw = raw.TrimEnd('0').TrimEnd('.');
+                    }
+                    valueString = raw;
+                }
+                else {
+                    valueString = Value.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty;
+                }
+                break;
+        }
 
         if (Delimiter.Style == ElementStyle.Compact) {
             sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing}");

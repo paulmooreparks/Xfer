@@ -26,7 +26,7 @@ public class LongElementTests
         Assert.AreEqual('&', element.Delimiter.ClosingSpecifier);
         Assert.AreEqual(ElementStyle.Compact, element.Delimiter.Style);
         Assert.AreEqual(1, element.Delimiter.SpecifierCount);
-        Assert.IsNull(element.CustomFormatter);
+    // Custom formatter support removed
     }
 
     [TestMethod]
@@ -99,20 +99,7 @@ public class LongElementTests
         Assert.AreEqual(ElementStyle.Implicit, element.Delimiter.Style);
     }
 
-    [TestMethod]
-    public void Constructor_WithCustomFormatter_SetsCorrectly()
-    {
-        // Arrange
-        Func<long, string> formatter = value => $"0x{value:X}";
-
-        // Act
-        var element = new LongElement(255L, customFormatter: formatter);
-
-        // Assert
-        Assert.AreEqual(255L, element.Value);
-        Assert.IsNotNull(element.CustomFormatter);
-        Assert.AreEqual("0xFF", element.CustomFormatter(255L));
-    }
+    // Removed custom formatter constructor test
 
     #endregion
 
@@ -225,51 +212,7 @@ public class LongElementTests
 
     #endregion
 
-    #region Serialization Tests - Custom Formatting
-
-    [TestMethod]
-    public void ToXfer_CustomFormatterWithoutHashPrefix_ReturnsCorrectFormat()
-    {
-        // Arrange
-        Func<long, string> customFormatter = value => $"VALUE_{value}";
-        var element = new LongElement(42L, customFormatter: customFormatter);
-
-        // Act
-        var result = element.ToXfer();
-
-        // Assert
-        Assert.AreEqual("&VALUE_42", result); // Without # prefix, gets & prefix
-    }
-
-    [TestMethod]
-    public void ToXfer_FormatterReturningEmpty_HandlesCorrectly()
-    {
-        // Arrange
-        Func<long, string> emptyFormatter = value => "";
-        var element = new LongElement(42L, customFormatter: emptyFormatter);
-
-        // Act
-        var result = element.ToXfer();
-
-        // Assert
-        Assert.AreEqual("&", result);
-    }
-
-    [TestMethod]
-    public void ToXfer_FormatterWithSpecialCharacters_HandlesCorrectly()
-    {
-        // Arrange
-        Func<long, string> specialFormatter = value => $"<<{value}>>";
-        var element = new LongElement(42L, customFormatter: specialFormatter);
-
-        // Act
-        var result = element.ToXfer();
-
-        // Assert
-        Assert.AreEqual("&<<42>>", result);
-    }
-
-    #endregion
+    // Removed custom formatting serialization tests
 
     #region Serialization Tests - Multiple Specifiers
 
@@ -301,56 +244,7 @@ public class LongElementTests
 
     #endregion
 
-    #region CustomFormatter Tests
-
-    [TestMethod]
-    public void CustomFormatter_Null_UsesDefaultFormatting()
-    {
-        // Arrange
-        var element = new LongElement(42L, customFormatter: null);
-
-        // Act
-        var result = element.ToXfer();
-
-        // Assert
-        Assert.AreEqual("&42", result);
-        Assert.IsNull(element.CustomFormatter);
-    }
-
-    [TestMethod]
-    public void CustomFormatter_SetsAndGets_Correctly()
-    {
-        // Arrange
-        var element = new LongElement(42L);
-        Func<long, string> formatter = value => $"CUSTOM_{value}";
-
-        // Act
-        element.CustomFormatter = formatter;
-
-        // Assert
-        Assert.IsNotNull(element.CustomFormatter);
-        Assert.AreEqual("CUSTOM_42", element.CustomFormatter(42L));
-    }
-
-    [TestMethod]
-    public void CustomFormatter_CanBeChanged_UpdatesSerialization()
-    {
-        // Arrange
-        var element = new LongElement(42L);
-        Func<long, string> formatter1 = value => $"FORMAT1_{value}";
-        Func<long, string> formatter2 = value => $"FORMAT2_{value}";
-
-        // Act & Assert
-        element.CustomFormatter = formatter1;
-        var result1 = element.ToXfer();
-        Assert.AreEqual("&FORMAT1_42", result1);
-
-        element.CustomFormatter = formatter2;
-        var result2 = element.ToXfer();
-        Assert.AreEqual("&FORMAT2_42", result2);
-    }
-
-    #endregion
+    // Removed CustomFormatter region
 
     #region ToString Tests
 
@@ -374,19 +268,7 @@ public class LongElementTests
         }
     }
 
-    [TestMethod]
-    public void ToString_WithCustomFormatter_IgnoresFormatter()
-    {
-        // Arrange
-        Func<long, string> formatter = value => $"CUSTOM_{value}";
-        var element = new LongElement(42L, customFormatter: formatter);
-
-        // Act
-        var result = element.ToString();
-
-        // Assert
-        Assert.AreEqual("42", result); // ToString should ignore custom formatter
-    }
+    // Removed ToString with custom formatter test
 
     #endregion
 
@@ -523,11 +405,7 @@ public class LongElementTests
             var element = new LongElement(size);
             Assert.AreEqual(size, element.Value);
 
-            // Test with hex formatting for memory addresses
-            Func<long, string> hexFormatter = value => $"&${value:X}";
-            element.CustomFormatter = hexFormatter;
-            var hexResult = element.ToXfer();
-            Assert.IsTrue(hexResult.StartsWith("&"));
+            // Hex formatting now done via attribute infrastructure; custom formatter removed
         }
     }
 

@@ -600,67 +600,45 @@ public class XferConvert {
     /// This duplicates intent of ElementStyleHelper but is inlined here to ensure test precision semantics.
     /// </summary>
     private static DecimalElement CreateAttributedDecimalElement(decimal value, PropertyInfo? property, XferSerializerSettings settings) {
-    var formatAttr = property?.GetCustomAttribute(typeof(XferNumericFormatAttribute)) as XferNumericFormatAttribute;
-    var precisionAttr = property?.GetCustomAttribute(typeof(XferDecimalPrecisionAttribute)) as XferDecimalPrecisionAttribute;
-
+        var formatAttr = property?.GetCustomAttribute(typeof(XferNumericFormatAttribute)) as XferNumericFormatAttribute;
+        var precisionAttr = property?.GetCustomAttribute(typeof(XferDecimalPrecisionAttribute)) as XferDecimalPrecisionAttribute;
         var style = Helpers.ElementStyleHelper.GetDecimalStyle(value, settings.StylePreference);
-
-        // Hex/Binary override (truncate fractional part intentionally) takes precedence over precision
-        if (formatAttr != null && formatAttr.Format != XferNumericFormat.Default && formatAttr.Format != XferNumericFormat.Decimal) {
-            // Use NumericFormatter to build string; embed via formatter to keep original numeric underlying value
-            Func<decimal,string> fmt = v => Helpers.NumericFormatter.FormatDecimal(v, formatAttr.Format, formatAttr.MinBits, formatAttr.MinDigits);
-            return new DecimalElement(value, style: style, customFormatter: fmt);
+        var element = new DecimalElement(value, style: style);
+        if (formatAttr != null && formatAttr.Format != XferNumericFormat.Default) {
+            element.SetNumericFormat(formatAttr.Format == XferNumericFormat.Default ? XferNumericFormat.Decimal : formatAttr.Format, formatAttr.MinBits, formatAttr.MinDigits);
         }
-
-    if (precisionAttr != null) {
-            // Round underlying value so round-trip deserialize yields rounded value (test expectation)
+        if (precisionAttr != null) {
+            // Round underlying value to reflect expected persistence semantics
             var rounded = Math.Round(value, precisionAttr.DecimalPlaces, MidpointRounding.AwayFromZero);
-            if (precisionAttr.DecimalPlaces == 0) {
-                // integer-like output
-                Func<decimal,string> fmt = v => rounded.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                return new DecimalElement(rounded, style: style, customFormatter: fmt);
+            element = new DecimalElement(rounded, style: style);
+            if (formatAttr != null && formatAttr.Format != XferNumericFormat.Default) {
+                element.SetNumericFormat(formatAttr.Format == XferNumericFormat.Default ? XferNumericFormat.Decimal : formatAttr.Format, formatAttr.MinBits, formatAttr.MinDigits);
             }
-            // Build formatted string with or without trailing zero trimming
-            string raw = rounded.ToString($"F{precisionAttr.DecimalPlaces}", System.Globalization.CultureInfo.InvariantCulture);
-            if (precisionAttr.RemoveTrailingZeros) {
-                raw = raw.TrimEnd('0').TrimEnd('.');
-            } // else keep all zeros
-            Func<decimal,string> fmtFull = v => raw;
-            return new DecimalElement(rounded, style: style, customFormatter: fmtFull);
+            element.SetPrecision(precisionAttr.DecimalPlaces, precisionAttr.RemoveTrailingZeros);
         }
-
-        return new DecimalElement(value, style: style);
+        return element;
     }
 
     /// <summary>
     /// Creates a DoubleElement honoring XferDecimalPrecisionAttribute and XferNumericFormatAttribute.
     /// </summary>
     private static DoubleElement CreateAttributedDoubleElement(double value, PropertyInfo? property, XferSerializerSettings settings) {
-    var formatAttr = property?.GetCustomAttribute(typeof(XferNumericFormatAttribute)) as XferNumericFormatAttribute;
-    var precisionAttr = property?.GetCustomAttribute(typeof(XferDecimalPrecisionAttribute)) as XferDecimalPrecisionAttribute;
-
+        var formatAttr = property?.GetCustomAttribute(typeof(XferNumericFormatAttribute)) as XferNumericFormatAttribute;
+        var precisionAttr = property?.GetCustomAttribute(typeof(XferDecimalPrecisionAttribute)) as XferDecimalPrecisionAttribute;
         var style = Helpers.ElementStyleHelper.GetDoubleStyle(value, settings.StylePreference);
-
-        if (formatAttr != null && formatAttr.Format != XferNumericFormat.Default && formatAttr.Format != XferNumericFormat.Decimal) {
-            Func<double,string> fmt = v => Helpers.NumericFormatter.FormatDouble(v, formatAttr.Format, formatAttr.MinBits, formatAttr.MinDigits);
-            return new DoubleElement(value, style: style, customFormatter: fmt);
+        var element = new DoubleElement(value, style: style);
+        if (formatAttr != null && formatAttr.Format != XferNumericFormat.Default) {
+            element.SetNumericFormat(formatAttr.Format == XferNumericFormat.Default ? XferNumericFormat.Decimal : formatAttr.Format, formatAttr.MinBits, formatAttr.MinDigits);
         }
-
         if (precisionAttr != null) {
             var rounded = Math.Round(value, precisionAttr.DecimalPlaces, MidpointRounding.AwayFromZero);
-            if (precisionAttr.DecimalPlaces == 0) {
-                Func<double,string> fmt0 = v => rounded.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                return new DoubleElement(rounded, style: style, customFormatter: fmt0);
+            element = new DoubleElement(rounded, style: style);
+            if (formatAttr != null && formatAttr.Format != XferNumericFormat.Default) {
+                element.SetNumericFormat(formatAttr.Format == XferNumericFormat.Default ? XferNumericFormat.Decimal : formatAttr.Format, formatAttr.MinBits, formatAttr.MinDigits);
             }
-            string raw = rounded.ToString($"F{precisionAttr.DecimalPlaces}", System.Globalization.CultureInfo.InvariantCulture);
-            if (precisionAttr.RemoveTrailingZeros) {
-                raw = raw.TrimEnd('0').TrimEnd('.');
-            }
-            Func<double,string> fmtFull = v => raw;
-            return new DoubleElement(rounded, style: style, customFormatter: fmtFull);
+            element.SetPrecision(precisionAttr.DecimalPlaces, precisionAttr.RemoveTrailingZeros);
         }
-
-        return new DoubleElement(value, style: style);
+        return element;
     }
 
     // Removed legacy fallback reflection path; standard GetCustomAttribute is sufficient after constructor fix.

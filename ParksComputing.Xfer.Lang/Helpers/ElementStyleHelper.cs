@@ -79,13 +79,11 @@ namespace ParksComputing.Xfer.Lang.Helpers {
         public static IntegerElement CreateFormattedIntegerElement(int value, PropertyInfo? property, ElementStylePreference preference, bool preferImplicit) {
             var formatAttribute = property?.GetCustomAttribute<XferNumericFormatAttribute>();
             var style = GetIntegerStyle(value, preference, preferImplicit);
-
+            var element = new IntegerElement(value, elementStyle: style);
             if (formatAttribute != null && formatAttribute.Format != XferNumericFormat.Default && formatAttribute.Format != XferNumericFormat.Decimal) {
-                var formatter = new Func<int, string>(v => NumericFormatter.FormatInteger(v, formatAttribute.Format, formatAttribute.MinBits, formatAttribute.MinDigits));
-                return new IntegerElement(value, elementStyle: style, customFormatter: formatter);
+                element.SetNumericFormat(formatAttribute.Format, formatAttribute.MinBits, formatAttribute.MinDigits);
             }
-
-            return new IntegerElement(value, elementStyle: style);
+            return element;
         }
 
         /// <summary>
@@ -94,13 +92,11 @@ namespace ParksComputing.Xfer.Lang.Helpers {
         public static LongElement CreateFormattedLongElement(long value, PropertyInfo? property, ElementStylePreference preference) {
             var formatAttribute = property?.GetCustomAttribute<XferNumericFormatAttribute>();
             var style = GetLongStyle(value, preference);
-
+            var element = new LongElement(value, style: style);
             if (formatAttribute != null && formatAttribute.Format != XferNumericFormat.Default && formatAttribute.Format != XferNumericFormat.Decimal) {
-                var formatter = new Func<long, string>(v => NumericFormatter.FormatLong(v, formatAttribute.Format, formatAttribute.MinBits, formatAttribute.MinDigits));
-                return new LongElement(value, style: style, customFormatter: formatter);
+                element.SetNumericFormat(formatAttribute.Format, formatAttribute.MinBits, formatAttribute.MinDigits);
             }
-
-            return new LongElement(value, style: style);
+            return element;
         }
 
         /// <summary>
@@ -110,28 +106,14 @@ namespace ParksComputing.Xfer.Lang.Helpers {
             var formatAttribute = property?.GetCustomAttribute<XferNumericFormatAttribute>();
             var precisionAttribute = property?.GetCustomAttribute<XferDecimalPrecisionAttribute>();
             var style = GetDecimalStyle(value, preference);
-
-            // Handle precision formatting
-            if (precisionAttribute != null || (formatAttribute != null && formatAttribute.Format == XferNumericFormat.Decimal)) {
-                var formatter = new Func<decimal, string>(v => {
-                    var format = formatAttribute?.Format ?? XferNumericFormat.Decimal;
-                    var minBits = formatAttribute?.MinBits ?? 0;
-                    var minDigits = formatAttribute?.MinDigits ?? 0;
-                    var decimalPlaces = precisionAttribute?.DecimalPlaces;
-                    var removeTrailingZeros = precisionAttribute?.RemoveTrailingZeros ?? true;
-                    
-                    return NumericFormatter.FormatDecimal(v, format, minBits, minDigits, decimalPlaces, removeTrailingZeros);
-                });
-                return new DecimalElement(value, style: style, customFormatter: formatter);
+            var element = new DecimalElement(value, style: style);
+            if (formatAttribute != null && formatAttribute.Format != XferNumericFormat.Default) {
+                element.SetNumericFormat(formatAttribute.Format == XferNumericFormat.Default ? XferNumericFormat.Decimal : formatAttribute.Format, formatAttribute.MinBits, formatAttribute.MinDigits);
             }
-            
-            // Handle hex/binary formatting (loses fractional precision)
-            if (formatAttribute != null && formatAttribute.Format != XferNumericFormat.Default && formatAttribute.Format != XferNumericFormat.Decimal) {
-                var formatter = new Func<decimal, string>(v => NumericFormatter.FormatDecimal(v, formatAttribute.Format, formatAttribute.MinBits, formatAttribute.MinDigits));
-                return new DecimalElement(value, style: style, customFormatter: formatter);
+            if (precisionAttribute != null) {
+                element.SetPrecision(precisionAttribute.DecimalPlaces, precisionAttribute.RemoveTrailingZeros);
             }
-
-            return new DecimalElement(value, style: style);
+            return element;
         }
 
         /// <summary>
@@ -141,28 +123,14 @@ namespace ParksComputing.Xfer.Lang.Helpers {
             var formatAttribute = property?.GetCustomAttribute<XferNumericFormatAttribute>();
             var precisionAttribute = property?.GetCustomAttribute<XferDecimalPrecisionAttribute>();
             var style = GetDoubleStyle(value, preference);
-
-            // Handle precision formatting
-            if (precisionAttribute != null || (formatAttribute != null && formatAttribute.Format == XferNumericFormat.Decimal)) {
-                var formatter = new Func<double, string>(v => {
-                    var format = formatAttribute?.Format ?? XferNumericFormat.Decimal;
-                    var minBits = formatAttribute?.MinBits ?? 0;
-                    var minDigits = formatAttribute?.MinDigits ?? 0;
-                    var decimalPlaces = precisionAttribute?.DecimalPlaces;
-                    var removeTrailingZeros = precisionAttribute?.RemoveTrailingZeros ?? true;
-                    
-                    return NumericFormatter.FormatDouble(v, format, minBits, minDigits, decimalPlaces, removeTrailingZeros);
-                });
-                return new DoubleElement(value, style: style, customFormatter: formatter);
+            var element = new DoubleElement(value, style: style);
+            if (formatAttribute != null && formatAttribute.Format != XferNumericFormat.Default) {
+                element.SetNumericFormat(formatAttribute.Format == XferNumericFormat.Default ? XferNumericFormat.Decimal : formatAttribute.Format, formatAttribute.MinBits, formatAttribute.MinDigits);
             }
-            
-            // Handle hex/binary formatting (loses fractional precision)
-            if (formatAttribute != null && formatAttribute.Format != XferNumericFormat.Default && formatAttribute.Format != XferNumericFormat.Decimal) {
-                var formatter = new Func<double, string>(v => NumericFormatter.FormatDouble(v, formatAttribute.Format, formatAttribute.MinBits, formatAttribute.MinDigits));
-                return new DoubleElement(value, style: style, customFormatter: formatter);
+            if (precisionAttribute != null) {
+                element.SetPrecision(precisionAttribute.DecimalPlaces, precisionAttribute.RemoveTrailingZeros);
             }
-
-            return new DoubleElement(value, style: style);
+            return element;
         }
 
         /// <summary>
