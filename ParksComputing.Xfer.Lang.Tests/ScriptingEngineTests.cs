@@ -426,7 +426,7 @@ public class ScriptingEngineTests {
         var operators = engine.GetAllOperators().ToList();
 
         // Assert
-    Assert.AreEqual(4, operators.Count);
+    Assert.AreEqual(12, operators.Count); // defined, eq, if, gt, ne, lt, lte, gte, and, or, not, xor
         Assert.IsTrue(operators.Any(op => op is EqualsOperator));
         Assert.IsTrue(operators.Any(op => op is DefinedOperator));
         Assert.IsTrue(operators.Any(op => op is IfOperator));
@@ -446,15 +446,23 @@ public class ScriptingEngineTests {
         var logicalOps = engine.GetOperatorsByCategory("Logical").ToList();
 
         // Assert
-    Assert.AreEqual(2, comparisonOps.Count); // eq, gt
+    Assert.AreEqual(6, comparisonOps.Count); // eq, gt, ne, lt, lte, gte
     Assert.IsTrue(comparisonOps.Any(o => o is EqualsOperator));
     Assert.IsTrue(comparisonOps.Any(o => o.OperatorName == "gt"));
+    Assert.IsTrue(comparisonOps.Any(o => o.OperatorName == "ne"));
+    Assert.IsTrue(comparisonOps.Any(o => o.OperatorName == "lt"));
+    Assert.IsTrue(comparisonOps.Any(o => o.OperatorName == "lte"));
+    Assert.IsTrue(comparisonOps.Any(o => o.OperatorName == "gte"));
 
         Assert.AreEqual(1, utilityOps.Count);
         Assert.IsInstanceOfType(utilityOps[0], typeof(DefinedOperator));
 
-        Assert.AreEqual(1, logicalOps.Count);
-        Assert.IsInstanceOfType(logicalOps[0], typeof(IfOperator));
+    Assert.AreEqual(5, logicalOps.Count); // if, and, or, not, xor
+    Assert.IsTrue(logicalOps.Any(o => o is IfOperator));
+    Assert.IsTrue(logicalOps.Any(o => o.OperatorName == "and"));
+    Assert.IsTrue(logicalOps.Any(o => o.OperatorName == "or"));
+    Assert.IsTrue(logicalOps.Any(o => o.OperatorName == "not"));
+    Assert.IsTrue(logicalOps.Any(o => o.OperatorName == "xor"));
     }
 
     [TestMethod]
@@ -534,7 +542,7 @@ public class ScriptingEngineTests {
         Assert.IsTrue(diagnostics.ContainsKey("ContextVariables"));
         Assert.IsTrue(diagnostics.ContainsKey("Environment"));
 
-    Assert.AreEqual(4, (int)diagnostics["RegisteredOperatorCount"]);
+    Assert.AreEqual(12, (int)diagnostics["RegisteredOperatorCount"]); // defined, eq, if, gt, ne, lt, lte, gte, and, or, not, xor
         Assert.AreEqual(1, (int)diagnostics["ContextVariableCount"]);
 
         var operators = (List<string>)diagnostics["RegisteredOperators"];
@@ -542,6 +550,14 @@ public class ScriptingEngineTests {
         Assert.IsTrue(operators.Contains("defined"));
     Assert.IsTrue(operators.Contains("if"));
     Assert.IsTrue(operators.Contains("gt"));
+    Assert.IsTrue(operators.Contains("ne"));
+    Assert.IsTrue(operators.Contains("lt"));
+    Assert.IsTrue(operators.Contains("lte"));
+    Assert.IsTrue(operators.Contains("gte"));
+    Assert.IsTrue(operators.Contains("and"));
+    Assert.IsTrue(operators.Contains("or"));
+    Assert.IsTrue(operators.Contains("not"));
+    Assert.IsTrue(operators.Contains("xor"));
 
         var variables = (List<string>)diagnostics["ContextVariables"];
         Assert.IsTrue(variables.Contains("TEST_VAR"));
@@ -560,7 +576,7 @@ public class ScriptingEngineTests {
 
         // Assert
         Assert.IsNotNull(result);
-    Assert.IsTrue(result.Contains("4 operators"));
+    Assert.IsTrue(result.Contains("12 operators"));
         Assert.IsTrue(result.Contains("1 context variables"));
     }
 

@@ -55,6 +55,12 @@ public class IfProcessingInstruction : ProcessingInstruction {
     public bool ConditionMet { get; private set; }
 
     /// <summary>
+    /// True when the operator name in the condition expression was unknown and treated as a no-op.
+    /// Used to preserve the PI in serialization for user visibility.
+    /// </summary>
+    public bool UnknownOperator { get; private set; }
+
+    /// <summary>
     /// The scripting engine used for evaluating the condition (cached for performance).
     /// </summary>
     private static ScriptingEngine? _scriptingEngine;
@@ -211,6 +217,7 @@ public class IfProcessingInstruction : ProcessingInstruction {
             } else if (!string.IsNullOrEmpty(opName)) {
                 // Unknown operator: emit warning and treat as *no-op* (return true so target is preserved, PI remains)
                 _parser?.AddWarning(WarningType.UnknownConditionalOperator, $"Unknown conditional operator '{opName}' in if PI (treated as no-op)");
+                UnknownOperator = true;
                 return true;
             }
         }

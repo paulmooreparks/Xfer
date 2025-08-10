@@ -12,15 +12,15 @@
  * - <! document { version "1.0" } !> { config "value" }       (With metadata)
  */
 
-<document> ::= <opt_whitespace> <metadata_element>? <opt_whitespace> <collection_element> <opt_whitespace>
+<document> ::= <opt_whitespace> <processing_instruction>* <opt_whitespace> <collection_element> <opt_whitespace>
 
 <collection_element> ::= <object_element> | <array_element> | <tuple_element>
 
-<metadata_element> ::= <processing_instruction>+
-
+/* Processing instructions (PI) appear only at document or collection element boundaries.
+ * Implementation constraint: exactly one key_value_pair per PI. Extra pairs are a parse error. */
 <processing_instruction> ::= <processing_instruction_explicit> | <processing_instruction_compact>
-<processing_instruction_explicit> ::= <element_open> <metadata_specifier> <opt_whitespace> <key_value_pair>+ <opt_whitespace> <metadata_specifier> <element_close>
-<processing_instruction_compact> ::= <metadata_specifier> <opt_whitespace> <key_value_pair>+ <opt_whitespace> <metadata_specifier>
+<processing_instruction_explicit> ::= <element_open> <metadata_specifier> <opt_whitespace> <key_value_pair> <opt_whitespace> <metadata_specifier> <element_close>
+<processing_instruction_compact> ::= <metadata_specifier> <opt_whitespace> <key_value_pair> <opt_whitespace> <metadata_specifier>
 
 <body_element> ::= <opt_whitespace> (
       <key_value_pair>
@@ -43,6 +43,8 @@
     | <dynamic_element>
     | <interpolated_element>
     | <processing_instruction>
+    | <query_element>
+    | <reference_element>
     ) <opt_whitespace>
 
 <string_element> ::= <string_element_explicit> | <string_element_compact>
@@ -120,7 +122,7 @@
 <object_element_explicit> ::= <element_open> <object_specifier_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_specifier_close> <element_close>
 <object_element_compact> ::= <object_specifier_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_specifier_close>
 
-/* Arrays should contain homogeneous elements (same type) */
+/* Arrays should contain homogeneous elements (enforced at runtime, not grammar) */
 <array_element> ::= <array_element_explicit> | <array_element_compact>
 <array_element_explicit> ::= <element_open> <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close> <element_close>
 <array_element_compact> ::= <array_specifier_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_specifier_close>
@@ -156,6 +158,21 @@
 <comment_specifier> ::= "/"+
 <dynamic_specifier> ::= "|"+
 <interpolated_specifier> ::= "'"+
+
+/* New element forms (query, reference) recognized by parser though semantics may be evolving */
+<query_element> ::= <query_element_explicit> | <query_element_compact>
+<query_element_explicit> ::= <element_open> <query_specifier_open> <opt_whitespace> <key_value_pair> <opt_whitespace> <query_specifier_close> <element_close>
+<query_element_compact> ::= <query_specifier_open> <opt_whitespace> <key_value_pair> <opt_whitespace> <query_specifier_close>
+
+<reference_element> ::= <reference_element_explicit> | <reference_element_compact>
+<reference_element_explicit> ::= <element_open> <reference_specifier_open> <opt_whitespace> <body_element> <opt_whitespace> <reference_specifier_close> <element_close>
+<reference_element_compact> ::= <reference_specifier_open> <opt_whitespace> <body_element> <opt_whitespace> <reference_specifier_close>
+
+/* Placeholders for specifiers (update with actual characters when finalized) */
+<query_specifier_open> ::= "?"+
+<query_specifier_close> ::= "?"+
+<reference_specifier_open> ::= "&"+  /* example; adjust if different */
+<reference_specifier_close> ::= "&"+
 
 <character_value> ::= <positive_integer>
     | <hexadecimal> | <binary>

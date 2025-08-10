@@ -5,7 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ParksComputing.Xfer.Lang.Elements;
-internal class NullElement : TypedElement<object?>
+/// <summary>
+/// Represents a null literal element in XferLang. Public so scripting tests can construct it.
+/// </summary>
+public class NullElement : TypedElement<object?>
 {
     public static readonly string ElementName = "null";
     public const char OpeningSpecifier = '?';

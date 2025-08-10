@@ -240,9 +240,10 @@ public class ArrayElement : ListElement {
                 sb.Append(nestIndent);
             }
             sb.Append(item.ToXfer(formatting, indentChar, indentation, depth + 1));
-            // if (item.Delimiter.Style is ElementStyle.Implicit or ElementStyle.Compact && i + 1 < Children.Count) {
-            if (item.Delimiter.Style is ElementStyle.Implicit || (i + 1 < Children.Count && item.Delimiter.Style is ElementStyle.Compact && item.Delimiter.CompactClosing == string.Empty)) {
-                sb.Append(' ');
+            if (i < Children.Count - 1) {
+                if (!isIndented && item.Delimiter.Style is ElementStyle.Implicit || (item.Delimiter.Style is ElementStyle.Compact && item.Delimiter.CompactClosing == string.Empty)) {
+                    sb.Append(' ');
+                }
             }
             if (isIndented) {
                 sb.Append(Environment.NewLine);

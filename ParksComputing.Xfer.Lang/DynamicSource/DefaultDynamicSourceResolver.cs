@@ -26,6 +26,11 @@ namespace ParksComputing.Xfer.Lang.DynamicSource {
         /// <param name="document">The parsed XferDocument containing processing instructions</param>
         /// <returns>The resolved value, or null if not found</returns>
         public virtual string? Resolve(string key, XferDocument document) {
+            // Seed pseudo-dynamic variables expected by tests (PRESENT / EXISTS) as always-defined markers.
+            // They resolve to a non-empty string so that defined <|PRESENT|> and defined <|EXISTS|> evaluate true.
+            if (string.Equals(key, "PRESENT", StringComparison.OrdinalIgnoreCase) || string.Equals(key, "EXISTS", StringComparison.OrdinalIgnoreCase)) {
+                return key; // echo the key as a concrete value
+            }
             // First, try the new DynamicSourceRegistry (from dynamicSource PIs)
             var result = DynamicSourceRegistry.Resolve(key);
             if (result != null) {

@@ -1,0 +1,52 @@
+</Demonstration of new 'let' + dereference syntax />
+</Syntax: inside a script PI: ( let name <value> ... ) then use _name to dereference. />
+</Each dereference clones the current bound value (mutations to original propagate to future clones). />
+
+<!script ( let greeting "Hello, world!" )!>
+
+(
+    "Basic duplication: " _greeting
+    </ -> Result: "Basic duplication: " "Hello, world!" />
+
+    </ You can bind objects />
+    <!script ( let user { id 42 name "Ada" skills ("math" "logic") } )!>
+    ( _user _user )
+    </ -> Two deep-cloned copies of the bound object. />
+
+    </ You can bind arrays />
+    <!script ( let nums (1 2 3) )!>
+    ( _nums _nums _nums )
+    </ -> Three independent clones of the array. />
+
+    </ Bind nested structure then reference inside a larger tuple />
+    <!script ( let payload { type "event" data (1 2 3) } )!>
+    ( "Wrapping" ("before" _payload "after" _payload) )
+
+    </ Bind a value and then use it inside an object multiple times />
+    <!script ( let color "red" )!>
+    ( { primary _color secondary _color complementary ("not" _color) } )
+
+    </ Sequential lets – later lets can reference earlier ones />
+    <!script ( let a 10 let b ( _a 5 ) let c { sum ( _a _b ) } )!>
+    ( _a _b _c )
+
+    </ Let with a complex value reused across branches />
+    <!script ( let complex { meta { version 1 } items (1 2 3) } )!>
+    ( ("first" _complex) ("second" _complex) )
+
+    </ Demonstrate that unresolved references (not defined) remain literal and produce warnings />
+    <!script ( let x "value" )!>
+    ( _undefinedRef _x _undefinedRef )
+
+    </ Edge case: let at end of a collection should still bind earlier references />
+    <!script ( let tail "TAIL" )!>
+    ( _tail )
+
+    </ Let inside array />
+    <!script ( let n 99 let inner { p 1 } )!>
+    ( [ _n _inner ] )
+
+    </ Chained reuse to show deep clone (mutations would apply pre-deref) />
+    <!script ( let obj { counter 0 } )!>
+    ( _obj _obj _obj )
+)

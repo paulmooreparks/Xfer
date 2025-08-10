@@ -118,6 +118,35 @@ public partial class Parser : IXferParser {
     }
 
     private XferDocument? _currentDocument = null;
+    // Legacy reference bindings (removed in favor of scoped stacks)
+    private readonly Dictionary<string, Element> _referenceBindings = new(StringComparer.Ordinal); // retained only temporarily for compatibility with any remaining calls
+    // Scoped binding stack for script 'let'
+    private readonly Stack<Dictionary<string, Element>> _bindingScopes = new();
+
+    internal void PushBindingScope() {
+        _bindingScopes.Push(new Dictionary<string, Element>(StringComparer.Ordinal));
+    }
+
+    internal void PopBindingScope() {
+        if (_bindingScopes.Count > 0) { _bindingScopes.Pop(); }
+    }
+
+    internal void BindReference(string name, Element valueElement) {
+        if (_bindingScopes.Count == 0) { PushBindingScope(); }
+        _bindingScopes.Peek()[name] = valueElement; // store original (mutations visible to future clones)
+        // Trace binding (reuse UnresolvedReference type purely for visibility until a Trace type is added)
+        if (_currentDocument != null) {
+            _currentDocument.Warnings.Add(new ParseWarning(WarningType.UnresolvedReference, $"[trace] bind '{name}' => {valueElement.GetType().Name}", CurrentRow, CurrentColumn, name));
+        }
+    }
+
+    internal bool TryResolveBinding(string name, out Element? element) {
+        foreach (var scope in _bindingScopes) { // stack enumerates with most recent first
+            if (scope.TryGetValue(name, out element)) { return true; }
+        }
+        element = null;
+        return false;
+    }
 
     /// <summary>
     /// Gets the version of the XferLang parser.
@@ -150,6 +179,8 @@ public partial class Parser : IXferParser {
         RegisterPIProcessor(DefinedProcessingInstruction.Keyword, CreateDefinedProcessingInstruction);
     // Conditional processing instruction (if) enabling conditional inclusion of the next element
     RegisterPIProcessor(IfProcessingInstruction.Keyword, CreateIfProcessingInstruction);
+    // Script processing instruction enabling scoped scripting operators (e.g., let)
+    RegisterPIProcessor(ScriptProcessingInstruction.Keyword, CreateScriptProcessingInstruction);
     }
 
     // Built-in PI processor factory methods
@@ -197,8 +228,6 @@ public partial class Parser : IXferParser {
                 Debug.WriteLine($"No processors registered for key: {innerKvp.Key}");
             }
         }
-
-        MapToXferDocumentMetadata(pi);
         return pi;
     }
 
@@ -206,7 +235,6 @@ public partial class Parser : IXferParser {
         if (kvp.Value is not ObjectElement obj) {
             throw new InvalidOperationException($"At row {parser.CurrentRow}, column {parser.CurrentColumn}: DynamicSource PI must contain an object with source configuration.");
         }
-
         return new DynamicSourceProcessingInstruction(obj);
     }
 
@@ -218,6 +246,10 @@ public partial class Parser : IXferParser {
     private static ProcessingInstruction CreateIfProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
         // Value can be any element representing the condition expression (text, dynamic, collection operator, etc.)
         return new IfProcessingInstruction(kvp.Value, parser);
+    }
+
+    private static ProcessingInstruction CreateScriptProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
+        return new ScriptProcessingInstruction(kvp, parser);
     }
 
     /// <summary>
@@ -236,24 +268,16 @@ public partial class Parser : IXferParser {
             return _scanString;
         }
         set {
-            Start = Position = 0;
-            _scanString = value;
+            _scanString = value ?? string.Empty;
+            Start = 0;
+            Position = 0;
         }
     }
 
     private char CurrentChar {
         get {
-            if (Position >= ScanString.Length) {
-                return '\0';
-            }
+            if (Position >= ScanString.Length) { return '\0'; }
             return ScanString[Position];
-        }
-    }
-
-    private string CurrentString {
-        get {
-            if (Start >= ScanString.Length || Position >= ScanString.Length) { return string.Empty; }
-            return ScanString.Substring(Start, Position - (Start - 1));
         }
     }
 
@@ -264,17 +288,17 @@ public partial class Parser : IXferParser {
         }
     }
 
+    private string CurrentString {
+        get {
+            if (Start >= ScanString.Length || Position >= ScanString.Length) { return string.Empty; }
+            return ScanString.Substring(Start, Position - (Start - 1));
+        }
+    }
+
     private char PreviousChar {
         get {
             if (Position - 1 < 0) { return '\0'; }
             return ScanString[Position - 1];
-        }
-    }
-
-    private string Remaining {
-        get {
-            if (Position >= ScanString.Length) { return string.Empty; }
-            return ScanString[Position..];
         }
     }
 
@@ -391,6 +415,19 @@ public partial class Parser : IXferParser {
         return ElementOpening(IntegerElement.ElementDelimiter, out specifierCount);
     }
 
+    internal bool DereferenceElementOpening(out int specifierCount) {
+        // Leading '_' followed by at least one identifier char (letter, digit, '_' or '-')
+        if (CurrentChar == '_' && (char.IsLetterOrDigit(Peek) || Peek == '_' || Peek == '-')) {
+            specifierCount = 1;
+            LastElementRow = CurrentRow;
+            LastElementColumn = CurrentColumn;
+            _delimStack.Push(new EmptyClosingElementDelimiter(DereferenceElement.OpeningSpecifier, DereferenceElement.ClosingSpecifier, specifierCount, ElementStyle.Compact));
+            Advance(); // consume leading underscore (similar to ElementOpening behavior)
+            return true;
+        }
+        return ElementOpening(DereferenceElement.ElementDelimiter, out specifierCount);
+    }
+
     internal bool ElementOpening(ElementDelimiter delimiter) {
         return ElementOpening(delimiter, out int _);
     }
@@ -484,6 +521,7 @@ public partial class Parser : IXferParser {
         return ElementCompactClosing();
     }
 
+    // Added CharacterElementClosing for character element parsing; mirrors compact closing semantics.
     internal bool CharacterElementClosing() {
         Debug.Assert(_delimStack.Peek().ClosingSpecifier == CharacterElement.ClosingSpecifier);
         return ElementCompactClosing();
@@ -519,10 +557,7 @@ public partial class Parser : IXferParser {
         return ElementClosing();
     }
 
-    internal bool ReferenceElementClosing() {
-        Debug.Assert(_delimStack.Peek().ClosingSpecifier == ReferenceElement.ClosingSpecifier);
-        return ElementClosing();
-    }
+    // Legacy ReferenceElement closing removed (no-op retained earlier).
 
     internal bool NullElementClosing() {
         if (_delimStack.Count == 0) {
@@ -775,6 +810,7 @@ public partial class Parser : IXferParser {
 
         // Clear ID tracking for new document
         _usedIds.Clear();
+    _referenceBindings.Clear();
 
         CollectionElement? rootElement = null;
 
@@ -786,11 +822,16 @@ public partial class Parser : IXferParser {
                 break;
             }
 
+            // (Late-removed approach of bulk executing before next element replaced by immediate execution after parsing each PI.)
+
             var element = ParseElement();
 
             if (element is ProcessingInstruction pi) {
-                // PI at document level - store it and set next element as target
                 document.ProcessingInstructions.Add(pi);
+                if (rootElement == null && pi is ProcessingInstructions.ScriptProcessingInstruction spiTop) {
+                    // Execute let bindings immediately so forthcoming root content can resolve dereferences.
+                    spiTop.ExecuteTopLevelEarlyBindings();
+                }
             }
             else if (element is CollectionElement collectionElement) {
                 if (rootElement != null) {
@@ -805,12 +846,23 @@ public partial class Parser : IXferParser {
                         docPI.ElementHandler(rootElement);
                     }
                 }
+                // After applying PIs (including script) the root content already parsed with active script scopes.
             }
             else if (element is EmptyElement) {
                 // Skip empty elements
             }
             else {
-                throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Invalid top-level element '{element.GetType().Name}'. Top-level elements must be processing instructions or a single collection element (object, array, or tuple).");
+                // Relax rule: allow a single non-collection root element by auto-wrapping it in a tuple root
+                if (rootElement != null) {
+                    throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Multiple root elements found. A document can only have one root element.");
+                }
+                var tuple = new TupleElement();
+                // Attach previously parsed PIs to this new synthetic tuple root so they can target its first child uniformly.
+                foreach (var docPI in document.ProcessingInstructions) {
+                    if (docPI.Target == null) { docPI.Target = tuple; }
+                }
+                tuple.Add(element);
+                rootElement = tuple;
             }
 
             SkipWhitespace();
@@ -826,8 +878,69 @@ public partial class Parser : IXferParser {
         }
         _pendingPIs.Clear();
 
+        // Execute any top-level script PIs (those parsed before a root element existed) now that a root is known.
+        foreach (var topLevelPI in document.ProcessingInstructions) {
+            if (topLevelPI is ProcessingInstructions.ScriptProcessingInstruction spi) {
+                if (spi.Target == null) { spi.Target = document.Root; }
+                // Ensure operators executed; ElementHandler is idempotent due to internal guard.
+                spi.ElementHandler(spi.Target);
+            }
+        }
+
+        // Final dereference resolution pass: any remaining DereferenceElements
+        // (e.g. those appearing after their script PIs in the same tuple/object) are
+        // replaced now that all bindings have been collected. This complements the
+        // immediate resolution that occurs during element parsing for earlier siblings.
+        if (document.Root is not null) {
+            ResolveRemainingDereferences(document.Root);
+        }
+
+        // Deactivate any active script scopes now that parsing complete
+        foreach (var docPI in document.ProcessingInstructions) {
+            // No script PI scope deactivation needed (no persistent scope object now).
+        }
+
         return document;
     }
+
+    private void ResolveRemainingDereferences(Element element) {
+        // Handle object separately (it is also a CollectionElement, so check first)
+        if (element is ObjectElement obj) {
+            foreach (var kv in obj.Dictionary) {
+                var v = kv.Value.Value;
+                if (v is DereferenceElement d2) {
+                    if (TryResolveBinding(d2.Value, out var bound2)) {
+                        kv.Value.Value = Helpers.ElementCloner.Clone(bound2!);
+                        if (_currentDocument != null) {
+                            _currentDocument.Warnings.Add(new ParseWarning(WarningType.UnresolvedReference, $"[trace] post-pass resolved '{d2.Value}' in object", CurrentRow, CurrentColumn, d2.Value));
+                        }
+                    }
+                } else {
+                    ResolveRemainingDereferences(v);
+                }
+            }
+        }
+        else if (element is CollectionElement coll) {
+            for (int i = 0; i < coll.Children.Count; i++) {
+                var child = coll.Children[i];
+                if (child is DereferenceElement d) {
+                    if (TryResolveBinding(d.Value, out var bound)) {
+                        coll.Children[i] = Helpers.ElementCloner.Clone(bound!);
+                        if (_currentDocument != null) {
+                            _currentDocument.Warnings.Add(new ParseWarning(WarningType.UnresolvedReference, $"[trace] post-pass resolved '{d.Value}' in collection", CurrentRow, CurrentColumn, d.Value));
+                        }
+                    }
+                } else {
+                    ResolveRemainingDereferences(child);
+                }
+            }
+        }
+        else {
+            // Scalar element: nothing to traverse
+        }
+    }
+
+    // SubstituteScriptBindings removed (immediate resolution now handled during parsing).
 
     // Map MetadataElement with XferKeyword to XferDocumentMetadata (with extensions)
     private void MapToXferDocumentMetadata(ProcessingInstruction metaElem) {
@@ -876,7 +989,10 @@ public partial class Parser : IXferParser {
         while (IsCharAvailable()) {
             Element? element = null;
             // For containers, create the element, push to stack, parse, then pop
-            if (KeywordElementOpening(out int keywordSpecifierCount)) {
+            if (DereferenceElementOpening(out int derefImplicitCount)) {
+                element = ParseDereferenceElement(derefImplicitCount);
+            }
+            else if (KeywordElementOpening(out int keywordSpecifierCount)) {
                 element = ParseKeywordElement(keywordSpecifierCount);
             }
             else if (ElementOpening(InterpolatedElement.ElementDelimiter, out int evalSpecifierCount)) {
@@ -924,8 +1040,9 @@ public partial class Parser : IXferParser {
             else if (ElementOpening(QueryElement.ElementDelimiter, out int querySpecifierCount)) {
                 element = ParseQueryElement(querySpecifierCount);
             }
-            else if (ElementOpening(ReferenceElement.ElementDelimiter, out int referenceSpecifierCount)) {
-                element = ParseReferenceElement(referenceSpecifierCount);
+            // explicit dereference (multiple underscores explicitly delimited)
+            else if (ElementOpening(DereferenceElement.ElementDelimiter, out int derefSpecifierCount)) {
+                element = ParseDereferenceElement(derefSpecifierCount);
             }
             else if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
                 element = ParseNullElement(nullSpecifierCount);
@@ -997,28 +1114,7 @@ public partial class Parser : IXferParser {
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {IdentifierElement.ElementName} element.");
     }
 
-    private ReferenceElement ParseReferenceElement(int specifierCount = 1) {
-        var style = _delimStack.Peek().Style;
-        var key = string.Empty;
-
-        Element? element = null;
-
-        while (IsCharAvailable()) {
-            if (ReferenceElementClosing()) {
-                return new ReferenceElement(element ?? new EmptyElement(), specifierCount, style);
-            }
-
-            if (element is not null) {
-                throw new InvalidOperationException($"At row {LastElementRow}, column {LastElementColumn}: Unexpected element type.");
-            }
-
-            element = ParseElement();
-
-            // TODO: Implement reference logic here
-        }
-
-        throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {IdentifierElement.ElementName} element.");
-    }
+    // Legacy ParseReferenceElement removed.
 
     private ProcessingInstruction ParseProcessingInstruction(int specifierCount = 1) {
         SkipWhitespace();
@@ -1058,6 +1154,14 @@ public partial class Parser : IXferParser {
 
                 // Call the processing instruction handler generically for all PIs
                 pi.ProcessingInstructionHandler();
+
+                // Policy: strip successful If PIs (condition met) from serialization to reduce noise,
+                // but retain those with unknown operators (for visibility) or those whose condition failed.
+                if (pi is IfProcessingInstruction ifpi) {
+                    if (ifpi.ConditionMet && !ifpi.UnknownOperator) {
+                        pi.SuppressSerialization = true;
+                    }
+                }
 
                 return pi;
             }
@@ -1143,19 +1247,13 @@ public partial class Parser : IXferParser {
                         }
                     }
                     // If element suppressed, remove any failed conditional IF PIs from the parent container so they don't serialize orphaned
-                    if (!shouldAddElement) {
-                        foreach (var pi in localPendingPIs) {
-                            if (pi is IfProcessingInstruction ifpi && !ifpi.ConditionMet) {
-                                // Remove from arrayElement children (it was previously added for serialization)
-                                arrayElement.Remove(pi);
-                            }
-                        }
-                    }
+                    // Policy: retain failed conditional IF PIs for visibility; do not remove them
                     localPendingPIs.Clear();
 
                     // Only add the element if all PIs approved it
                     if (shouldAddElement) {
                         arrayElement.Add(element);
+                        // Legacy let binding processing removed.
                     }
                 }
                 catch (Exception ex) {
@@ -1196,18 +1294,13 @@ public partial class Parser : IXferParser {
                             break;
                         }
                     }
-                    if (!shouldAddElement) {
-                        foreach (var pi in localPendingPIs) {
-                            if (pi is IfProcessingInstruction ifpi && !ifpi.ConditionMet) {
-                                arrayElement.Remove(pi);
-                            }
-                        }
-                    }
+                    // Policy: retain failed conditional IF PIs for visibility
                     localPendingPIs.Clear();
 
                     // Only add the element if all PIs approved it
                     if (shouldAddElement) {
                         arrayElement.Add(element);
+                        // Legacy let binding processing removed.
                     }
                 }
                 catch (Exception ex) {
@@ -1280,13 +1373,7 @@ public partial class Parser : IXferParser {
                         break;
                     }
                 }
-                if (!shouldAddElement) {
-                    foreach (var pi in localPendingPIs) {
-                        if (pi is IfProcessingInstruction ifpi && !ifpi.ConditionMet) {
-                            objectElement.RemoveChild(pi);
-                        }
-                    }
-                }
+                // Policy: retain failed conditional IF PIs for visibility; do not remove
                 localPendingPIs.Clear();
             }
 
@@ -1313,6 +1400,7 @@ public partial class Parser : IXferParser {
                 else {
                     throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected element type '{element.GetType().Name}'. Objects can only contain KeyValuePairElement, ProcessingInstruction, or EmptyElement. Found: {element}");
                 }
+                // Legacy let processing removed.
             }
         }
 
@@ -1328,6 +1416,12 @@ public partial class Parser : IXferParser {
 
         while (IsCharAvailable()) {
             if (TupleElementClosing()) {
+                // Deactivate any script scopes targeting this tuple now that its contents are fully parsed
+                foreach (var child in tupleElement.Children) {
+                    if (child is ScriptProcessingInstruction spi && spi.Target == tupleElement) {
+                        // No scope deactivation required.
+                    }
+                }
                 return tupleElement;
             }
 
@@ -1343,22 +1437,18 @@ public partial class Parser : IXferParser {
                 foreach (var pendingPI in pendingPIs) {
                     pendingPI.Target = element;
                     try {
+                        if (pendingPI is ScriptProcessingInstruction spi) {
+                            // Ensure scope active & operators executed before handling element
+                            // Already executed.
+                        }
                         pendingPI.ElementHandler(element);
                     }
                     catch (ConditionalElementException) {
-                        // PI indicates this element should not be added
                         shouldAddElement = false;
                         break;
                     }
                 }
-                if (!shouldAddElement) {
-                    // Remove any failed conditional IF PIs so they do not serialize orphaned
-                    foreach (var p in pendingPIs) {
-                        if (p is IfProcessingInstruction ifpi && !ifpi.ConditionMet) {
-                            tupleElement.Remove(p);
-                        }
-                    }
-                }
+                // Policy: retain failed conditional IF PIs for visibility
                 pendingPIs.Clear();
 
                 if (shouldAddElement) {
@@ -1838,6 +1928,39 @@ public partial class Parser : IXferParser {
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {DecimalElement.ElementName} element.");
     }
 
+    private Element ParseDereferenceElement(int specifierCount = 1) {
+        var style = _delimStack.Peek().Style;
+        // Consume leading underscores already consumed by ElementOpening.
+        // Read identifier chars for name.
+        if (!IsCharAvailable()) {
+            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Incomplete dereference element.");
+        }
+        var sb = new StringBuilder();
+        while (IsCharAvailable() && (char.IsLetterOrDigit(CurrentChar) || CurrentChar == '_' || CurrentChar == '-')) {
+            sb.Append(CurrentChar);
+            Expand();
+        }
+        var name = sb.ToString();
+        if (string.IsNullOrEmpty(name)) {
+            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Dereference must specify a name after '_'.");
+        }
+        // Completed dereference token; remove delimiter context
+        if (_delimStack.Count > 0) {
+            _delimStack.Pop();
+        }
+        if (TryResolveBinding(name, out var bound)) {
+            if (_currentDocument != null) {
+                _currentDocument.Warnings.Add(new ParseWarning(WarningType.UnresolvedReference, $"[trace] deref '{name}' resolved immediately", CurrentRow, CurrentColumn, name));
+            }
+            return Helpers.ElementCloner.Clone(bound!);
+        }
+        if (_currentDocument != null) {
+            _currentDocument.Warnings.Add(new ParseWarning(WarningType.UnresolvedReference, $"[trace] deref '{name}' unresolved (will attempt post-pass)", CurrentRow, CurrentColumn, name));
+        }
+        AddWarning(WarningType.UnresolvedReference, $"Unresolved reference '{name}'", name);
+        return new DereferenceElement(name, specifierCount, style);
+    }
+
     private DoubleElement ParseDoubleElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
@@ -2011,4 +2134,17 @@ public partial class Parser : IXferParser {
             throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Failed to parse numeric value '{valueString}'. Error: {ex.Message}");
         }
     }
+
+    /// <summary>
+    /// Detects let bindings (let `name` value) inside a collection and records them while removing the trio.
+    /// This runs after new elements are added so bindings can be referenced by later siblings.
+    /// </summary>
+    // Legacy ProcessLetBindings removed.
+
+    /// <summary>
+    /// Forces a final let-binding processing pass on the document root if it is a collection.
+    /// This is a safety net in case the last trio occurs at the tail just before closing the root
+    /// collection and wasn't followed by an additional element that would have triggered processing.
+    /// </summary>
+    // Legacy let finalization & ProcessLetBindings removed (immediate substitution model).
 }

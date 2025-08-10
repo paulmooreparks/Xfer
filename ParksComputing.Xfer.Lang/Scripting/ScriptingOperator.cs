@@ -142,7 +142,10 @@ public abstract class ScriptingOperator {
     /// </summary>
     /// <param name="type">The type to check.</param>
     /// <returns>True if the type is numeric; otherwise, false.</returns>
-    private static bool IsNumeric(Type type) {
+    // Made public to allow lightweight operator implementations in other namespaces
+    // (e.g., simple comparison operators) to reuse numeric detection without subclass
+    // inheritance complexities or duplicate logic. Safe because it's pure and stateless.
+    public static bool IsNumeric(Type type) {
         return type == typeof(int) || type == typeof(long) || type == typeof(double) ||
                type == typeof(decimal) || type == typeof(float) || type == typeof(short) ||
                type == typeof(byte) || type == typeof(uint) || type == typeof(ulong) ||

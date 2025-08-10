@@ -165,18 +165,6 @@ public class EqualsOperator : ScriptingOperator {
     }
 
     /// <summary>
-    /// Determines if a type is numeric.
-    /// </summary>
-    /// <param name="type">The type to check.</param>
-    /// <returns>True if the type is numeric; otherwise, false.</returns>
-    private static bool IsNumeric(Type type) {
-        return type == typeof(int) || type == typeof(long) || type == typeof(double) ||
-               type == typeof(decimal) || type == typeof(float) || type == typeof(short) ||
-               type == typeof(byte) || type == typeof(uint) || type == typeof(ulong) ||
-               type == typeof(ushort) || type == typeof(sbyte);
-    }
-
-    /// <summary>
     /// Provides additional validation specific to the equals operator.
     /// </summary>
     /// <param name="arguments">The arguments to validate.</param>

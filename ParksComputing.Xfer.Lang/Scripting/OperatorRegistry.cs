@@ -146,11 +146,19 @@ public static class OperatorRegistry {
 
     RegisterOperator<Comparison.GreaterThanOperator>();
 
-    // Additional operators will be registered here as they are implemented:
-        // RegisterOperator<Comparison.LessThanOperator>();
-        // RegisterOperator<Logical.AndOperator>();
-        // RegisterOperator<Logical.OrOperator>();
-        // RegisterOperator<Logical.NotOperator>();
+    // Newly added comparison operators
+    RegisterOperator<Comparison.NotEqualOperator>();
+    RegisterOperator<Comparison.LessThanOperator>();
+    RegisterOperator<Comparison.LessThanOrEqualOperator>();
+    RegisterOperator<Comparison.GreaterThanOrEqualOperator>();
+
+    // Newly added logical operators
+    RegisterOperator<Logical.AndOperator>();
+    RegisterOperator<Logical.OrOperator>();
+    RegisterOperator<Logical.NotOperator>();
+    RegisterOperator<Logical.XorOperator>();
+
+    // Additional operators will be registered here as they are implemented in future phases
     }
 
     /// <summary>

@@ -85,5 +85,10 @@ public enum WarningType {
     /// <summary>
     /// An if processing instruction referenced an unknown/unregistered operator (condition treated as false).
     /// </summary>
-    UnknownConditionalOperator
+    UnknownConditionalOperator,
+
+    /// <summary>
+    /// A reference element referenced a name that has not been bound via a let binding.
+    /// </summary>
+    UnresolvedReference
 }

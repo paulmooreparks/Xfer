@@ -42,6 +42,11 @@ public class ProcessingInstruction : TypedElement<Element> {
     }
 
     /// <summary>
+    /// When true, this processing instruction will not serialize (used for successful conditional IF PIs).
+    /// </summary>
+    public bool SuppressSerialization { get; set; }
+
+    /// <summary>
     /// Virtual method for handling processing instruction-specific logic.
     /// Override this method in derived classes to implement custom processing instruction behavior.
     /// </summary>
@@ -73,6 +78,9 @@ public class ProcessingInstruction : TypedElement<Element> {
     /// <param name="depth">The current nesting depth (default is 0).</param>
     /// <returns>The formatted XferLang representation of the processing instruction.</returns>
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
+        if (SuppressSerialization) {
+            return string.Empty;
+        }
         bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
         bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
         string rootIndent = string.Empty;

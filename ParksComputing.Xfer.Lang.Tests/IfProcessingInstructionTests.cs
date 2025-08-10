@@ -8,20 +8,20 @@ public class IfProcessingInstructionTests {
     [TestMethod]
     public void IfPI_GreaterThanOperator_SuppressesAndIncludesCorrectly() {
     // Need single root collection; embed conditional elements inside an array
-    var input = "[ <! if gt[#4 #10] !> \"A\" <! if gt[#10 #4] !> \"B\" ]"; // First false (suppress), second true (include)
+    var input = "[<! if gt[#4 #10] !> \"A\" <! if gt[#10 #4] !> \"B\"]"; // First false (suppress), second true (include)
         var parser = new Parser();
         var doc = parser.Parse(input);
         var output = doc.ToXfer();
 
         Assert.IsFalse(output.Contains("A"), $"Output should not contain 'A' but was: {output}");
-        Assert.IsTrue(output.Contains("B"), $"Output should contain 'B' but was: {output}");
-    // TODO: Decide if successful conditional PIs should be stripped from serialization; currently they remain
-    // Assert.IsFalse(output.Contains("<!"), "Processing instructions should not appear in serialized output");
+    Assert.IsTrue(output.Contains("B"), $"Output should contain 'B' but was: {output}");
+    // Successful PI (second) should be stripped
+    Assert.IsFalse(output.Contains("<! if gt[#10 #4] !>"), "Successful conditional PI should be stripped");
     }
 
     [TestMethod]
     public void IfPI_UnknownOperator_NoOpDoesNotSuppress() {
-    var input = "[ <! if someUnknownOp[#1 #2] !> \"X\" ]"; // Unknown operator -> no-op, element + PI retained
+    var input = "[<! if someUnknownOp[#1 #2] !> \"X\"]"; // Unknown operator -> no-op, element + PI retained
         var parser = new Parser();
         var doc = parser.Parse(input);
         var output = doc.ToXfer();
