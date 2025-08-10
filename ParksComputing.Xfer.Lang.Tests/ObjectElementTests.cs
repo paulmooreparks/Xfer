@@ -467,12 +467,17 @@ public class ObjectElementTests
 
         Console.WriteLine(result);
 
-        // Assert
-    // Accept either Windows (\r\n) or Unix (\n) newlines to be platform agnostic
-    Assert.IsTrue(result.Contains("{\r\n") || result.Contains("{\n"), "Missing opening brace + newline");
-    Assert.IsTrue(result.Contains("  name\"John\"\r\n") || result.Contains("  name\"John\"\n"), "Missing name line");
-    Assert.IsTrue(result.Contains("  age#30\r\n") || result.Contains("  age#30\n"), "Missing age line");
-        Assert.IsTrue(result.EndsWith("}"));
+    // Assert using Environment.NewLine for platform independence
+    var nl = Environment.NewLine;
+    // Split preserving empty last line if any
+    var lines = result.Split(new[] { nl }, StringSplitOptions.None);
+    Assert.IsTrue(lines.Length >= 3, "Expected at least 3 lines for formatted object.");
+    Assert.AreEqual("{", lines[0]);
+    Assert.AreEqual("  name\"John\"", lines[1]);
+    Assert.AreEqual("  age#30", lines[2]);
+    // Closing brace should be last non-empty line
+    var closing = lines.Last(l => l.Length > 0);
+    Assert.AreEqual("}", closing);
     }
 
     [TestMethod]
@@ -487,10 +492,14 @@ public class ObjectElementTests
 
         Console.WriteLine(result);
 
-        // Assert
-    Assert.IsTrue(result.Contains("{\r\n") || result.Contains("{\n"), "Missing opening brace + newline");
-    Assert.IsTrue(result.Contains("\tname\"John\"\r\n") || result.Contains("\tname\"John\"\n"), "Missing tab-indented name line");
-        Assert.IsTrue(result.EndsWith("}"));
+    // Assert using Environment.NewLine for platform independence
+    var nl = Environment.NewLine;
+    var lines = result.Split(new[] { nl }, StringSplitOptions.None);
+    Assert.IsTrue(lines.Length >= 2, "Expected at least 2 lines for single-property formatted object.");
+    Assert.AreEqual("{", lines[0]);
+    Assert.AreEqual("\tname\"John\"", lines[1]);
+    var closing = lines.Last(l => l.Length > 0);
+    Assert.AreEqual("}", closing);
     }
 
     #endregion
