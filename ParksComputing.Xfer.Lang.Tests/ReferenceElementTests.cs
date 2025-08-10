@@ -17,6 +17,13 @@ public class ReferenceElementTests {
     }
 
     [TestMethod]
+    public void StandaloneLetPI_ReplacesSubsequentDereference() {
+        var parser = new Parser();
+    var doc = parser.Parse("<! let ( x \"Hello\" ) !> (_x _x)");
+        Assert.AreEqual("(\"Hello\"\"Hello\")", doc.Root.ToXfer());
+    }
+
+    [TestMethod]
     public void UnresolvedDereference_WarningAndElementRetained() {
         var parser = new Parser();
         var doc = parser.Parse("(_missing)");

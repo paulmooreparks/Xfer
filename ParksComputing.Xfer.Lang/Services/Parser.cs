@@ -183,6 +183,8 @@ public partial class Parser : IXferParser {
     RegisterPIProcessor(IfProcessingInstruction.Keyword, CreateIfProcessingInstruction);
     // Script processing instruction enabling scoped scripting operators (e.g., let)
     RegisterPIProcessor(ScriptProcessingInstruction.Keyword, CreateScriptProcessingInstruction);
+    // Standalone let processing instruction
+    RegisterPIProcessor(LetProcessingInstruction.Keyword, CreateLetProcessingInstruction);
     }
 
     // Built-in PI processor factory methods
@@ -252,6 +254,10 @@ public partial class Parser : IXferParser {
 
     private static ProcessingInstruction CreateScriptProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
         return new ScriptProcessingInstruction(kvp, parser);
+    }
+
+    private static ProcessingInstruction CreateLetProcessingInstruction(KeyValuePairElement kvp, Parser parser) {
+        return new LetProcessingInstruction(kvp, parser);
     }
 
     /// <summary>
@@ -836,9 +842,15 @@ public partial class Parser : IXferParser {
 
             if (element is ProcessingInstruction pi) {
                 document.ProcessingInstructions.Add(pi);
-                if (rootElement == null && pi is ProcessingInstructions.ScriptProcessingInstruction spiTop) {
-                    // Execute let bindings immediately so forthcoming root content can resolve dereferences.
-                    spiTop.ExecuteTopLevelEarlyBindings();
+                if (rootElement == null) {
+                    switch (pi) {
+                        case ProcessingInstructions.ScriptProcessingInstruction spiTop:
+                            spiTop.ExecuteTopLevelEarlyBindings();
+                            break;
+                        case ProcessingInstructions.LetProcessingInstruction lpiTop:
+                            lpiTop.ExecuteEarly();
+                            break;
+                    }
                 }
             }
             else if (element is CollectionElement collectionElement) {
@@ -1246,7 +1258,7 @@ public partial class Parser : IXferParser {
                 arrayElement.Add(pi);
                 // Also add to local pending PIs for application to next element
                 localPendingPIs.Add(pi);
-                if (pi is ScriptProcessingInstruction spiEarly1) { spiEarly1.ExecuteTopLevelEarlyBindings(); }
+                if (pi is ScriptProcessingInstruction spiEarly1) { spiEarly1.ExecuteTopLevelEarlyBindings(); } else if (pi is LetProcessingInstruction lpiEarly1) { lpiEarly1.ExecuteEarly(); }
                 SkipWhitespace();
             }
 
@@ -1296,7 +1308,7 @@ public partial class Parser : IXferParser {
                 arrayElement.Add(pi);
                 // Also add to local pending PIs for application to next element
                 localPendingPIs.Add(pi);
-                if (pi is ScriptProcessingInstruction spiEarly2) { spiEarly2.ExecuteTopLevelEarlyBindings(); }
+                if (pi is ScriptProcessingInstruction spiEarly2) { spiEarly2.ExecuteTopLevelEarlyBindings(); } else if (pi is LetProcessingInstruction lpiEarly2) { lpiEarly2.ExecuteEarly(); }
                 SkipWhitespace();
             }
 
@@ -1414,6 +1426,9 @@ public partial class Parser : IXferParser {
                     if (meta is ScriptProcessingInstruction spiEarly) {
                         spiEarly.ExecuteTopLevelEarlyBindings();
                     }
+                    else if (meta is LetProcessingInstruction lpiEarly) {
+                        lpiEarly.ExecuteEarly();
+                    }
                 }
                 else if (element is EmptyElement) {
                     // Ignore empty elements in objects
@@ -1462,6 +1477,9 @@ public partial class Parser : IXferParser {
                 // to the very next sibling element (e.g., an interpolated string)
                 if (pi is ScriptProcessingInstruction spiEarly) {
                     spiEarly.ExecuteTopLevelEarlyBindings(); // safe re-entry guarded internally
+                }
+                else if (pi is LetProcessingInstruction lpiEarly) {
+                    lpiEarly.ExecuteEarly();
                 }
             } else {
                 // Non-PI element: set it as target for any pending PIs

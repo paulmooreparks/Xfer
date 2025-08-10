@@ -8,7 +8,7 @@
     "Basic duplication: " _greeting
     </ -> Result: "Basic duplication: " "Hello, world!" />
 
-    <! script ( let greetee "World" ) !> 'Hello, <_greetee_>.'
+    <! let greetee "World" !> 'Hello, <_greetee_>.'
 
     </ You can bind objects />
     <!script ( let user { id 42 name "Ada" skills ("math" "logic") } )!>

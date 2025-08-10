@@ -135,7 +135,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
         }
     }
 
-    private static bool ContainsSelfDereference(Element element, string name) {
+    internal static bool ContainsSelfDereference(Element element, string name) {
         if (element is DereferenceElement de && de.Value == name) {
             return true;
         }
@@ -151,7 +151,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
         return false;
     }
 
-    private static void ResolveDereferences(Element element, Parser parser) {
+    internal static void ResolveDereferences(Element element, Parser parser) {
         if (element is DereferenceElement deref) {
             if (parser.TryResolveBinding(deref.Value, out var bound)) {
                 // Replace element in its parent context by mutating where possible is complex; since we
