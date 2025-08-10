@@ -31,7 +31,7 @@ public class DoubleElement : NumericElement<double>
     /// <summary>
     /// The delimiter configuration for double elements using caret characters.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
     /// Custom formatter function for the double value. If null, uses default formatting.
@@ -57,7 +57,7 @@ public class DoubleElement : NumericElement<double>
     /// <param name="customFormatter">Optional custom formatter function for the double value</param>
     /// </summary>
     public DoubleElement(NumericValue<double> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<double, string>? customFormatter = null)
-        : base(numericValue, ElementName, new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
+        : base(numericValue, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
     {
         CustomFormatter = customFormatter;
     }
@@ -82,7 +82,7 @@ public class DoubleElement : NumericElement<double>
         }
         else if (Delimiter.Style == ElementStyle.Compact)
         {
-            sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing} ");
+            sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing}");
         }
         else
         {

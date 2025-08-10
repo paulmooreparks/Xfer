@@ -68,8 +68,8 @@ public class ElementTests
         var falseElement = new BooleanElement(false);
 
         // Act & Assert
-        Assert.AreEqual("~true ", trueElement.ToXfer());
-        Assert.AreEqual("~false ", falseElement.ToXfer());
+        Assert.AreEqual("~true", trueElement.ToXfer());
+        Assert.AreEqual("~false", falseElement.ToXfer());
     }
 
     [TestMethod]

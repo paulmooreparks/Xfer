@@ -31,7 +31,7 @@ public class BooleanElement : TypedElement<bool>
     /// <summary>
     /// The default element delimiter configuration for boolean elements.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
     /// The string representation of the true value.
@@ -76,13 +76,9 @@ public class BooleanElement : TypedElement<bool>
         var value = Value ? TrueValue : FalseValue;
         var sb = new StringBuilder();
 
-        if (Delimiter.Style == ElementStyle.Implicit)
+        if (Delimiter.Style == ElementStyle.Compact)
         {
-            sb.Append(value);
-        }
-        else if (Delimiter.Style == ElementStyle.Compact)
-        {
-            sb.Append($"{Delimiter.OpeningSpecifier}{value}");
+            sb.Append($"{Delimiter.OpeningSpecifier}{value}{Delimiter.CompactClosing}");
         }
         else
         {

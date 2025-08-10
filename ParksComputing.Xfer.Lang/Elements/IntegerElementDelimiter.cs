@@ -2,7 +2,7 @@ using System;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
-public class NumericElementDelimiter : ElementDelimiter {
+public class EmptyClosingElementDelimiter : ElementDelimiter {
     /// <summary>
     /// The opening delimiter character for integer elements.
     /// </summary>
@@ -16,11 +16,11 @@ public class NumericElementDelimiter : ElementDelimiter {
     /// <summary>
     /// Initializes a new instance of the IntegerElementDelimiter class.
     /// </summary>
-    public NumericElementDelimiter(char openingSpecifier, char closingSpecifier, ElementStyle style = ElementStyle.Compact) : base(openingSpecifier, closingSpecifier, 1, style) {
+    public EmptyClosingElementDelimiter(char openingSpecifier, char closingSpecifier, ElementStyle style = ElementStyle.Compact) : base(openingSpecifier, closingSpecifier, 1, style) {
         // No additional initialization needed
     }
 
-    public NumericElementDelimiter(char openingSpecifier, char closingSpecifier, int specifierCount, ElementStyle style = ElementStyle.Compact) : base(openingSpecifier, closingSpecifier, specifierCount, style) {
+    public EmptyClosingElementDelimiter(char openingSpecifier, char closingSpecifier, int specifierCount, ElementStyle style = ElementStyle.Compact) : base(openingSpecifier, closingSpecifier, specifierCount, style) {
         // No additional initialization needed
     }
 }

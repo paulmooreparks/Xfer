@@ -109,7 +109,7 @@ public class CharacterElementTests
         var result = element.ToXfer();
 
         // Assert
-        Assert.AreEqual("\\$0 ", result);
+        Assert.AreEqual("\\$0", result);
     }
 
     [TestMethod]
@@ -122,7 +122,7 @@ public class CharacterElementTests
         var result = element.ToXfer();
 
         // Assert
-        Assert.AreEqual("\\$1F600 ", result);
+        Assert.AreEqual("\\$1F600", result);
     }
 
     [TestMethod]
@@ -135,7 +135,7 @@ public class CharacterElementTests
         var result = element.ToXfer();
 
         // Assert
-        Assert.AreEqual("\\$10FFFF ", result);
+        Assert.AreEqual("\\$10FFFF", result);
     }
 
     [TestMethod]
@@ -148,7 +148,7 @@ public class CharacterElementTests
         var result = element.ToXfer(Formatting.Indented, indentation: 4, depth: 1);
 
         // Assert
-        Assert.AreEqual("\\$41 ", result); // Formatting doesn't affect character elements
+        Assert.AreEqual("\\$41", result); // Formatting doesn't affect character elements
     }
 
     #endregion
@@ -230,14 +230,14 @@ public class CharacterElementTests
         // Test common ASCII characters
         var testCases = new[]
         {
-            (48, "0", "\\$30 "),   // '0'
-            (57, "9", "\\$39 "),   // '9'
-            (65, "A", "\\$41 "),   // 'A'
-            (90, "Z", "\\$5A "),   // 'Z'
-            (97, "a", "\\$61 "),   // 'a'
-            (122, "z", "\\$7A "),  // 'z'
-            (33, "!", "\\$21 "),   // '!'
-            (64, "@", "\\$40 "),   // '@'
+            (48, "0", "\\$30"),   // '0'
+            (57, "9", "\\$39"),   // '9'
+            (65, "A", "\\$41"),   // 'A'
+            (90, "Z", "\\$5A"),   // 'Z'
+            (97, "a", "\\$61"),   // 'a'
+            (122, "z", "\\$7A"),  // 'z'
+            (33, "!", "\\$21"),   // '!'
+            (64, "@", "\\$40"),   // '@'
         };
 
         foreach (var (codePoint, expectedChar, expectedXfer) in testCases)
@@ -290,7 +290,6 @@ public class CharacterElementTests
             // ToXfer should return hex format
             var xfer = element.ToXfer();
             Assert.IsTrue(xfer.StartsWith("\\$"));
-            Assert.IsTrue(xfer.EndsWith(" "));
         }
     }
 

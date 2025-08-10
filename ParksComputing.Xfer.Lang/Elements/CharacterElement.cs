@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,10 +31,10 @@ public class CharacterElement : TypedElement<int> {
     /// <summary>
     /// The default element delimiter configuration for character elements.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
 
-    private NumericValue<int> _numericValue = new NumericValue<int>(default);
+    private NumericValue<int> _numericValue = new NumericValue<int>(default, NumericBase.Hexadecimal);
 
     public NumericValue<int> NumericValue {
         get { return _numericValue; }
@@ -50,11 +50,11 @@ public class CharacterElement : TypedElement<int> {
     /// <param name="style">The element style for formatting (default: Compact).</param>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the code point is outside the valid Unicode range.</exception>
     public CharacterElement(int codePoint, int specifierCount = 1, ElementStyle style = ElementStyle.Compact) :
-        this(new NumericValue<int>(codePoint), specifierCount, style) {
+        this(new NumericValue<int>(codePoint, NumericBase.Hexadecimal), specifierCount, style) {
     }
 
     public CharacterElement(NumericValue<int> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact) :
-        base(numericValue.Value, ElementName, new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
+        base(numericValue.Value, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
         if (numericValue.Value < 0 || numericValue.Value > 0x10FFFF) {
             throw new ArgumentOutOfRangeException(nameof(numericValue), "Code point must be between 0 and 0x10FFFF.");
         }

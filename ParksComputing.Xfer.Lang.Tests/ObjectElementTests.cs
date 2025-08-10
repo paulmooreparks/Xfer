@@ -412,7 +412,7 @@ public class ObjectElementTests
         // Assert
         Assert.IsTrue(result.StartsWith("{"));
         Assert.IsTrue(result.EndsWith("}"));
-        Assert.IsTrue(result.Contains("name \"John\""));
+        Assert.IsTrue(result.Contains("name\"John\""));
     }
 
     [TestMethod]
@@ -428,9 +428,9 @@ public class ObjectElementTests
 
         // Assert - canonical format is compact without space after opening brace
         Assert.IsTrue(result.StartsWith("{"));
-        Assert.IsTrue(result.EndsWith(" }"));
-        Assert.IsTrue(result.Contains("name \"John\""));
-        Assert.IsTrue(result.Contains("age #30"));
+        Assert.IsTrue(result.EndsWith("}"));
+        Assert.IsTrue(result.Contains("name\"John\""));
+        Assert.IsTrue(result.Contains("age#30"));
     }
 
     [TestMethod]
@@ -447,7 +447,7 @@ public class ObjectElementTests
         // Assert - explicit style uses <{ and }> delimiters without extra spaces
         Assert.IsTrue(result.StartsWith("<{"));
         Assert.IsTrue(result.EndsWith("}>"));
-        Assert.IsTrue(result.Contains("name \"John\""));
+        Assert.IsTrue(result.Contains("name\"John\""));
     }
 
     #endregion
@@ -467,8 +467,8 @@ public class ObjectElementTests
 
         // Assert
         Assert.IsTrue(result.Contains("{\r\n"));
-        Assert.IsTrue(result.Contains("  name \"John\"\r\n"));
-        Assert.IsTrue(result.Contains("  age #30 \r\n"));
+        Assert.IsTrue(result.Contains("  name\"John\"\r\n"));
+        Assert.IsTrue(result.Contains("  age#30\r\n"));
         Assert.IsTrue(result.EndsWith("}"));
     }
 
@@ -484,7 +484,7 @@ public class ObjectElementTests
 
         // Assert
         Assert.IsTrue(result.Contains("{\r\n"));
-        Assert.IsTrue(result.Contains("\tname \"John\"\r\n"));
+        Assert.IsTrue(result.Contains("\tname\"John\"\r\n"));
         Assert.IsTrue(result.EndsWith("}"));
     }
 
@@ -507,9 +507,9 @@ public class ObjectElementTests
         var result = outerObj.ToXfer();
 
         // Assert
-        Assert.IsTrue(result.Contains("name \"John\""));
-        Assert.IsTrue(result.Contains("address { "));
-        Assert.IsTrue(result.Contains("city \"New York\""));
+        Assert.IsTrue(result.Contains("name\"John\""));
+        Assert.IsTrue(result.Contains("address{"));
+        Assert.IsTrue(result.Contains("city\"New York\""));
     }
 
     [TestMethod]
@@ -529,9 +529,9 @@ public class ObjectElementTests
         var result = level1.ToXfer();
 
         // Assert
-        Assert.IsTrue(result.Contains("child { "));
-        Assert.IsTrue(result.Contains("nested { "));
-        Assert.IsTrue(result.Contains("value \"deep\""));
+        Assert.IsTrue(result.Contains("child{"));
+        Assert.IsTrue(result.Contains("nested{"));
+        Assert.IsTrue(result.Contains("value\"deep\""));
     }
 
     #endregion
@@ -665,9 +665,9 @@ public class ObjectElementTests
         var result = obj.ToString();
 
         // Assert
-        Assert.IsTrue(result.Contains("name \"John\""));
-        Assert.IsTrue(result.StartsWith("{ "));
-        Assert.IsTrue(result.EndsWith(" }"));
+        Assert.IsTrue(result.Contains("name\"John\""));
+        Assert.IsTrue(result.StartsWith("{"));
+        Assert.IsTrue(result.EndsWith("}"));
     }
 
     [TestMethod]
@@ -700,9 +700,9 @@ public class ObjectElementTests
         var xfer = person.ToXfer(Formatting.Indented);
 
         // Assert
-        Assert.IsTrue(xfer.Contains("name \"John Doe\""));
-        Assert.IsTrue(xfer.Contains("age #30"));
-        Assert.IsTrue(xfer.Contains("email \"john.doe@example.com\""));
+        Assert.IsTrue(xfer.Contains("name\"John Doe\""));
+        Assert.IsTrue(xfer.Contains("age#30"));
+        Assert.IsTrue(xfer.Contains("email\"john.doe@example.com\""));
     }
 
     [TestMethod]
@@ -719,10 +719,10 @@ public class ObjectElementTests
         var xfer = config.ToXfer();
 
         // Assert
-        Assert.IsTrue(xfer.Contains("server \"localhost\""));
-        Assert.IsTrue(xfer.Contains("port #8080"));
-        Assert.IsTrue(xfer.Contains("ssl true"));
-        Assert.IsTrue(xfer.Contains("timeout &30000"));
+        Assert.IsTrue(xfer.Contains("server\"localhost\""));
+        Assert.IsTrue(xfer.Contains("port#8080"));
+        Assert.IsTrue(xfer.Contains("ssl~true"));
+        Assert.IsTrue(xfer.Contains("timeout&30000"));
     }
 
     #endregion

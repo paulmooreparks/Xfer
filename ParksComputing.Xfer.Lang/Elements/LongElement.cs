@@ -30,7 +30,7 @@ public class LongElement : NumericElement<long>
     /// <summary>
     /// The delimiter configuration for long integer elements using ampersand characters.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
     /// Custom formatter function for the long value. If null, uses default formatting.
@@ -53,7 +53,7 @@ public class LongElement : NumericElement<long>
     /// Initializes a new instance of the LongElement class with the specified numeric value.
     /// </summary>
     public LongElement(NumericValue<long> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<long, string>? customFormatter = null)
-        : base(numericValue, ElementName, new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
+        : base(numericValue, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
     {
         CustomFormatter = customFormatter;
     }
@@ -78,7 +78,7 @@ public class LongElement : NumericElement<long>
         }
         else if (Delimiter.Style == ElementStyle.Compact)
         {
-            sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing} ");
+            sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing}");
         }
         else
         {

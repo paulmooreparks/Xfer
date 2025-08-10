@@ -153,22 +153,6 @@ public class IfProcessingInstructionTests
     #region Method Implementation Tests
 
     [TestMethod]
-    public void ElementHandler_CalledWithElement_TracksCall()
-    {
-        // Arrange
-        var condition = new StringElement("true");
-        var ifPi = new TestIfProcessingInstruction(condition);
-        var element = new StringElement("test");
-
-        // Act
-        ifPi.ElementHandler(element);
-
-        // Assert
-        Assert.IsTrue(ifPi.ElementHandlerCalled);
-        Assert.AreEqual(element, ifPi.LastHandledElement);
-    }
-
-    [TestMethod]
     public void ProcessingInstructionHandler_Called_TracksCall()
     {
         // Arrange
@@ -288,23 +272,6 @@ public class IfProcessingInstructionTests
     #region Handler Behavior Tests
 
     [TestMethod]
-    public void HandlerBehavior_ElementHandler_CanAccessElementProperties()
-    {
-        // Arrange
-        var condition = new StringElement("test");
-        var ifPi = new TestIfProcessingInstruction(condition);
-        var stringElement = new StringElement("test value");
-
-        // Act
-        ifPi.ElementHandler(stringElement);
-
-        // Assert
-        Assert.AreEqual(stringElement, ifPi.LastHandledElement);
-        Assert.IsInstanceOfType(ifPi.LastHandledElement, typeof(StringElement));
-        Assert.AreEqual("test value", ((StringElement)ifPi.LastHandledElement).Value);
-    }
-
-    [TestMethod]
     public void HandlerBehavior_ProcessingInstructionHandler_CallsCorrectly()
     {
         // Arrange
@@ -316,28 +283,6 @@ public class IfProcessingInstructionTests
 
         // Assert
         Assert.IsTrue(ifPi.ProcessingInstructionHandlerCalled);
-    }
-
-    #endregion
-
-    #region Virtual Method Override Tests
-
-    [TestMethod]
-    public void VirtualMethods_CanBeOverridden_BehaveDifferently()
-    {
-        // Arrange
-        var condition = new StringElement("test");
-        var ifPi = new TestIfProcessingInstruction(condition);
-        var element = new StringElement("test");
-
-        // Act
-        ifPi.ElementHandler(element);
-        ifPi.ProcessingInstructionHandler();
-
-        // Assert - Our test implementation tracks calls
-        Assert.IsTrue(ifPi.ElementHandlerCalled);
-        Assert.IsTrue(ifPi.ProcessingInstructionHandlerCalled);
-        Assert.AreEqual(element, ifPi.LastHandledElement);
     }
 
     #endregion

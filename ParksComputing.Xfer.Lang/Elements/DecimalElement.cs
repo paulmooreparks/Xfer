@@ -31,7 +31,7 @@ public class DecimalElement : NumericElement<decimal>
     /// <summary>
     /// The delimiter configuration for decimal elements using asterisk characters.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
     /// Custom formatter function for the decimal value. If null, uses default formatting.
@@ -51,7 +51,7 @@ public class DecimalElement : NumericElement<decimal>
     }
 
     public DecimalElement(NumericValue<decimal> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<decimal, string>? customFormatter = null)
-        : base(numericValue, ElementName, new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
+        : base(numericValue, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
     {
         CustomFormatter = customFormatter;
     }
@@ -76,7 +76,7 @@ public class DecimalElement : NumericElement<decimal>
         }
         else if (Delimiter.Style == ElementStyle.Compact)
         {
-            sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing} ");
+            sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing}");
         }
         else
         {

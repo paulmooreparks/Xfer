@@ -384,11 +384,11 @@ public class LongElementTests
         // Act & Assert
         element.CustomFormatter = formatter1;
         var result1 = element.ToXfer();
-        Assert.AreEqual("&FORMAT1_42 ", result1);
+        Assert.AreEqual("&FORMAT1_42", result1);
 
         element.CustomFormatter = formatter2;
         var result2 = element.ToXfer();
-        Assert.AreEqual("&FORMAT2_42 ", result2);
+        Assert.AreEqual("&FORMAT2_42", result2);
     }
 
     #endregion

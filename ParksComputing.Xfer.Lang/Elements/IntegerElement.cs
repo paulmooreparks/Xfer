@@ -30,7 +30,7 @@ public class IntegerElement : NumericElement<int>
     /// <summary>
     /// The delimiter configuration for integer elements using hash characters.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    public static readonly ElementDelimiter ElementDelimiter = new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
     /// Custom formatter function for the integer value. If null, uses default formatting.
@@ -53,7 +53,7 @@ public class IntegerElement : NumericElement<int>
     /// Initializes a new instance of the IntegerElement class with the specified numeric value.
     /// </summary>
     public IntegerElement(NumericValue<int> value, int specifierCount = 1, ElementStyle elementStyle = ElementStyle.Compact, Func<int, string>? customFormatter = null)
-        : base(value, ElementName, new NumericElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, elementStyle))
+        : base(value, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, elementStyle))
     {
         CustomFormatter = customFormatter;
     }
