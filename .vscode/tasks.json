@@ -87,6 +87,29 @@
 			},
 			"problemMatcher": "$msCompile",
 			"dependsOn": "build"
+		},
+		{
+			"label": "watch tests",
+			"command": "dotnet",
+			"type": "shell",
+			"args": [
+				"watch",
+				"test",
+				"--no-build",
+				"--no-restore",
+				"--configuration",
+				"Release"
+			],
+			"isBackground": true,
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"problemMatcher": "$msCompile"
 		}
 	]
 }

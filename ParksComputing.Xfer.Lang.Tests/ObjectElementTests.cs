@@ -468,9 +468,10 @@ public class ObjectElementTests
         Console.WriteLine(result);
 
         // Assert
-        Assert.IsTrue(result.Contains("{\r\n"));
-        Assert.IsTrue(result.Contains("  name\"John\"\r\n"));
-        Assert.IsTrue(result.Contains("  age#30\r\n"));
+    // Accept either Windows (\r\n) or Unix (\n) newlines to be platform agnostic
+    Assert.IsTrue(result.Contains("{\r\n") || result.Contains("{\n"), "Missing opening brace + newline");
+    Assert.IsTrue(result.Contains("  name\"John\"\r\n") || result.Contains("  name\"John\"\n"), "Missing name line");
+    Assert.IsTrue(result.Contains("  age#30\r\n") || result.Contains("  age#30\n"), "Missing age line");
         Assert.IsTrue(result.EndsWith("}"));
     }
 
@@ -487,8 +488,8 @@ public class ObjectElementTests
         Console.WriteLine(result);
 
         // Assert
-        Assert.IsTrue(result.Contains("{\r\n"));
-        Assert.IsTrue(result.Contains("\tname\"John\"\r\n"));
+    Assert.IsTrue(result.Contains("{\r\n") || result.Contains("{\n"), "Missing opening brace + newline");
+    Assert.IsTrue(result.Contains("\tname\"John\"\r\n") || result.Contains("\tname\"John\"\n"), "Missing tab-indented name line");
         Assert.IsTrue(result.EndsWith("}"));
     }
 
