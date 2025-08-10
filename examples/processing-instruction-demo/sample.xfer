@@ -1,1 +1,58 @@
-{one\1 two#$2 three&%11}
+</ Start your day with a comment! />
+!document {
+    xfer "11.1"
+    id "top"
+}!
+
+!charDef {
+    fooz \zeta
+    theend \omega
+    pin \pushpin
+    answer \$42
+}!
+
+
+(
+    [~true ~false ~true ~false]
+    (~false ~true ~false ~true)
+    {one\1 two#$2 three&%11}
+    (x y "z")
+    </
+    <! script (
+        let `rootNode` (root (`document`))
+        let `objectNode` (getElementById(document "object"))
+    )!
+
+    let `bazNode` (baz (bar (foo (`rootNode`))))
+    />
+
+    _key "value"
+    `query "foo"`
+    `item (`item ("root" 0)` 0)`
+    <! if eq["Linux" "<|PLATFORM|>"] !>
+    profile{name"Bob"role"admin"verified~true}
+
+    <! if gt[#4 #<|NUMBER_OF_PROCESSORS|>] !>
+
+    mixedData ( "Sample" @2023-12-25@ *99.5 )
+    age $18
+    <!id "kvp"!>foo <!id "value"!>"bar"
+    [1 2 3]
+    <\answer\>
+    'I <\heart\><\vsemoji\> XferLang!'
+    'Put a <\pin\> in it!'
+    foo"bar"
+
+    <! id "object" !>
+    alphabet {
+        <! id "testpi" !> a '<\alpha\>'
+        b '<\beta\>'
+        g '<\gamma\>'
+        d '<\delta\>'
+        e '<\epsilon\>'
+        z '<\zeta\>'
+    }
+
+    <! id "array" !> [<! id "one"!> 1 2 3]
+
+)

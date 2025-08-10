@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -101,6 +101,9 @@ public class KeyValuePairElement : TypedElement<Element> {
                     sb.Append(' ');
                 }
                 sb.Append(pi.ToXfer(formatting, indentChar, indentation, depth));
+            }
+            else if (child is KeyValuePairElement kvp) {
+                sb.Append(' ');
             }
         }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -82,7 +82,7 @@ public class BooleanElement : TypedElement<bool>
         }
         else if (Delimiter.Style == ElementStyle.Compact)
         {
-            sb.Append($"{Delimiter.OpeningSpecifier}{value} ");
+            sb.Append($"{Delimiter.OpeningSpecifier}{value}");
         }
         else
         {

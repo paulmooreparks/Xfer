@@ -906,7 +906,7 @@ public partial class Parser : IXferParser {
                 element = ParseBooleanElement(boolSpecifierCount);
             }
             else if (ElementOpening(DateTimeElement.ElementDelimiter, out int dateSpecifierCount)) {
-                element = ParseDateElement(dateSpecifierCount);
+                element = ParseTemporalElement(dateSpecifierCount);
             }
             else if (ElementOpening(DynamicElement.ElementDelimiter, out int phSpecifierCount)) {
                 element = ParseDynamicElement(phSpecifierCount);
@@ -1479,6 +1479,7 @@ public partial class Parser : IXferParser {
 
             if (resolved.HasValue) {
                 codePoint = resolved.Value;
+                numericValue.Value = codePoint;
             }
             else {
                 // Add warning for unresolved character name
@@ -1554,7 +1555,7 @@ public partial class Parser : IXferParser {
             }
 
             if (ElementExplicitOpening(DateTimeElement.ElementDelimiter, out int dateSpecifierCount)) {
-                Element dateElement = ParseDateElement(dateSpecifierCount);
+                Element dateElement = ParseTemporalElement(dateSpecifierCount);
 
                 valueBuilder.Append(
                     dateElement switch {
@@ -1616,7 +1617,7 @@ public partial class Parser : IXferParser {
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {StringElement.ElementName} element.");
     }
 
-    private Element ParseDateElement(int specifierCount = 1) {
+    private Element ParseTemporalElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
 
         if (style is not ElementStyle.Compact) {
