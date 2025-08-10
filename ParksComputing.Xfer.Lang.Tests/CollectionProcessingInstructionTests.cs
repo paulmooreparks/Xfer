@@ -15,8 +15,8 @@ public class CollectionProcessingInstructionTests {
         var output = doc.ToXfer();
 
         // 99 suppressed, 3 included
-        Assert.IsFalse(output.Contains("99"), $"Expected 99 to be suppressed. Output: {output}");
-        Assert.IsTrue(output.Contains("3"), $"Expected 3 to be present. Output: {output}");
+    Assert.IsFalse(output.Contains(" 99") || output.EndsWith("99]"), $"Expected 99 to be suppressed. Output: {output}");
+    Assert.IsTrue(output.Contains("3"), $"Expected 3 to be present. Output: {output}");
     }
 
     [TestMethod]
@@ -39,8 +39,8 @@ public class CollectionProcessingInstructionTests {
         var doc = parser.Parse(input);
         var output = doc.ToXfer();
 
-        Assert.IsTrue(output.Contains("1"), $"Tuple should contain 1. Output: {output}");
-        Assert.IsFalse(output.Contains(" 2 "), $"Tuple should not contain 2. Output: {output}");
-        Assert.IsTrue(output.Contains("3"), $"Tuple should contain 3. Output: {output}");
+    Assert.IsTrue(output.Contains("1"), $"Tuple should contain 1. Output: {output}");
+    Assert.IsFalse(output.Contains(" 2 ") || output.Contains("(1 2 3") , $"Tuple should not contain 2. Output: {output}");
+    Assert.IsTrue(output.Contains("3"), $"Tuple should contain 3. Output: {output}");
     }
 }

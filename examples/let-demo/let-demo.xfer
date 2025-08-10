@@ -10,7 +10,7 @@
 
     </ You can bind objects />
     <!script ( let user { id 42 name "Ada" skills ("math" "logic") } )!>
-    ( _user _user )
+    { user _user }
     </ -> Two deep-cloned copies of the bound object. />
 
     </ You can bind arrays />

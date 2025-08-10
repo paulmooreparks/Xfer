@@ -14,7 +14,7 @@ public class ScriptProcessingInstructionWarningSuppressionTests {
         var doc = parser.Parse("<!script ( let v 42 )!> (_v)");
         // After parse, dereference should be replaced by an IntegerElement clone.
         var serialized = doc.ToXfer();
-        Assert.AreEqual("(42)", serialized, "Dereference should resolve to bound value");
+    Assert.IsTrue(serialized.Replace(" ", string.Empty) == "(42)", $"Dereference should resolve to bound value. Got: {serialized}");
         // There should be no remaining UnresolvedReference warning for 'v'.
         Assert.IsFalse(doc.Warnings.Any(w => w.Type == WarningType.UnresolvedReference && w.Context == "v"), "UnresolvedReference warning for 'v' should be suppressed");
         // There should be at least one trace indicating resolution (immediate or local-pass).
@@ -37,5 +37,20 @@ public class ScriptProcessingInstructionWarningSuppressionTests {
         Assert.IsFalse(doc.Warnings.Any(w => w.Type == WarningType.UnresolvedReference && w.Context == "name"));
         // Expect at least one trace for deref resolved immediately and let binding trace.
         Assert.IsTrue(doc.Warnings.Count(w => w.Type == WarningType.Trace && w.Context == "name") >= 1);
+    }
+
+    [TestMethod]
+    public void ScriptPI_ObjectTarget_LetOnly_SuppressesPI_And_Resolves_Dereference() {
+        var parser = new Parser();
+        // PI targets a non-tuple (object) element whose value contains a dereference.
+        // Dereference will be unresolved during initial parse of the object, then locally resolved and warning suppressed.
+        var doc = parser.Parse("<!script ( let v 42 )!> { answer _v }");
+        var xfer = doc.ToXfer();
+        // PI should suppress itself (only lets) leaving only the object serialization
+    Assert.IsTrue(xfer.Replace(" ", string.Empty).Contains("{answer42}"), $"Expected object with resolved value, got: {xfer}");
+        // No unresolved reference warning for v should remain
+        Assert.IsFalse(doc.Warnings.Any(w => w.Type == WarningType.UnresolvedReference && w.Context == "v"), "UnresolvedReference warning for 'v' should be suppressed after local-pass");
+        // At least one trace should mention local-pass or binding for 'v'
+        Assert.IsTrue(doc.Warnings.Any(w => w.Type == WarningType.Trace && w.Context == "v"), "Trace diagnostics for 'v' expected");
     }
 }

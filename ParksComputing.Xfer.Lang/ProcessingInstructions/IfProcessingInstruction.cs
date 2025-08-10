@@ -78,6 +78,14 @@ public class IfProcessingInstruction : ProcessingInstruction {
     }
 
     /// <summary>
+    /// INTERNAL TEST HOOK: resets cached scripting engine to force clean context.
+    /// Marked internal so production code does not casually invoke it; exposed to tests via InternalsVisibleTo if configured.
+    /// </summary>
+    internal static void __ResetCachedEngine_ForTests() {
+        _scriptingEngine = null;
+    }
+
+    /// <summary>
     /// Initializes a new instance of the IfProcessingInstruction class.
     /// </summary>
     /// <param name="conditionExpression">The condition expression to evaluate (any element type).</param>
@@ -273,7 +281,12 @@ public class IfProcessingInstruction : ProcessingInstruction {
     /// <param name="operatorName">The potential operator name to check.</param>
     /// <returns>True if the name represents a known operator; otherwise, false.</returns>
     private bool IsKnownOperator(string operatorName) {
-        // Query the global operator registry for registered operators
+        // Ensure built-in operators are registered at least once (defensive: some manual test runs
+        // may invoke operator detection before any ScriptingEngine instance has been created).
+        // If the registry is empty, register built-ins lazily.
+        if (OperatorRegistry.GetRegisteredOperatorNames().Count == 0) {
+            OperatorRegistry.RegisterBuiltInOperators();
+        }
         return OperatorRegistry.IsOperatorRegistered(operatorName);
     }
 

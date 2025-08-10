@@ -19,8 +19,8 @@ public class IfProcessingInstructionSerializationTests {
         var parser = new Parser();
         var doc = parser.Parse("[<! if eq[\"x\" \"y\"] !> \"A\"]");
         var output = doc.ToXfer();
-        Assert.IsFalse(output.Contains("\"A\""));
-        Assert.IsTrue(output.Contains("<!"), "Failed condition PI should remain for visibility");
+    Assert.IsFalse(output.Contains("\"A\""));
+    Assert.IsTrue(output.Contains("<!"), $"Failed condition PI should remain for visibility. Output: {output}");
     }
 
     [TestMethod]
