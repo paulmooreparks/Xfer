@@ -5,10 +5,6 @@
         "markdown": true,
         "scminput": false
     },
-    "github.copilot.advanced": {
-        "length": 500,
-        "temperature": 0.1
-    },
     "files.associations": {
         "*.xfer": "xferlang"
     },

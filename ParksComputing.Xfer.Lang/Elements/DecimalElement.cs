@@ -11,8 +11,7 @@ namespace ParksComputing.Xfer.Lang.Elements;
 /// Decimal elements store high-precision decimal values suitable for financial
 /// calculations and other applications requiring exact decimal representation.
 /// </summary>
-public class DecimalElement : NumericElement<decimal>
-{
+public class DecimalElement : NumericElement<decimal> {
     /// <summary>
     /// The element name used in XferLang serialization for decimal numbers.
     /// </summary>
@@ -46,13 +45,11 @@ public class DecimalElement : NumericElement<decimal>
     /// <param name="style">The element style for delimiter handling (default: Compact)</param>
     /// <param name="customFormatter">Optional custom formatter function for the decimal value</param>
     public DecimalElement(decimal value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<decimal, string>? customFormatter = null)
-        : this(new NumericValue<decimal>(value), specifierCount, style)
-    {
+        : this(new NumericValue<decimal>(value), specifierCount, style, customFormatter) {
     }
 
     public DecimalElement(NumericValue<decimal> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<decimal, string>? customFormatter = null)
-        : base(numericValue, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
-    {
+        : base(numericValue, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
         CustomFormatter = customFormatter;
     }
 
@@ -65,21 +62,14 @@ public class DecimalElement : NumericElement<decimal>
     /// <param name="indentation">The number of indentation characters per level (default: 2)</param>
     /// <param name="depth">The current nesting depth for indentation calculation (default: 0)</param>
     /// <returns>The XferLang string representation of this decimal element</returns>
-    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
-    {
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
         var sb = new StringBuilder();
         string valueString = CustomFormatter != null ? CustomFormatter(Value) : NumericValue.ToString();
 
-        if (Delimiter.Style == ElementStyle.Implicit)
-        {
-            sb.Append($"{valueString} ");
-        }
-        else if (Delimiter.Style == ElementStyle.Compact)
-        {
+        if (Delimiter.Style == ElementStyle.Compact) {
             sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing}");
         }
-        else
-        {
+        else {
             sb.Append($"{Delimiter.ExplicitOpening}{valueString}{Delimiter.ExplicitClosing}");
         }
 

@@ -46,7 +46,7 @@ public class DoubleElement : NumericElement<double>
     /// <param name="style">The element style for delimiter handling (default: Compact)</param>
     /// <param name="customFormatter">Optional custom formatter function for the double value</param>
     public DoubleElement(double value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact, Func<double, string>? customFormatter = null)
-        : this(new NumericValue<double>(value), specifierCount, style) {
+        : this(new NumericValue<double>(value), specifierCount, style, customFormatter) {
     }
 
     /// <summary>
@@ -76,16 +76,10 @@ public class DoubleElement : NumericElement<double>
         var sb = new StringBuilder();
         string valueString = CustomFormatter != null ? CustomFormatter(Value) : NumericValue.ToString();
 
-        if (Delimiter.Style == ElementStyle.Implicit)
-        {
-            sb.Append($"{valueString}");
-        }
-        else if (Delimiter.Style == ElementStyle.Compact)
-        {
+        if (Delimiter.Style == ElementStyle.Compact) {
             sb.Append($"{Delimiter.CompactOpening}{valueString}{Delimiter.CompactClosing}");
         }
-        else
-        {
+        else {
             sb.Append($"{Delimiter.ExplicitOpening}{valueString}{Delimiter.ExplicitClosing}");
         }
 

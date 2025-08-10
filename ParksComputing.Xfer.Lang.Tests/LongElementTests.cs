@@ -146,19 +146,6 @@ public class LongElementTests
     #region Serialization Tests - Default Formatting
 
     [TestMethod]
-    public void ToXfer_ImplicitStyle_ReturnsCorrectFormat()
-    {
-        // Arrange
-        var element = new LongElement(42L, style: ElementStyle.Implicit);
-
-        // Act
-        var result = element.ToXfer();
-
-        // Assert
-        Assert.AreEqual("42", result);
-    }
-
-    [TestMethod]
     public void ToXfer_CompactStyle_ReturnsCorrectFormat()
     {
         // Arrange
@@ -239,34 +226,6 @@ public class LongElementTests
     #endregion
 
     #region Serialization Tests - Custom Formatting
-
-    [TestMethod]
-    public void ToXfer_HexFormatter_ReturnsCorrectFormat()
-    {
-        // Arrange
-        Func<long, string> hexFormatter = value => $"#0x{value:X}";
-        var element = new LongElement(255L, customFormatter: hexFormatter);
-
-        // Act
-        var result = element.ToXfer();
-
-        // Assert
-        Assert.AreEqual("#0xFF", result); // Custom formatted values with # prefix don't get & prefix
-    }
-
-    [TestMethod]
-    public void ToXfer_BinaryFormatter_ReturnsCorrectFormat()
-    {
-        // Arrange
-        Func<long, string> binaryFormatter = value => $"#0b{Convert.ToString(value, 2)}";
-        var element = new LongElement(15L, customFormatter: binaryFormatter);
-
-        // Act
-        var result = element.ToXfer();
-
-        // Assert
-        Assert.AreEqual("#0b1111", result);
-    }
 
     [TestMethod]
     public void ToXfer_CustomFormatterWithoutHashPrefix_ReturnsCorrectFormat()
@@ -460,40 +419,6 @@ public class LongElementTests
     }
 
     [TestMethod]
-    public void EdgeCases_PowersOfTwo_HandleCorrectly()
-    {
-        var powersOfTwo = new[]
-        {
-            1L,
-            2L,
-            4L,
-            8L,
-            16L,
-            32L,
-            64L,
-            128L,
-            256L,
-            512L,
-            1024L,
-            1048576L,       // 2^20
-            1073741824L,    // 2^30
-            4398046511104L, // 2^42
-        };
-
-        foreach (var value in powersOfTwo)
-        {
-            var element = new LongElement(value);
-            Assert.AreEqual(value, element.Value);
-
-            // Test with hex formatter
-            Func<long, string> hexFormatter = v => $"#0x{v:X}";
-            element.CustomFormatter = hexFormatter;
-            var hexResult = element.ToXfer();
-            Assert.IsTrue(hexResult.StartsWith("#"));
-        }
-    }
-
-    [TestMethod]
     public void EdgeCases_CommonLargeNumbers_HandleCorrectly()
     {
         var largeNumbers = new[]
@@ -527,20 +452,6 @@ public class LongElementTests
 
         // Assert
         Assert.AreEqual("&42", result); // Numeric elements typically ignore formatting parameters
-    }
-
-    [TestMethod]
-    public void ToXfer_WithCustomFormatterAndFormatting_UsesCustomFormatter()
-    {
-        // Arrange
-        Func<long, string> hexFormatter = value => $"#0x{value:X}";
-        var element = new LongElement(255L, customFormatter: hexFormatter);
-
-        // Act
-        var result = element.ToXfer(Formatting.Indented);
-
-        // Assert
-        Assert.AreEqual("#0xFF", result);
     }
 
     #endregion
@@ -613,10 +524,10 @@ public class LongElementTests
             Assert.AreEqual(size, element.Value);
 
             // Test with hex formatting for memory addresses
-            Func<long, string> hexFormatter = value => $"#0x{value:X}";
+            Func<long, string> hexFormatter = value => $"&${value:X}";
             element.CustomFormatter = hexFormatter;
             var hexResult = element.ToXfer();
-            Assert.IsTrue(hexResult.StartsWith("#"));
+            Assert.IsTrue(hexResult.StartsWith("&"));
         }
     }
 

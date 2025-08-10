@@ -11,8 +11,7 @@ namespace ParksComputing.Xfer.Lang.Elements;
 /// Boolean elements store true/false values and are rendered as "true" or "false"
 /// in the XferLang format. The compact style uses ~ delimiters by default.
 /// </summary>
-public class BooleanElement : TypedElement<bool>
-{
+public class BooleanElement : TypedElement<bool> {
     /// <summary>
     /// The element type name for boolean elements.
     /// </summary>
@@ -50,16 +49,14 @@ public class BooleanElement : TypedElement<bool>
     /// <param name="specifierCount">The number of delimiter characters to use (default: 1).</param>
     /// <param name="style">The element style for formatting (default: Compact).</param>
     public BooleanElement(bool value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
-        : base(value, ElementName, new ElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style))
-    {
+        : base(value, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
     }
 
     /// <summary>
     /// Converts the boolean element to its XferLang string representation without formatting.
     /// </summary>
     /// <returns>The XferLang string representation of the boolean value.</returns>
-    public override string ToXfer()
-    {
+    public override string ToXfer() {
         return ToXfer(Formatting.None);
     }
 
@@ -71,17 +68,14 @@ public class BooleanElement : TypedElement<bool>
     /// <param name="indentation">The number of indent characters per level.</param>
     /// <param name="depth">The current indentation depth.</param>
     /// <returns>The formatted XferLang string representation of the boolean value.</returns>
-    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0)
-    {
+    public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
         var value = Value ? TrueValue : FalseValue;
         var sb = new StringBuilder();
 
-        if (Delimiter.Style == ElementStyle.Compact)
-        {
-            sb.Append($"{Delimiter.OpeningSpecifier}{value}{Delimiter.CompactClosing}");
+        if (Delimiter.Style == ElementStyle.Compact) {
+            sb.Append($"{Delimiter.OpeningSpecifier}{value}{Delimiter.CompactClosing}{Delimiter.CompactClosing}");
         }
-        else
-        {
+        else {
             sb.Append($"{Delimiter.ExplicitOpening}{value}{Delimiter.ExplicitClosing}");
         }
 
@@ -92,8 +86,7 @@ public class BooleanElement : TypedElement<bool>
     /// Returns the string representation of the boolean value.
     /// </summary>
     /// <returns>The boolean value as a string.</returns>
-    public override string ToString()
-    {
+    public override string ToString() {
         return Value.ToString();
     }
 }
