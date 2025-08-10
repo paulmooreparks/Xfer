@@ -11,7 +11,9 @@ public class AndOperator : ScriptingOperator {
         ValidateArguments(arguments);
         foreach (var arg in arguments) {
             var val = ResolveValue(arg, context);
-            if (!ToBoolean(val)) return false;
+            if (!ToBoolean(val)) {
+                return false;
+            }
         }
         return true;
     }

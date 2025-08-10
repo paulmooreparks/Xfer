@@ -513,6 +513,11 @@ public partial class Parser : IXferParser {
         return ElementClosing();
     }
 
+    internal bool DereferenceElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == DereferenceElement.ClosingSpecifier);
+        return ElementCompactClosing();
+    }
+
     internal bool IdentifierElementClosing() {
         Debug.Assert(_delimStack.Peek().ClosingSpecifier == IdentifierElement.ClosingSpecifier);
         return ElementCompactClosing();
@@ -806,7 +811,6 @@ public partial class Parser : IXferParser {
 
         return document!;
     }
-
     internal XferDocument ParseDocument()
     {
         var document = new XferDocument();
@@ -1242,6 +1246,7 @@ public partial class Parser : IXferParser {
                 arrayElement.Add(pi);
                 // Also add to local pending PIs for application to next element
                 localPendingPIs.Add(pi);
+                if (pi is ScriptProcessingInstruction spiEarly1) { spiEarly1.ExecuteTopLevelEarlyBindings(); }
                 SkipWhitespace();
             }
 
@@ -1291,6 +1296,7 @@ public partial class Parser : IXferParser {
                 arrayElement.Add(pi);
                 // Also add to local pending PIs for application to next element
                 localPendingPIs.Add(pi);
+                if (pi is ScriptProcessingInstruction spiEarly2) { spiEarly2.ExecuteTopLevelEarlyBindings(); }
                 SkipWhitespace();
             }
 
@@ -1405,6 +1411,9 @@ public partial class Parser : IXferParser {
                 }
                 else if (element is ProcessingInstruction meta) {
                     objectElement.AddOrUpdate(meta);
+                    if (meta is ScriptProcessingInstruction spiEarly) {
+                        spiEarly.ExecuteTopLevelEarlyBindings();
+                    }
                 }
                 else if (element is EmptyElement) {
                     // Ignore empty elements in objects
@@ -1449,6 +1458,11 @@ public partial class Parser : IXferParser {
                 // Add PI to tuple and track it for target assignment
                 tupleElement.Add(pi);
                 pendingPIs.Add(pi);
+                // For script PIs, execute let bindings immediately so they are visible
+                // to the very next sibling element (e.g., an interpolated string)
+                if (pi is ScriptProcessingInstruction spiEarly) {
+                    spiEarly.ExecuteTopLevelEarlyBindings(); // safe re-entry guarded internally
+                }
             } else {
                 // Non-PI element: set it as target for any pending PIs
                 bool shouldAddElement = true;
@@ -1661,6 +1675,24 @@ public partial class Parser : IXferParser {
             if (ElementExplicitOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
                 StringElement stringElement = ParseStringElement(stringSpecifierCount);
                 valueBuilder.Append(stringElement.Value);
+                continue;
+            }
+
+            if (ElementExplicitOpening(DereferenceElement.ElementDelimiter, out int dereferenceElementCount)) {
+                Element dereferenceElement = ParseDereferenceElement(dereferenceElementCount);
+                    // If unresolved during ParseDereferenceElement (returned DereferenceElement), attempt a late bind here
+                    if (dereferenceElement is DereferenceElement dLate) {
+                        if (TryResolveBinding(dLate.Value, out var lateBound) && lateBound is not null) {
+                            // For interpolation we want the textual value (no quotes for strings)
+                            valueBuilder.Append(lateBound.ToString());
+                        } else {
+                            // Keep original name to surface unresolved reference; matches prior behavior
+                            valueBuilder.Append(dLate.Value);
+                        }
+                    } else {
+                        // Already resolved to a cloned element; use its textual representation
+                        valueBuilder.Append(dereferenceElement.ToString());
+                    }
                 continue;
             }
 
@@ -1948,33 +1980,35 @@ public partial class Parser : IXferParser {
 
     private Element ParseDereferenceElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
-        // Consume leading underscores already consumed by ElementOpening.
-        // Read identifier chars for name.
-        if (!IsCharAvailable()) {
-            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Incomplete dereference element.");
-        }
         var sb = new StringBuilder();
-        while (IsCharAvailable() && (char.IsLetterOrDigit(CurrentChar) || CurrentChar == '_' || CurrentChar == '-')) {
+
+        while (IsCharAvailable()) {
+            if (DereferenceElementClosing()) {
+                break;
+            }
+
             sb.Append(CurrentChar);
             Expand();
         }
+
         var name = sb.ToString();
+
         if (string.IsNullOrEmpty(name)) {
             throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Dereference must specify a name after '_'.");
         }
-        // Completed dereference token; remove delimiter context
-        if (_delimStack.Count > 0) {
-            _delimStack.Pop();
-        }
+
         if (TryResolveBinding(name, out var bound)) {
             if (_currentDocument != null) {
                 _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] deref '{name}' resolved immediately", CurrentRow, CurrentColumn, name));
             }
+
             return Helpers.ElementCloner.Clone(bound!);
         }
+
         if (_currentDocument != null) {
             _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] deref '{name}' unresolved (will attempt post-pass)", CurrentRow, CurrentColumn, name));
         }
+
         AddWarning(WarningType.UnresolvedReference, $"Unresolved reference '{name}'", name);
         return new DereferenceElement(name, specifierCount, style);
     }

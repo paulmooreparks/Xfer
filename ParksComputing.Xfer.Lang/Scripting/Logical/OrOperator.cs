@@ -11,7 +11,9 @@ public class OrOperator : ScriptingOperator {
         ValidateArguments(arguments);
         foreach (var arg in arguments) {
             var val = ResolveValue(arg, context);
-            if (ToBoolean(val)) return true;
+            if (ToBoolean(val)) {
+                return true;
+            }
         }
         return false;
     }

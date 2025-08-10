@@ -11,7 +11,10 @@ public class LessThanOperator : ScriptingOperator {
         ValidateArguments(arguments);
         var left = ResolveValue(arguments[0], context);
         var right = ResolveValue(arguments[1], context);
-        if (left == null || right == null) return false; // null is never < anything (including null)
+        if (left == null || right == null) {
+            return false; // null is never < anything (including null)
+        }
+
         return Compare(left, right) < 0;
     }
     private int Compare(object left, object right) {
@@ -19,7 +22,10 @@ public class LessThanOperator : ScriptingOperator {
             try { return Decimal.Compare(Convert.ToDecimal(left), Convert.ToDecimal(right)); } catch { }
             return Math.Sign(Convert.ToDouble(left) - Convert.ToDouble(right));
         }
-        if (left is DateTime ldt && right is DateTime rdt) return ldt.CompareTo(rdt);
+        if (left is DateTime ldt && right is DateTime rdt) {
+            return ldt.CompareTo(rdt);
+        }
+
         return string.Compare(left.ToString(), right.ToString(), StringComparison.Ordinal);
     }
 }

@@ -13,6 +13,8 @@
 
 
 (
+    <! script ( let greetee "World" ) !> 'Hello, <_greetee_>.'
+
     [~true ~false ~true ~false]
     (~false ~true ~false ~true)
     {one\1 two#$2 three&%11}
@@ -29,17 +31,9 @@
     }
 
     <! script (
-        let `rootNode` (root (`document`))
-        let `objectNode` (getElementById(document "object"))
+        let rootNode (root (document "root"))
     )!>
 
-    </
-    let `bazNode` (baz (bar (foo (`rootNode`))))
-    />
-
-    '<`objectNode`>'
-
-    _key "value"
     <! if eq["Linux" "<|PLATFORM|>"] !>
     profile{name"Bob"role"admin"verified~true}
 
