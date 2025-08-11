@@ -115,7 +115,6 @@
                         <li><a href="#type-parkscomputing-xfer-lang-elements-dateelement">DateElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-datetimeelement">DateTimeElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-decimalelement">DecimalElement</a></li>
-                        <li><a href="#type-parkscomputing-xfer-lang-elements-dereferenceelement">DereferenceElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-dictionaryelement">DictionaryElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-doubleelement">DoubleElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-dynamicelement">DynamicElement</a></li>
@@ -3506,55 +3505,6 @@
 <p>The XferLang string representation of this decimal element</p>
 </div>
 </section>
-<section id="type-parkscomputing-xfer-lang-elements-dereferenceelement"><h3>Class: DereferenceElement</h3>
-<p>Represents a dereference of a previously bound name using leading underscore(s): _name Uses empty closing delimiter semantics similar to numeric and boolean elements.</p>
-<h4>Properties</h4>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr>
-<td><code>IsClone</code></td>
-<td><code>bool</code></td>
-<td>Indicates this dereference element was produced as a clone during parse (for diagnostics).</td>
-</tr>
-</tbody>
-</table>
-<h4>Methods</h4>
-<div class="method-doc">
-<h5>Constructor</h5>
-<code>DereferenceElement(string name, int specifierCount, ElementStyle style)</code>
-<p>Creates a dereference element for a previously bound name.</p>
-<h6>Parameters</h6>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr>
-<td><code>name</code></td>
-<td><code>string</code></td>
-<td>The binding name to resolve when evaluated.</td>
-</tr>
-<tr>
-<td><code>specifierCount</code></td>
-<td><code>int</code></td>
-<td>Number of leading underscores (>=1) for stylistic grouping.</td>
-</tr>
-<tr>
-<td><code>style</code></td>
-<td><code>ElementStyle</code></td>
-<td>Delimiter style controlling implicit/compact/explicit emission.</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="method-doc">
-<h5>ToXfer</h5>
-<code>string ToXfer()</code>
-</div>
-<div class="method-doc">
-<h5>ToXfer</h5>
-<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
-</div>
-</section>
 <section id="type-parkscomputing-xfer-lang-elements-dictionaryelement"><h3>Abstract Class: DictionaryElement</h3>
 <p>Abstract base class representing a dictionary-based collection element in XferLang. Manages key-value pair collections with efficient key-based lookups. Non-semantic elements (processing instructions, comments) are stored separately from key-value pairs.</p>
 <h4>Properties</h4>
@@ -5452,105 +5402,52 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-referenceelement"><h3>Class: ReferenceElement</h3>
-<p>Represents a reference wrapper element introduced by backtick specifiers that encloses another element.</p>
+<p>Represents a dereference of a previously bound name using leading underscore(s): _name Uses empty closing delimiter semantics similar to numeric and boolean elements.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr>
-<td><code>Target</code></td>
-<td><code>Element</code></td>
-<td>Gets or sets the target element that this processing instruction applies to. Can be null if the processing instruction applies globally or has no specific target.</td>
+<td><code>IsClone</code></td>
+<td><code>bool</code></td>
+<td>Indicates this dereference element was produced as a clone during parse (for diagnostics).</td>
 </tr>
 </tbody>
 </table>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
-<code>ReferenceElement(Element value, int specifierCount, ElementStyle style)</code>
-<p>Initializes a new instance of the ReferenceElement class with the specified value and name.</p>
+<code>ReferenceElement(string name, int specifierCount, ElementStyle style)</code>
+<p>Creates a dereference element for a previously bound name.</p>
 <h6>Parameters</h6>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr>
-<td><code>value</code></td>
-<td><code>Element</code></td>
-<td>The enclosed element being referenced.</td>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>The binding name to resolve when evaluated.</td>
 </tr>
 <tr>
 <td><code>specifierCount</code></td>
 <td><code>int</code></td>
-<td>Number of specifier characters.</td>
+<td>Number of leading underscores (>=1) for stylistic grouping.</td>
 </tr>
 <tr>
 <td><code>style</code></td>
 <td><code>ElementStyle</code></td>
-<td>Delimiter style controlling serialization.</td>
+<td>Delimiter style controlling implicit/compact/explicit emission.</td>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="method-doc">
-<h5>ElementHandler</h5>
-<code>void ElementHandler(Element element)</code>
-<p>Virtual method for handling element-specific processing. Override this method in derived classes to implement custom element handling logic.</p>
-<h6>Parameters</h6>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr>
-<td><code>element</code></td>
-<td><code>Element</code></td>
-<td>The element to be processed.</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="method-doc">
-<h5>ReferenceHandler</h5>
-<code>void ReferenceHandler()</code>
-<p>Virtual method for handling reference-specific logic. Override this method in derived classes to implement custom reference behavior.</p>
 </div>
 <div class="method-doc">
 <h5>ToXfer</h5>
 <code>string ToXfer()</code>
-<p>Converts the processing instruction to its XferLang string representation without formatting.</p>
-<h6>Returns</h6>
-<p>The XferLang representation of the processing instruction.</p>
 </div>
 <div class="method-doc">
 <h5>ToXfer</h5>
 <code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
-<p>Converts the processing instruction to its XferLang string representation with specified formatting options.</p>
-<h6>Parameters</h6>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr>
-<td><code>formatting</code></td>
-<td><code>Formatting</code></td>
-<td>The formatting options to apply.</td>
-</tr>
-<tr>
-<td><code>indentChar</code></td>
-<td><code>Char</code></td>
-<td>The character to use for indentation (default is space).</td>
-</tr>
-<tr>
-<td><code>indentation</code></td>
-<td><code>int</code></td>
-<td>The number of indent characters per level (default is 2).</td>
-</tr>
-<tr>
-<td><code>depth</code></td>
-<td><code>int</code></td>
-<td>The current nesting depth (default is 0).</td>
-</tr>
-</tbody>
-</table>
-<h6>Returns</h6>
-<p>The formatted XferLang representation of the processing instruction.</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-stringelement"><h3>Class: StringElement</h3>
@@ -8851,7 +8748,7 @@
 
 
         <footer>
-            <p>Documentation generated on 2025-08-11 08:45:09 UTC</p>
+            <p>Documentation generated on 2025-08-11 09:02:32 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

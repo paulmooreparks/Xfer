@@ -34,9 +34,9 @@
                     <summary>XferLang by Example</summary>
                     <ul>
                 <li><a href="#a-direct-comparison">A Direct Comparison</a></li>
-                <li><a href="#core-value-variety-still-plain-data">Core Value Variety (Still Plain Data)</a></li>
-                <li><a href="#delimiter--specifier-duplication-early-universal-rule">Delimiter / Specifier Duplication (Early, Universal Rule)</a></li>
-                <li><a href="#adding-document-metadata-document-processing-instruction">Adding Document Metadata (Document Processing Instruction)</a></li>
+                <li><a href="#core-xferpath">Core XferPath</a></li>
+                <li><a href="#delimiter--specifier-duplication-uniform-escapefree-rule">Delimiter / Specifier Duplication (Uniform, Escape‑Free Rule)</a></li>
+                <li><a href="#adding-document-metadata-document-pi">Adding Document Metadata (Document PI)</a></li>
                 <li><a href="#dynamic-elements-late-binding-andamp-source-overrides">Dynamic Elements (Late Binding) &amp; Source Overrides</a></li>
                 <li><a href="#a-quick-tour-of-processing-instructions">A Quick Tour of Processing Instructions</a></li>
                 <li><a href="#interpolated-text-structured-not-escaped">Interpolated Text (Structured, Not Escaped)</a></li>
@@ -192,12 +192,11 @@
 
 <p><img src="https://raw.githubusercontent.com/paulmooreparks/Xfer/master/logo/XferLang-sm.png" alt="XferLogo" /></p>
 <h1 id="the-xferlang-data-interchange-format">The XferLang Data-Interchange Format</h1>
-<p><a href="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml"><img src="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml/badge.svg" alt=".NET Build Status" /></a>
+<p><a href="https://github.com/paulmooreparks/Xfer"><img src="https://img.shields.io/github/last-commit/paulmooreparks/Xfer" alt="GitHub last commit" /></a>
+<a href="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml"><img src="https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml/badge.svg" alt=".NET Build Status" /></a>
 <a href="https://www.nuget.org/packages/ParksComputing.Xfer.Lang"><img src="https://img.shields.io/nuget/vpre/ParksComputing.Xfer.Lang.svg" alt="NuGet" /></a>
-<a href="https://github.com/paulmooreparks/Xfer"><img src="https://img.shields.io/github/last-commit/paulmooreparks/Xfer" alt="GitHub last commit" /></a>
 <a href="https://github.com/paulmooreparks/Xfer/issues"><img src="https://img.shields.io/github/issues/paulmooreparks/Xfer" alt="GitHub issues" /></a>
 <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a></p>
-<p><em>Welcome to everyone who came here from <a href="https://news.ycombinator.com/item?id=42114543">Hacker News</a>. Thank you so much for all the great input and discussion!</em></p>
 <section id="table-of-contents"><h2 id="table-of-contents">Table of Contents</h2>
 <ul>
 <li><a href="#the-xferlang-data-interchange-format">The XferLang Data-Interchange Format</a>
@@ -207,9 +206,9 @@
 <li><a href="#xferlang-by-example">XferLang by Example</a>
 <ul>
 <li><a href="#a-direct-comparison">A Direct Comparison</a></li>
-<li><a href="#core-value-variety-still-plain-data">Core Value Variety (Still Plain Data)</a></li>
-<li><a href="#delimiter--specifier-duplication-early-universal-rule">Delimiter / Specifier Duplication (Early, Universal Rule)</a></li>
-<li><a href="#adding-document-metadata-document-processing-instruction">Adding Document Metadata (Document Processing Instruction)</a></li>
+<li><a href="#core-xferpath">Core XferPath</a></li>
+<li><a href="#delimiter--specifier-duplication-uniform-escapefree-rule">Delimiter / Specifier Duplication (Uniform, Escape‑Free Rule)</a></li>
+<li><a href="#adding-document-metadata-document-pi">Adding Document Metadata (Document PI)</a></li>
 <li><a href="#dynamic-elements-late-binding--source-overrides">Dynamic Elements (Late Binding) &amp; Source Overrides</a>
 <ul>
 <li><a href="#file-env-and-const-together">File, Env, and Const Together</a></li>
@@ -367,16 +366,19 @@
 </li>
 </ul>
 <section id="introduction-and-philosophy"><h2 id="introduction-and-philosophy">Introduction and Philosophy</h2>
-<p>XferLang is a data-interchange format designed to support data serialization, data transmission, and offline use cases such as configuration management. Its design philosophy is centered around four key principles:</p>
+<p>XferLang is a strongly‑typed, delimiter‑driven data‑interchange format for configuration, structured content, and templated runtime inputs. It aims to feel instantly familiar to anyone who knows JSON—then give you the things you keep wishing JSON had: explicit types, whitespace flexibility, structured interpolation, safe embedding without escape sequences, late binding, and parse‑time directives.</p>
+<p>Guiding principles:</p>
 <ul>
-<li><strong>Clarity and Readability</strong>: The syntax is designed to be human-readable, even without separators like commas. This is achieved by using whitespace to delimit elements in most cases.</li>
-<li><strong>Explicit Typing</strong>: All values are explicitly typed. This avoids the type ambiguity that can sometimes occur in formats like JSON, leading to more predictable parsing and less defensive coding.</li>
-<li><strong>Elimination of Escaping</strong>: XferLang does not require escaping of special characters in values. Instead, values are enclosed in unique delimiters. If the content contains a sequence that matches the delimiter, the delimiter character can be repeated as many times as necessary to make it unique, ensuring that data can be embedded without modification.</li>
-<li><strong>Safety in Embedding</strong>: The delimiter-repetition strategy allows for the safe embedding of complex, nested data structures without the risk of delimiter collision.</li>
-<li><strong>Structured Root</strong>: All XferLang documents require a root collection element (Object, Array, or Tuple) to ensure well-defined document structure and unambiguous parsing.</li>
+<li><strong>Readable by default</strong> – Minimal punctuation; whitespace separates elements when that’s unambiguous. You can pretty‑print or collapse aggressively without changing meaning.</li>
+<li><strong>Explicit types</strong> – Every value carries an unambiguous type marker (boolean, decimal, date/time, etc.). Ambiguous heuristics disappear; downstream code stops guessing.</li>
+<li><strong>No escape tax</strong> – Instead of backslash escaping inside strings (or other forms), XferLang lets you lengthen the opening/closing specifier run. Need an embedded quote? Double the quotes. Need a pipe inside a dynamic element? Use a longer pipe run. This works uniformly across element kinds.</li>
+<li><strong>Safe arbitrary embedding</strong> – Because specifiers can lengthen, you can drop in generated fragments, templated chunks, or foreign content without pre‑processing or opaque escaping layers.</li>
+<li><strong>Single structured root</strong> – Every document has exactly one root collection (object, array, or tuple). This removes edge ambiguity, enables streaming readers, and aligns cleanly with schema / validation tooling.</li>
+<li><strong>Parse‑time intent</strong> – Processing Instructions (PIs) let you bind values, declare dynamic sources, conditionally include elements, and define symbolic characters—without blurring the core data model.</li>
 </ul>
+<p>If JSON is a lightweight transport envelope, XferLang is that envelope plus the ergonomics needed for maintainable, evolving, human‑edited configuration at scale.</p>
 <section id="xferlang-by-example"><h2 id="xferlang-by-example">XferLang by Example</h2>
-<p>XferLang is meant to feel similar to JSON while immediately surfacing additional power: explicit typing, flexible whitespace, and parse‑time behavior via processing instructions (PIs).</p>
+<p>Let’s build intuition first. Each snippet introduces one dimension of capability; together they show how you get power without giving up clarity.</p>
 <section id="a-direct-comparison"><h3 id="a-direct-comparison">A Direct Comparison</h3>
 <p>Simple XferLang document:</p>
 <pre><code class="language-xfer">{
@@ -406,8 +408,8 @@
 <pre><code class="language-xfer">{name&quot;Alice&quot;age 30 isMember~true scores[*85 *90 *78.5]profile{email&quot;alice@example.com&quot;joinedDate@2023-01-15T12:00:00@}}
 </code></pre>
 <hr />
-<section id="core-value-variety-still-plain-data"><h3 id="core-value-variety-still-plain-data">Core Value Variety (Still Plain Data)</h3>
-<p>Even before advanced features, explicit typing clarifies intent and removes ambiguity:</p>
+<section id="core-xferpath"><h3 id="core-xferpath">Core XferPath</h3>
+<p>Explicit typing in XferLang clarifies intent and removes ambiguity while remaining terse:</p>
 <pre><code class="language-xfer">sample {
     title &quot;Demo&quot;
     retries 3          &lt;/ implicit integer /&gt;
@@ -422,14 +424,14 @@
 }
 </code></pre>
 <p>Arrays are homogeneous; tuples are heterogeneous. Angle‑bracket explicit forms (not shown here) kick in only when needed.</p>
-<section id="delimiter--specifier-duplication-early-universal-rule"><h3 id="delimiter-specifier-duplication-early-universal-rule">Delimiter / Specifier Duplication (Early, Universal Rule)</h3>
-<p>XferLang never requires escape sequences. Instead, you may repeat an element's specifier delimiter(s) as many times as necessary to create a unique opening/closing pair that does not appear inside the content. The parser matches the full run length. This applies uniformly to any element that uses balanced specifiers:</p>
+<section id="delimiter--specifier-duplication-uniform-escapefree-rule"><h3 id="delimiter-specifier-duplication-uniform-escapefree-rule">Delimiter / Specifier Duplication (Uniform, Escape‑Free Rule)</h3>
+<p>Instead of escape sequences, XferLang lets you lengthen the delimiter sequence. The parser treats the entire contiguous run as the opening (and requires the same length run to close). Apply this anywhere a specifier pairs with itself or a matching closer:</p>
 <ul>
-<li>Strings (<code>&quot;</code>) – repeat quotes: <code>&quot;&quot;&quot;Text with &quot;quotes&quot; and &quot;&quot;embedded delimiter&quot;&quot;.&quot;&quot;&quot;</code></li>
-<li>Dynamic elements (<code>|</code>) – need a literal pipe? Wrap with a longer run: <code>||value with | symbol||</code></li>
-<li>Interpolated text (apostrophes) – nest another interpolated block by lengthening the outer run.</li>
-<li>Numeric / boolean / date forms in explicit angle brackets – if interior would contain the specifier, wrap in angle brackets or lengthen the specifier run.</li>
-<li>Comments (<code>&lt;/ ... /&gt;</code>) – if the body needs to show a sequence that looks like a closing <code>/&gt;</code>, extend with extra slashes: <code>&lt;// A comment containing &lt;/inner/&gt; safely //&gt;</code>.</li>
+<li>Strings (<code>&quot;…&quot;</code>): embed quotes by doubling: <code>&quot;&quot;He said, &quot;Hello&quot;.&quot;&quot;</code></li>
+<li>Dynamic elements (<code>|name|</code>): need a literal <code>|</code> inside? Use <code>||value with | symbol||</code>.</li>
+<li>Interpolated text (<code>'…'</code>): nest or include apostrophes by lengthening: <code>''Outer 'inner' still fine''</code>.</li>
+<li>Comments (<code>&lt;/ … /&gt;</code>): if interior contains <code>&lt;/</code>, lengthen the leading <code>/</code> run: <code>&lt;// A comment with &lt;/inner/&gt; safely //&gt;</code>.</li>
+<li>Any explicit form (<code>&lt;…&gt;</code>): angle‑bracket wrapper isolates interior specifier runs when needed.</li>
 </ul>
 <p>Examples:</p>
 <pre><code class="language-xfer">example {
@@ -441,8 +443,8 @@
 }
 </code></pre>
 <p>Guideline: choose the shortest delimiter length that avoids ambiguity; lengthen only when the content would otherwise prematurely terminate the element. This rule lets you embed arbitrarily complex content (including what look like closing tokens) without escapes.</p>
-<section id="adding-document-metadata-document-processing-instruction"><h3 id="adding-document-metadata-document-processing-instruction">Adding Document Metadata (Document Processing Instruction)</h3>
-<p>A processing instruction (or PI) wraps a single key/value pair that can influence parsing or supply metadata. The document PI associates version info and sets other document-level properties:</p>
+<section id="adding-document-metadata-document-pi"><h3 id="adding-document-metadata-document-pi">Adding Document Metadata (Document PI)</h3>
+<p>A Processing Instruction (PI) is a lightweight directive: exactly one key/value pair that the parser consumes before (optionally) influencing subsequent parsing. The <code>document</code> PI attaches version and other top‑level metadata:</p>
 <pre><code class="language-xfer">&lt;! document { version &quot;1.2&quot; environment &quot;prod&quot; } !&gt;
 {
     service { host &quot;api.example.com&quot; port 8443 ssl ~true }
@@ -450,7 +452,7 @@
 }
 </code></pre>
 <section id="dynamic-elements-late-binding-andamp-source-overrides"><h3 id="dynamic-elements-late-binding-source-overrides">Dynamic Elements (Late Binding) &amp; Source Overrides</h3>
-<p>Dynamic elements (<code>|identifier|</code>) resolve at parse time. By default, each <code>|name|</code> returns the value of the environment variable whose name matches <code>name</code> (fallback variable name is the identifier itself). The <code>dynamicSource</code> processing instruction replaces that simple environment-variable lookup with an explicit configuration per key, letting you: (a) rename the environment variable, (b) supply a literal constant, or (c) load from a file (and extensibly other sources via custom handlers). If a key is not configured by any <code>dynamicSource</code> PI, the environment lookup behavior remains the default.</p>
+<p>Dynamic elements (<code>|identifier|</code>) defer value selection until parse time. Default behavior: lookup the environment variable whose name matches the identifier. The <code>dynamicSource</code> PI lets you override that per key—mapping it to a file, a literal constant, or a different environment variable (and custom resolvers can add more sources). Unconfigured keys still fall back to the environment.</p>
 <pre><code class="language-xfer">{
     currentUser |user|
     greeting 'Hello &lt;|user|&gt;'
@@ -470,9 +472,16 @@
 </code></pre>
 <p>At this stage we've seen explicit types, metadata PI, and dynamic resolution. These features are already beyond JSON while remaining approachable.</p>
 <section id="a-quick-tour-of-processing-instructions"><h3 id="a-quick-tour-of-processing-instructions">A Quick Tour of Processing Instructions</h3>
-<p>You have now met two PIs (<code>document</code>, <code>dynamicSource</code>). Others, shown later, add local bindings (<code>let</code>), grouped operations (<code>script</code>), conditional inclusion (<code>if</code>), character definitions (<code>chardef</code>), and more. Each follows the same shape: <code>&lt;! name &lt;value&gt; !&gt;</code> where <code>&lt;value&gt;</code> is any element (often an object for multiple fields).</p>
+<p>You have now met two PIs (<code>document</code>, <code>dynamicSource</code>). Additional built‑ins:</p>
+<ul>
+<li><code>let</code> – bind a name to a value for later dereference</li>
+<li><code>script</code> – batch multiple <code>let</code> bindings (let‑only today) so they all execute before the next element</li>
+<li><code>if</code> – conditionally suppress the immediately following element (PI itself is always stripped)</li>
+<li><code>chardef</code> – define symbolic character aliases</li>
+</ul>
+<p>Shape: <code>&lt;! name value !&gt;</code> where <code>value</code> may be any element (often an object for multiple fields).</p>
 <section id="interpolated-text-structured-not-escaped"><h3 id="interpolated-text-structured-not-escaped">Interpolated Text (Structured, Not Escaped)</h3>
-<p>Interpolated text (apostrophe delimiters) embeds explicit elements using <code>&lt; ... &gt;</code> markers inside:</p>
+<p>Interpolated text (apostrophe‑delimited) embeds <strong>real elements</strong>, not ad‑hoc string fragments. Inside the body, wrap each embedded element in <code>&lt; … &gt;</code> using that element’s explicit form. The engine evaluates them structurally before producing the final string.</p>
 <pre><code class="language-xfer">&lt;! dynamicSource { user env &quot;USER&quot; } !&gt;
 {
     banner 'User=&lt;|user|&gt; LoggedIn=&lt;~true~&gt; Since &lt;@2025-08-01T09:30:00Z@&gt;'
@@ -480,7 +489,7 @@
 </code></pre>
 <p>No string escape layer -— embedded parts are real elements, not ad‑hoc templating.</p>
 <section id="local-bindings-with-let-dereference-for-reuse"><h3 id="local-bindings-with-let-dereference-for-reuse">Local Bindings with <code>let</code> (Dereference for Reuse)</h3>
-<p>Local, structural reuse is achieved by binding a name to a value, then dereferencing it with a dereference element, which is specified with a leading underscore. The binding executes before sibling elements are parsed.</p>
+<p>Bind once, reuse structurally. A <code>let</code> PI introduces a name whose value you can later insert via a dereference element (leading underscore). Binding occurs before parsing subsequent siblings, so dereferences see earlier values.</p>
 <pre><code class="language-xfer">&lt;! let base { host &quot;localhost&quot; port 8080 } !&gt;
 {
     primary _base
@@ -492,7 +501,7 @@
 { banner 'Launching &lt;_appName_&gt;...' }
 </code></pre>
 <section id="grouped-let-bindings-script-pi"><h3 id="grouped-let-bindings-script-pi">Grouped Let Bindings (<code>script</code> PI)</h3>
-<p>The <code>script</code> PI batches multiple <code>let</code> bindings so they all execute before the next element is parsed. (Current implementation: only plain <code>let</code> is supported; other operators or expression evaluations inside the <code>script</code> PI tuple are not yet active.)</p>
+<p>The <code>script</code> PI batches multiple <code>let</code> bindings so they all complete before the next element parses. (Today: only <code>let</code> forms are recognized; future operator expressions may be enabled.)</p>
 <pre><code class="language-xfer">&lt;! script (
     let host &quot;localhost&quot;
     let port 8080
@@ -503,7 +512,7 @@
 </code></pre>
 <p>Bindings are processed left‑to‑right. Later bindings may dereference earlier ones. Because the <code>script</code> PI contains only <code>let</code> bindings it is suppressed from serialized output.</p>
 <section id="conditional-inclusion-if-pi"><h3 id="conditional-inclusion-if-pi">Conditional Inclusion (<code>if</code> PI)</h3>
-<p>Processing instructions can conditionally suppress the element they decorate. A basic form:</p>
+<p>The <code>if</code> PI evaluates a condition; if it’s false the immediately following element is never added to the document. The PI itself is always stripped regardless of outcome.</p>
 <pre><code class="language-xfer">&lt;! let showDebug ~false !&gt;
 &lt;! if _showDebug !&gt;
 { debug { level &quot;verbose&quot; } }
@@ -525,8 +534,8 @@
 &lt;! if someUnknownOp[&quot;a&quot; &quot;b&quot;] !&gt; { kept ~true }                         &lt;/ unknown op -&gt; element kept; PI stripped /&gt;
 </code></pre>
 <section id="character-definitions"><h3 id="character-definitions">Character Definitions</h3>
-<p>Custom symbolic characters keep documents readable:</p>
-<pre><code class="language-xfer">&lt;! charDef { bullet \$2022 arrow \$2192 } !&gt;
+<p>Define symbolic character aliases for readability (keyword → Unicode code point):</p>
+<pre><code class="language-xfer">&lt;! chardef { bullet \$2022 arrow \$2192 } !&gt;
 { list (&quot;Item&quot; \bullet &quot;Next&quot; \arrow ) }
 </code></pre>
 <hr />
@@ -572,19 +581,19 @@ Characters: <code>\65</code>, <code>\$41</code>, <code>\%01000001</code>, or pre
 <section id="null"><h3 id="null">Null</h3>
 <p><code>?</code> represents a null value.</p>
 <section id="binding-and-dereference"><h3 id="binding-and-dereference">Binding and Dereference</h3>
-<p><code>&lt;! let name value !&gt;</code> binds <code>name</code> to <code>value</code>. Inside subsequent elements the value can be dereferenced with <code>_name</code> (or inside interpolation as <code>&lt;_name_&gt;</code>).</p>
-<p>Batching bindings: The <code>script</code> processing instruction currently supports only <code>let</code> bindings (future operator forms may be added). You can group several sequential <code>let</code> bindings inside a single tuple so they all execute before the next element parses:</p>
+<p><code>&lt;! let name &lt;value&gt; !&gt;</code> binds <code>name</code> to <code>&lt;value&gt;</code>. Inside subsequent elements the value can be dereferenced with <code>_name</code> (or inside interpolation as <code>&lt;_name_&gt;</code>).</p>
+<p>Batching bindings: The <code>script</code> processing instruction currently supports only the <code>let</code> operator. (Additional operators will be added prior to general release.) You can group several sequential <code>let</code> bindings inside a single tuple so they all execute before the next element parses:</p>
 <pre><code class="language-xfer">&lt;! script ( let first &quot;Alice&quot; let greeting 'Hi &lt;_first_&gt;' let answer 42 ) !&gt;
 { message _greeting number _answer }
 </code></pre>
 <p>All listed <code>let</code> bindings are evaluated in order; later bindings can reference earlier ones (as with <code>_first</code> inside the interpolated greeting) but self‑reference is prevented. Because the script PI here contains only <code>let</code> bindings it does not serialize into the output (it is suppressed after execution).</p>
 <section id="interpolated-text"><h3 id="interpolated-text">Interpolated Text</h3>
-<p>Delimited by apostrophes: <code>'Hello &lt;_name_&gt;'</code>. Embedded elements inside must use explicit forms. Expressions are structural replacements; no string escape layer.</p>
+<p>Delimited by apostrophes: <code>'Hello &lt;_name_&gt;'</code>. Embedded elements inside must use explicit forms. Expressions are structural replacements; no character escaping is required.</p>
 <section id="dynamic-elements"><h3 id="dynamic-elements">Dynamic Elements</h3>
 <p><code>|identifier|</code> resolves through the configured dynamic source resolver (e.g., environment). Content is a single identifier; nested elements are not allowed inside the delimiters in the current implementation.</p>
 <section id="processing-instructions-pis"><h3 id="processing-instructions-pis">Processing Instructions (PIs)</h3>
-<p>Compact: <code>! name value !</code>  Explicit: <code>&lt;! name value !&gt;</code>.
-A PI consists of exactly one key/value pair; the value can be any element (commonly an object for multiple fields). Some PIs introduce bindings or affect subsequent parsing and may be suppressed from serialization after execution.</p>
+<p>Compact: <code>! name &lt;value&gt; !</code>  Explicit: <code>&lt;! name &lt;value&gt; !&gt;</code>.
+A PI consists of exactly one key/value pair; the value can be any element. Some PIs introduce bindings or affect subsequent parsing and may be suppressed from serialization after execution.</p>
 <section id="language-specification"><h2 id="language-specification">Language Specification</h2>
 <section id="document-structure"><h3 id="document-structure">Document Structure</h3>
 <p>Order:</p>
@@ -2269,7 +2278,7 @@ dotnet test --collect:&quot;XPlat Code Coverage&quot;
 </section>
 
         <footer>
-            <p>Documentation generated on 2025-08-11 08:45:07 UTC</p>
+            <p>Documentation generated on 2025-08-11 09:02:30 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>
