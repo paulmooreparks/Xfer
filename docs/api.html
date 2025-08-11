@@ -3508,6 +3508,17 @@
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-dereferenceelement"><h3>Class: DereferenceElement</h3>
 <p>Represents a dereference of a previously bound name using leading underscore(s): _name Uses empty closing delimiter semantics similar to numeric and boolean elements.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>IsClone</code></td>
+<td><code>bool</code></td>
+<td>Indicates this dereference element was produced as a clone during parse (for diagnostics).</td>
+</tr>
+</tbody>
+</table>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -4193,6 +4204,7 @@
 </table>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-emptyclosingelementdelimiter"><h3>Class: EmptyClosingElementDelimiter</h3>
+<p>Delimiter variant whose compact closing sequence is empty (used by dereference & numeric forms).</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -5022,13 +5034,7 @@
 <div class="method-doc">
 <h5>ToXfer</h5>
 <code>string ToXfer()</code>
-<p>Initializes a new instance of the NumericElement class using a  that may carry formatting metadata.</p>
-<h6>Parameters</h6>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-</tbody>
-</table>
+<p>Serializes this numeric element to its XferLang string representation using default formatting.</p>
 <h6>Returns</h6>
 <p>The XferLang string representation of this numeric element</p>
 </div>
@@ -6439,6 +6445,18 @@
 <div class="method-doc">
 <h5>Constructor</h5>
 <code>ConditionalElementException(string message)</code>
+<p>Creates a new .</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>message</code></td>
+<td><code>string</code></td>
+<td>Describes the element condition failure.</td>
+</tr>
+</tbody>
+</table>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-processinginstructions-definedprocessinginstruction"><h3>Class: DefinedProcessingInstruction</h3>
@@ -6625,6 +6643,11 @@
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr>
+<td><code>AppliedConditionMetSnapshot</code></td>
+<td><code>Nullable&lt;bool&gt;</code></td>
+<td>Snapshot of ConditionMet at the exact moment ElementHandler was invoked. Used to detect post-application mutation or evaluation/application divergence in intermittent failures. Null until ElementHandler runs for the first time.</td>
+</tr>
+<tr>
 <td><code>ConditionExpression</code></td>
 <td><code>Element</code></td>
 <td>The condition expression to evaluate.</td>
@@ -6633,6 +6656,16 @@
 <td><code>ConditionMet</code></td>
 <td><code>bool</code></td>
 <td>The result of the condition evaluation - true if the condition is met, false otherwise.</td>
+</tr>
+<tr>
+<td><code>DebugId</code></td>
+<td><code>int</code></td>
+<td>Public identifier (debug only usage) to correlate logs. Stable for lifetime of the PI instance.</td>
+</tr>
+<tr>
+<td><code>ElementHandlerInvoked</code></td>
+<td><code>bool</code></td>
+<td>Tracks whether ElementHandler executed (even if it later threw for suppression) to distinguish between "never applied" and "applied then mutated" scenarios.</td>
 </tr>
 <tr>
 <td><code>UnknownOperator</code></td>
@@ -6645,6 +6678,23 @@
 <div class="method-doc">
 <h5>Constructor</h5>
 <code>IfProcessingInstruction(Element conditionExpression, Parser parser)</code>
+<p>Initializes a new instance of the  class. The condition expression is stored and evaluated later during .</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>conditionExpression</code></td>
+<td><code>Element</code></td>
+<td>Expression whose truthiness determines whether the next element is included.</td>
+</tr>
+<tr>
+<td><code>parser</code></td>
+<td><code>Parser</code></td>
+<td>Optional parser used for emitting warnings (e.g. unknown operator).</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="method-doc">
 <h5>ElementHandler</h5>
@@ -6684,7 +6734,7 @@
 <tr>
 <td><code>BindingName</code></td>
 <td><code>string</code></td>
-<td>The identifier introduced into the current binding scope by this PI. Distinct from the PI keyword ("let") and no longer shadows .</td>
+<td>The identifier introduced into the current binding scope by this PI. Distinct from the PI keyword ("let").</td>
 </tr>
 <tr>
 <td><code>BoundValue</code></td>
@@ -8145,7 +8195,7 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-scripting-logical-ifoperator"><h3>Class: IfOperator</h3>
-<p>Scripting operator providing conditional evaluation. Returns one of two values depending on the truthiness of the first argument. Usage: if condition trueValue [ falseValue ]. Also leveraged by the if processing instruction. Nested operator expressions (e.g., if defined <|NAME|>) are supported.</p>
+<p>Scripting operator providing conditional evaluation. Returns one of two values depending on the truthiness of the first argument. Usage: if condition trueValue [falseValue]. Also leveraged by the if processing instruction. Nested operator expressions (for example a defined test like: if defined DEREF) are supported. NOTE: Angle-bracket dereference placeholders were removed from the XML documentation example to avoid malformed XML warnings.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -8801,7 +8851,7 @@
 
 
         <footer>
-            <p>Documentation generated on 2025-08-11 03:55:44 UTC</p>
+            <p>Documentation generated on 2025-08-11 08:45:09 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

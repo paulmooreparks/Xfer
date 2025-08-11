@@ -127,15 +127,14 @@ public class IfProcessingInstruction : ProcessingInstruction {
         _scriptingEngine = null;
     }
 
-    /// <summary>
-    /// <summary>
-    /// Initializes a new instance of the <see cref="IfProcessingInstruction"/> class.
-    /// Evaluates the provided condition expression during processing instruction handling.
-    /// </summary>
-    /// <param name="conditionExpression">The expression whose truthiness determines whether the following element is included.</param>
-    /// <param name="parser">Optional parser instance used for emitting warnings.</param>
     private readonly Services.Parser? _parser; // For emitting warnings
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="IfProcessingInstruction"/> class.
+    /// The condition expression is stored and evaluated later during <see cref="ProcessingInstructionHandler"/>.
+    /// </summary>
+    /// <param name="conditionExpression">Expression whose truthiness determines whether the next element is included.</param>
+    /// <param name="parser">Optional parser used for emitting warnings (e.g. unknown operator).</param>
     public IfProcessingInstruction(Element conditionExpression, Services.Parser? parser = null) : base(conditionExpression, Keyword) {
         ConditionExpression = conditionExpression ?? throw new ArgumentNullException(nameof(conditionExpression));
         _parser = parser;
@@ -202,11 +201,12 @@ public class IfProcessingInstruction : ProcessingInstruction {
         // Signal removal via exception so parser catch blocks handle skipping (including root-handling logic there).
         throw new ConditionalElementException("Element condition not met - should not be added to document");
     }
-
-#if DEBUG
+    #if DEBUG
     Console.WriteLine($"[IF][ID={DebugId}][APPLY] conditionMet=true -> allow");
-#endif
-    }    /// <summary>
+    #endif
+    }
+
+    /// <summary>
     /// Removes an element from its parent container.
     /// Handles different parent types (ObjectElement, ArrayElement, TupleElement).
     /// </summary>
@@ -280,7 +280,9 @@ public class IfProcessingInstruction : ProcessingInstruction {
 
                 bool known = IsKnownOperator(opName);
 #if DEBUG
+                #if DEBUG
                 Console.WriteLine($"[TRACE-IF] Evaluating operator KVP op='{opName}' known={known} rawValue='{kvpExp.Value}'");
+                #endif
 #endif
                 if (known) {
                     try {
@@ -289,7 +291,9 @@ public class IfProcessingInstruction : ProcessingInstruction {
                         Element[] args;
                         if (valueElem is CollectionElement coll) {
 #if DEBUG
+                            #if DEBUG
                             Console.WriteLine($"[TRACE-IF] Operator '{opName}' argCount={coll.Count}");
+                            #endif
 #endif
                             args = new Element[coll.Count];
                             for (int i = 0; i < coll.Count; i++) {
@@ -297,7 +301,9 @@ public class IfProcessingInstruction : ProcessingInstruction {
                                 if (arg != null) {
                                     args[i] = arg; // assign positional arg
 #if DEBUG
+                                    #if DEBUG
                                     Console.WriteLine($"[TRACE-IF]  arg[{i}]='{arg}' type={arg.GetType().Name}");
+                                    #endif
 #endif
                                 }
                             }
@@ -306,7 +312,9 @@ public class IfProcessingInstruction : ProcessingInstruction {
                         }
                         var result = scriptingEngine.Evaluate(opName, args);
 #if DEBUG
+                        #if DEBUG
                         Console.WriteLine($"[TRACE-IF] Operator '{opName}' evaluation result={result ?? "<null>"}");
+                        #endif
 #endif
                         return ConvertToBoolean(result);
                     }
@@ -329,13 +337,17 @@ public class IfProcessingInstruction : ProcessingInstruction {
             if (_parser != null && _parser.TryResolveBinding(derefElem.Value, out var bound)) {
                 // Use the bound element's parsed value for truthiness
 #if DEBUG
+                #if DEBUG
                 Console.WriteLine($"[TRACE-IF] Dereference '_{derefElem.Value}' resolved to element='{bound}' parsedValue='{bound?.ParsedValue ?? "<null>"}' type={bound?.GetType().Name}");
+                #endif
 #endif
                 return ConvertToBoolean(bound?.ParsedValue);
             }
             // Unresolved dereference counts as false
 #if DEBUG
+            #if DEBUG
             Console.WriteLine($"[TRACE-IF] Dereference '_{derefElem.Value}' unresolved -> false");
+            #endif
 #endif
             return false;
         }

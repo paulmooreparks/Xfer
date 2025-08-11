@@ -37,10 +37,10 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
         if (Operations == null) { return; }
         bool onlyLets = true;
     // TEMP TRACE: verify execution timing and operation enumeration
-        try {
-            var childSummary = string.Join(";", Operations.Children.Select(c => c.GetType().Name + "=" + c.ToXfer().Replace("\n"," ")));
-            _parser.AddWarning(WarningType.Trace, $"[trace] script PI execute begin (ops={Operations.Children.Count}) [{childSummary}]", Keyword);
-        } catch { _parser.AddWarning(WarningType.Trace, $"[trace] script PI execute begin (ops={Operations.Children.Count})", Keyword); }
+    // Reduced trace noise: only emit a concise begin message in debug builds
+#if DEBUG
+    _parser.AddWarning(WarningType.Trace, $"[trace] script PI begin ops={Operations.Children.Count}", Keyword);
+#endif
         for (int i = 0; i < Operations.Children.Count; i++) {
             var child = Operations.Children[i];
 
@@ -60,7 +60,10 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
                 if (ContainsSelfDereference(valueElem, name)) { throw new InvalidOperationException($"Self reference in let binding '{name}'."); }
                 ResolveDereferences(valueElem, _parser);
                 _parser.BindReference(name, valueElem);
-                _parser.AddWarning(WarningType.Trace, $"[trace] script PI let bound '{name}' (valueType={valueElem.GetType().Name})", name);
+                // Core binding trace retained (optional) - downgrade by guarding with DEBUG
+#if DEBUG
+                _parser.AddWarning(WarningType.Trace, $"[trace] script PI let '{name}' -> {valueElem.GetType().Name}", name);
+#endif
                 i += 2; // skip name + value
                 continue;
             }
@@ -75,7 +78,9 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
                     if (ContainsSelfDereference(valueElem, name)) { throw new InvalidOperationException($"Self reference in let binding '{name}'."); }
                     ResolveDereferences(valueElem, _parser);
                     _parser.BindReference(name, valueElem);
-                    _parser.AddWarning(WarningType.Trace, $"[trace] script PI let bound '{name}' (valueType={valueElem.GetType().Name})", name);
+                    #if DEBUG
+                    _parser.AddWarning(WarningType.Trace, $"[trace] script PI let '{name}' -> {valueElem.GetType().Name}", name);
+                    #endif
                     continue;
                 }
                 else {
@@ -87,10 +92,10 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
             // Non-let child: keep PI visible.
             onlyLets = false;
         }
-        if (onlyLets) {
-            SuppressSerialization = true; // PI itself disappears
-        }
-    _parser.AddWarning(WarningType.Trace, $"[trace] script PI execute end (onlyLets={onlyLets})", Keyword);
+    if (onlyLets) { SuppressSerialization = true; }
+#if DEBUG
+    _parser.AddWarning(WarningType.Trace, $"[trace] script PI end onlyLets={onlyLets}", Keyword);
+#endif
         _operatorsExecuted = true;
     }
 
@@ -103,7 +108,9 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
                     if (_parser.TryResolveBinding(d2.Value, out var bound2)) {
                         kv.Value.Value = Helpers.ElementCloner.Clone(bound2!);
                         // local-pass resolution trace
-                        _parser.AddWarning(WarningType.Trace, $"[trace] local-pass resolved '{d2.Value}' in object", Keyword);
+                        #if DEBUG
+                        _parser.AddWarning(WarningType.Trace, $"[trace] local-pass resolved '{d2.Value}' (object)", Keyword);
+                        #endif
                         // suppress earlier unresolved warning if present
                         SuppressEarlierUnresolved(d2.Value);
                     }
@@ -117,7 +124,9 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
                 if (child is DereferenceElement d) {
                     if (_parser.TryResolveBinding(d.Value, out var bound)) {
                         coll.Children[i] = Helpers.ElementCloner.Clone(bound!);
-                        _parser.AddWarning(WarningType.Trace, $"[trace] local-pass resolved '{d.Value}' in collection", Keyword);
+                        #if DEBUG
+                        _parser.AddWarning(WarningType.Trace, $"[trace] local-pass resolved '{d.Value}' (collection)", Keyword);
+                        #endif
                         SuppressEarlierUnresolved(d.Value);
                     }
                 } else {

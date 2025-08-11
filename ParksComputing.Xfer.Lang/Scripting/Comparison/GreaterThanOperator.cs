@@ -32,20 +32,10 @@ public class GreaterThanOperator : ScriptingOperator {
         var left = ResolveValue(arguments[0], context);
         var right = ResolveValue(arguments[1], context);
 
-#if DEBUG
-        try {
-            // Targeted trace for intermittent gt[#1 #2] anomaly observed in tests
-            if (left is not null && right is not null) {
-                string tag = left.ToString() == "1" && right.ToString() == "2" ? "[TRACE-GT-ANOMALY-CANDIDATE]" : "[TRACE-GT]";
-                Console.WriteLine($"{tag} GreaterThanOperator.Evaluate left={left}({left.GetType().Name}) right={right}({right.GetType().Name}) numericLeft={IsNumericType(left.GetType())} numericRight={IsNumericType(right.GetType())}");
-            }
-        } catch { /* best effort */ }
-#endif
+    // Debug trace removed to reduce noise; can be reintroduced under DEBUG if needed for anomaly analysis.
 
     if (left == null || right == null) {
-#if DEBUG
-        Console.WriteLine("[TRACE-GT] Null operand detected -> result false");
-#endif
+    // (debug trace suppressed)
         return false; // null not greater than anything
     }
 
@@ -54,9 +44,7 @@ public class GreaterThanOperator : ScriptingOperator {
             try {
                 var ld = Convert.ToDecimal(left);
                 var rd = Convert.ToDecimal(right);
-#if DEBUG
-                Console.WriteLine($"[TRACE-GT] Numeric compare {ld} > {rd} => {ld > rd}");
-#endif
+                // (debug trace suppressed)
                 return ld > rd;
             }
             catch (Exception) { /* fall through to string */ }
@@ -64,9 +52,7 @@ public class GreaterThanOperator : ScriptingOperator {
 
         // DateTime comparisons
     if (left is DateTime ldt && right is DateTime rdt) {
-#if DEBUG
-        Console.WriteLine($"[TRACE-GT] DateTime compare {ldt:o} > {rdt:o} => {ldt > rdt}");
-#endif
+    // (debug trace suppressed)
         return ldt > rdt;
         }
 
@@ -74,9 +60,7 @@ public class GreaterThanOperator : ScriptingOperator {
         var ls = left.ToString();
         var rs = right.ToString();
     var cmp = string.Compare(ls, rs, StringComparison.Ordinal) > 0;
-#if DEBUG
-    Console.WriteLine($"[TRACE-GT] Fallback string compare '{ls}' > '{rs}' => {cmp}");
-#endif
+    // (debug trace suppressed)
     return cmp;
     }
 

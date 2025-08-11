@@ -7,7 +7,8 @@ namespace ParksComputing.Xfer.Lang.Scripting.Logical;
 /// <summary>
 /// Scripting operator providing conditional evaluation. Returns one of two values depending on the truthiness
 /// of the first argument. Usage: <c>if condition trueValue [falseValue]</c>. Also leveraged by the <c>if</c>
-/// processing instruction. Nested operator expressions (for example <c>if defined &lt;|NAME|&gt;</c>) are supported.
+/// processing instruction. Nested operator expressions (for example a defined test like: <c>if defined DEREF</c>) are supported.
+/// NOTE: Angle-bracket dereference placeholders were removed from the XML documentation example to avoid malformed XML warnings.
 /// </summary>
 public class IfOperator : ScriptingOperator {
     /// <summary>
@@ -88,7 +89,7 @@ public class IfOperator : ScriptingOperator {
 
     /// <summary>
     /// Determines if an element represents an operator expression that should be evaluated.
-    /// This allows for nested operator calls like: if defined <|foo|>
+    /// This allows for nested operator calls like: <c>if defined _foo</c> (example simplified for XML docs).
     /// </summary>
     /// <param name="element">The element to check.</param>
     /// <returns>True if the element represents an operator expression; otherwise, false.</returns>

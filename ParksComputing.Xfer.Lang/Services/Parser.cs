@@ -1232,7 +1232,9 @@ public partial class Parser : IXferParser {
                 pi.ProcessingInstructionHandler();
 #if DEBUG
                 if (pi is IfProcessingInstruction dbgIfCreated) {
+                    #if DEBUG
                     Console.WriteLine($"[TRACE-PI][CREATE] IF PI created cond='{dbgIfCreated.ConditionExpression}' met={dbgIfCreated.ConditionMet} unknown={dbgIfCreated.UnknownOperator} suppressSer={dbgIfCreated.SuppressSerialization}");
+                    #endif
                 }
 #endif
 
@@ -1316,14 +1318,18 @@ public partial class Parser : IXferParser {
                     // Apply any local pending PIs to this element
                     bool shouldAddElement = true;
 #if DEBUG
+                    #if DEBUG
                     Console.WriteLine($"[TRACE-PARSE][ARRAY-HEAD] Applying {localPendingPIs.Count} pending PIs to element type={element.GetType().Name}");
+                    #endif
 #endif
                     foreach (var pendingPI in localPendingPIs) {
                         pendingPI.Target = element;
                         try {
 #if DEBUG
                             if (pendingPI is IfProcessingInstruction dbgIf1) {
+                                #if DEBUG
                                 Console.WriteLine($"[TRACE-PARSE][ARRAY-HEAD] About to apply IF PI cond='{dbgIf1.ConditionExpression}' conditionMet={dbgIf1.ConditionMet} unknown={dbgIf1.UnknownOperator} targetType={element.GetType().Name}");
+                                #endif
                             }
 #endif
                             pendingPI.ElementHandler(element);
@@ -1331,7 +1337,9 @@ public partial class Parser : IXferParser {
                         catch (ConditionalElementException) {
 #if DEBUG
                             if (pendingPI is IfProcessingInstruction dbgIfFail1) {
+                                #if DEBUG
                                 Console.WriteLine($"[TRACE-PARSE][ARRAY-HEAD] IF PI suppressed element cond='{dbgIfFail1.ConditionExpression}'");
+                                #endif
                             }
 #endif
                             // PI indicates this element should not be added
@@ -1378,14 +1386,18 @@ public partial class Parser : IXferParser {
                     // Apply any local pending PIs to this element
                     bool shouldAddElement = true;
 #if DEBUG
+                    #if DEBUG
                     Console.WriteLine($"[TRACE-PARSE][ARRAY] Applying {localPendingPIs.Count} pending PIs to element type={element.GetType().Name}");
+                    #endif
 #endif
                     foreach (var pendingPI in localPendingPIs) {
                         pendingPI.Target = element;
                         try {
 #if DEBUG
                             if (pendingPI is IfProcessingInstruction dbgIf2) {
+                                #if DEBUG
                                 Console.WriteLine($"[TRACE-PARSE][ARRAY] About to apply IF PI cond='{dbgIf2.ConditionExpression}' conditionMet={dbgIf2.ConditionMet} unknown={dbgIf2.UnknownOperator} targetType={element.GetType().Name}");
+                                #endif
                             }
 #endif
                             pendingPI.ElementHandler(element);
@@ -1393,7 +1405,9 @@ public partial class Parser : IXferParser {
                         catch (ConditionalElementException) {
 #if DEBUG
                             if (pendingPI is IfProcessingInstruction dbgIfFail2) {
+                                #if DEBUG
                                 Console.WriteLine($"[TRACE-PARSE][ARRAY] IF PI suppressed element cond='{dbgIfFail2.ConditionExpression}'");
+                                #endif
                             }
 #endif
                             // PI indicates this element should not be added
@@ -1474,7 +1488,9 @@ public partial class Parser : IXferParser {
                     try {
 #if DEBUG
                         if (pendingPI is IfProcessingInstruction dbgIfObj) {
+                            #if DEBUG
                             Console.WriteLine($"[TRACE-PARSE][OBJECT] About to apply IF PI cond='{dbgIfObj.ConditionExpression}' conditionMet={dbgIfObj.ConditionMet} unknown={dbgIfObj.UnknownOperator} targetType={element.GetType().Name}");
+                            #endif
                         }
 #endif
                         pendingPI.ElementHandler(element);
@@ -1482,7 +1498,9 @@ public partial class Parser : IXferParser {
                     catch (ConditionalElementException) {
 #if DEBUG
                         if (pendingPI is IfProcessingInstruction dbgIfFailObj) {
+                            #if DEBUG
                             Console.WriteLine($"[TRACE-PARSE][OBJECT] IF PI suppressed element cond='{dbgIfFailObj.ConditionExpression}'");
+                            #endif
                         }
 #endif
                         // PI indicates this element should not be added
@@ -1574,7 +1592,9 @@ public partial class Parser : IXferParser {
                         }
 #if DEBUG
                         if (pendingPI is IfProcessingInstruction dbgIfTuple) {
+                            #if DEBUG
                             Console.WriteLine($"[TRACE-PARSE][TUPLE] About to apply IF PI cond='{dbgIfTuple.ConditionExpression}' conditionMet={dbgIfTuple.ConditionMet} unknown={dbgIfTuple.UnknownOperator} targetType={element.GetType().Name}");
+                            #endif
                         }
 #endif
                         pendingPI.ElementHandler(element);
@@ -1582,7 +1602,9 @@ public partial class Parser : IXferParser {
                     catch (ConditionalElementException) {
 #if DEBUG
                         if (pendingPI is IfProcessingInstruction dbgIfFailTuple) {
+                            #if DEBUG
                             Console.WriteLine($"[TRACE-PARSE][TUPLE] IF PI suppressed element cond='{dbgIfFailTuple.ConditionExpression}'");
+                            #endif
                         }
 #endif
                         shouldAddElement = false;
