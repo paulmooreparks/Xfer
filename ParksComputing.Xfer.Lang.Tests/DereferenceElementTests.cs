@@ -12,8 +12,8 @@ public class DereferenceElementTests {
     var doc = parser.Parse("(_foo)");
     Assert.AreEqual(1, doc.Root.Count, "Tuple should contain one element (the dereference)");
     var first = doc.Root.GetElementAt(0);
-        Assert.IsInstanceOfType(first, typeof(DereferenceElement));
-        var d = (DereferenceElement)first!;
+        Assert.IsInstanceOfType(first, typeof(ReferenceElement));
+        var d = (ReferenceElement)first!;
         Assert.AreEqual("foo", d.Value);
     }
 

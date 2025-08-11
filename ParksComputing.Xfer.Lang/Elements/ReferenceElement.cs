@@ -3,122 +3,44 @@ using System.Text;
 namespace ParksComputing.Xfer.Lang.Elements;
 
 /// <summary>
-/// Represents a reference wrapper element introduced by backtick specifiers that encloses another element.
+/// Represents a dereference of a previously bound name using leading underscore(s): _name
+/// Uses empty closing delimiter semantics similar to numeric and boolean elements.
 /// </summary>
-public class ReferenceElement : TypedElement<Element> {
-    /// <summary>
-    /// The element name used for reference elements.
-    /// </summary>
-    public const string ElementName = "reference";
-
-    /// <summary>
-    /// The character used to open and close reference elements ('`').
-    /// </summary>
-    public const char OpeningSpecifier = '`';
-
-    /// <summary>
-    /// The character used to close reference elements (same as opening).
-    /// </summary>
+public class ReferenceElement : TypedElement<string> {
+    /// <summary>Name used in serialization for dereference elements.</summary>
+    public static readonly string ElementName = "deref";
+    /// <summary>Leading underscore character introducing a dereference.</summary>
+    public const char OpeningSpecifier = '_';
+    /// <summary>Closing specifier (same underscore; empty closing semantics).</summary>
     public const char ClosingSpecifier = OpeningSpecifier;
+    /// <summary>Element delimiter with empty closing portion for dereference.</summary>
+    public static readonly ElementDelimiter ElementDelimiter = new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
-    /// The element delimiter configuration for reference elements.
+    /// Creates a dereference element for a previously bound name.
     /// </summary>
-    public static readonly ElementDelimiter ElementDelimiter = new ElementDelimiter(OpeningSpecifier, ClosingSpecifier);
+    /// <param name="name">The binding name to resolve when evaluated.</param>
+    /// <param name="specifierCount">Number of leading underscores (>=1) for stylistic grouping.</param>
+    /// <param name="style">Delimiter style controlling implicit/compact/explicit emission.</param>
+    public ReferenceElement(string name, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
+        : base(name, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) { }
 
     /// <summary>
-    /// Initializes a new instance of the ReferenceElement class with the specified value and name.
+    /// Indicates this dereference element was produced as a clone during parse (for diagnostics).
     /// </summary>
-    /// <param name="value">The enclosed element being referenced.</param>
-    /// <param name="specifierCount">Number of specifier characters.</param>
-    /// <param name="style">Delimiter style controlling serialization.</param>
-    public ReferenceElement(Element value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
-        : base(value, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
-    }
+    public bool IsClone { get; init; }
 
-    /// <summary>
-    /// Virtual method for handling reference-specific logic.
-    /// Override this method in derived classes to implement custom reference behavior.
-    /// </summary>
-    public virtual void ReferenceHandler() {
-    }
+    // Note: Dereference elements are parsed via a lightweight opening predicate (DereferenceElementOpening)
+    // that treats a leading '_' followed by identifier characters as a dereference token, similar to how
+    // Keyword/Identifier implicit forms are handled. The parser immediately attempts binding resolution
+    // and substitutes a clone when possible.
 
-    /// <summary>
-    /// Virtual method for handling element-specific processing.
-    /// Override this method in derived classes to implement custom element handling logic.
-    /// </summary>
-    /// <param name="element">The element to be processed.</param>
-    public virtual void ElementHandler(Element element) {
-    }
+    /// <inheritdoc />
+    public override string ToXfer() => ToXfer(Formatting.None);
 
-    /// <summary>
-    /// Converts the processing instruction to its XferLang string representation without formatting.
-    /// </summary>
-    /// <returns>The XferLang representation of the processing instruction.</returns>
-    public override string ToXfer() {
-        return ToXfer(Formatting.None);
-    }
-
-    /// <summary>
-    /// Converts the processing instruction to its XferLang string representation with specified formatting options.
-    /// </summary>
-    /// <param name="formatting">The formatting options to apply.</param>
-    /// <param name="indentChar">The character to use for indentation (default is space).</param>
-    /// <param name="indentation">The number of indent characters per level (default is 2).</param>
-    /// <param name="depth">The current nesting depth (default is 0).</param>
-    /// <returns>The formatted XferLang representation of the processing instruction.</returns>
+    /// <inheritdoc />
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
-        bool isIndented = (formatting & Formatting.Indented) == Formatting.Indented;
-        bool isSpaced = (formatting & Formatting.Spaced) == Formatting.Spaced;
-        string rootIndent = string.Empty;
-        string nestIndent = string.Empty;
-
-        var sb = new StringBuilder();
-
-        if (isIndented) {
-            rootIndent = new string(indentChar, indentation * depth);
-            nestIndent = new string(indentChar, indentation * (depth + 1));
-        }
-
-        switch (Delimiter.Style) {
-            case ElementStyle.Explicit:
-                sb.Append(Delimiter.ExplicitOpening);
-                break;
-            case ElementStyle.Compact:
-                sb.Append(Delimiter.CompactOpening);
-                break;
-        }
-
-        if (isIndented) {
-            sb.Append(Environment.NewLine);
-        }
-
-        if (isIndented) {
-            sb.Append(nestIndent);
-        }
-
-        sb.Append(Value?.ToXfer(formatting, indentChar, indentation, depth + 1));
-
-        if (isIndented) {
-            sb.Append(Environment.NewLine);
-            sb.Append(rootIndent);
-        }
-
-        switch (Delimiter.Style) {
-            case ElementStyle.Explicit:
-                sb.Append(Delimiter.ExplicitClosing);
-                break;
-            case ElementStyle.Compact:
-                sb.Append(Delimiter.CompactClosing);
-                break;
-        }
-
-        return sb.ToString();
+        var underscores = new string(OpeningSpecifier, Delimiter.SpecifierCount);
+        return underscores + Value;
     }
-
-    /// <summary>
-    /// Gets or sets the target element that this processing instruction applies to.
-    /// Can be null if the processing instruction applies globally or has no specific target.
-    /// </summary>
-    public Element? Target { get; set; }
 }

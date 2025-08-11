@@ -104,7 +104,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
         if (element is ObjectElement obj) {
             foreach (var kv in obj.Dictionary) {
                 var v = kv.Value.Value;
-                if (v is DereferenceElement d2) {
+                if (v is ReferenceElement d2) {
                     if (_parser.TryResolveBinding(d2.Value, out var bound2)) {
                         kv.Value.Value = Helpers.ElementCloner.Clone(bound2!);
                         // local-pass resolution trace
@@ -121,7 +121,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
         } else if (element is CollectionElement coll) {
             for (int i = 0; i < coll.Children.Count; i++) {
                 var child = coll.Children[i];
-                if (child is DereferenceElement d) {
+                if (child is ReferenceElement d) {
                     if (_parser.TryResolveBinding(d.Value, out var bound)) {
                         coll.Children[i] = Helpers.ElementCloner.Clone(bound!);
                         #if DEBUG
@@ -151,7 +151,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
     }
 
     internal static bool ContainsSelfDereference(Element element, string name) {
-        if (element is DereferenceElement de && de.Value == name) {
+        if (element is ReferenceElement de && de.Value == name) {
             return true;
         }
         if (element is CollectionElement coll) {
@@ -167,7 +167,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
     }
 
     internal static void ResolveDereferences(Element element, Parser parser) {
-        if (element is DereferenceElement deref) {
+        if (element is ReferenceElement deref) {
             if (parser.TryResolveBinding(deref.Value, out var bound)) {
                 // Replace element in its parent context by mutating where possible is complex; since we
                 // resolve before binding insertion for lets, we can just ignore (valueElement may hold a collection).
@@ -179,7 +179,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
         if (element is CollectionElement coll) {
             for (int i = 0; i < coll.Children.Count; i++) {
                 var child = coll.Children[i];
-                if (child is DereferenceElement derefChild) {
+                if (child is ReferenceElement derefChild) {
                     if (parser.TryResolveBinding(derefChild.Value, out var bound2)) {
                         coll.Children[i] = Helpers.ElementCloner.Clone(bound2!);
                     }
@@ -190,7 +190,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
         } else if (element is ObjectElement obj) {
             foreach (var kv in obj.Dictionary) {
                 var v = kv.Value.Value;
-                if (v is DereferenceElement d2) {
+                if (v is ReferenceElement d2) {
                     if (parser.TryResolveBinding(d2.Value, out var bound3)) {
                         kv.Value.Value = Helpers.ElementCloner.Clone(bound3!);
                     }

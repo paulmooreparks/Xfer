@@ -424,17 +424,17 @@ public partial class Parser : IXferParser {
         return ElementOpening(IntegerElement.ElementDelimiter, out specifierCount);
     }
 
-    internal bool DereferenceElementOpening(out int specifierCount) {
+    internal bool ReferenceElementOpening(out int specifierCount) {
         // Leading '_' followed by at least one identifier char (letter, digit, '_' or '-')
         if (CurrentChar == '_' && (char.IsLetterOrDigit(Peek) || Peek == '_' || Peek == '-')) {
             specifierCount = 1;
             LastElementRow = CurrentRow;
             LastElementColumn = CurrentColumn;
-            _delimStack.Push(new EmptyClosingElementDelimiter(DereferenceElement.OpeningSpecifier, DereferenceElement.ClosingSpecifier, specifierCount, ElementStyle.Compact));
+            _delimStack.Push(new EmptyClosingElementDelimiter(ReferenceElement.OpeningSpecifier, ReferenceElement.ClosingSpecifier, specifierCount, ElementStyle.Compact));
             Advance(); // consume leading underscore (similar to ElementOpening behavior)
             return true;
         }
-        return ElementOpening(DereferenceElement.ElementDelimiter, out specifierCount);
+        return ElementOpening(ReferenceElement.ElementDelimiter, out specifierCount);
     }
 
     internal bool ElementOpening(ElementDelimiter delimiter) {
@@ -520,8 +520,8 @@ public partial class Parser : IXferParser {
         return ElementClosing();
     }
 
-    internal bool DereferenceElementClosing() {
-        Debug.Assert(_delimStack.Peek().ClosingSpecifier == DereferenceElement.ClosingSpecifier);
+    internal bool ReferenceElementClosing() {
+        Debug.Assert(_delimStack.Peek().ClosingSpecifier == ReferenceElement.ClosingSpecifier);
         return ElementCompactClosing();
     }
 
@@ -570,8 +570,6 @@ public partial class Parser : IXferParser {
         Debug.Assert(_delimStack.Peek().ClosingSpecifier == QueryElement.ClosingSpecifier);
         return ElementClosing();
     }
-
-    // Legacy ReferenceElement closing removed (no-op retained earlier).
 
     internal bool NullElementClosing() {
         if (_delimStack.Count == 0) {
@@ -917,7 +915,7 @@ public partial class Parser : IXferParser {
             }
         }
 
-        // Final dereference resolution pass: any remaining DereferenceElements
+        // Final dereference resolution pass: any remaining ReferenceElements
         // (e.g. those appearing after their script PIs in the same tuple/object) are
         // replaced now that all bindings have been collected. This complements the
         // immediate resolution that occurs during element parsing for earlier siblings.
@@ -938,7 +936,7 @@ public partial class Parser : IXferParser {
         if (element is ObjectElement obj) {
             foreach (var kv in obj.Dictionary) {
                 var v = kv.Value.Value;
-                if (v is DereferenceElement d2) {
+                if (v is ReferenceElement d2) {
                     if (TryResolveBinding(d2.Value, out var bound2)) {
                         kv.Value.Value = Helpers.ElementCloner.Clone(bound2!);
                         if (_currentDocument != null) {
@@ -986,7 +984,7 @@ public partial class Parser : IXferParser {
         else if (element is CollectionElement coll) {
             for (int i = 0; i < coll.Children.Count; i++) {
                 var child = coll.Children[i];
-                if (child is DereferenceElement d) {
+                if (child is ReferenceElement d) {
                     if (TryResolveBinding(d.Value, out var bound)) {
                         coll.Children[i] = Helpers.ElementCloner.Clone(bound!);
                         if (_currentDocument != null) {
@@ -1065,8 +1063,8 @@ public partial class Parser : IXferParser {
         while (IsCharAvailable()) {
             Element? element = null;
             // For containers, create the element, push to stack, parse, then pop
-            if (DereferenceElementOpening(out int derefImplicitCount)) {
-                element = ParseDereferenceElement(derefImplicitCount);
+            if (ReferenceElementOpening(out int derefImplicitCount)) {
+                element = ParseReferenceElement(derefImplicitCount);
             }
             else if (KeywordElementOpening(out int keywordSpecifierCount)) {
                 element = ParseKeywordElement(keywordSpecifierCount);
@@ -1117,8 +1115,8 @@ public partial class Parser : IXferParser {
                 element = ParseQueryElement(querySpecifierCount);
             }
             // explicit dereference (multiple underscores explicitly delimited)
-            else if (ElementOpening(DereferenceElement.ElementDelimiter, out int derefSpecifierCount)) {
-                element = ParseDereferenceElement(derefSpecifierCount);
+            else if (ElementOpening(ReferenceElement.ElementDelimiter, out int derefSpecifierCount)) {
+                element = ParseReferenceElement(derefSpecifierCount);
             }
             else if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
                 element = ParseNullElement(nullSpecifierCount);
@@ -1189,8 +1187,6 @@ public partial class Parser : IXferParser {
 
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {IdentifierElement.ElementName} element.");
     }
-
-    // Legacy ParseReferenceElement removed.
 
     private ProcessingInstruction ParseProcessingInstruction(int specifierCount = 1) {
         SkipWhitespace();
@@ -1873,10 +1869,10 @@ public partial class Parser : IXferParser {
                 continue;
             }
 
-            if (ElementExplicitOpening(DereferenceElement.ElementDelimiter, out int dereferenceElementCount)) {
-                Element dereferenceElement = ParseDereferenceElement(dereferenceElementCount);
-                // If unresolved during ParseDereferenceElement (returned DereferenceElement), attempt a late bind here
-                if (dereferenceElement is DereferenceElement dLate) {
+            if (ElementExplicitOpening(ReferenceElement.ElementDelimiter, out int referenceElementCount)) {
+                Element referenceElement = ParseReferenceElement(referenceElementCount);
+                // If unresolved during ParseReferenceElement (returned ReferenceElement), attempt a late bind here
+                if (referenceElement is ReferenceElement dLate) {
                     if (TryResolveBinding(dLate.Value, out var lateBound) && lateBound is not null) {
                         valueBuilder.Append(ElementToInterpolatedText(lateBound));
                     } else {
@@ -1892,7 +1888,7 @@ public partial class Parser : IXferParser {
                     }
                 } else {
                     // Already resolved to a cloned element; use its textual representation (unquoted for strings)
-                    valueBuilder.Append(ElementToInterpolatedText(dereferenceElement));
+                    valueBuilder.Append(ElementToInterpolatedText(referenceElement));
                 }
                 continue;
             }
@@ -2197,12 +2193,12 @@ public partial class Parser : IXferParser {
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {DecimalElement.ElementName} element.");
     }
 
-    private Element ParseDereferenceElement(int specifierCount = 1) {
+    private Element ParseReferenceElement(int specifierCount = 1) {
         var style = _delimStack.Peek().Style;
         var sb = new StringBuilder();
 
         while (IsCharAvailable()) {
-            if (DereferenceElementClosing()) {
+            if (ReferenceElementClosing()) {
                 break;
             }
 
@@ -2228,7 +2224,7 @@ public partial class Parser : IXferParser {
         }
 
         AddWarning(WarningType.UnresolvedReference, $"Unresolved reference '{name}'", name);
-        return new DereferenceElement(name, specifierCount, style);
+        return new ReferenceElement(name, specifierCount, style);
     }
 
     private DoubleElement ParseDoubleElement(int specifierCount = 1) {

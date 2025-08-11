@@ -333,7 +333,7 @@ public class IfProcessingInstruction : ProcessingInstruction {
         }
 
         // Direct dereference element: resolve binding value (if available) and evaluate its truthiness.
-        if (conditionExpression is DereferenceElement derefElem) {
+        if (conditionExpression is ReferenceElement derefElem) {
             if (_parser != null && _parser.TryResolveBinding(derefElem.Value, out var bound)) {
                 // Use the bound element's parsed value for truthiness
 #if DEBUG
