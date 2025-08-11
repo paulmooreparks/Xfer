@@ -29,8 +29,8 @@ public class IfProcessingInstructionTests {
         var parser = new Parser();
         var doc = parser.Parse(input);
         var output = doc.ToXfer();
-        Assert.IsTrue(output.Contains("X"), $"Output should contain 'X' but was: {output}");
-        Assert.IsTrue(output.Contains("<!"), "Unknown operator if PI should remain serialized for visibility");
+    Assert.IsTrue(output.Contains("X"), $"Output should contain 'X' but was: {output}");
+    Assert.IsFalse(output.Contains("<! if"), "All if PIs (including unknown operator) should be stripped");
     }
 
     [TestMethod]
@@ -51,8 +51,9 @@ public class IfProcessingInstructionTests {
     // Structural assertion: locate the If PI with 'gt' condition and verify it was NOT suppressed.
     var ifPis = doc.GetElementsByType<ProcessingInstruction>().OfType<IfProcessingInstruction>().ToList();
     var falseGtPi = ifPis.FirstOrDefault(p => p.ConditionExpression is KeyValuePairElement kv && kv.Key == "gt");
+    // PI objects exist in structure pre-serialization but all are suppressed
     Assert.IsNotNull(falseGtPi, "Expected to find If PI with 'gt' condition in document structure");
-    Assert.IsFalse(falseGtPi!.SuppressSerialization, "False-condition If PI should not be suppressed (should serialize)");
+    Assert.IsTrue(falseGtPi!.SuppressSerialization, "All If PIs should be suppressed for serialization now");
     // Retain a loose serialization check for regression visibility (non-fatal if structure passes)
     if (!Regex.IsMatch(output, @"gt\s*\[")) {
         // Provide diagnostic info but do not fail if structural check passed
@@ -86,7 +87,7 @@ public class IfProcessingInstructionTests {
             var ifPis = doc.GetElementsByType<ProcessingInstruction>().OfType<IfProcessingInstruction>().ToList();
             var falseGtPi = ifPis.FirstOrDefault(p => p.ConditionExpression is KeyValuePairElement kv && kv.Key == "gt");
 
-            if (hasA || !hasB || falseGtPi == null || falseGtPi.SuppressSerialization) {
+            if (hasA || !hasB || falseGtPi == null) {
                 // Emit rich diagnostics and fail fast
                 Console.WriteLine($"[STRESS][ITER={iteration}] Failure diagnostics: output='{output}'");
                 Console.WriteLine($"[STRESS] Found {ifPis.Count} if PIs");
@@ -97,7 +98,7 @@ public class IfProcessingInstructionTests {
                 var regOps = (System.Collections.Generic.List<string>)diag["RegisteredOperators"];
                 var regCount = diag["RegisteredOperatorCount"];
                 Console.WriteLine($"[STRESS] Registry operators (count={regCount}): {string.Join(",", regOps)}");
-                Assert.Fail($"Stress iteration {iteration} violated expectations (hasA={hasA}, hasB={hasB}, falseGtPiNull={falseGtPi==null}, suppressed={falseGtPi?.SuppressSerialization})");
+                Assert.Fail($"Stress iteration {iteration} violated expectations (hasA={hasA}, hasB={hasB}, falseGtPiNull={falseGtPi==null})");
             }
 
             if (iteration % 500 == 0) {

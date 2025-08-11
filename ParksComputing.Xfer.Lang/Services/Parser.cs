@@ -2,6 +2,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Text;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 using ParksComputing.Xfer.Lang.Extensions;
 using ParksComputing.Xfer.Lang.Elements;
@@ -863,7 +864,16 @@ public partial class Parser : IXferParser {
                 foreach (var docPI in document.ProcessingInstructions) {
                     if (docPI.Target == null) {
                         docPI.Target = rootElement;
-                        docPI.ElementHandler(rootElement);
+                        try {
+                            docPI.ElementHandler(rootElement);
+                        }
+                        catch (ConditionalElementException) {
+                            // Root suppressed: replace with empty tuple so document remains valid.
+                            var replacement = new TupleElement();
+                            rootElement = replacement;
+                            docPI.Target = replacement; // keep PI targeting new root for serialization visibility
+                            // retain PI (SuppressSerialization already false by default)
+                        }
                     }
                 }
                 // After applying PIs (including script) the root content already parsed with active script scopes.
@@ -938,6 +948,28 @@ public partial class Parser : IXferParser {
                     }
                 } else {
                     ResolveRemainingDereferences(v);
+                }
+            }
+        }
+        else if (element is InterpolatedElement ie) {
+            // Final fallback: resolve any lingering implicit _name or _name_ tokens in interpolated text
+            // that were not resolved during initial parse (e.g., due to late let binding visibility edge cases).
+            if (ie.Value.Contains('_')) {
+                var replaced = Regex.Replace(ie.Value, @"_([A-Za-z0-9_\-]+)_?", m => {
+                    var name = m.Groups[1].Value;
+                    if (TryResolveBinding(name, out var bound) && bound != null) {
+                        return ElementToInterpolatedText(bound);
+                    }
+                    if (name.EndsWith('_')) { // defensive: try trimmed variant
+                        var trimmed = name.TrimEnd('_');
+                        if (TryResolveBinding(trimmed, out var boundTrim) && boundTrim != null) {
+                            return ElementToInterpolatedText(boundTrim);
+                        }
+                    }
+                    return m.Value; // leave unresolved
+                });
+                if (!ReferenceEquals(replaced, ie.Value)) {
+                    ie.Value = replaced; // update in-place
                 }
             }
         }
@@ -1188,13 +1220,16 @@ public partial class Parser : IXferParser {
 
                 // Call the processing instruction handler generically for all PIs
                 pi.ProcessingInstructionHandler();
+#if DEBUG
+                if (pi is IfProcessingInstruction dbgIfCreated) {
+                    Console.WriteLine($"[TRACE-PI][CREATE] IF PI created cond='{dbgIfCreated.ConditionExpression}' met={dbgIfCreated.ConditionMet} unknown={dbgIfCreated.UnknownOperator} suppressSer={dbgIfCreated.SuppressSerialization}");
+                }
+#endif
 
-                // Policy: strip successful If PIs (condition met) from serialization to reduce noise,
-                // but retain those with unknown operators (for visibility) or those whose condition failed.
-                if (pi is IfProcessingInstruction ifpi) {
-                    if (ifpi.ConditionMet && !ifpi.UnknownOperator) {
-                        pi.SuppressSerialization = true;
-                    }
+                // Policy update: strip all If PIs from serialization regardless of outcome (success, failure, unknown op)
+                // per specified behavior that conditional directives are non-material after evaluation.
+                if (pi is IfProcessingInstruction) {
+                    pi.SuppressSerialization = true;
                 }
 
                 return pi;
@@ -1270,12 +1305,25 @@ public partial class Parser : IXferParser {
 
                     // Apply any local pending PIs to this element
                     bool shouldAddElement = true;
+#if DEBUG
+                    Console.WriteLine($"[TRACE-PARSE][ARRAY-HEAD] Applying {localPendingPIs.Count} pending PIs to element type={element.GetType().Name}");
+#endif
                     foreach (var pendingPI in localPendingPIs) {
                         pendingPI.Target = element;
                         try {
+#if DEBUG
+                            if (pendingPI is IfProcessingInstruction dbgIf1) {
+                                Console.WriteLine($"[TRACE-PARSE][ARRAY-HEAD] About to apply IF PI cond='{dbgIf1.ConditionExpression}' conditionMet={dbgIf1.ConditionMet} unknown={dbgIf1.UnknownOperator} targetType={element.GetType().Name}");
+                            }
+#endif
                             pendingPI.ElementHandler(element);
                         }
                         catch (ConditionalElementException) {
+#if DEBUG
+                            if (pendingPI is IfProcessingInstruction dbgIfFail1) {
+                                Console.WriteLine($"[TRACE-PARSE][ARRAY-HEAD] IF PI suppressed element cond='{dbgIfFail1.ConditionExpression}'");
+                            }
+#endif
                             // PI indicates this element should not be added
                             shouldAddElement = false;
                             break;
@@ -1319,12 +1367,25 @@ public partial class Parser : IXferParser {
 
                     // Apply any local pending PIs to this element
                     bool shouldAddElement = true;
+#if DEBUG
+                    Console.WriteLine($"[TRACE-PARSE][ARRAY] Applying {localPendingPIs.Count} pending PIs to element type={element.GetType().Name}");
+#endif
                     foreach (var pendingPI in localPendingPIs) {
                         pendingPI.Target = element;
                         try {
+#if DEBUG
+                            if (pendingPI is IfProcessingInstruction dbgIf2) {
+                                Console.WriteLine($"[TRACE-PARSE][ARRAY] About to apply IF PI cond='{dbgIf2.ConditionExpression}' conditionMet={dbgIf2.ConditionMet} unknown={dbgIf2.UnknownOperator} targetType={element.GetType().Name}");
+                            }
+#endif
                             pendingPI.ElementHandler(element);
                         }
                         catch (ConditionalElementException) {
+#if DEBUG
+                            if (pendingPI is IfProcessingInstruction dbgIfFail2) {
+                                Console.WriteLine($"[TRACE-PARSE][ARRAY] IF PI suppressed element cond='{dbgIfFail2.ConditionExpression}'");
+                            }
+#endif
                             // PI indicates this element should not be added
                             shouldAddElement = false;
                             break;
@@ -1401,9 +1462,19 @@ public partial class Parser : IXferParser {
                 foreach (var pendingPI in localPendingPIs) {
                     pendingPI.Target = element;
                     try {
+#if DEBUG
+                        if (pendingPI is IfProcessingInstruction dbgIfObj) {
+                            Console.WriteLine($"[TRACE-PARSE][OBJECT] About to apply IF PI cond='{dbgIfObj.ConditionExpression}' conditionMet={dbgIfObj.ConditionMet} unknown={dbgIfObj.UnknownOperator} targetType={element.GetType().Name}");
+                        }
+#endif
                         pendingPI.ElementHandler(element);
                     }
                     catch (ConditionalElementException) {
+#if DEBUG
+                        if (pendingPI is IfProcessingInstruction dbgIfFailObj) {
+                            Console.WriteLine($"[TRACE-PARSE][OBJECT] IF PI suppressed element cond='{dbgIfFailObj.ConditionExpression}'");
+                        }
+#endif
                         // PI indicates this element should not be added
                         shouldAddElement = false;
                         break;
@@ -1491,9 +1562,19 @@ public partial class Parser : IXferParser {
                             // Ensure scope active & operators executed before handling element
                             // Already executed.
                         }
+#if DEBUG
+                        if (pendingPI is IfProcessingInstruction dbgIfTuple) {
+                            Console.WriteLine($"[TRACE-PARSE][TUPLE] About to apply IF PI cond='{dbgIfTuple.ConditionExpression}' conditionMet={dbgIfTuple.ConditionMet} unknown={dbgIfTuple.UnknownOperator} targetType={element.GetType().Name}");
+                        }
+#endif
                         pendingPI.ElementHandler(element);
                     }
                     catch (ConditionalElementException) {
+#if DEBUG
+                        if (pendingPI is IfProcessingInstruction dbgIfFailTuple) {
+                            Console.WriteLine($"[TRACE-PARSE][TUPLE] IF PI suppressed element cond='{dbgIfFailTuple.ConditionExpression}'");
+                        }
+#endif
                         shouldAddElement = false;
                         break;
                     }
@@ -1685,11 +1766,75 @@ public partial class Parser : IXferParser {
         return new CharacterElement(numericValue, specifierCount, style: style);
     }
 
+    private static string ElementToInterpolatedText(Element e) {
+        return e switch {
+            StringElement s => s.Value, // omit quotes in interpolation
+            InterpolatedElement i => i.Value,
+            IntegerElement i2 => i2.Value.ToString(CultureInfo.InvariantCulture),
+            LongElement l => l.Value.ToString(CultureInfo.InvariantCulture),
+            DecimalElement d => d.Value.ToString(CultureInfo.InvariantCulture),
+            DoubleElement dbl => dbl.Value.ToString(CultureInfo.InvariantCulture),
+            BooleanElement b => b.Value.ToString(),
+            DateTimeElement dt => dt.Value.ToString("o", CultureInfo.InvariantCulture),
+            DateElement da => da.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            TimeElement tm => tm.Value.ToString(),
+            TimeSpanElement ts => ts.Value.ToString(),
+            _ => e.ToString()
+        } ?? string.Empty;
+    }
+
     private InterpolatedElement ParseInterpolatedElement(int specifierCount = 1) {
         StringBuilder valueBuilder = new();
         var style = _delimStack.Peek().Style;
 
         while (IsCharAvailable()) {
+            // Support embedded dereference tokens inside interpolated strings using implicit syntax
+            // Examples: 'Hello, _name.'  or 'Hello, _name_.' (trailing underscore treated as empty-closing)
+            if (CurrentChar == '_' && (char.IsLetterOrDigit(Peek) || Peek == '_' || Peek == '-')) {
+                int savePos = Position;
+                int saveRow = CurrentRow;
+                int saveCol = CurrentColumn;
+                // Consume leading underscores as specifier count (currently stylistic)
+                int leadingUnderscores = 0;
+                while (IsCharAvailable() && CurrentChar == '_') { leadingUnderscores++; Advance(); }
+
+                // Require at least one identifier char after underscores to treat as dereference
+                if (IsCharAvailable() && (char.IsLetterOrDigit(CurrentChar) || CurrentChar == '_' || CurrentChar == '-')) {
+                    var nameBuilder = new StringBuilder();
+                    while (IsCharAvailable() && (char.IsLetterOrDigit(CurrentChar) || CurrentChar == '_' || CurrentChar == '-')) {
+                        // If current is underscore and next char is NOT an identifier constituent, treat as closing underscore
+                        if (CurrentChar == '_' && !(char.IsLetterOrDigit(Peek) || Peek == '_' || Peek == '-')) {
+                            break; // leave underscore for optional closing consumption logic below
+                        }
+                        nameBuilder.Append(CurrentChar);
+                        Advance();
+                    }
+                    // Optional closing underscore (empty-closing style) if followed by non-identifier char
+                    bool consumedClosing = false;
+                    if (IsCharAvailable() && CurrentChar == '_' && !(char.IsLetterOrDigit(Peek) || Peek == '_' || Peek == '-')) {
+                        consumedClosing = true;
+                        Advance();
+                    }
+                    var name = nameBuilder.ToString();
+                    if (!string.IsNullOrEmpty(name)) {
+                        if (TryResolveBinding(name, out var bound) && bound != null) {
+                            valueBuilder.Append(ElementToInterpolatedText(bound));
+                            continue; // resolved dereference appended
+                        }
+                        else {
+                            // Unresolved: re-emit original token for visibility
+                            var originalToken = new StringBuilder();
+                            originalToken.Append(new string('_', leadingUnderscores));
+                            originalToken.Append(name);
+                            if (consumedClosing) { originalToken.Append('_'); }
+                            valueBuilder.Append(originalToken.ToString());
+                            continue;
+                        }
+                    }
+                }
+                // If pattern failed, rewind and treat as normal char
+                Position = savePos; CurrentRow = saveRow; CurrentColumn = saveCol; // minimal rewind (column/row restore)
+            }
             if (ElementExplicitOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
                 StringElement stringElement = ParseStringElement(stringSpecifierCount);
                 valueBuilder.Append(stringElement.Value);
@@ -1698,19 +1843,18 @@ public partial class Parser : IXferParser {
 
             if (ElementExplicitOpening(DereferenceElement.ElementDelimiter, out int dereferenceElementCount)) {
                 Element dereferenceElement = ParseDereferenceElement(dereferenceElementCount);
-                    // If unresolved during ParseDereferenceElement (returned DereferenceElement), attempt a late bind here
-                    if (dereferenceElement is DereferenceElement dLate) {
-                        if (TryResolveBinding(dLate.Value, out var lateBound) && lateBound is not null) {
-                            // For interpolation we want the textual value (no quotes for strings)
-                            valueBuilder.Append(lateBound.ToString());
-                        } else {
-                            // Keep original name to surface unresolved reference; matches prior behavior
-                            valueBuilder.Append(dLate.Value);
-                        }
+                // If unresolved during ParseDereferenceElement (returned DereferenceElement), attempt a late bind here
+                if (dereferenceElement is DereferenceElement dLate) {
+                    if (TryResolveBinding(dLate.Value, out var lateBound) && lateBound is not null) {
+                        valueBuilder.Append(ElementToInterpolatedText(lateBound));
                     } else {
-                        // Already resolved to a cloned element; use its textual representation
-                        valueBuilder.Append(dereferenceElement.ToString());
+                        // Keep original name to surface unresolved reference; matches prior behavior
+                        valueBuilder.Append(dLate.Value);
                     }
+                } else {
+                    // Already resolved to a cloned element; use its textual representation (unquoted for strings)
+                    valueBuilder.Append(ElementToInterpolatedText(dereferenceElement));
+                }
                 continue;
             }
 
@@ -1783,7 +1927,25 @@ public partial class Parser : IXferParser {
             }
 
             if (ElementClosing()) {
-                return new InterpolatedElement(valueBuilder.ToString().Normalize(NormalizationForm.FormC), specifierCount, style);
+                var raw = valueBuilder.ToString();
+                // Fallback substitution pass: replace any remaining _name or _name_ tokens with bound values
+                if (raw.Contains('_')) {
+                    raw = Regex.Replace(raw, @"_([A-Za-z0-9_\-]+)_?", m => {
+                        var name = m.Groups[1].Value;
+                        // If name ends with underscore and direct lookup fails, attempt trimmed variant
+                        if (TryResolveBinding(name, out var bound) && bound != null) {
+                            return ElementToInterpolatedText(bound);
+                        }
+                        if (name.EndsWith('_')) {
+                            var trimmed = name.TrimEnd('_');
+                            if (TryResolveBinding(trimmed, out var boundTrim) && boundTrim != null) {
+                                return ElementToInterpolatedText(boundTrim);
+                            }
+                        }
+                        return m.Value; // leave unresolved for visibility
+                    });
+                }
+                return new InterpolatedElement(raw.Normalize(NormalizationForm.FormC), specifierCount, style);
             }
 
             valueBuilder.Append(CurrentChar);
@@ -2019,7 +2181,6 @@ public partial class Parser : IXferParser {
             if (_currentDocument != null) {
                 _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] deref '{name}' resolved immediately", CurrentRow, CurrentColumn, name));
             }
-
             return Helpers.ElementCloner.Clone(bound!);
         }
 

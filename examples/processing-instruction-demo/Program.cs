@@ -51,7 +51,7 @@ namespace ProcessingInstructionDemo {
             // if (doc.Errors?.Any() == true) { ... }
 
 
-            var xfer = doc.ToXfer();
+            var xfer = doc.ToXfer(Formatting.Pretty);
             Console.WriteLine("Serialized Xfer:");
             Console.WriteLine(xfer);
 

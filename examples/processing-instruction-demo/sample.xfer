@@ -13,11 +13,28 @@
 
 
 (
-    year (getElementById (_document "date"))
-    count (root (_document))
+    <! script (
+        let host "localhost"
+        let port 8080
+    ) !>
+    {
+        serviceUrl 'https://<_host_>:<_port_>/'
+    }
 
-    MultiParam (_sampleClass year (getElementById (_document "date")) count (root (_document)))
+    <! let showDebug ~false !>
+    <! if _showDebug !>
+    { debug { level "verbose" } }
 
+    <! if <|DEBUG|>!>
+    { debug { level "verbose" } }
+
+    </ These are examples of future object-binding approaches />
+    (
+        year (getElementById (_document "date"))
+        count (root (_document))
+
+        MultiParam (_sampleClass year (getElementById (_document "date")) count (root (_document)))
+    )
 
     <! script ( let greetee "World" let score *99.5 ) !>
     {

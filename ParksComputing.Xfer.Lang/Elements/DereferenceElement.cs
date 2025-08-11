@@ -25,6 +25,11 @@ public class DereferenceElement : TypedElement<string> {
     public DereferenceElement(string name, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
         : base(name, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) { }
 
+    /// <summary>
+    /// Indicates this dereference element was produced as a clone during parse (for diagnostics).
+    /// </summary>
+    public bool IsClone { get; init; }
+
     // Note: Dereference elements are parsed via a lightweight opening predicate (DereferenceElementOpening)
     // that treats a leading '_' followed by identifier characters as a dereference token, similar to how
     // Keyword/Identifier implicit forms are handled. The parser immediately attempts binding resolution

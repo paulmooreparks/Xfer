@@ -69,7 +69,10 @@ public class LetProcessingInstruction : ProcessingInstruction {
         if (ContainsSelfDereference(BoundValue, BindingName)) { throw new InvalidOperationException($"Self reference in let binding '{BindingName}'."); }
         // Resolve any dereferences inside the value using existing helper from script PI
         ScriptProcessingInstruction.ResolveDereferences(BoundValue, _parser);
-        _parser.BindReference(BindingName, BoundValue);
+        // Avoid double-binding if ElementHandler invoked after early execution
+        if (!_parser.TryResolveBinding(BindingName, out var _existing)) {
+            _parser.BindReference(BindingName, BoundValue);
+        }
         SuppressSerialization = true; // let PI should disappear after binding
         base.ElementHandler(element);
     }
@@ -82,7 +85,9 @@ public class LetProcessingInstruction : ProcessingInstruction {
     internal void ExecuteEarly() {
         if (ContainsSelfDereference(BoundValue, BindingName)) { throw new InvalidOperationException($"Self reference in let binding '{BindingName}'."); }
         ScriptProcessingInstruction.ResolveDereferences(BoundValue, _parser);
-        _parser.BindReference(BindingName, BoundValue);
+        if (!_parser.TryResolveBinding(BindingName, out var _existing)) {
+            _parser.BindReference(BindingName, BoundValue);
+        }
         SuppressSerialization = true;
     }
 

@@ -15,6 +15,31 @@ _Welcome to everyone who came here from [Hacker News](https://news.ycombinator.c
   - [Table of Contents](#table-of-contents)
   - [Introduction and Philosophy](#introduction-and-philosophy)
   - [XferLang by Example](#xferlang-by-example)
+    - [A Direct Comparison](#a-direct-comparison)
+    - [Core Value Variety (Still Plain Data)](#core-value-variety-still-plain-data)
+    - [Delimiter / Specifier Duplication (Early, Universal Rule)](#delimiter--specifier-duplication-early-universal-rule)
+    - [Adding Document Metadata (Document Processing Instruction)](#adding-document-metadata-document-processing-instruction)
+    - [Dynamic Elements (Late Binding) \& Source Overrides](#dynamic-elements-late-binding--source-overrides)
+      - [File, Env, and Const Together](#file-env-and-const-together)
+    - [A Quick Tour of Processing Instructions](#a-quick-tour-of-processing-instructions)
+    - [Interpolated Text (Structured, Not Escaped)](#interpolated-text-structured-not-escaped)
+    - [Local Bindings with `let` (Dereference for Reuse)](#local-bindings-with-let-dereference-for-reuse)
+    - [Grouped Let Bindings (`script` PI)](#grouped-let-bindings-script-pi)
+    - [Conditional Inclusion (`if` PI)](#conditional-inclusion-if-pi)
+    - [Character Definitions](#character-definitions)
+    - [What You Just Saw (Feature Progression)](#what-you-just-saw-feature-progression)
+  - [Core Concepts](#core-concepts)
+    - [Elements and Syntax Forms](#elements-and-syntax-forms)
+    - [Collections](#collections)
+    - [Keywords vs Identifiers](#keywords-vs-identifiers)
+    - [Numbers](#numbers)
+    - [Text and Characters](#text-and-characters)
+    - [Date / Time](#date--time)
+    - [Null](#null)
+    - [Binding and Dereference](#binding-and-dereference)
+    - [Interpolated Text](#interpolated-text)
+    - [Dynamic Elements](#dynamic-elements)
+    - [Processing Instructions (PIs)](#processing-instructions-pis)
   - [Language Specification](#language-specification)
     - [Document Structure](#document-structure)
     - [Element Syntax Variations](#element-syntax-variations)
@@ -100,7 +125,7 @@ XferLang is a data-interchange format designed to support data serialization, da
 *   **Structured Root**: All XferLang documents require a root collection element (Object, Array, or Tuple) to ensure well-defined document structure and unambiguous parsing.
 
 ## XferLang by Example
-XferLang is meant to feel familiar if you already work with JSON while offering alternative trade‑offs: explicit typing, flexible whitespace, delimiter repetition instead of character escaping, and built‑in processing instructions (PIs) for document‑local behavior.
+XferLang is meant to feel similar to JSON while immediately surfacing additional power: explicit typing, flexible whitespace, and parse‑time behavior via processing instructions (PIs).
 
 ### A Direct Comparison
 
@@ -134,108 +159,209 @@ Equivalent JSON:
 }
 ```
 
-Whitespace and newlines are optional in XferLang; the same document can be written compactly:
+Newlines are optional in XferLang, and whitespace can be reduced to only the minimum necessary to separate elements. Therefore, the same XferLang document shown above can be written very compactly:
 
 ```xfer
 {name"Alice"age 30 isMember~true scores[*85 *90 *78.5]profile{email"alice@example.com"joinedDate@2023-01-15T12:00:00@}}
 ```
 
-### Additional Practical Examples
+---
 
-#### Configuration With Types and Dates
+### Core Value Variety (Still Plain Data)
+
+Even before advanced features, explicit typing clarifies intent and removes ambiguity:
+
 ```xfer
-<! document { version "1.2" } !>
+sample {
+    title "Demo"
+    retries 3          </ implicit integer />
+    ratio *0.8125      </ high‑precision decimal />
+    threshold ^0.5     </ double />
+    active ~true       </ boolean />
+    launched @2025-08-01T09:30:00Z@
+    tags [ "alpha" "preview" ]
+    point ( *42.3601 *-71.0589 )
+    notes ""No escaping needed: "quotes" stay simple.""
+    optional ?
+}
+```
+
+Arrays are homogeneous; tuples are heterogeneous. Angle‑bracket explicit forms (not shown here) kick in only when needed.
+
+### Delimiter / Specifier Duplication (Early, Universal Rule)
+
+XferLang never requires escape sequences. Instead, you may repeat an element's specifier delimiter(s) as many times as necessary to create a unique opening/closing pair that does not appear inside the content. The parser matches the full run length. This applies uniformly to any element that uses balanced specifiers:
+
+* Strings (`"`) – repeat quotes: `"""Text with "quotes" and ""embedded delimiter""."""`
+* Dynamic elements (`|`) – need a literal pipe? Wrap with a longer run: `||value with | symbol||`
+* Interpolated text (apostrophes) – nest another interpolated block by lengthening the outer run.
+* Numeric / boolean / date forms in explicit angle brackets – if interior would contain the specifier, wrap in angle brackets or lengthen the specifier run.
+* Comments (`</ ... />`) – if the body needs to show a sequence that looks like a closing `/>`, extend with extra slashes: `<// A comment containing </inner/> safely //>`.
+
+Examples:
+
+```xfer
+example {
+    plain "Alpha"
+    nestedQuotes ""He said, "Hello" then left.""
+    dynamicWithPipe ||status|ok||        </ inner single | stays literal />
+    commentDemo <// Outer </ inner /> still fine //>
+    dateExample <@2025-08-01T12:00:00@>  </ explicit form keeps internal @ sequences unambiguous />
+}
+```
+
+Guideline: choose the shortest delimiter length that avoids ambiguity; lengthen only when the content would otherwise prematurely terminate the element. This rule lets you embed arbitrarily complex content (including what look like closing tokens) without escapes.
+
+### Adding Document Metadata (Document Processing Instruction)
+
+A processing instruction (or PI) wraps a single key/value pair that can influence parsing or supply metadata. The document PI associates version info and sets other document-level properties:
+
+```xfer
+<! document { version "1.2" environment "prod" } !>
 {
-    service { host "api.example.com" port 8443 ssl ~true timeout 30 }
-    database { host "db1" port 5432 poolSize 20 }
-    maintenanceWindow ( @2025-01-15T02:00:00Z@ *2.5 ) </ start, hours />
+    service { host "api.example.com" port 8443 ssl ~true }
+    maintenance ( @2025-01-15T02:00:00Z@ *2.5 ) </ start, hours />
 }
 ```
 
-#### Local Bindings and Dereference
-Bindings introduced with the `let` processing instruction (or the `script` PI) are referenced with a leading underscore.
+### Dynamic Elements (Late Binding) & Source Overrides
+
+Dynamic elements (`|identifier|`) resolve at parse time. By default, each `|name|` returns the value of the environment variable whose name matches `name` (fallback variable name is the identifier itself). The `dynamicSource` processing instruction replaces that simple environment-variable lookup with an explicit configuration per key, letting you: (a) rename the environment variable, (b) supply a literal constant, or (c) load from a file (and extensibly other sources via custom handlers). If a key is not configured by any `dynamicSource` PI, the environment lookup behavior remains the default.
 
 ```xfer
-<! let greeting "World" !>
 {
-    message 'Hello, <_greeting_>.'
-    value _greeting
+    currentUser |user|
+    greeting 'Hello <|user|>'
 }
 ```
 
-Same using a script PI to batch multiple lets:
+#### File, Env, and Const Together
+
+The `dynamicSource` processing instruction provides three built‑in source types: `const`, `env`, and `file`. Each key inside the `dynamicSource` object maps a dynamic element name to a configuration expressed as a key/value pair: `<name> <sourceType> <sourceValue>`. Resolution delegates to a handler registered for the source type.
 
 ```xfer
-<! script ( let greeting "World" let score *99.5 ) !>
+<! dynamicSource {
+    apiKey    file "secrets/api-key.txt"   </ contents of file used as value />
+    userName  env  "USER"                  </ environment variable />
+    buildTag  const "2025.08.11"           </ literal constant />
+} !>
 {
-    summary 'Hi <_greeting_>, your score is <_score_>.'
+    auth { key |apiKey| user |userName| tag |buildTag| }
+    banner 'Deploy <|buildTag|> for <|userName|> (key length <#( len |apiKey| )#>)'
 }
 ```
 
-#### Interpolated Text
-Interpolated text elements (apostrophe delimiters) allow embedded explicit elements:
+At this stage we've seen explicit types, metadata PI, and dynamic resolution. These features are already beyond JSON while remaining approachable.
+
+### A Quick Tour of Processing Instructions
+
+You have now met two PIs (`document`, `dynamicSource`). Others, shown later, add local bindings (`let`), grouped operations (`script`), conditional inclusion (`if`), character definitions (`chardef`), and more. Each follows the same shape: `<! name <value> !>` where `<value>` is any element (often an object for multiple fields).
+
+### Interpolated Text (Structured, Not Escaped)
+
+Interpolated text (apostrophe delimiters) embeds explicit elements using `< ... >` markers inside:
 
 ```xfer
-<! let appName "XferDemo" !>
+<! dynamicSource { user env "USER" } !>
 {
-    banner 'Launching <_appName_> at <@2025-08-01T12:00:00Z@>'
+    banner 'User=<|user|> LoggedIn=<~true~> Since <@2025-08-01T09:30:00Z@>'
 }
 ```
 
-#### Dynamic Values (Environment / Other Sources)
-Dynamic elements use `|` delimiters and resolve through a configurable resolver. (Current implementation maps an identifier to a value; complex nested content inside `|...|` is not supported.)
+No string escape layer -— embedded parts are real elements, not ad‑hoc templating.
+
+### Local Bindings with `let` (Dereference for Reuse)
+
+Local, structural reuse is achieved by binding a name to a value, then dereferencing it with a dereference element, which is specified with a leading underscore. The binding executes before sibling elements are parsed.
 
 ```xfer
-<! dynamicSource { username env "USER" } !>
+<! let base { host "localhost" port 8080 } !>
 {
-    currentUser |username|
-    welcome 'User: <|username|>'
-}
-```
-
-#### Arrays vs Tuples
-Arrays are homogeneous; tuples are heterogeneous:
-```xfer
-data {
-    numbers [ 1 2 3 4 ]
-    point ( *42.3601 *-71.0589 @2025-07-04T12:00:00Z@ )
-}
-```
-
-#### Decimal, Integer (Hex/Binary) and Boolean Forms
-```xfer
-metrics {
-    load *0.8125
-    statusCode 200
-    statusMask #%11001100
-    colorCode #$FFAA33
-    healthy ~true
-}
-```
-
-#### Character Definitions and Usage
-```xfer
-<! chardef { bullet \$2022 arrow \$2192 } !>
-{ list [ "Item" \bullet "Next" \arrow ] }
-```
-
-#### Reusing Structured Values
-```xfer
-<! let baseConfig { host "localhost" port 8080 } !>
-{
-    primary _baseConfig
+    primary _base
     secondary { host "localhost" port 8081 }
 }
 ```
 
-### What These Examples Highlight (Concise Contrast)
-- Keys do not require quotes when they are simple identifiers.
-- Value types are explicit (`~true`, `*123.45`, `@2025-01-01@`) removing ambiguity.
-- No escaping: delimiter repetition and explicit forms avoid backslash escapes.
-- Bindings and dereferences (`let` / `_name`) support local reuse.
-- Processing instructions provide structured, parse‑time directives.
+Bindings may be evaluated inside an interpolated string by using explicit syntax for the dereference element, `<_name_>`:
 
-The remainder of this document drills into the core concepts, the formal language, and the .NET APIs.
+```xfer
+<! let appName "XferDemo" !>
+{ banner 'Launching <_appName_>...' }
+```
+
+### Grouped Let Bindings (`script` PI)
+
+The `script` PI batches multiple `let` bindings so they all execute before the next element is parsed. (Current implementation: only plain `let` is supported; other operators or expression evaluations inside the `script` PI tuple are not yet active.)
+
+```xfer
+<! script (
+    let host "localhost"
+    let port 8080
+) !>
+{
+    serviceUrl 'https://<_host_>:<_port_>/'
+}
+```
+
+Bindings are processed left‑to‑right. Later bindings may dereference earlier ones. Because the `script` PI contains only `let` bindings it is suppressed from serialized output.
+
+### Conditional Inclusion (`if` PI)
+
+Processing instructions can conditionally suppress the element they decorate. A basic form:
+
+```xfer
+<! let showDebug ~false !>
+<! if _showDebug !>
+{ debug { level "verbose" } }
+```
+
+Defined vs undefined (existence test) also matters:
+
+```xfer
+<! if defined _showDebug !> { note 'Binding exists even if false.' }
+```
+
+Behavior & serialization rules:
+
+* If the condition evaluates to false, the target element (the immediately following sibling element) is completely suppressed; that is, it is never added to the parsed document model.
+* If the condition evaluates to true, the target element is retained.
+* Regardless of outcome (true, false, evaluation error, or unknown operator name) the `if` processing instruction itself is always stripped from serialization output. It acts only as a directive at parse time.
+* An unknown operator name inside the condition currently acts as a no‑op (treated as truthy so the element is preserved) but the PI is still stripped. Future versions may surface a warning; do not rely on serialization visibility for diagnostics.
+* Direct dereference conditions (`<! if _flag !>`) test the bound value's truthiness; use `defined` to distinguish between an undefined binding and a defined but falsy value.
+
+Example showing outcomes (serialized form shown on right):
+
+```xfer
+<! let enabled ~true !>  <! if _enabled !> { feature { status "on" } }   </ serializes as: { feature { status "on" } } />
+<! let enabled ~false !> <! if _enabled !> { feature { status "on" } }   </ serializes as: (nothing emitted) />
+<! if someUnknownOp["a" "b"] !> { kept ~true }                         </ unknown op -> element kept; PI stripped />
+```
+
+### Character Definitions
+
+Custom symbolic characters keep documents readable:
+
+```xfer
+<! charDef { bullet \$2022 arrow \$2192 } !>
+{ list ("Item" \bullet "Next" \arrow ) }
+```
+
+---
+
+### What You Just Saw (Feature Progression)
+
+1. Plain explicit types (numbers, booleans, dates, tuples, arrays, objects, null, interpolated text)
+2. Metadata via `document` PI
+3. Dynamic values + overriding resolution with `dynamicSource`
+4. Structured interpolation (no ad‑hoc escaping)
+5. Local structural reuse with `let` and dereference (`_name` / `<_name_>`)
+6. Batched let bindings via `script` (let-only today)
+7. Conditional element inclusion with `if` (value test & defined test)
+8. Custom symbolic characters with `chardef`
+
+These examples intentionally stop short of exhaustive syntax or full operator semantics; the following sections (Core Concepts → Language Specification) formalize everything just previewed.
+
+The remainder of this document now drills into the core concepts, the formal language, and the .NET APIs.
 
 ## Core Concepts
 
@@ -268,7 +394,16 @@ Date/time values use `@...@` with ISO‑8601 forms. (Date-only and time-only for
 `?` represents a null value.
 
 ### Binding and Dereference
-`<! let name value !>` binds `name` to `value`. Inside subsequent elements the value can be dereferenced with `_name` (or inside interpolation as `<_name_>`). Script PI batches operators: `<! script ( let a 1 let b 2 ) !>`.
+`<! let name value !>` binds `name` to `value`. Inside subsequent elements the value can be dereferenced with `_name` (or inside interpolation as `<_name_>`).
+
+Batching bindings: The `script` processing instruction currently supports only `let` bindings (future operator forms may be added). You can group several sequential `let` bindings inside a single tuple so they all execute before the next element parses:
+
+```xfer
+<! script ( let first "Alice" let greeting 'Hi <_first_>' let answer 42 ) !>
+{ message _greeting number _answer }
+```
+
+All listed `let` bindings are evaluated in order; later bindings can reference earlier ones (as with `_first` inside the interpolated greeting) but self‑reference is prevented. Because the script PI here contains only `let` bindings it does not serialize into the output (it is suppressed after execution).
 
 ### Interpolated Text
 Delimited by apostrophes: `'Hello <_name_>'`. Embedded elements inside must use explicit forms. Expressions are structural replacements; no string escape layer.

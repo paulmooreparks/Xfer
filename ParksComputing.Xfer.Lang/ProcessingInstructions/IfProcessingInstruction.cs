@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using ParksComputing.Xfer.Lang.Elements;
 using ParksComputing.Xfer.Lang.Services;
 using ParksComputing.Xfer.Lang.Scripting;
@@ -74,6 +75,39 @@ public class IfProcessingInstruction : ProcessingInstruction {
     private static ScriptingEngine? _scriptingEngine;
 
     /// <summary>
+    /// Deterministic incremental identifier for debug correlation across creation, application, and final document state.
+    /// </summary>
+    private static int _nextId = 0;
+
+    /// <summary>
+    /// Public identifier (debug only usage) to correlate logs. Stable for lifetime of the PI instance.
+    /// </summary>
+    public int DebugId { get; }
+
+    /// <summary>
+    /// Snapshot of ConditionMet at the exact moment ElementHandler was invoked. Used to detect
+    /// post-application mutation or evaluation/application divergence in intermittent failures.
+    /// Null until ElementHandler runs for the first time.
+    /// </summary>
+    public bool? AppliedConditionMetSnapshot { get; private set; }
+
+    /// <summary>
+    /// Tracks whether ElementHandler executed (even if it later threw for suppression) to distinguish
+    /// between "never applied" and "applied then mutated" scenarios.
+    /// </summary>
+    public bool ElementHandlerInvoked { get; private set; }
+
+    /// <summary>
+    /// Tracks whether the ProcessingInstructionHandler evaluation has executed. Intermittent test
+    /// failures showed cases where ConditionMet remained at the default (false) yet the target
+    /// element was still added, indicating the evaluation path may have been skipped (e.g. if the
+    /// PI construction path changed or a future refactor omits the explicit handler call). To make
+    /// the logic robust against any missed invocation, ElementHandler will lazily force evaluation
+    /// when this is false before applying suppression logic.
+    /// </summary>
+    private bool _evaluated;
+
+    /// <summary>
     /// Gets or creates the scripting engine for evaluating conditions.
     /// This is cached to avoid creating multiple engines for repeated evaluations.
     /// </summary>
@@ -105,6 +139,14 @@ public class IfProcessingInstruction : ProcessingInstruction {
     public IfProcessingInstruction(Element conditionExpression, Services.Parser? parser = null) : base(conditionExpression, Keyword) {
         ConditionExpression = conditionExpression ?? throw new ArgumentNullException(nameof(conditionExpression));
         _parser = parser;
+    DebugId = Interlocked.Increment(ref _nextId);
+    // Universal policy: all if PIs are stripped from serialization regardless of outcome.
+    // Setting this in the ctor guarantees suppression even if future parser code paths
+    // forget to toggle SuppressSerialization after creation.
+    SuppressSerialization = true;
+#if DEBUG
+    Console.WriteLine($"[IF][ID={DebugId}][CTOR] Created IfProcessingInstruction with condition='{ConditionExpression}'");
+#endif
     }
 
     /// <summary>
@@ -121,10 +163,15 @@ public class IfProcessingInstruction : ProcessingInstruction {
             // For the if PI, we evaluate the condition and store the result
             // The actual conditional behavior is handled in ElementHandler
             ConditionMet = EvaluateCondition(ConditionExpression, scriptingEngine);
+            _evaluated = true; // mark evaluation complete
+            // Always emit evaluation snapshot (Release + Debug) for intermittent suppression diagnostics.
+            Console.WriteLine($"[IF][ID={DebugId}][EVAL][v2] met={ConditionMet} unknownOp={UnknownOperator} expr='{ConditionExpression}'");
         }
         catch (Exception) {
             // If any error occurs during evaluation, consider the condition false
             ConditionMet = false;
+            _evaluated = true;
+            Console.WriteLine($"[IF][ID={DebugId}][EVAL][v2] exception -> force met=false expr='{ConditionExpression}'");
         }
     }
 
@@ -138,14 +185,27 @@ public class IfProcessingInstruction : ProcessingInstruction {
         if (element == null) {
             return;
         }
+    // Defensive: ensure evaluation happened even if ProcessingInstructionHandler was not invoked.
+    if (!_evaluated) {
+    Console.WriteLine($"[IF][ID={DebugId}][APPLY][LATE-EVAL][v2] Detected unevaluated PI - forcing evaluation before applying to {element.GetType().Name}");
+        ProcessingInstructionHandler();
+    }
+    ElementHandlerInvoked = true;
+    AppliedConditionMetSnapshot = ConditionMet; // snapshot BEFORE branch for post-mortem
+    // Always log in Release too (minimal text) so failing CI artifacts contain correlation data.
+    Console.WriteLine($"[IF][ID={DebugId}][APPLY] snapshotMet={AppliedConditionMetSnapshot} targetType={element.GetType().Name}");
 
-        if (!ConditionMet) {
-            // Signal that this element should not be added by throwing a special exception
-            // that the parser can catch and handle appropriately
-            throw new ConditionalElementException("Element condition not met - should not be added to document");
-        }
+    if (!ConditionMet) {
+#if DEBUG
+        Console.WriteLine($"[IF][ID={DebugId}][APPLY] conditionMet=false -> THROW suppress");
+#endif
+        // Signal removal via exception so parser catch blocks handle skipping (including root-handling logic there).
+        throw new ConditionalElementException("Element condition not met - should not be added to document");
+    }
 
-        Console.WriteLine($"[DEBUG] Condition met - element will be added: {element.GetType().Name}");
+#if DEBUG
+    Console.WriteLine($"[IF][ID={DebugId}][APPLY] conditionMet=true -> allow");
+#endif
     }    /// <summary>
     /// Removes an element from its parent container.
     /// Handles different parent types (ObjectElement, ArrayElement, TupleElement).
@@ -209,31 +269,54 @@ public class IfProcessingInstruction : ProcessingInstruction {
     private bool EvaluateCondition(Element conditionExpression, ScriptingEngine scriptingEngine) {
         // Support operator expressed as a key/value pair: op[args...]
         // e.g. eq["Linux" "<|PLATFORM|>"] parsed as KeyValuePairElement(key='eq', value = ArrayElement)
-    if (conditionExpression is KeyValuePairElement kvpExp && kvpExp.Key is not null) {
+        if (conditionExpression is KeyValuePairElement kvpExp && kvpExp.Key is not null) {
             var opName = kvpExp.Key.Trim();
-            if (!string.IsNullOrEmpty(opName) && IsKnownOperator(opName)) {
+            if (!string.IsNullOrEmpty(opName)) {
+                // Defensive: ensure built-ins are registered (idempotent) before deciding unknown.
+                // This avoids a partial-registration race leading to misclassification as unknown.
                 try {
-                    // Gather arguments from value element
-                    var valueElem = kvpExp.Value;
-                    Element[] args;
-                    if (valueElem is CollectionElement coll) {
-                        args = new Element[coll.Count];
-                        for (int i = 0; i < coll.Count; i++) {
-                            var arg = coll.GetElementAt(i);
-                            if (arg != null) {
-                                args[i] = arg; // default(Element) skipped
+                    OperatorRegistry.RegisterBuiltInOperators();
+                } catch { /* best effort */ }
+
+                bool known = IsKnownOperator(opName);
+#if DEBUG
+                Console.WriteLine($"[TRACE-IF] Evaluating operator KVP op='{opName}' known={known} rawValue='{kvpExp.Value}'");
+#endif
+                if (known) {
+                    try {
+                        // Gather arguments from value element
+                        var valueElem = kvpExp.Value;
+                        Element[] args;
+                        if (valueElem is CollectionElement coll) {
+#if DEBUG
+                            Console.WriteLine($"[TRACE-IF] Operator '{opName}' argCount={coll.Count}");
+#endif
+                            args = new Element[coll.Count];
+                            for (int i = 0; i < coll.Count; i++) {
+                                var arg = coll.GetElementAt(i);
+                                if (arg != null) {
+                                    args[i] = arg; // assign positional arg
+#if DEBUG
+                                    Console.WriteLine($"[TRACE-IF]  arg[{i}]='{arg}' type={arg.GetType().Name}");
+#endif
+                                }
                             }
+                        } else {
+                            args = new[] { valueElem };
                         }
-                    } else {
-                        args = new[] { valueElem };
+                        var result = scriptingEngine.Evaluate(opName, args);
+#if DEBUG
+                        Console.WriteLine($"[TRACE-IF] Operator '{opName}' evaluation result={result ?? "<null>"}");
+#endif
+                        return ConvertToBoolean(result);
                     }
-                    var result = scriptingEngine.Evaluate(opName, args);
-                    return ConvertToBoolean(result);
+                    catch (Exception ex) {
+                        // Evaluation failure -> treat as false (do NOT mark unknown; operator existed but failed)
+                        Console.WriteLine($"[DEBUG] Operator '{opName}' evaluation exception: {ex.GetType().Name}: {ex.Message}");
+                        return false;
+                    }
                 }
-                catch {
-                    return false;
-                }
-            } else if (!string.IsNullOrEmpty(opName)) {
+
                 // Unknown operator: emit warning and treat as *no-op* (return true so target is preserved, PI remains)
                 _parser?.AddWarning(WarningType.UnknownConditionalOperator, $"Unknown conditional operator '{opName}' in if PI (treated as no-op)");
                 UnknownOperator = true;
@@ -241,10 +324,27 @@ public class IfProcessingInstruction : ProcessingInstruction {
             }
         }
 
-        // If the condition is a simple element (like a DynamicElement), treat it as a "defined" check
+        // Direct dereference element: resolve binding value (if available) and evaluate its truthiness.
+        if (conditionExpression is DereferenceElement derefElem) {
+            if (_parser != null && _parser.TryResolveBinding(derefElem.Value, out var bound)) {
+                // Use the bound element's parsed value for truthiness
+#if DEBUG
+                Console.WriteLine($"[TRACE-IF] Dereference '_{derefElem.Value}' resolved to element='{bound}' parsedValue='{bound?.ParsedValue ?? "<null>"}' type={bound?.GetType().Name}");
+#endif
+                return ConvertToBoolean(bound?.ParsedValue);
+            }
+            // Unresolved dereference counts as false
+#if DEBUG
+            Console.WriteLine($"[TRACE-IF] Dereference '_{derefElem.Value}' unresolved -> false");
+#endif
+            return false;
+        }
+
+        // If the condition is a simple, already-resolved element (literal, previously bound value, etc.)
+        // evaluate its intrinsic truthiness directly instead of performing an implicit "defined" check.
+        // Users can still request an explicit defined test via the 'defined' operator: <! if defined _name !>
         if (IsSimpleElement(conditionExpression)) {
-            var result = scriptingEngine.Evaluate("defined", conditionExpression);
-            return result is bool boolResult && boolResult;
+            return ConvertToBoolean(conditionExpression.ParsedValue);
         }
 
         // If the condition is a collection that looks like an operator expression, evaluate it as such
