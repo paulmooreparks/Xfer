@@ -13,6 +13,9 @@
 
 
 (
+    <! script ( let first "Alice" let greeting 'Hi <_first_>' let answer 42 ) !>
+    { message _greeting number _answer }
+
     <! script (
         let host "localhost"
         let port 8080

@@ -955,14 +955,17 @@ public partial class Parser : IXferParser {
             // Final fallback: resolve any lingering implicit _name or _name_ tokens in interpolated text
             // that were not resolved during initial parse (e.g., due to late let binding visibility edge cases).
             if (ie.Value.Contains('_')) {
+                List<string> resolvedNames = new();
                 var replaced = Regex.Replace(ie.Value, @"_([A-Za-z0-9_\-]+)_?", m => {
                     var name = m.Groups[1].Value;
                     if (TryResolveBinding(name, out var bound) && bound != null) {
+                        resolvedNames.Add(name);
                         return ElementToInterpolatedText(bound);
                     }
                     if (name.EndsWith('_')) { // defensive: try trimmed variant
                         var trimmed = name.TrimEnd('_');
                         if (TryResolveBinding(trimmed, out var boundTrim) && boundTrim != null) {
+                            resolvedNames.Add(trimmed);
                             return ElementToInterpolatedText(boundTrim);
                         }
                     }
@@ -970,6 +973,13 @@ public partial class Parser : IXferParser {
                 });
                 if (!ReferenceEquals(replaced, ie.Value)) {
                     ie.Value = replaced; // update in-place
+                    // Suppress earlier unresolved warnings for any names now resolved via fallback
+                    foreach (var rn in resolvedNames.Distinct()) {
+                        SuppressEarlierUnresolvedReferenceWarning(rn);
+                        if (_currentDocument != null) {
+                            _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] post-pass interpolated resolved '{rn}'", CurrentRow, CurrentColumn, rn));
+                        }
+                    }
                 }
             }
         }
@@ -1848,8 +1858,15 @@ public partial class Parser : IXferParser {
                     if (TryResolveBinding(dLate.Value, out var lateBound) && lateBound is not null) {
                         valueBuilder.Append(ElementToInterpolatedText(lateBound));
                     } else {
-                        // Keep original name to surface unresolved reference; matches prior behavior
-                        valueBuilder.Append(dLate.Value);
+                        // Re-emit a synthetic implicit dereference token ( _name_ ) so that the
+                        // final interpolation fallback pass can still resolve it once the binding
+                        // becomes available (e.g., later in the same script PI). If we were to
+                        // append only the bare name (previous behavior) the token would be lost
+                        // and could never resolve, producing incorrect output like 'Hi first'
+                        // instead of 'Hi Alice'. We intentionally drop the explicit angle brackets
+                        // so the final resolved text omits them unless the user provided literal
+                        // angle brackets outside the token.
+                        valueBuilder.Append('_').Append(dLate.Value).Append('_');
                     }
                 } else {
                     // Already resolved to a cloned element; use its textual representation (unquoted for strings)
