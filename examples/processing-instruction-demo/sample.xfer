@@ -13,7 +13,16 @@
 
 
 (
-    <! script ( let greetee "World" ) !> 'Hello, <_greetee_>.'
+    year (getElementById (_document "date"))
+    count (root (_document))
+
+    MultiParam (_sampleClass year (getElementById (_document "date")) count (root (_document)))
+
+
+    <! script ( let greetee "World" let score *99.5 ) !>
+    {
+        summary 'Hello, <_greetee_>. Your score is <_score_>.'
+    }
 
     [~true ~false ~true ~false]
     (~false ~true ~false ~true)
@@ -50,3 +59,5 @@
     <! id "array" !> [<! id "one"!> 1 2 3]
 
 )
+
+

@@ -115,12 +115,14 @@
                         <li><a href="#type-parkscomputing-xfer-lang-elements-dateelement">DateElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-datetimeelement">DateTimeElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-decimalelement">DecimalElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-dereferenceelement">DereferenceElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-dictionaryelement">DictionaryElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-doubleelement">DoubleElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-dynamicelement">DynamicElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-element">Element</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-elementdelimiter">ElementDelimiter</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-elementstyle">ElementStyle</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-emptyclosingelementdelimiter">EmptyClosingElementDelimiter</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-emptyelement">EmptyElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-identifierelement">IdentifierElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-integerelement">IntegerElement</a></li>
@@ -129,8 +131,13 @@
                         <li><a href="#type-parkscomputing-xfer-lang-elements-keywordelement">KeywordElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-listelement">ListElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-longelement">LongElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-nullelement">NullElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-numericbase">NumericBase</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-numericelement-1">NumericElement&lt;T&gt;</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-numericvalue-1">NumericValue&lt;T&gt;</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-objectelement">ObjectElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-queryelement">QueryElement</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-elements-referenceelement">ReferenceElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-stringelement">StringElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-textelement">TextElement</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-elements-timeelement">TimeElement</a></li>
@@ -151,23 +158,20 @@
             </li>
             <li>
                 <details>
-                    <summary>ParksComputing.Xfer.Lang.Models</summary>
-                    <ul>
-                        <li><a href="#type-parkscomputing-xfer-lang-models-person">Person</a></li>
-                    </ul>
-                </details>
-            </li>
-            <li>
-                <details>
                     <summary>ParksComputing.Xfer.Lang.ProcessingInstructions</summary>
                     <ul>
                         <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-chardefprocessinginstruction">CharDefProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-conditionalelementexception">ConditionalElementException</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-definedprocessinginstruction">DefinedProcessingInstruction</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-documentprocessinginstruction">DocumentProcessingInstruction</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-dynamicsourceprocessinginstruction">DynamicSourceProcessingInstruction</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-idprocessinginstruction">IdProcessingInstruction</a></li>
-                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-metaprocessinginstruction">MetaProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-ifprocessinginstruction">IfProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-letprocessinginstruction">LetProcessingInstruction</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-processinginstruction">ProcessingInstruction</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-propertiesprocessinginstruction">PropertiesProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-scriptprocessinginstruction">ScriptProcessingInstruction</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-processinginstructions-tagprocessinginstruction">TagProcessingInstruction</a></li>
                     </ul>
                 </details>
             </li>
@@ -184,6 +188,51 @@
                         <li><a href="#type-parkscomputing-xfer-lang-schema-xferschema">XferSchema</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-schema-xferschemaparser">XferSchemaParser</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-schema-xferschemavalidator">XferSchemaValidator</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Scripting</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-operatorregistry">OperatorRegistry</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-scriptingarchitecturedemo">ScriptingArchitectureDemo</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-scriptingcontext">ScriptingContext</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-scriptingengine">ScriptingEngine</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-scriptingoperator">ScriptingOperator</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Scripting.Comparison</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-comparison-equalsoperator">EqualsOperator</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-comparison-greaterthanoperator">GreaterThanOperator</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-comparison-greaterthanorequaloperator">GreaterThanOrEqualOperator</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-comparison-lessthanoperator">LessThanOperator</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-comparison-lessthanorequaloperator">LessThanOrEqualOperator</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-comparison-notequaloperator">NotEqualOperator</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Scripting.Logical</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-logical-andoperator">AndOperator</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-logical-ifoperator">IfOperator</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-logical-notoperator">NotOperator</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-logical-oroperator">OrOperator</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-logical-xoroperator">XorOperator</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>ParksComputing.Xfer.Lang.Scripting.Utility</summary>
+                    <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-scripting-utility-definedoperator">DefinedOperator</a></li>
                     </ul>
                 </details>
             </li>
@@ -206,7 +255,7 @@
     <main class="content">
 
 <section id="api-overview"><h1>ParksComputing.Xfer.Lang API Documentation</h1>
-<p>API documentation for ParksComputing.Xfer.Lang version 0.14.0.0</p></section>
+<p>API documentation for ParksComputing.Xfer.Lang version 0.15.0.0</p></section>
 <section id="namespace-parkscomputing-xfer-lang"><h2>Namespace: ParksComputing.Xfer.Lang</h2>
 <section id="type-parkscomputing-xfer-lang-datetimehandling"><h3>Enum: DateTimeHandling</h3>
 <p>Specifies how DateTime values should be handled during serialization and deserialization. Controls time zone information and formatting in the resulting XferLang output.</p>
@@ -429,14 +478,34 @@
 <td>A character element was empty and a replacement character was used.</td>
 </tr>
 <tr>
+<td><code>InvalidCharacterValue</code></td>
+<td><code>4</code></td>
+<td>A character value was invalid and a fallback was used.</td>
+</tr>
+<tr>
 <td><code>NumericPrecisionLoss</code></td>
 <td><code>1</code></td>
 <td>Precision may be lost during numeric conversion.</td>
 </tr>
 <tr>
+<td><code>Trace</code></td>
+<td><code>7</code></td>
+<td>Non-problem diagnostic trace emitted during parsing (informational only).</td>
+</tr>
+<tr>
+<td><code>UnknownConditionalOperator</code></td>
+<td><code>5</code></td>
+<td>An if processing instruction referenced an unknown/unregistered operator (condition treated as false).</td>
+</tr>
+<tr>
 <td><code>UnregisteredProcessingInstruction</code></td>
 <td><code>2</code></td>
 <td>An unregistered processing instruction was encountered.</td>
+</tr>
+<tr>
+<td><code>UnresolvedReference</code></td>
+<td><code>6</code></td>
+<td>A reference element referenced a name that has not been bound via a let binding.</td>
 </tr>
 </tbody>
 </table>
@@ -1453,9 +1522,45 @@
 </table>
 </div>
 <div class="method-doc">
-<h5>GetElementById</h5>
-<code>Element GetElementById(string id)</code>
-<p>Finds an element by its ID within the document.</p>
+<h5>ContainsElementId</h5>
+<code>bool ContainsElementId(string id)</code>
+<p>Checks if an element with the specified ID exists in the document.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>string</code></td>
+<td>The ID to check for.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if an element with the specified ID exists; otherwise, false.</p>
+</div>
+<div class="method-doc">
+<h5>ContainsTag</h5>
+<code>bool ContainsTag(string tag)</code>
+<p>Checks if any elements in the document have the specified tag.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>tag</code></td>
+<td><code>string</code></td>
+<td>The tag to check for.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if any elements have the specified tag; otherwise, false.</p>
+</div>
+<div class="method-doc">
+<h5>FindElementById</h5>
+<code>Element FindElementById(string id)</code>
+<p>Finds an element by its ID using the original tree traversal method. This method is provided for compatibility and verification purposes. Generally, GetElementById should be used instead for better performance.</p>
 <h6>Parameters</h6>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -1469,6 +1574,135 @@
 </table>
 <h6>Returns</h6>
 <p>The first element that matches the given ID; otherwise, null.</p>
+</div>
+<div class="method-doc">
+<h5>GetAllElementsWithIds</h5>
+<code>IReadOnlyDictionary&lt;string, Element&gt; GetAllElementsWithIds()</code>
+<p>Gets all elements in the document that have IDs assigned.</p>
+<h6>Returns</h6>
+<p>A read-only collection of all elements with IDs.</p>
+</div>
+<div class="method-doc">
+<h5>GetAllTags</h5>
+<code>IReadOnlyCollection&lt;string&gt; GetAllTags()</code>
+<p>Gets all unique tags used in the document.</p>
+<h6>Returns</h6>
+<p>A read-only collection of all tags in the document.</p>
+</div>
+<div class="method-doc">
+<h5>GetElementById</h5>
+<code>Element GetElementById(string id)</code>
+<p>Finds an element by its ID within the document using fast O(1) lookup.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>string</code></td>
+<td>The ID of the element to find.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The first element that matches the given ID; otherwise, null.</p>
+</div>
+<div class="method-doc">
+<h5>GetElementsByAllTags</h5>
+<code>IReadOnlyCollection&lt;Element&gt; GetElementsByAllTags(String[] tags)</code>
+<p>Gets all elements in the document that have all of the specified tags.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>tags</code></td>
+<td><code>String[]</code></td>
+<td>The tags that elements must have.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A read-only collection of elements that have all of the specified tags.</p>
+</div>
+<div class="method-doc">
+<h5>GetElementsByAnyTag</h5>
+<code>IReadOnlyCollection&lt;Element&gt; GetElementsByAnyTag(String[] tags)</code>
+<p>Gets all elements in the document that have any of the specified tags.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>tags</code></td>
+<td><code>String[]</code></td>
+<td>The tags to search for.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A read-only collection of elements that have at least one of the specified tags.</p>
+</div>
+<div class="method-doc">
+<h5>GetElementsByTag</h5>
+<code>IReadOnlyCollection&lt;Element&gt; GetElementsByTag(string tag)</code>
+<p>Gets all elements in the document that have the specified tag.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>tag</code></td>
+<td><code>string</code></td>
+<td>The tag to search for.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A read-only collection of elements with the specified tag.</p>
+</div>
+<div class="method-doc">
+<h5>GetElementsByType</h5>
+<code>IReadOnlyCollection&lt;T&gt; GetElementsByType()</code>
+<p>Gets all elements of the specified type in the document.</p>
+<h6>Returns</h6>
+<p>A collection of elements of the specified type.</p>
+</div>
+<div class="method-doc">
+<h5>GetElementsByType</h5>
+<code>IReadOnlyCollection&lt;Element&gt; GetElementsByType(Type elementType)</code>
+<p>Gets all elements of the specified type in the document.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>elementType</code></td>
+<td><code>Type</code></td>
+<td>The element type to search for.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A collection of elements of the specified type.</p>
+</div>
+<div class="method-doc">
+<h5>GetTagElementCount</h5>
+<code>int GetTagElementCount(string tag)</code>
+<p>Gets the count of elements that have the specified tag.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>tag</code></td>
+<td><code>string</code></td>
+<td>The tag to count elements for.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The number of elements with the specified tag.</p>
 </div>
 <div class="method-doc">
 <h5>ToByteArray</h5>
@@ -2398,6 +2632,49 @@
 <p>True if the element was added successfully, false if type validation failed</p>
 </div>
 <div class="method-doc">
+<h5>Remove</h5>
+<code>bool Remove(Element element)</code>
+<p>Removes the specified element from this array. If this was the last element and it's removed, the element type constraint is reset.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>element</code></td>
+<td><code>Element</code></td>
+<td>The element to remove</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the element was found and removed, false otherwise</p>
+</div>
+<div class="method-doc">
+<h5>RemoveAllChildren</h5>
+<code>int RemoveAllChildren()</code>
+<p>Removes all child elements from this array. Resets the element type constraint when the array becomes empty.</p>
+<h6>Returns</h6>
+<p>The number of children that were removed</p>
+</div>
+<div class="method-doc">
+<h5>RemoveAt</h5>
+<code>bool RemoveAt(int index)</code>
+<p>Removes the element at the specified index. If this was the last element and it's removed, the element type constraint is reset.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>index</code></td>
+<td><code>int</code></td>
+<td>The zero-based index of the element to remove</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the element was found and removed, false otherwise</p>
+</div>
+<div class="method-doc">
 <h5>ToString</h5>
 <code>string ToString()</code>
 <p>Returns a string representation of this array element using its XferLang serialization.</p>
@@ -2524,6 +2801,17 @@
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-characterelement"><h3>Class: CharacterElement</h3>
 <p>Represents a character element in XferLang using backslash (\) delimiters. Character elements store Unicode code points as integers and can represent any valid Unicode character. The value represents the numeric code point (0 to 0x10FFFF) rather than the character itself.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>NumericValue</code></td>
+<td><code>NumericValue&lt;int&gt;</code></td>
+<td>Gets or sets the underlying numeric value (code point) plus its base information. Setting updates the exposed .</td>
+</tr>
+</tbody>
+</table>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -2547,6 +2835,32 @@
 <td><code>style</code></td>
 <td><code>ElementStyle</code></td>
 <td>The element style for formatting (default: Compact).</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>CharacterElement(NumericValue&lt;int&gt; numericValue, int specifierCount, ElementStyle style)</code>
+<p>Initializes a new character element from an existing  code point wrapper.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>numericValue</code></td>
+<td><code>NumericValue&lt;int&gt;</code></td>
+<td>The numeric value wrapper containing the code point and base.</td>
+</tr>
+<tr>
+<td><code>specifierCount</code></td>
+<td><code>int</code></td>
+<td>Number of delimiter characters to use (default 1).</td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td><code>ElementStyle</code></td>
+<td>The element style (Compact or Explicit).</td>
 </tr>
 </tbody>
 </table>
@@ -2609,6 +2923,11 @@
 <td><code>Count</code></td>
 <td><code>int</code></td>
 <td>Gets the number of elements in this collection.</td>
+</tr>
+<tr>
+<td><code>ParsedValue</code></td>
+<td><code>Object</code></td>
+<td>Gets the parsed value of this collection element, which is the collection of child elements. For collections, this returns the Values enumerable.</td>
 </tr>
 <tr>
 <td><code>Values</code></td>
@@ -3099,22 +3418,11 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-decimalelement"><h3>Class: DecimalElement</h3>
-<p>Represents a decimal number element in XferLang using asterisk (*) delimiters. Decimal elements store high-precision decimal values suitable for financial calculations and other applications requiring exact decimal representation.</p>
-<h4>Properties</h4>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr>
-<td><code>CustomFormatter</code></td>
-<td><code>Func&lt;decimal, string&gt;</code></td>
-<td>Custom formatter function for the decimal value. If null, uses default formatting.</td>
-</tr>
-</tbody>
-</table>
+<p>Represents a decimal number element in XferLang using asterisk (*) delimiters. Attribute metadata can control precision, trailing zeros, and alternative bases (hex/binary).</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
-<code>DecimalElement(decimal value, int specifierCount, ElementStyle style, Func&lt;decimal, string&gt; customFormatter)</code>
+<code>DecimalElement(decimal value, int specifierCount, ElementStyle style)</code>
 <p>Initializes a new instance of the DecimalElement class with the specified value and formatting options.</p>
 <h6>Parameters</h6>
 <table class="api-table">
@@ -3135,10 +3443,31 @@
 <td><code>ElementStyle</code></td>
 <td>The element style for delimiter handling (default: Compact)</td>
 </tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DecimalElement(NumericValue&lt;decimal&gt; numericValue, int specifierCount, ElementStyle style)</code>
+<p>Initializes a new instance of  using a  wrapper to carry formatting metadata.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
 <tr>
-<td><code>customFormatter</code></td>
-<td><code>Func&lt;decimal, string&gt;</code></td>
-<td>Optional custom formatter function for the decimal value</td>
+<td><code>numericValue</code></td>
+<td><code>NumericValue&lt;decimal&gt;</code></td>
+<td>The wrapped decimal value including formatting metadata.</td>
+</tr>
+<tr>
+<td><code>specifierCount</code></td>
+<td><code>int</code></td>
+<td>The number of delimiter specifier characters to use.</td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td><code>ElementStyle</code></td>
+<td>The delimiter style.</td>
 </tr>
 </tbody>
 </table>
@@ -3175,6 +3504,44 @@
 </table>
 <h6>Returns</h6>
 <p>The XferLang string representation of this decimal element</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-dereferenceelement"><h3>Class: DereferenceElement</h3>
+<p>Represents a dereference of a previously bound name using leading underscore(s): _name Uses empty closing delimiter semantics similar to numeric and boolean elements.</p>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DereferenceElement(string name, int specifierCount, ElementStyle style)</code>
+<p>Creates a dereference element for a previously bound name.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>The binding name to resolve when evaluated.</td>
+</tr>
+<tr>
+<td><code>specifierCount</code></td>
+<td><code>int</code></td>
+<td>Number of leading underscores (>=1) for stylistic grouping.</td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td><code>ElementStyle</code></td>
+<td>Delimiter style controlling implicit/compact/explicit emission.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-dictionaryelement"><h3>Abstract Class: DictionaryElement</h3>
@@ -3251,22 +3618,11 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-doubleelement"><h3>Class: DoubleElement</h3>
-<p>Represents a double-precision floating-point number element in XferLang using caret (^) delimiters. Double elements store IEEE 754 double-precision floating-point values suitable for scientific calculations and general-purpose numeric operations.</p>
-<h4>Properties</h4>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr>
-<td><code>CustomFormatter</code></td>
-<td><code>Func&lt;double, string&gt;</code></td>
-<td>Custom formatter function for the double value. If null, uses default formatting.</td>
-</tr>
-</tbody>
-</table>
+<p>Represents a double-precision floating-point number element in XferLang using caret (^) delimiters. Attribute metadata can control precision, trailing zeros, and alternative bases (hex/binary).</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
-<code>DoubleElement(double value, int markerCount, ElementStyle style, Func&lt;double, string&gt; customFormatter)</code>
+<code>DoubleElement(double value, int specifierCount, ElementStyle style)</code>
 <p>Initializes a new instance of the DoubleElement class with the specified value and formatting options.</p>
 <h6>Parameters</h6>
 <table class="api-table">
@@ -3278,7 +3634,7 @@
 <td>The double-precision floating-point value to represent</td>
 </tr>
 <tr>
-<td><code>markerCount</code></td>
+<td><code>specifierCount</code></td>
 <td><code>int</code></td>
 <td>The number of delimiter characters to use (default: 1)</td>
 </tr>
@@ -3287,13 +3643,13 @@
 <td><code>ElementStyle</code></td>
 <td>The element style for delimiter handling (default: Compact)</td>
 </tr>
-<tr>
-<td><code>customFormatter</code></td>
-<td><code>Func&lt;double, string&gt;</code></td>
-<td>Optional custom formatter function for the double value</td>
-</tr>
 </tbody>
 </table>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DoubleElement(NumericValue&lt;double&gt; numericValue, int specifierCount, ElementStyle style)</code>
+<p>Initializes a new instance of the DoubleElement class with the specified numeric value. The numeric value to represent as a doubleThe number of delimiter characters to use (default: 1)The element style for delimiter handling (default: Compact)</p>
 </div>
 <div class="method-doc">
 <h5>ToXfer</h5>
@@ -3331,6 +3687,17 @@
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-dynamicelement"><h3>Class: DynamicElement</h3>
 <p>Represents a dynamic element in XferLang using pipe (|) delimiters. Dynamic elements contain text that can be dynamically resolved or evaluated at runtime, often used for variable substitution or dynamic content generation.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>ParsedValue</code></td>
+<td><code>Object</code></td>
+<td>Gets the parsed value of this dynamic element, which is the resolved value. For dynamic elements, this returns the already-resolved Value. Returns null if the dynamic element resolved to an empty or null value. For setting, use the Value property to set the resolved value.</td>
+</tr>
+</tbody>
+</table>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -3376,14 +3743,19 @@
 <td>Gets or sets the delimiter information for this element, including opening/closing characters and style.</td>
 </tr>
 <tr>
+<td><code>FirstChild</code></td>
+<td><code>Element</code></td>
+<td>Gets the first child element, or null if this element has no children.</td>
+</tr>
+<tr>
 <td><code>Id</code></td>
 <td><code>string</code></td>
 <td>Optional ID for this element, settable via inline PI: <! id "myId" !></td>
 </tr>
 <tr>
-<td><code>Metadata</code></td>
-<td><code>XferMetadata</code></td>
-<td>Optional metadata for this element, set via meta PI.</td>
+<td><code>LastChild</code></td>
+<td><code>Element</code></td>
+<td>Gets the last child element, or null if this element has no children.</td>
 </tr>
 <tr>
 <td><code>Name</code></td>
@@ -3391,9 +3763,29 @@
 <td>Gets the name of this element type.</td>
 </tr>
 <tr>
+<td><code>NextSibling</code></td>
+<td><code>Element</code></td>
+<td>Gets the next sibling element in the parent's children collection.</td>
+</tr>
+<tr>
 <td><code>Parent</code></td>
 <td><code>Element</code></td>
 <td>Gets or sets the parent element of this element in the document hierarchy.</td>
+</tr>
+<tr>
+<td><code>ParsedValue</code></td>
+<td><code>Object</code></td>
+<td>Optional parsed value associated with this element (e.g., a numeric primitive after lexical analysis). Implementations may set during parsing for faster scripting/operator evaluation.</td>
+</tr>
+<tr>
+<td><code>PreviousSibling</code></td>
+<td><code>Element</code></td>
+<td>Gets the previous sibling element in the parent's children collection.</td>
+</tr>
+<tr>
+<td><code>Tag</code></td>
+<td><code>string</code></td>
+<td>Optional tag for this element, settable via inline PI: <! tag "tagName" !> Tags allow non-unique categorization of elements for grouping and selection. Each element can have only one tag.</td>
 </tr>
 </tbody>
 </table>
@@ -3454,6 +3846,143 @@
 <p>The found element, or null if no element is found.</p>
 </div>
 <div class="method-doc">
+<h5>FindElementsByTag</h5>
+<code>IReadOnlyCollection&lt;Element&gt; FindElementsByTag(string tag)</code>
+<p>Recursively finds all descendant elements with the specified tag.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>tag</code></td>
+<td><code>string</code></td>
+<td>The tag to search for.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A collection of elements that have the specified tag.</p>
+</div>
+<div class="method-doc">
+<h5>FindElementsByType</h5>
+<code>IReadOnlyCollection&lt;T&gt; FindElementsByType()</code>
+<p>Recursively finds all descendant elements of the specified type.</p>
+<h6>Returns</h6>
+<p>A collection of elements of the specified type.</p>
+</div>
+<div class="method-doc">
+<h5>FindElementsByType</h5>
+<code>IReadOnlyCollection&lt;Element&gt; FindElementsByType(Type elementType)</code>
+<p>Recursively finds all descendant elements of the specified type.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>elementType</code></td>
+<td><code>Type</code></td>
+<td>The element type to search for.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A collection of elements of the specified type.</p>
+</div>
+<div class="method-doc">
+<h5>GetAncestors</h5>
+<code>IEnumerable&lt;Element&gt; GetAncestors()</code>
+<p>Gets all ancestor elements from parent up to the root.</p>
+<h6>Returns</h6>
+<p>A collection of ancestor elements, ordered from immediate parent to root.</p>
+</div>
+<div class="method-doc">
+<h5>GetDescendants</h5>
+<code>IEnumerable&lt;Element&gt; GetDescendants()</code>
+<p>Gets all descendant elements in depth-first order.</p>
+<h6>Returns</h6>
+<p>A collection of all descendant elements.</p>
+</div>
+<div class="method-doc">
+<h5>GetSiblings</h5>
+<code>IEnumerable&lt;Element&gt; GetSiblings()</code>
+<p>Gets all sibling elements (excluding this element).</p>
+<h6>Returns</h6>
+<p>A collection of sibling elements.</p>
+</div>
+<div class="method-doc">
+<h5>Remove</h5>
+<code>bool Remove()</code>
+<p>Removes this element from its parent element. DOM-like removal that handles parent-child relationship cleanup.</p>
+<h6>Returns</h6>
+<p>True if the element was successfully removed, false if it had no parent</p>
+</div>
+<div class="method-doc">
+<h5>RemoveAllChildren</h5>
+<code>int RemoveAllChildren()</code>
+<p>Removes all child elements from this element's children collection. Automatically clears parent relationships for all removed children.</p>
+<h6>Returns</h6>
+<p>The number of children that were removed</p>
+</div>
+<div class="method-doc">
+<h5>RemoveChild</h5>
+<code>bool RemoveChild(Element child)</code>
+<p>Removes a specific child element from this element's children collection. Automatically clears the parent relationship.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>child</code></td>
+<td><code>Element</code></td>
+<td>The child element to remove</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the child was found and removed, false otherwise</p>
+</div>
+<div class="method-doc">
+<h5>RemoveChildAt</h5>
+<code>bool RemoveChildAt(int index)</code>
+<p>Removes a child element at the specified index from this element's children collection. Automatically clears the parent relationship.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>index</code></td>
+<td><code>int</code></td>
+<td>The zero-based index of the child to remove</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the child was successfully removed, false if index was out of range</p>
+</div>
+<div class="method-doc">
+<h5>ReplaceChild</h5>
+<code>bool ReplaceChild(Element oldChild, Element newChild)</code>
+<p>Replaces a child element with a new element. Automatically manages parent-child relationships.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>oldChild</code></td>
+<td><code>Element</code></td>
+<td>The existing child element to replace</td>
+</tr>
+<tr>
+<td><code>newChild</code></td>
+<td><code>Element</code></td>
+<td>The new child element to add in its place</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the replacement was successful, false if oldChild was not found</p>
+</div>
+<div class="method-doc">
 <h5>ToXfer</h5>
 <code>string ToXfer()</code>
 <p>Serializes this element to its XferLang string representation using default formatting.</p>
@@ -3501,29 +4030,39 @@
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr>
-<td><code>Closing</code></td>
-<td><code>string</code></td>
-<td>Gets the full closing delimiter string including angle brackets.</td>
-</tr>
-<tr>
 <td><code>ClosingSpecifier</code></td>
 <td><code>Char</code></td>
 <td>Gets the character used to close this element type.</td>
 </tr>
 <tr>
-<td><code>MinClosing</code></td>
+<td><code>CompactClosing</code></td>
 <td><code>string</code></td>
 <td>Gets the minimal closing delimiter string without angle brackets.</td>
 </tr>
 <tr>
-<td><code>MinOpening</code></td>
+<td><code>CompactOpening</code></td>
 <td><code>string</code></td>
 <td>Gets the minimal opening delimiter string without angle brackets.</td>
 </tr>
 <tr>
-<td><code>Opening</code></td>
+<td><code>ExplicitClosing</code></td>
+<td><code>string</code></td>
+<td>Gets the full closing delimiter string including angle brackets.</td>
+</tr>
+<tr>
+<td><code>ExplicitOpening</code></td>
 <td><code>string</code></td>
 <td>Gets the full opening delimiter string including angle brackets.</td>
+</tr>
+<tr>
+<td><code>ImplicitClosing</code></td>
+<td><code>string</code></td>
+<td>Gets the implicit closing delimiter string, which is empty by default.</td>
+</tr>
+<tr>
+<td><code>ImplicitOpening</code></td>
+<td><code>string</code></td>
+<td>Gets the implicit opening delimiter string, which is empty by default.</td>
 </tr>
 <tr>
 <td><code>OpeningSpecifier</code></td>
@@ -3585,7 +4124,7 @@
 <tr>
 <td><code>elementStyle</code></td>
 <td><code>ElementStyle</code></td>
-<td>The element style for delimiter handling (default: Explicit)</td>
+<td>The element style for delimiter handling (default: Compact)</td>
 </tr>
 </tbody>
 </table>
@@ -3616,7 +4155,7 @@
 <tr>
 <td><code>style</code></td>
 <td><code>ElementStyle</code></td>
-<td>The element style for delimiter handling (default: Explicit)</td>
+<td>The element style for delimiter handling (default: Compact)</td>
 </tr>
 </tbody>
 </table>
@@ -3652,6 +4191,82 @@
 </tr>
 </tbody>
 </table>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-emptyclosingelementdelimiter"><h3>Class: EmptyClosingElementDelimiter</h3>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>CompactClosing</code></td>
+<td><code>string</code></td>
+<td>The closing delimiter character for integer elements.</td>
+</tr>
+<tr>
+<td><code>CompactOpening</code></td>
+<td><code>string</code></td>
+<td>The opening delimiter character for integer elements.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>EmptyClosingElementDelimiter(Char openingSpecifier, Char closingSpecifier, ElementStyle style)</code>
+<p>Create a delimiter with empty closing sequence and specifier count 1.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>openingSpecifier</code></td>
+<td><code>Char</code></td>
+<td>Opening delimiter character.</td>
+</tr>
+<tr>
+<td><code>closingSpecifier</code></td>
+<td><code>Char</code></td>
+<td>Closing delimiter character (same as opening).</td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td><code>ElementStyle</code></td>
+<td>Delimiter style.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>EmptyClosingElementDelimiter(Char openingSpecifier, Char closingSpecifier, int specifierCount, ElementStyle style)</code>
+<p>Create a delimiter with an explicit specifier count.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>openingSpecifier</code></td>
+<td><code>Char</code></td>
+<td>Opening delimiter character.</td>
+</tr>
+<tr>
+<td><code>closingSpecifier</code></td>
+<td><code>Char</code></td>
+<td>Closing delimiter character (same as opening).</td>
+</tr>
+<tr>
+<td><code>specifierCount</code></td>
+<td><code>int</code></td>
+<td>Number of specifier characters.</td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td><code>ElementStyle</code></td>
+<td>Delimiter style.</td>
+</tr>
+</tbody>
+</table>
+</div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-emptyelement"><h3>Class: EmptyElement</h3>
 <p>Represents an empty element in XferLang that contains no value. Used for representing null or void values in the serialization format.</p>
@@ -3802,22 +4417,11 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-integerelement"><h3>Class: IntegerElement</h3>
-<p>Represents a 32-bit signed integer element in XferLang. Uses hash (#) delimiters and supports custom formatting for integer values.</p>
-<h4>Properties</h4>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr>
-<td><code>CustomFormatter</code></td>
-<td><code>Func&lt;int, string&gt;</code></td>
-<td>Custom formatter function for the integer value. If null, uses default formatting.</td>
-</tr>
-</tbody>
-</table>
+<p>Represents a 32-bit signed integer element in XferLang. Uses hash (#) delimiters and supports attribute-driven hexadecimal or binary formatting.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
-<code>IntegerElement(int value, int specifierCount, ElementStyle elementStyle, Func&lt;int, string&gt; customFormatter)</code>
+<code>IntegerElement(int value, int specifierCount, ElementStyle elementStyle)</code>
 <p>Initializes a new instance of the IntegerElement class with the specified value and formatting options.</p>
 <h6>Parameters</h6>
 <table class="api-table">
@@ -3838,13 +4442,13 @@
 <td><code>ElementStyle</code></td>
 <td>The element style for delimiter handling (default: Compact)</td>
 </tr>
-<tr>
-<td><code>customFormatter</code></td>
-<td><code>Func&lt;int, string&gt;</code></td>
-<td>Optional custom formatter function for the integer value</td>
-</tr>
 </tbody>
 </table>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>IntegerElement(NumericValue&lt;int&gt; value, int specifierCount, ElementStyle elementStyle)</code>
+<p>Initializes a new instance of the IntegerElement class with the specified numeric value.</p>
 </div>
 <div class="method-doc">
 <h5>ToXfer</h5>
@@ -3923,8 +4527,8 @@
 </tr>
 <tr>
 <td><code>KeyElement</code></td>
-<td><code>TextElement</code></td>
-<td>Gets or sets the text element that represents the key portion of the key-value pair.</td>
+<td><code>KeywordElement</code></td>
+<td>Gets or sets the keyword element that represents the key portion of the key-value pair.</td>
 </tr>
 <tr>
 <td><code>Value</code></td>
@@ -3936,16 +4540,16 @@
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
-<code>KeyValuePairElement(TextElement keyElement, int specifierCount)</code>
-<p>Initializes a new instance of the KeyValuePairElement class with a key element and default empty value.</p>
+<code>KeyValuePairElement(KeywordElement keyElement, int specifierCount)</code>
+<p>Initializes a new instance of the KeyValuePairElement class with a keyword element and default empty value.</p>
 <h6>Parameters</h6>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr>
 <td><code>keyElement</code></td>
-<td><code>TextElement</code></td>
-<td>The text element representing the key.</td>
+<td><code>KeywordElement</code></td>
+<td>The keyword element representing the key.</td>
 </tr>
 <tr>
 <td><code>specifierCount</code></td>
@@ -3957,16 +4561,16 @@
 </div>
 <div class="method-doc">
 <h5>Constructor</h5>
-<code>KeyValuePairElement(TextElement keyElement, Element value, int specifierCount)</code>
-<p>Initializes a new instance of the KeyValuePairElement class with a key element and value element.</p>
+<code>KeyValuePairElement(KeywordElement keyElement, Element value, int specifierCount)</code>
+<p>Initializes a new instance of the KeyValuePairElement class with a keyword element and value element.</p>
 <h6>Parameters</h6>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr>
 <td><code>keyElement</code></td>
-<td><code>TextElement</code></td>
-<td>The text element representing the key.</td>
+<td><code>KeywordElement</code></td>
+<td>The keyword element representing the key.</td>
 </tr>
 <tr>
 <td><code>value</code></td>
@@ -4153,6 +4757,108 @@
 <p>The element at the specified index, or null if index is invalid</p>
 </div>
 <div class="method-doc">
+<h5>Remove</h5>
+<code>bool Remove(Element element)</code>
+<p>Removes the specified element from this list.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>element</code></td>
+<td><code>Element</code></td>
+<td>The element to remove</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the element was found and removed, false otherwise</p>
+</div>
+<div class="method-doc">
+<h5>RemoveAllChildren</h5>
+<code>int RemoveAllChildren()</code>
+<p>Removes all child elements from this list. Overrides base implementation to handle both _items and Children collections.</p>
+<h6>Returns</h6>
+<p>The number of children that were removed</p>
+</div>
+<div class="method-doc">
+<h5>RemoveAt</h5>
+<code>bool RemoveAt(int index)</code>
+<p>Removes the element at the specified index.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>index</code></td>
+<td><code>int</code></td>
+<td>The zero-based index of the element to remove</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the element was found and removed, false otherwise</p>
+</div>
+<div class="method-doc">
+<h5>RemoveChild</h5>
+<code>bool RemoveChild(Element child)</code>
+<p>Removes a specific child element from this list. Overrides base implementation to handle both _items and Children collections.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>child</code></td>
+<td><code>Element</code></td>
+<td>The child element to remove</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the child was found and removed, false otherwise</p>
+</div>
+<div class="method-doc">
+<h5>RemoveChildAt</h5>
+<code>bool RemoveChildAt(int index)</code>
+<p>Removes a child element at the specified index. Overrides base implementation to handle both _items and Children collections.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>index</code></td>
+<td><code>int</code></td>
+<td>The zero-based index of the child to remove</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the child was successfully removed, false if index was out of range</p>
+</div>
+<div class="method-doc">
+<h5>ReplaceChild</h5>
+<code>bool ReplaceChild(Element oldChild, Element newChild)</code>
+<p>Replaces a child element with a new element. Overrides base implementation to handle both _items and Children collections.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>oldChild</code></td>
+<td><code>Element</code></td>
+<td>The existing child element to replace</td>
+</tr>
+<tr>
+<td><code>newChild</code></td>
+<td><code>Element</code></td>
+<td>The new child element to add in its place</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the replacement was successful, false if oldChild was not found</p>
+</div>
+<div class="method-doc">
 <h5>ToString</h5>
 <code>string ToString()</code>
 <p>Returns a string representation of this list by joining all semantic items with spaces.</p>
@@ -4161,22 +4867,11 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-longelement"><h3>Class: LongElement</h3>
-<p>Represents a 64-bit signed integer element in XferLang. Uses ampersand (&) delimiters and supports custom formatting for long values.</p>
-<h4>Properties</h4>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr>
-<td><code>CustomFormatter</code></td>
-<td><code>Func&lt;long, string&gt;</code></td>
-<td>Custom formatter function for the long value. If null, uses default formatting.</td>
-</tr>
-</tbody>
-</table>
+<p>Represents a 64-bit signed integer element in XferLang. Uses ampersand (&) delimiters and supports attribute-driven hexadecimal or binary formatting.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
-<code>LongElement(long value, int specifierCount, ElementStyle style, Func&lt;long, string&gt; customFormatter)</code>
+<code>LongElement(long value, int specifierCount, ElementStyle style)</code>
 <p>Initializes a new instance of the LongElement class with the specified value and formatting options.</p>
 <h6>Parameters</h6>
 <table class="api-table">
@@ -4197,13 +4892,13 @@
 <td><code>ElementStyle</code></td>
 <td>The element style for delimiter handling (default: Compact)</td>
 </tr>
-<tr>
-<td><code>customFormatter</code></td>
-<td><code>Func&lt;long, string&gt;</code></td>
-<td>Optional custom formatter function for the long value</td>
-</tr>
 </tbody>
 </table>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>LongElement(NumericValue&lt;long&gt; numericValue, int specifierCount, ElementStyle style)</code>
+<p>Initializes a new instance of the LongElement class with the specified numeric value.</p>
 </div>
 <div class="method-doc">
 <h5>ToXfer</h5>
@@ -4239,12 +4934,83 @@
 <p>The XferLang string representation of this long integer element</p>
 </div>
 </section>
+<section id="type-parkscomputing-xfer-lang-elements-nullelement"><h3>Class: NullElement</h3>
+<p>Represents a null literal element in XferLang. Public so scripting tests can construct it.</p>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>NullElement(ElementStyle style)</code>
+<p>Create a new null element.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>style</code></td>
+<td><code>ElementStyle</code></td>
+<td>Delimiter style (implicit, compact, explicit).</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-numericbase"><h3>Enum: NumericBase</h3>
+<p>Represents the numeric base used when interpreting or serializing a . Prefix conventions (when serialized through helper types): : no prefix: '$' prefix: '%' prefix</p>
+<h4>Members</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Value</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Binary</code></td>
+<td><code>2</code></td>
+<td>Base 2 ('%' prefix)</td>
+</tr>
+<tr>
+<td><code>Decimal</code></td>
+<td><code>10</code></td>
+<td>Base 10 (no prefix)</td>
+</tr>
+<tr>
+<td><code>Hexadecimal</code></td>
+<td><code>16</code></td>
+<td>Base 16 ('$' prefix)</td>
+</tr>
+</tbody>
+</table>
+</section>
 <section id="type-parkscomputing-xfer-lang-elements-numericelement-1"><h3>Abstract Class: NumericElement&lt;T&gt;</h3>
 <p>Abstract base class for numeric elements in XferLang. Provides common functionality for serializing numeric types with configurable delimiters.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>NumericValue</code></td>
+<td><code>NumericValue&lt;T&gt;</code></td>
+<td>Strongly typed wrapper including formatting metadata for the numeric value. Setting updates the public .</td>
+</tr>
+</tbody>
+</table>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
 <code>NumericElement`1(T value, string name, ElementDelimiter delimiter)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>NumericElement`1(NumericValue&lt;T&gt; numericValue, string name, ElementDelimiter delimiter)</code>
 </div>
 <div class="method-doc">
 <h5>ToString</h5>
@@ -4256,7 +5022,13 @@
 <div class="method-doc">
 <h5>ToXfer</h5>
 <code>string ToXfer()</code>
-<p>Serializes this numeric element to its XferLang string representation using default formatting.</p>
+<p>Initializes a new instance of the NumericElement class using a  that may carry formatting metadata.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+</tbody>
+</table>
 <h6>Returns</h6>
 <p>The XferLang string representation of this numeric element</p>
 </div>
@@ -4292,6 +5064,45 @@
 </table>
 <h6>Returns</h6>
 <p>The XferLang string representation of this numeric element</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-numericvalue-1"><h3>Class: NumericValue&lt;T&gt;</h3>
+<p>Represents a typed numeric value together with its  and a flag indicating whether an explicit value was assigned. This wrapper is used by numeric element types to retain formatting intent (hex / binary) even if the underlying integer value can be represented in multiple ways.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Base</code></td>
+<td><code>NumericBase</code></td>
+<td>Gets or sets the numeric base used for serialization / display.</td>
+</tr>
+<tr>
+<td><code>HasValue</code></td>
+<td><code>bool</code></td>
+<td>True once a value has been explicitly assigned (distinguishes default construction).</td>
+</tr>
+<tr>
+<td><code>Value</code></td>
+<td><code>T</code></td>
+<td>Gets or sets the underlying numeric value. Setting a value marks  true.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>NumericValue`1(T value, NumericBase numericBase)</code>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>NumericValue`1()</code>
+<p>Initializes a new instance with no explicit value (HasValue remains false until set).</p>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+<p>Returns a string representing the value with an optional prefix ($ for hex, % for binary).</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-objectelement"><h3>Class: ObjectElement</h3>
@@ -4410,6 +5221,72 @@
 <p>True if the element was found and removed, false otherwise</p>
 </div>
 <div class="method-doc">
+<h5>RemoveAllChildren</h5>
+<code>int RemoveAllChildren()</code>
+<p>Removes all key-value pairs and children from this object.</p>
+<h6>Returns</h6>
+<p>The number of children that were removed</p>
+</div>
+<div class="method-doc">
+<h5>RemoveChild</h5>
+<code>bool RemoveChild(Element child)</code>
+<p>Removes a specific child element from this object. Overrides base implementation to handle both _values dictionary and Children collection.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>child</code></td>
+<td><code>Element</code></td>
+<td>The child element to remove</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the child was found and removed, false otherwise</p>
+</div>
+<div class="method-doc">
+<h5>RemoveChildAt</h5>
+<code>bool RemoveChildAt(int index)</code>
+<p>Removes a child element at the specified index from the Children collection. Note: Objects are not naturally ordered, but this provides access to Children collection by index.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>index</code></td>
+<td><code>int</code></td>
+<td>The zero-based index of the child to remove</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the child was successfully removed, false if index was out of range</p>
+</div>
+<div class="method-doc">
+<h5>ReplaceChild</h5>
+<code>bool ReplaceChild(Element oldChild, Element newChild)</code>
+<p>Replaces a child element with a new element. For KeyValuePairElements, replaces the value for the same key.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>oldChild</code></td>
+<td><code>Element</code></td>
+<td>The existing child element to replace</td>
+</tr>
+<tr>
+<td><code>newChild</code></td>
+<td><code>Element</code></td>
+<td>The new child element to add in its place</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the replacement was successful, false if oldChild was not found</p>
+</div>
+<div class="method-doc">
 <h5>ToString</h5>
 <code>string ToString()</code>
 <p>Returns a string representation of the object element.</p>
@@ -4459,6 +5336,215 @@
 <div class="method-doc">
 <h5>TryGetElement</h5>
 <code>bool TryGetElement(string key, TElement& result)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-queryelement"><h3>Class: QueryElement</h3>
+<p>Represents a query element introduced by semicolon specifiers. Wraps a whose key/value pair expresses the query semantics.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Kvp</code></td>
+<td><code>KeyValuePairElement</code></td>
+<td>Gets or sets the key-value pair element that contains the processing instruction's name and value. This represents the structured data of the processing instruction.</td>
+</tr>
+<tr>
+<td><code>Target</code></td>
+<td><code>Element</code></td>
+<td>Gets or sets the target element that this processing instruction applies to. Can be null if the processing instruction applies globally or has no specific target.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>QueryElement(KeyValuePairElement value, int specifierCount, ElementStyle style)</code>
+<p>Initializes a new instance of the QueryElement class with the specified value and name.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>KeyValuePairElement</code></td>
+<td>The key/value pair carried by this query element.</td>
+</tr>
+<tr>
+<td><code>specifierCount</code></td>
+<td><code>int</code></td>
+<td>Number of leading specifier characters.</td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td><code>ElementStyle</code></td>
+<td>Delimiter style controlling serialization.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+<p>Virtual method for handling element-specific processing. Override this method in derived classes to implement custom element handling logic.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>element</code></td>
+<td><code>Element</code></td>
+<td>The element to be processed.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>QueryHandler</h5>
+<code>void QueryHandler()</code>
+<p>Virtual method for handling query-specific logic. Override this method in derived classes to implement custom query behavior.</p>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+<p>Converts the processing instruction to its XferLang string representation without formatting.</p>
+<h6>Returns</h6>
+<p>The XferLang representation of the processing instruction.</p>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+<p>Converts the processing instruction to its XferLang string representation with specified formatting options.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>formatting</code></td>
+<td><code>Formatting</code></td>
+<td>The formatting options to apply.</td>
+</tr>
+<tr>
+<td><code>indentChar</code></td>
+<td><code>Char</code></td>
+<td>The character to use for indentation (default is space).</td>
+</tr>
+<tr>
+<td><code>indentation</code></td>
+<td><code>int</code></td>
+<td>The number of indent characters per level (default is 2).</td>
+</tr>
+<tr>
+<td><code>depth</code></td>
+<td><code>int</code></td>
+<td>The current nesting depth (default is 0).</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The formatted XferLang representation of the processing instruction.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-elements-referenceelement"><h3>Class: ReferenceElement</h3>
+<p>Represents a reference wrapper element introduced by backtick specifiers that encloses another element.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Target</code></td>
+<td><code>Element</code></td>
+<td>Gets or sets the target element that this processing instruction applies to. Can be null if the processing instruction applies globally or has no specific target.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ReferenceElement(Element value, int specifierCount, ElementStyle style)</code>
+<p>Initializes a new instance of the ReferenceElement class with the specified value and name.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>Element</code></td>
+<td>The enclosed element being referenced.</td>
+</tr>
+<tr>
+<td><code>specifierCount</code></td>
+<td><code>int</code></td>
+<td>Number of specifier characters.</td>
+</tr>
+<tr>
+<td><code>style</code></td>
+<td><code>ElementStyle</code></td>
+<td>Delimiter style controlling serialization.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+<p>Virtual method for handling element-specific processing. Override this method in derived classes to implement custom element handling logic.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>element</code></td>
+<td><code>Element</code></td>
+<td>The element to be processed.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ReferenceHandler</h5>
+<code>void ReferenceHandler()</code>
+<p>Virtual method for handling reference-specific logic. Override this method in derived classes to implement custom reference behavior.</p>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer()</code>
+<p>Converts the processing instruction to its XferLang string representation without formatting.</p>
+<h6>Returns</h6>
+<p>The XferLang representation of the processing instruction.</p>
+</div>
+<div class="method-doc">
+<h5>ToXfer</h5>
+<code>string ToXfer(Formatting formatting, Char indentChar, int indentation, int depth)</code>
+<p>Converts the processing instruction to its XferLang string representation with specified formatting options.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>formatting</code></td>
+<td><code>Formatting</code></td>
+<td>The formatting options to apply.</td>
+</tr>
+<tr>
+<td><code>indentChar</code></td>
+<td><code>Char</code></td>
+<td>The character to use for indentation (default is space).</td>
+</tr>
+<tr>
+<td><code>indentation</code></td>
+<td><code>int</code></td>
+<td>The number of indent characters per level (default is 2).</td>
+</tr>
+<tr>
+<td><code>depth</code></td>
+<td><code>int</code></td>
+<td>The current nesting depth (default is 0).</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The formatted XferLang representation of the processing instruction.</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-elements-stringelement"><h3>Class: StringElement</h3>
@@ -5072,6 +6158,11 @@
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr>
+<td><code>ParsedValue</code></td>
+<td><code>Object</code></td>
+<td>Gets the parsed value of this element for external evaluation. For typed elements, this returns the strongly-typed Value.</td>
+</tr>
+<tr>
 <td><code>Value</code></td>
 <td><code>T</code></td>
 <td>Gets or sets the strongly-typed value stored in this element.</td>
@@ -5289,32 +6380,6 @@
 </div>
 </section>
 </section>
-<section id="namespace-parkscomputing-xfer-lang-models"><h2>Namespace: ParksComputing.Xfer.Lang.Models</h2>
-<section id="type-parkscomputing-xfer-lang-models-person"><h3>Class: Person</h3>
-<p>Represents a simple person model used for testing and demonstration purposes. Contains basic personal information properties for serialization examples.</p>
-<h4>Properties</h4>
-<table class="api-table">
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-<tr>
-<td><code>Age</code></td>
-<td><code>int</code></td>
-<td>Gets or sets the person's age in years.</td>
-</tr>
-<tr>
-<td><code>Name</code></td>
-<td><code>string</code></td>
-<td>Gets or sets the person's name.</td>
-</tr>
-</tbody>
-</table>
-<h4>Methods</h4>
-<div class="method-doc">
-<h5>Constructor</h5>
-<code>Person()</code>
-</div>
-</section>
-</section>
 <section id="namespace-parkscomputing-xfer-lang-processinginstructions"><h2>Namespace: ParksComputing.Xfer.Lang.ProcessingInstructions</h2>
 <section id="type-parkscomputing-xfer-lang-processinginstructions-chardefprocessinginstruction"><h3>Class: CharDefProcessingInstruction</h3>
 <p>Processing instruction for defining custom character definitions in XferLang. Allows mapping of custom character names to Unicode code points for use in character elements. The instruction expects an object containing name-to-codepoint mappings.</p>
@@ -5366,6 +6431,78 @@
 <h5>ProcessingInstructionHandler</h5>
 <code>void ProcessingInstructionHandler()</code>
 <p>Handles the processing of character definitions by registering the custom character mappings globally. Validates that all values are character elements and updates the CharacterIdRegistry.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-conditionalelementexception"><h3>Class: ConditionalElementException</h3>
+<p>Exception thrown when a conditional element should not be added to the document. This signals to the parser that the element should be skipped.</p>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ConditionalElementException(string message)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-definedprocessinginstruction"><h3>Class: DefinedProcessingInstruction</h3>
+<p>Processing instruction for checking if any element is defined (has a meaningful value). Returns true if the element exists and has a non-null, non-empty value, false otherwise. This works like #ifdef but for any element type - dynamic elements, characters, references, etc. Integrates with the dynamic element system for powerful conditional logic.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>IsDefined</code></td>
+<td><code>bool</code></td>
+<td>The result of the definition check - true if the element is defined (has meaningful value), false otherwise.</td>
+</tr>
+<tr>
+<td><code>SourceElement</code></td>
+<td><code>Element</code></td>
+<td>The element to check for definition (any element type).</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DefinedProcessingInstruction(Element value)</code>
+<p>Initializes a new instance of the DefinedProcessingInstruction class.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>Element</code></td>
+<td>The element to check for definition (any element type).</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+<p>Handles element processing for the defined PI. This is typically not used for conditional PIs as they evaluate during processing instruction handling.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>element</code></td>
+<td><code>Element</code></td>
+<td>The element to process (unused for this PI type).</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ProcessingInstructionHandler</h5>
+<code>void ProcessingInstructionHandler()</code>
+<p>Handles the processing of the element definition check. This performs the actual conditional evaluation and stores the result. Now delegates to the DefinedOperator in the Scripting namespace for consistent logic.</p>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+<p>Gets a string representation of this defined PI showing the element and result.</p>
+<h6>Returns</h6>
+<p>A string in the format "defined(element_type: 'element_value') = result".</p>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-processinginstructions-documentprocessinginstruction"><h3>Class: DocumentProcessingInstruction</h3>
@@ -5481,32 +6618,94 @@
 </table>
 </div>
 </section>
-<section id="type-parkscomputing-xfer-lang-processinginstructions-metaprocessinginstruction"><h3>Class: MetaProcessingInstruction</h3>
-<p>Processing instruction for storing metadata information in XferLang documents. Provides a way to attach arbitrary metadata such as authorship, creation dates, versioning information, and other descriptive properties to elements or documents.</p>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-ifprocessinginstruction"><h3>Class: IfProcessingInstruction</h3>
+<p>Processing instruction for conditional execution based on expressions. Evaluates a condition and conditionally affects the target element based on the result. Demonstrates the hybrid approach where processing instructions delegate to reusable scripting operators.</p>
 <h4>Properties</h4>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr>
-<td><code>Metadata</code></td>
-<td><code>XferMetadata</code></td>
-<td>Gets or sets the metadata object containing structured metadata information. This property shadows the base Metadata property to provide strongly-typed access.</td>
+<td><code>ConditionExpression</code></td>
+<td><code>Element</code></td>
+<td>The condition expression to evaluate.</td>
+</tr>
+<tr>
+<td><code>ConditionMet</code></td>
+<td><code>bool</code></td>
+<td>The result of the condition evaluation - true if the condition is met, false otherwise.</td>
+</tr>
+<tr>
+<td><code>UnknownOperator</code></td>
+<td><code>bool</code></td>
+<td>True when the operator name in the condition expression was unknown and treated as a no-op. Used to preserve the PI in serialization for user visibility.</td>
 </tr>
 </tbody>
 </table>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
-<code>MetaProcessingInstruction(ObjectElement value)</code>
-<p>Initializes a new instance of the MetaProcessingInstruction class with the specified metadata object.</p>
+<code>IfProcessingInstruction(Element conditionExpression, Parser parser)</code>
+</div>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+<p>Handles element processing based on the conditional evaluation result. If the condition is met, the element is processed normally. If the condition is not met, we signal that the element should not be added to the document.</p>
 <h6>Parameters</h6>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr>
-<td><code>value</code></td>
-<td><code>ObjectElement</code></td>
-<td>The object element containing metadata key-value pairs.</td>
+<td><code>element</code></td>
+<td><code>Element</code></td>
+<td>The target element to conditionally process.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ProcessingInstructionHandler</h5>
+<code>void ProcessingInstructionHandler()</code>
+<p>Handles the processing of the conditional expression evaluation. This delegates to the IfOperator in the Scripting namespace for consistent logic while providing the Processing Instruction interface for document-level usage.</p>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+<p>Gets a string representation of this if PI showing the condition and result.</p>
+<h6>Returns</h6>
+<p>A string in the format "if(condition_type: 'condition_value') = result".</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-letprocessinginstruction"><h3>Class: LetProcessingInstruction</h3>
+<p>Standalone let processing instruction: <! let name <value> !> Mirrors the let operator used inside a script processing instruction but as a first-class PI.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>BindingName</code></td>
+<td><code>string</code></td>
+<td>The identifier introduced into the current binding scope by this PI. Distinct from the PI keyword ("let") and no longer shadows .</td>
+</tr>
+<tr>
+<td><code>BoundValue</code></td>
+<td><code>Element</code></td>
+<td>The (possibly structured) value element bound to . All internal dereferences are resolved before binding.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+<p>Binds the resolved value to  in the parser scope so subsequent siblings can dereference it. Suppresses serialization of the PI itself.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>element</code></td>
+<td><code>Element</code></td>
+<td>The target element the PI is attached to.</td>
 </tr>
 </tbody>
 </table>
@@ -5522,6 +6721,11 @@
 <td><code>Kvp</code></td>
 <td><code>KeyValuePairElement</code></td>
 <td>Gets or sets the key-value pair element that contains the processing instruction's name and value. This represents the structured data of the processing instruction.</td>
+</tr>
+<tr>
+<td><code>SuppressSerialization</code></td>
+<td><code>bool</code></td>
+<td>When true, this processing instruction will not serialize (used for successful conditional IF PIs).</td>
 </tr>
 <tr>
 <td><code>Target</code></td>
@@ -5640,6 +6844,73 @@
 <td><code>value</code></td>
 <td><code>ObjectElement</code></td>
 <td>The object element containing custom property definitions.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-scriptprocessinginstruction"><h3>Class: ScriptProcessingInstruction</h3>
+<p>Processing Instruction that executes scripting operator invocations prior to parsing its target element. New syntax example: <! script ( let name <value> ) !> <targetElement> The let operator uses a plain  for the binding name instead of a reference element. Additional operators may be appended within the same tuple in future extensions.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Operations</code></td>
+<td><code>TupleElement</code></td>
+<td>The tuple of operator invocations to execute prior to parsing the target element. Currently supports let bindings; future operators may be added.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+<p>Executes supported operators (currently let) before normal element processing and updates the target subtree to resolve any dereferences that became available.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>element</code></td>
+<td><code>Element</code></td>
+<td>The target element associated with this PI.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-processinginstructions-tagprocessinginstruction"><h3>Class: TagProcessingInstruction</h3>
+<p>Processing instruction for assigning a single tag to elements in XferLang. The tag processing instruction associates a string tag with an element, enabling element categorization and group selection within the document. Multiple elements can share the same tag, but each element can have only one tag.</p>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>TagProcessingInstruction(TextElement value)</code>
+<p>Initializes a new instance of the TagProcessingInstruction class with the specified tag value.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>value</code></td>
+<td><code>TextElement</code></td>
+<td>The text element containing the tag value to assign to the target element.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ElementHandler</h5>
+<code>void ElementHandler(Element element)</code>
+<p>Handles element processing by setting the tag value on the target element. Throws an exception if the element already has a tag assigned.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>element</code></td>
+<td><code>Element</code></td>
+<td>The element to assign the tag to.</td>
 </tr>
 </tbody>
 </table>
@@ -5930,6 +7201,1194 @@
 </tr>
 </tbody>
 </table>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-scripting"><h2>Namespace: ParksComputing.Xfer.Lang.Scripting</h2>
+<section id="type-parkscomputing-xfer-lang-scripting-operatorregistry"><h3>Static Class: OperatorRegistry</h3>
+<p>Global registry for scripting operators that provides centralized operator management. This allows operators to query for other registered operators without circular dependencies.</p>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Clear</h5>
+<code>void Clear()</code>
+<p>Clears all registered operators.</p>
+</div>
+<div class="method-doc">
+<h5>ClearRegistry</h5>
+<code>void ClearRegistry()</code>
+<p>Clears all registered operators (alias for Clear method).</p>
+</div>
+<div class="method-doc">
+<h5>CreateOperator</h5>
+<code>ScriptingOperator CreateOperator(string operatorName)</code>
+<p>Creates an instance of the specified operator.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>operatorName</code></td>
+<td><code>string</code></td>
+<td>The name of the operator to create.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A new instance of the operator, or null if not found.</p>
+</div>
+<div class="method-doc">
+<h5>GetDiagnosticInfo</h5>
+<code>Dictionary&lt;string, Object&gt; GetDiagnosticInfo()</code>
+<p>Gets diagnostic information about the operator registry.</p>
+<h6>Returns</h6>
+<p>A dictionary containing diagnostic information.</p>
+</div>
+<div class="method-doc">
+<h5>GetOperatorType</h5>
+<code>Type GetOperatorType(string operatorName)</code>
+<p>Gets the type of the specified operator.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>operatorName</code></td>
+<td><code>string</code></td>
+<td>The name of the operator.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The type of the operator, or null if not found.</p>
+</div>
+<div class="method-doc">
+<h5>GetRegisteredOperatorNames</h5>
+<code>IReadOnlyCollection&lt;string&gt; GetRegisteredOperatorNames()</code>
+<p>Gets all registered operator names.</p>
+<h6>Returns</h6>
+<p>A read-only collection of registered operator names.</p>
+</div>
+<div class="method-doc">
+<h5>IsOperatorRegistered</h5>
+<code>bool IsOperatorRegistered(string operatorName)</code>
+<p>Checks if an operator is registered with the specified name.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>operatorName</code></td>
+<td><code>string</code></td>
+<td>The name of the operator to check.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the operator is registered; otherwise, false.</p>
+</div>
+<div class="method-doc">
+<h5>RegisterBuiltInOperators</h5>
+<code>void RegisterBuiltInOperators()</code>
+<p>Registers all built-in operators that come with the scripting system. This method should be called during application initialization.</p>
+</div>
+<div class="method-doc">
+<h5>RegisterOperator</h5>
+<code>void RegisterOperator()</code>
+<p>Registers an operator type with the global registry.</p>
+</div>
+<div class="method-doc">
+<h5>RegisterOperator</h5>
+<code>void RegisterOperator(string operatorName, Type operatorType)</code>
+<p>Registers an operator type with the global registry by name and type.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>operatorName</code></td>
+<td><code>string</code></td>
+<td>The name of the operator.</td>
+</tr>
+<tr>
+<td><code>operatorType</code></td>
+<td><code>Type</code></td>
+<td>The type of the operator.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>UnregisterOperator</h5>
+<code>bool UnregisterOperator(string operatorName)</code>
+<p>Unregisters an operator from the global registry.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>operatorName</code></td>
+<td><code>string</code></td>
+<td>The name of the operator to unregister.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the operator was found and removed; otherwise, false.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-scriptingarchitecturedemo"><h3>Static Class: ScriptingArchitectureDemo</h3>
+<p>Demonstration and testing class for the new Scripting namespace architecture. Shows how the separated operators provide clean, reusable conditional logic outside of the Processing Instruction hierarchy.</p>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>DemonstrateBackwardCompatibility</h5>
+<code>void DemonstrateBackwardCompatibility()</code>
+<p>Demonstrates how the new architecture maintains backward compatibility with existing Processing Instructions while providing enhanced capabilities.</p>
+</div>
+<div class="method-doc">
+<h5>RunBasicDemo</h5>
+<code>void RunBasicDemo()</code>
+<p>Demonstrates the basic usage of the scripting engine with various operators.</p>
+</div>
+<div class="method-doc">
+<h5>ShowDiagnosticInfo</h5>
+<code>void ShowDiagnosticInfo()</code>
+<p>Shows diagnostic information about the scripting engine state.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-scriptingcontext"><h3>Class: ScriptingContext</h3>
+<p>Provides execution context for scripting operations including variable resolution, environment access, and parser integration for expression evaluation.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Architecture</code></td>
+<td><code>string</code></td>
+<td>Gets the current processor architecture for architecture-specific conditional logic.</td>
+</tr>
+<tr>
+<td><code>CurrentElement</code></td>
+<td><code>Element</code></td>
+<td>Gets or sets the current element being processed, if any.</td>
+</tr>
+<tr>
+<td><code>DotNetVersion</code></td>
+<td><code>Version</code></td>
+<td>Gets the current .NET runtime version.</td>
+</tr>
+<tr>
+<td><code>IsDebug</code></td>
+<td><code>bool</code></td>
+<td>Gets a value indicating whether this is a debug build.</td>
+</tr>
+<tr>
+<td><code>Parser</code></td>
+<td><code>Parser</code></td>
+<td>Gets or sets the parser instance for access to parsing context and configuration.</td>
+</tr>
+<tr>
+<td><code>Platform</code></td>
+<td><code>string</code></td>
+<td>Gets the current platform name for platform-specific conditional logic.</td>
+</tr>
+<tr>
+<td><code>ProcessorCount</code></td>
+<td><code>int</code></td>
+<td>Gets the number of logical processors available on the current machine.</td>
+</tr>
+<tr>
+<td><code>Variables</code></td>
+<td><code>Dictionary&lt;string, Object&gt;</code></td>
+<td>Gets or sets the dictionary of user-defined variables available for dynamic element resolution.</td>
+</tr>
+<tr>
+<td><code>WorkingDirectory</code></td>
+<td><code>string</code></td>
+<td>Gets the current working directory.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ScriptingContext()</code>
+<p>Initializes a new instance of the ScriptingContext class.</p>
+</div>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ScriptingContext(Parser parser)</code>
+<p>Initializes a new instance of the ScriptingContext class with the specified parser.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>parser</code></td>
+<td><code>Parser</code></td>
+<td>The parser instance to associate with this context.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ClearVariables</h5>
+<code>void ClearVariables()</code>
+<p>Clears all variables from the context (except built-in environment variables).</p>
+</div>
+<div class="method-doc">
+<h5>GetEnvironmentVariable</h5>
+<code>string GetEnvironmentVariable(string variableName)</code>
+<p>Gets the value of an environment variable.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>variableName</code></td>
+<td><code>string</code></td>
+<td>The name of the environment variable.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The value of the environment variable, or null if not found.</p>
+</div>
+<div class="method-doc">
+<h5>RemoveVariable</h5>
+<code>bool RemoveVariable(string name)</code>
+<p>Removes a variable from the context.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>The variable name to remove.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the variable was found and removed; otherwise, false.</p>
+</div>
+<div class="method-doc">
+<h5>SetVariable</h5>
+<code>void SetVariable(string name, Object value)</code>
+<p>Sets a variable in the context.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>The variable name.</td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td><code>Object</code></td>
+<td>The variable value.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>TryResolveVariable</h5>
+<code>bool TryResolveVariable(string variableName, Object& value)</code>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-scriptingengine"><h3>Class: ScriptingEngine</h3>
+<p>Scripting engine that provides expression evaluation capabilities using registered operators. This engine coordinates the execution of scripting operators and manages their lifecycle.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Context</code></td>
+<td><code>ScriptingContext</code></td>
+<td>Gets the scripting context used by this engine.</td>
+</tr>
+<tr>
+<td><code>RegisteredOperators</code></td>
+<td><code>IEnumerable&lt;string&gt;</code></td>
+<td>Gets the collection of registered operator names.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>ScriptingEngine(ScriptingContext context)</code>
+<p>Initializes a new instance of the ScriptingEngine with a scripting context.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>context</code></td>
+<td><code>ScriptingContext</code></td>
+<td>The scripting context containing variables and environment information.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ClearCustomOperators</h5>
+<code>void ClearCustomOperators()</code>
+<p>Clears all registered operators except built-in ones.</p>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(string operatorName, Element[] arguments)</code>
+<p>Evaluates an expression using the specified operator and arguments.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>operatorName</code></td>
+<td><code>string</code></td>
+<td>The name of the operator to use.</td>
+</tr>
+<tr>
+<td><code>arguments</code></td>
+<td><code>Element[]</code></td>
+<td>The arguments to pass to the operator.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The result of the operator evaluation, or null if no result is available.</p>
+</div>
+<div class="method-doc">
+<h5>GetAllOperators</h5>
+<code>IEnumerable&lt;ScriptingOperator&gt; GetAllOperators()</code>
+<p>Gets all registered operators.</p>
+<h6>Returns</h6>
+<p>A collection of all registered operators.</p>
+</div>
+<div class="method-doc">
+<h5>GetDiagnosticInfo</h5>
+<code>Dictionary&lt;string, Object&gt; GetDiagnosticInfo()</code>
+<p>Gets diagnostic information about the scripting engine state.</p>
+<h6>Returns</h6>
+<p>A dictionary containing diagnostic information.</p>
+</div>
+<div class="method-doc">
+<h5>GetOperator</h5>
+<code>ScriptingOperator GetOperator(string operatorName)</code>
+<p>Gets information about a registered operator.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>operatorName</code></td>
+<td><code>string</code></td>
+<td>The name of the operator.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The operator instance if found; otherwise, null.</p>
+</div>
+<div class="method-doc">
+<h5>GetOperatorsByCategory</h5>
+<code>IEnumerable&lt;ScriptingOperator&gt; GetOperatorsByCategory(string category)</code>
+<p>Gets operators by category (based on namespace).</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>category</code></td>
+<td><code>string</code></td>
+<td>The category to filter by (e.g., "Comparison", "Logical", "Utility").</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A collection of operators in the specified category.</p>
+</div>
+<div class="method-doc">
+<h5>IsOperatorRegistered</h5>
+<code>bool IsOperatorRegistered(string operatorName)</code>
+<p>Checks if an operator is registered with the specified name.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>operatorName</code></td>
+<td><code>string</code></td>
+<td>The name of the operator to check.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the operator is registered; otherwise, false.</p>
+</div>
+<div class="method-doc">
+<h5>RegisterOperator</h5>
+<code>void RegisterOperator(ScriptingOperator operator)</code>
+<p>Registers a scripting operator with the engine.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>operator</code></td>
+<td><code>ScriptingOperator</code></td>
+<td>The operator to register.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+<p>Returns a string representation of the scripting engine state.</p>
+<h6>Returns</h6>
+<p>A string describing the engine's current state.</p>
+</div>
+<div class="method-doc">
+<h5>TryEvaluate</h5>
+<code>bool TryEvaluate(string operatorName, Element[] arguments, Object& result)</code>
+</div>
+<div class="method-doc">
+<h5>UnregisterOperator</h5>
+<code>bool UnregisterOperator(string operatorName)</code>
+<p>Unregisters a scripting operator from the engine.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>operatorName</code></td>
+<td><code>string</code></td>
+<td>The name of the operator to unregister.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the operator was found and removed; otherwise, false.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-scriptingoperator"><h3>Abstract Class: ScriptingOperator</h3>
+<p>Abstract base class for scripting operators that evaluate expressions in XferLang. Provides the foundation for comparison, logical, utility, and other expression operators used in conditional logic and dynamic content resolution.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td>Gets a brief description of what this operator does. Used for documentation and error messages.</td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td>Gets the maximum number of arguments this operator accepts. Return -1 for unlimited arguments.</td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td>Gets the minimum number of arguments this operator requires.</td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td>Gets the unique name identifier for this operator. This name is used to register and lookup the operator in the scripting engine.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Evaluates the operator with the specified arguments in the given context.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>context</code></td>
+<td><code>ScriptingContext</code></td>
+<td>The scripting context containing variables and environment information.</td>
+</tr>
+<tr>
+<td><code>arguments</code></td>
+<td><code>Element[]</code></td>
+<td>The arguments to evaluate. Number and types depend on the specific operator.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The result of the operator evaluation, or null if no result is available.</p>
+</div>
+<div class="method-doc">
+<h5>IsNumeric</h5>
+<code>bool IsNumeric(Type type)</code>
+<p>Determines if a type is numeric (can be used in numeric comparisons).</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td><code>Type</code></td>
+<td>The type to check.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>True if the type is numeric; otherwise, false.</p>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+<p>Returns a string representation of this operator.</p>
+<h6>Returns</h6>
+<p>A string containing the operator name and description.</p>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-scripting-comparison"><h2>Namespace: ParksComputing.Xfer.Lang.Scripting.Comparison</h2>
+<section id="type-parkscomputing-xfer-lang-scripting-comparison-equalsoperator"><h3>Class: EqualsOperator</h3>
+<p>Scripting operator that checks if two elements are equal. Provides flexible equality comparison handling different element types and values.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td>Gets a brief description of what this operator does.</td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td>Gets the maximum number of arguments this operator accepts. The equals operator accepts exactly two arguments.</td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td>Gets the minimum number of arguments this operator requires. The equals operator requires exactly two arguments to compare.</td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td>Gets the unique name identifier for this operator.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>EqualsOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Evaluates whether two elements are equal. Equality semantics: - Resolves both elements to their actual values using context - Handles null comparisons (null == null is true, null != anything else) - Performs type-appropriate comparisons: - String comparisons are case-sensitive by default - Numeric comparisons handle type coercion (int vs double, etc.) - Boolean comparisons are direct - Object comparisons use .Equals() method</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>context</code></td>
+<td><code>ScriptingContext</code></td>
+<td>The scripting context containing variables and environment information.</td>
+</tr>
+<tr>
+<td><code>arguments</code></td>
+<td><code>Element[]</code></td>
+<td>The two elements to compare. Must contain exactly two elements.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>Boolean true if the elements are equal; otherwise, false.</p>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+<p>Returns a detailed string representation of this operator.</p>
+<h6>Returns</h6>
+<p>A string describing the operator and its usage.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-comparison-greaterthanoperator"><h3>Class: GreaterThanOperator</h3>
+<p>Scripting operator that determines whether the first argument is greater than the second. Supports numeric coercion; for non-numeric comparable types (string) falls back to ordinal comparison.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>GreaterThanOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Evaluates the operator returning true when the resolved left value is strictly greater than the resolved right value.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>context</code></td>
+<td><code>ScriptingContext</code></td>
+<td>Active scripting context used to resolve element values.</td>
+</tr>
+<tr>
+<td><code>arguments</code></td>
+<td><code>Element[]</code></td>
+<td>Exactly two elements: left and right.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>true if left > right; otherwise false. If either operand is null the result is false.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-comparison-greaterthanorequaloperator"><h3>Class: GreaterThanOrEqualOperator</h3>
+<p>Scripting operator that determines whether the first (left) argument is greater than or equal to the second (right) argument. Null handling: null >= null returns true; any other combination with null returns false.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>GreaterThanOrEqualOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Evaluates the operator returning true when left >= right after resolving argument values.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>context</code></td>
+<td><code>ScriptingContext</code></td>
+<td>Active scripting context used to resolve element values.</td>
+</tr>
+<tr>
+<td><code>arguments</code></td>
+<td><code>Element[]</code></td>
+<td>Exactly two elements: left and right.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>true if left >= right; otherwise false. When both operands are null returns true.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-comparison-lessthanoperator"><h3>Class: LessThanOperator</h3>
+<p>Scripting operator that determines whether the first (left) argument is strictly less than the second (right) argument. Supports numeric coercion,  comparison, and falls back to ordinal string comparison when types differ. Symbol: lt</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>LessThanOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Evaluates the operator returning true when the resolved left value is strictly less than the resolved right value.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>context</code></td>
+<td><code>ScriptingContext</code></td>
+<td>Active scripting context used to resolve element values.</td>
+</tr>
+<tr>
+<td><code>arguments</code></td>
+<td><code>Element[]</code></td>
+<td>Exactly two elements: left and right.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>true if [0] is strictly less than [1]; otherwise false. Returns false if either side is null.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-comparison-lessthanorequaloperator"><h3>Class: LessThanOrEqualOperator</h3>
+<p>Scripting operator that determines whether the first (left) argument is less than or equal to the second (right) argument. Null handling: null <= null returns true; any other combination with null returns false.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>LessThanOrEqualOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Evaluates the operator returning true when left <= right after resolving argument values.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>context</code></td>
+<td><code>ScriptingContext</code></td>
+<td>Active scripting context used to resolve element values.</td>
+</tr>
+<tr>
+<td><code>arguments</code></td>
+<td><code>Element[]</code></td>
+<td>Exactly two elements: left and right.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>true if left <= right; otherwise false. When both operands are null returns true.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-comparison-notequaloperator"><h3>Class: NotEqualOperator</h3>
+<p>Logical negation of EqualsOperator (eq). Returns true when operands are not equal.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>NotEqualOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Evaluates the operator returning true when the two resolved argument values are not equal. Delegates equality logic to  and negates the result.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>context</code></td>
+<td><code>ScriptingContext</code></td>
+<td>Active scripting context used to resolve element values.</td>
+</tr>
+<tr>
+<td><code>arguments</code></td>
+<td><code>Element[]</code></td>
+<td>Exactly two elements to compare.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>true if arguments are not equal; otherwise false.</p>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-scripting-logical"><h2>Namespace: ParksComputing.Xfer.Lang.Scripting.Logical</h2>
+<section id="type-parkscomputing-xfer-lang-scripting-logical-andoperator"><h3>Class: AndOperator</h3>
+<p>Logical conjunction operator that evaluates arguments left-to-right and short-circuits on the first falsey value.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td>Unlimited additional arguments may be supplied.</td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>AndOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Returns false for the first falsey argument; otherwise true.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-logical-ifoperator"><h3>Class: IfOperator</h3>
+<p>Scripting operator providing conditional evaluation. Returns one of two values depending on the truthiness of the first argument. Usage: if condition trueValue [ falseValue ]. Also leveraged by the if processing instruction. Nested operator expressions (e.g., if defined <|NAME|>) are supported.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td>Gets a brief description of what this operator does.</td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td>Gets the maximum number of arguments this operator accepts. The if operator accepts at most 3 arguments: condition, true-value, and false-value.</td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td>Gets the minimum number of arguments this operator requires. The if operator requires at least 2 arguments: condition and true-value.</td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td>Gets the unique name identifier for this operator.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>IfOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Evaluates a conditional expression and returns the appropriate value. Conditional semantics: - First argument: The condition to evaluate (any element or expression) - Second argument: Value to return if condition is true - Third argument (optional): Value to return if condition is false (defaults to null) Truthiness evaluation: - Boolean true/false values are used directly - Non-null, non-empty strings are considered true - Non-zero numbers are considered true - Non-null objects are considered true - null, empty strings, and zero are considered false</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>context</code></td>
+<td><code>ScriptingContext</code></td>
+<td>The scripting context containing variables and environment information.</td>
+</tr>
+<tr>
+<td><code>arguments</code></td>
+<td><code>Element[]</code></td>
+<td>The condition and value arguments. Must contain 2-3 elements.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The true-value if condition is true, false-value if condition is false, or null if no false-value provided.</p>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+<p>Returns a detailed string representation of this operator.</p>
+<h6>Returns</h6>
+<p>A string describing the operator and its usage.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-logical-notoperator"><h3>Class: NotOperator</h3>
+<p>Logical negation operator that inverts the truthiness of a single argument.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td>Exactly one argument.</td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>NotOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Returns true when the argument is falsey; otherwise false.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-logical-oroperator"><h3>Class: OrOperator</h3>
+<p>Logical disjunction operator that evaluates arguments left-to-right and short-circuits on the first truthy value.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td>Unlimited additional arguments may be supplied.</td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>OrOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Returns true for the first truthy argument; otherwise false.</p>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-scripting-logical-xoroperator"><h3>Class: XorOperator</h3>
+<p>Logical exclusive OR operator returning true only when exactly one of the two arguments is truthy.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td>Exactly two arguments.</td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XorOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Returns true when exactly one argument is truthy.</p>
+</div>
+</section>
+</section>
+<section id="namespace-parkscomputing-xfer-lang-scripting-utility"><h2>Namespace: ParksComputing.Xfer.Lang.Scripting.Utility</h2>
+<section id="type-parkscomputing-xfer-lang-scripting-utility-definedoperator"><h3>Class: DefinedOperator</h3>
+<p>Scripting operator that checks if an element has a meaningful value (is "defined"). This is the extracted core logic from DefinedProcessingInstruction, designed to be reusable across different contexts within the scripting system.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>Description</code></td>
+<td><code>string</code></td>
+<td>Gets a brief description of what this operator does.</td>
+</tr>
+<tr>
+<td><code>MaxArguments</code></td>
+<td><code>int</code></td>
+<td>Gets the maximum number of arguments this operator accepts. The defined operator accepts exactly one argument.</td>
+</tr>
+<tr>
+<td><code>MinArguments</code></td>
+<td><code>int</code></td>
+<td>Gets the minimum number of arguments this operator requires. The defined operator requires exactly one argument to check.</td>
+</tr>
+<tr>
+<td><code>OperatorName</code></td>
+<td><code>string</code></td>
+<td>Gets the unique name identifier for this operator.</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>DefinedOperator()</code>
+</div>
+<div class="method-doc">
+<h5>Evaluate</h5>
+<code>Object Evaluate(ScriptingContext context, Element[] arguments)</code>
+<p>Evaluates whether the specified element is "defined" (has a meaningful value). Definition semantics: - An element is considered "defined" if its ParsedValue is not null - For DynamicElement: Uses runtime value resolution with string.IsNullOrEmpty check - For CollectionElement: Defined if has at least one child element - For other elements: Defined if ParsedValue is not null - Variables from context: Defined if variable exists and has non-null value</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>context</code></td>
+<td><code>ScriptingContext</code></td>
+<td>The scripting context containing variables and environment information.</td>
+</tr>
+<tr>
+<td><code>arguments</code></td>
+<td><code>Element[]</code></td>
+<td>The element to check for definition. Must contain exactly one element.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>Boolean true if the element is defined; otherwise, false.</p>
+</div>
+<div class="method-doc">
+<h5>ToString</h5>
+<code>string ToString()</code>
+<p>Returns a detailed string representation of this operator.</p>
+<h6>Returns</h6>
+<p>A string describing the operator and its usage.</p>
 </div>
 </section>
 </section>
@@ -6299,8 +8758,6 @@
 </tr>
 </tbody>
 </table>
-<h6>Returns</h6>
-<p>An XferDocument containing the parsed elements and metadata.</p>
 </div>
 <div class="method-doc">
 <h5>Parse</h5>
@@ -6344,7 +8801,7 @@
 
 
         <footer>
-            <p>Documentation generated on 2025-08-06 02:51:44 UTC</p>
+            <p>Documentation generated on 2025-08-11 03:55:44 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

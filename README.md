@@ -100,17 +100,18 @@ XferLang is a data-interchange format designed to support data serialization, da
 *   **Structured Root**: All XferLang documents require a root collection element (Object, Array, or Tuple) to ensure well-defined document structure and unambiguous parsing.
 
 ## XferLang by Example
+XferLang is meant to feel familiar if you already work with JSON while offering alternative trade‑offs: explicit typing, flexible whitespace, delimiter repetition instead of character escaping, and built‑in processing instructions (PIs) for document‑local behavior.
 
-Perhaps the easiest way to understand XferLang is to see it compared to a familiar format like JSON.
+### A Direct Comparison
 
-Here's a simple XferLang document:
+Simple XferLang document:
 
 ```xfer
 {
     name "Alice"
     age 30
     isMember ~true
-    scores [*85 *90 *78.5]
+    scores [ *85 *90 *78.5 ]
     profile {
         email "alice@example.com"
         joinedDate @2023-01-15T12:00:00@
@@ -118,61 +119,186 @@ Here's a simple XferLang document:
 }
 ```
 
-And here is the equivalent JSON document:
+Equivalent JSON:
 
 ```json
 {
-    "name": "Alice",
-    "age": 30,
-    "isMember": true,
-    "scores": [85, 90, 78.5],
-    "profile": {
-        "email": "alice@example.com",
-        "joinedDate": "2023-01-15T12:00:00"
-    }
+  "name": "Alice",
+  "age": 30,
+  "isMember": true,
+  "scores": [85, 90, 78.5],
+  "profile": {
+    "email": "alice@example.com",
+    "joinedDate": "2023-01-15T12:00:00"
+  }
 }
 ```
 
-In contrast to JSON, XferLang eliminates commas, uses explicit type prefixes for certain types (`*` for decimal, `~` for Boolean, `?` for null) while maintaining readability.
-
-Because whitespace is flexible, the same XferLang document can be made extremely compact:
+Whitespace and newlines are optional in XferLang; the same document can be written compactly:
 
 ```xfer
-{name"Alice"age 30 isMember~true scores[*85 *90 *78.5]profile{email"alice@example.com"joinedDate@2023-05-05T20:00:00@}}
+{name"Alice"age 30 isMember~true scores[*85 *90 *78.5]profile{email"alice@example.com"joinedDate@2023-01-15T12:00:00@}}
 ```
+
+### Additional Practical Examples
+
+#### Configuration With Types and Dates
+```xfer
+<! document { version "1.2" } !>
+{
+    service { host "api.example.com" port 8443 ssl ~true timeout 30 }
+    database { host "db1" port 5432 poolSize 20 }
+    maintenanceWindow ( @2025-01-15T02:00:00Z@ *2.5 ) </ start, hours />
+}
+```
+
+#### Local Bindings and Dereference
+Bindings introduced with the `let` processing instruction (or the `script` PI) are referenced with a leading underscore.
+
+```xfer
+<! let greeting "World" !>
+{
+    message 'Hello, <_greeting_>.'
+    value _greeting
+}
+```
+
+Same using a script PI to batch multiple lets:
+
+```xfer
+<! script ( let greeting "World" let score *99.5 ) !>
+{
+    summary 'Hi <_greeting_>, your score is <_score_>.'
+}
+```
+
+#### Interpolated Text
+Interpolated text elements (apostrophe delimiters) allow embedded explicit elements:
+
+```xfer
+<! let appName "XferDemo" !>
+{
+    banner 'Launching <_appName_> at <@2025-08-01T12:00:00Z@>'
+}
+```
+
+#### Dynamic Values (Environment / Other Sources)
+Dynamic elements use `|` delimiters and resolve through a configurable resolver. (Current implementation maps an identifier to a value; complex nested content inside `|...|` is not supported.)
+
+```xfer
+<! dynamicSource { username env "USER" } !>
+{
+    currentUser |username|
+    welcome 'User: <|username|>'
+}
+```
+
+#### Arrays vs Tuples
+Arrays are homogeneous; tuples are heterogeneous:
+```xfer
+data {
+    numbers [ 1 2 3 4 ]
+    point ( *42.3601 *-71.0589 @2025-07-04T12:00:00Z@ )
+}
+```
+
+#### Decimal, Integer (Hex/Binary) and Boolean Forms
+```xfer
+metrics {
+    load *0.8125
+    statusCode 200
+    statusMask #%11001100
+    colorCode #$FFAA33
+    healthy ~true
+}
+```
+
+#### Character Definitions and Usage
+```xfer
+<! chardef { bullet \$2022 arrow \$2192 } !>
+{ list [ "Item" \bullet "Next" \arrow ] }
+```
+
+#### Reusing Structured Values
+```xfer
+<! let baseConfig { host "localhost" port 8080 } !>
+{
+    primary _baseConfig
+    secondary { host "localhost" port 8081 }
+}
+```
+
+### What These Examples Highlight (Concise Contrast)
+- Keys do not require quotes when they are simple identifiers.
+- Value types are explicit (`~true`, `*123.45`, `@2025-01-01@`) removing ambiguity.
+- No escaping: delimiter repetition and explicit forms avoid backslash escapes.
+- Bindings and dereferences (`let` / `_name`) support local reuse.
+- Processing instructions provide structured, parse‑time directives.
+
+The remainder of this document drills into the core concepts, the formal language, and the .NET APIs.
+
+## Core Concepts
+
+### Elements and Syntax Forms
+Every value is an element. Most elements support three styles:
+- Implicit: minimal form (e.g., `42`) when unambiguous.
+- Compact: type delimiter(s) (e.g., `#42`, `"text"`).
+- Explicit: wrapped in angle brackets (e.g., `<#42#>`, `<"A quote: "">`) allowing delimiter repetition.
+
+### Collections
+- Object: `{ key value ... }` (unordered key/value pairs; keys are keywords)
+- Array: `[ value value ... ]` (homogeneous)
+- Tuple: `( value value ... )` (heterogeneous)
+
+### Keywords vs Identifiers
+- Keywords (object keys) are implicit barewords or `=...=` when containing characters outside `[A-Za-z0-9_]`.
+- Identifiers (`:name:`) are symbolic values, not keys.
+
+### Numbers
+Integers (`#` or implicit), longs (`&`), decimals (`*` high precision), doubles (`^`). Alternate bases for integers/longs: hex `$`, binary `%`.
+
+### Text and Characters
+Strings: `"..."` (repeat `"` to include the delimiter) or explicit `<"...">`.
+Characters: `\65`, `\$41`, `\%01000001`, or predefined keywords (`\tab`).
+
+### Date / Time
+Date/time values use `@...@` with ISO‑8601 forms. (Date-only and time-only forms may be parsed where implemented.)
+
+### Null
+`?` represents a null value.
+
+### Binding and Dereference
+`<! let name value !>` binds `name` to `value`. Inside subsequent elements the value can be dereferenced with `_name` (or inside interpolation as `<_name_>`). Script PI batches operators: `<! script ( let a 1 let b 2 ) !>`.
+
+### Interpolated Text
+Delimited by apostrophes: `'Hello <_name_>'`. Embedded elements inside must use explicit forms. Expressions are structural replacements; no string escape layer.
+
+### Dynamic Elements
+`|identifier|` resolves through the configured dynamic source resolver (e.g., environment). Content is a single identifier; nested elements are not allowed inside the delimiters in the current implementation.
+
+### Processing Instructions (PIs)
+Compact: `! name value !`  Explicit: `<! name value !>`.
+A PI consists of exactly one key/value pair; the value can be any element (commonly an object for multiple fields). Some PIs introduce bindings or affect subsequent parsing and may be suppressed from serialization after execution.
 
 ## Language Specification
 
 ### Document Structure
 
-An XferLang document consists of two main parts: optional **Processing Instructions** followed by a **Root Collection Element**.
+Order:
+1. Zero or more processing instructions.
+2. Exactly one root collection element (Object, Array, or Tuple).
 
-*   **Metadata Processing Instruction (`document`)**: If present, the `document` processing instruction must be the very first non-comment element in the document. It defines the document's metadata, such as the XferLang version.
-*   **Additional Processing Instructions**: Other processing instructions besides the `document` processing instruction may be placed before the root element.
-*   **Root Collection Element**: The main content of the document must be contained within a single collection element (Object, Array, or Tuple). This ensures the document has a well-defined structure and prevents ambiguity in parsing.
-
-Comments (`</ ... />`) may be placed anywhere in the document.
+Processing instructions each contain one key/value pair. For richer metadata group fields inside an object:
 
 ```xfer
-</ A document processing instruction, which is signified with the reserved keyword `document`
-is optional, but if present it must be the first non-comment element in the document. />
-<! document { version "1.0" } !>
-
-</ Other processing instructions may be placed into the document before the root node. />
-<! id "root" !>
-
-</ The document root node must be a collection element. />
-{
-    message "Hello, World!"
-    count 42
-    config { debug ~true }
-}
+<! document { version "1.0" author "Alice" } !>
+<! let greeting "World" !>
+{ message 'Hi <_greeting_>.' }
 ```
 
-**Valid Root Collection Types:**
-- **Object**: `{ key1 value1 key2 value2 }` - Most common for structured data
-- **Array**: `[ element1 element2 element3 ]` - For homogeneous collections
-- **Tuple**: `( element1 element2 element3 )` - For heterogeneous sequences
+Comments (`</ ... />`) may appear anywhere and are ignored.
+
+Root collection requirement avoids ambiguity and enables streaming parsers.
 
 ### Element Syntax Variations
 
@@ -650,7 +776,20 @@ For documents with heterogeneous top-level content, use Tuple:
     dynamicContent <'Welcome to <|APP_NAME|> version <"1.0">'>
     ```
 
-It is a good practice to use explicit syntax (`<' ... '>`) when you are unsure whether or not the interpolated values may contain single quotes.
+It is a good practice to use explicit syntax (`<' ... '>`) when you are unsure whether interpolated values may contain single quotes.
+
+**Dereference Element**
+* **Specifier:** `_` leading underscores (empty closing delimiter)
+* **Description:** Replaces the dereference token with a previously bound value (`let` or script `let`).
+* **Syntax:** `_name`, `__name` (multiple underscores allowed to disambiguate, must match closing count in explicit form)
+* **In Interpolated Text:** Use explicit form: `'Hello <_name_>'`.
+* **Examples:**
+    ```xfer
+    <! let host "localhost" !>
+    { apiHost _host message 'Host: <_host_>' }
+    ```
+
+Resolution happens as early as possible; unresolved references may be resolved in a later pass if a subsequent `let` appears earlier in structural order.
 
 ### Document Validation and Common Mistakes
 

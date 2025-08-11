@@ -14,6 +14,10 @@ namespace ParksComputing.Xfer.Lang.Elements;
 public abstract class NumericElement<T> : TypedElement<T> where T : struct, IConvertible {
     private NumericValue<T> _numericValue = new NumericValue<T>(default);
 
+    /// <summary>
+    /// Strongly typed wrapper including formatting metadata for the numeric value.
+    /// Setting updates the public <see cref="TypedElement{T}.Value"/>.
+    /// </summary>
     public NumericValue<T> NumericValue {
         get { return _numericValue; }
         set { _numericValue = value; Value = _numericValue.Value; }
@@ -30,6 +34,12 @@ public abstract class NumericElement<T> : TypedElement<T> where T : struct, ICon
         _numericValue = new NumericValue<T>(value);
     }
 
+    /// <summary>
+    /// Initializes a new instance using a <see cref="NumericValue{T}"/> wrapper (carrying formatting metadata).
+    /// </summary>
+    /// <param name="numericValue">Wrapped numeric value with formatting metadata.</param>
+    /// <param name="name">Element name for serialization.</param>
+    /// <param name="delimiter">Delimiter configuration.</param>
     public NumericElement(NumericValue<T> numericValue, string name, ElementDelimiter delimiter) : base(numericValue.Value, name, delimiter)
     {
         NumericValue = numericValue;

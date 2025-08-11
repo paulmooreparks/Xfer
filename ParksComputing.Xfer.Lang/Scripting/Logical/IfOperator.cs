@@ -5,9 +5,9 @@ using ParksComputing.Xfer.Lang.Elements;
 namespace ParksComputing.Xfer.Lang.Scripting.Logical;
 
 /// <summary>
-/// Scripting operator that provides conditional execution based on a condition.
-/// The if operator evaluates a condition and returns one of two possible values based on the result.
-/// This is the core conditional logic operator that can be used standalone or within Processing Instructions.
+/// Scripting operator providing conditional evaluation. Returns one of two values depending on the truthiness
+/// of the first argument. Usage: <c>if condition trueValue [falseValue]</c>. Also leveraged by the <c>if</c>
+/// processing instruction. Nested operator expressions (for example <c>if defined &lt;|NAME|&gt;</c>) are supported.
 /// </summary>
 public class IfOperator : ScriptingOperator {
     /// <summary>

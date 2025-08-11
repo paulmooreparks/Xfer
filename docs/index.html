@@ -29,7 +29,34 @@
         </div>
         <ul>
             <li><a href="#introduction-and-philosophy">Introduction and Philosophy</a></li>
-            <li><a href="#xferlang-by-example">XferLang by Example</a></li>
+            <li>
+                <details>
+                    <summary>XferLang by Example</summary>
+                    <ul>
+                <li><a href="#a-direct-comparison">A Direct Comparison</a></li>
+                <li><a href="#additional-practical-examples">Additional Practical Examples</a></li>
+                <li><a href="#what-these-examples-highlight-concise-contrast">What These Examples Highlight (Concise Contrast)</a></li>
+                    </ul>
+                </details>
+            </li>
+            <li>
+                <details>
+                    <summary>Core Concepts</summary>
+                    <ul>
+                <li><a href="#elements-and-syntax-forms">Elements and Syntax Forms</a></li>
+                <li><a href="#collections">Collections</a></li>
+                <li><a href="#keywords-vs-identifiers">Keywords vs Identifiers</a></li>
+                <li><a href="#numbers">Numbers</a></li>
+                <li><a href="#text-and-characters">Text and Characters</a></li>
+                <li><a href="#date--time">Date / Time</a></li>
+                <li><a href="#null">Null</a></li>
+                <li><a href="#binding-and-dereference">Binding and Dereference</a></li>
+                <li><a href="#interpolated-text">Interpolated Text</a></li>
+                <li><a href="#dynamic-elements">Dynamic Elements</a></li>
+                <li><a href="#processing-instructions-pis">Processing Instructions (PIs)</a></li>
+                    </ul>
+                </details>
+            </li>
             <li>
                 <details>
                     <summary>Language Specification</summary>
@@ -306,64 +333,160 @@
 <li><strong>Structured Root</strong>: All XferLang documents require a root collection element (Object, Array, or Tuple) to ensure well-defined document structure and unambiguous parsing.</li>
 </ul>
 <section id="xferlang-by-example"><h2 id="xferlang-by-example">XferLang by Example</h2>
-<p>Perhaps the easiest way to understand XferLang is to see it compared to a familiar format like JSON.</p>
-<p>Here's a simple XferLang document:</p>
+<p>XferLang is meant to feel familiar if you already work with JSON while offering alternative trade‑offs: explicit typing, flexible whitespace, delimiter repetition instead of character escaping, and built‑in processing instructions (PIs) for document‑local behavior.</p>
+<section id="a-direct-comparison"><h3 id="a-direct-comparison">A Direct Comparison</h3>
+<p>Simple XferLang document:</p>
 <pre><code class="language-xfer">{
     name &quot;Alice&quot;
     age 30
     isMember ~true
-    scores [*85 *90 *78.5]
+    scores [ *85 *90 *78.5 ]
     profile {
         email &quot;alice@example.com&quot;
         joinedDate @2023-01-15T12:00:00@
     }
 }
 </code></pre>
-<p>And here is the equivalent JSON document:</p>
+<p>Equivalent JSON:</p>
 <pre><code class="language-json">{
-    &quot;name&quot;: &quot;Alice&quot;,
-    &quot;age&quot;: 30,
-    &quot;isMember&quot;: true,
-    &quot;scores&quot;: [85, 90, 78.5],
-    &quot;profile&quot;: {
-        &quot;email&quot;: &quot;alice@example.com&quot;,
-        &quot;joinedDate&quot;: &quot;2023-01-15T12:00:00&quot;
-    }
+  &quot;name&quot;: &quot;Alice&quot;,
+  &quot;age&quot;: 30,
+  &quot;isMember&quot;: true,
+  &quot;scores&quot;: [85, 90, 78.5],
+  &quot;profile&quot;: {
+    &quot;email&quot;: &quot;alice@example.com&quot;,
+    &quot;joinedDate&quot;: &quot;2023-01-15T12:00:00&quot;
+  }
 }
 </code></pre>
-<p>In contrast to JSON, XferLang eliminates commas, uses explicit type prefixes for certain types (<code>*</code> for decimal, <code>~</code> for Boolean, <code>?</code> for null) while maintaining readability.</p>
-<p>Because whitespace is flexible, the same XferLang document can be made extremely compact:</p>
-<pre><code class="language-xfer">{name&quot;Alice&quot;age 30 isMember~true scores[*85 *90 *78.5]profile{email&quot;alice@example.com&quot;joinedDate@2023-05-05T20:00:00@}}
+<p>Whitespace and newlines are optional in XferLang; the same document can be written compactly:</p>
+<pre><code class="language-xfer">{name&quot;Alice&quot;age 30 isMember~true scores[*85 *90 *78.5]profile{email&quot;alice@example.com&quot;joinedDate@2023-01-15T12:00:00@}}
 </code></pre>
+<section id="additional-practical-examples"><h3 id="additional-practical-examples">Additional Practical Examples</h3>
+<section id="configuration-with-types-and-dates"><h4 id="configuration-with-types-and-dates">Configuration With Types and Dates</h4>
+<pre><code class="language-xfer">&lt;! document { version &quot;1.2&quot; } !&gt;
+{
+    service { host &quot;api.example.com&quot; port 8443 ssl ~true timeout 30 }
+    database { host &quot;db1&quot; port 5432 poolSize 20 }
+    maintenanceWindow ( @2025-01-15T02:00:00Z@ *2.5 ) &lt;/ start, hours /&gt;
+}
+</code></pre>
+<section id="local-bindings-and-dereference"><h4 id="local-bindings-and-dereference">Local Bindings and Dereference</h4>
+<p>Bindings introduced with the <code>let</code> processing instruction (or the <code>script</code> PI) are referenced with a leading underscore.</p>
+<pre><code class="language-xfer">&lt;! let greeting &quot;World&quot; !&gt;
+{
+    message 'Hello, &lt;_greeting_&gt;.'
+    value _greeting
+}
+</code></pre>
+<p>Same using a script PI to batch multiple lets:</p>
+<pre><code class="language-xfer">&lt;! script ( let greeting &quot;World&quot; let score *99.5 ) !&gt;
+{
+    summary 'Hi &lt;_greeting_&gt;, your score is &lt;_score_&gt;.'
+}
+</code></pre>
+<section id="interpolated-text"><h4 id="interpolated-text">Interpolated Text</h4>
+<p>Interpolated text elements (apostrophe delimiters) allow embedded explicit elements:</p>
+<pre><code class="language-xfer">&lt;! let appName &quot;XferDemo&quot; !&gt;
+{
+    banner 'Launching &lt;_appName_&gt; at &lt;@2025-08-01T12:00:00Z@&gt;'
+}
+</code></pre>
+<section id="dynamic-values-environment--other-sources"><h4 id="dynamic-values-environment-other-sources">Dynamic Values (Environment / Other Sources)</h4>
+<p>Dynamic elements use <code>|</code> delimiters and resolve through a configurable resolver. (Current implementation maps an identifier to a value; complex nested content inside <code>|...|</code> is not supported.)</p>
+<pre><code class="language-xfer">&lt;! dynamicSource { username env &quot;USER&quot; } !&gt;
+{
+    currentUser |username|
+    welcome 'User: &lt;|username|&gt;'
+}
+</code></pre>
+<section id="arrays-vs-tuples"><h4 id="arrays-vs-tuples">Arrays vs Tuples</h4>
+<p>Arrays are homogeneous; tuples are heterogeneous:</p>
+<pre><code class="language-xfer">data {
+    numbers [ 1 2 3 4 ]
+    point ( *42.3601 *-71.0589 @2025-07-04T12:00:00Z@ )
+}
+</code></pre>
+<section id="decimal-integer-hexbinary-and-boolean-forms"><h4 id="decimal-integer-hexbinary-and-boolean-forms">Decimal, Integer (Hex/Binary) and Boolean Forms</h4>
+<pre><code class="language-xfer">metrics {
+    load *0.8125
+    statusCode 200
+    statusMask #%11001100
+    colorCode #$FFAA33
+    healthy ~true
+}
+</code></pre>
+<section id="character-definitions-and-usage"><h4 id="character-definitions-and-usage">Character Definitions and Usage</h4>
+<pre><code class="language-xfer">&lt;! chardef { bullet \$2022 arrow \$2192 } !&gt;
+{ list [ &quot;Item&quot; \bullet &quot;Next&quot; \arrow ] }
+</code></pre>
+<section id="reusing-structured-values"><h4 id="reusing-structured-values">Reusing Structured Values</h4>
+<pre><code class="language-xfer">&lt;! let baseConfig { host &quot;localhost&quot; port 8080 } !&gt;
+{
+    primary _baseConfig
+    secondary { host &quot;localhost&quot; port 8081 }
+}
+</code></pre>
+<section id="what-these-examples-highlight-concise-contrast"><h3 id="what-these-examples-highlight-concise-contrast">What These Examples Highlight (Concise Contrast)</h3>
+<ul>
+<li>Keys do not require quotes when they are simple identifiers.</li>
+<li>Value types are explicit (<code>~true</code>, <code>*123.45</code>, <code>@2025-01-01@</code>) removing ambiguity.</li>
+<li>No escaping: delimiter repetition and explicit forms avoid backslash escapes.</li>
+<li>Bindings and dereferences (<code>let</code> / <code>_name</code>) support local reuse.</li>
+<li>Processing instructions provide structured, parse‑time directives.</li>
+</ul>
+<p>The remainder of this document drills into the core concepts, the formal language, and the .NET APIs.</p>
+<section id="core-concepts"><h2 id="core-concepts">Core Concepts</h2>
+<section id="elements-and-syntax-forms"><h3 id="elements-and-syntax-forms">Elements and Syntax Forms</h3>
+<p>Every value is an element. Most elements support three styles:</p>
+<ul>
+<li>Implicit: minimal form (e.g., <code>42</code>) when unambiguous.</li>
+<li>Compact: type delimiter(s) (e.g., <code>#42</code>, <code>&quot;text&quot;</code>).</li>
+<li>Explicit: wrapped in angle brackets (e.g., <code>&lt;#42#&gt;</code>, <code>&lt;&quot;A quote: &quot;&quot;&gt;</code>) allowing delimiter repetition.</li>
+</ul>
+<section id="collections"><h3 id="collections">Collections</h3>
+<ul>
+<li>Object: <code>{ key value ... }</code> (unordered key/value pairs; keys are keywords)</li>
+<li>Array: <code>[ value value ... ]</code> (homogeneous)</li>
+<li>Tuple: <code>( value value ... )</code> (heterogeneous)</li>
+</ul>
+<section id="keywords-vs-identifiers"><h3 id="keywords-vs-identifiers">Keywords vs Identifiers</h3>
+<ul>
+<li>Keywords (object keys) are implicit barewords or <code>=...=</code> when containing characters outside <code>[A-Za-z0-9_]</code>.</li>
+<li>Identifiers (<code>:name:</code>) are symbolic values, not keys.</li>
+</ul>
+<section id="numbers"><h3 id="numbers">Numbers</h3>
+<p>Integers (<code>#</code> or implicit), longs (<code>&amp;</code>), decimals (<code>*</code> high precision), doubles (<code>^</code>). Alternate bases for integers/longs: hex <code>$</code>, binary <code>%</code>.</p>
+<section id="text-and-characters"><h3 id="text-and-characters">Text and Characters</h3>
+<p>Strings: <code>&quot;...&quot;</code> (repeat <code>&quot;</code> to include the delimiter) or explicit <code>&lt;&quot;...&quot;&gt;</code>.
+Characters: <code>\65</code>, <code>\$41</code>, <code>\%01000001</code>, or predefined keywords (<code>\tab</code>).</p>
+<section id="date--time"><h3 id="date-time">Date / Time</h3>
+<p>Date/time values use <code>@...@</code> with ISO‑8601 forms. (Date-only and time-only forms may be parsed where implemented.)</p>
+<section id="null"><h3 id="null">Null</h3>
+<p><code>?</code> represents a null value.</p>
+<section id="binding-and-dereference"><h3 id="binding-and-dereference">Binding and Dereference</h3>
+<p><code>&lt;! let name value !&gt;</code> binds <code>name</code> to <code>value</code>. Inside subsequent elements the value can be dereferenced with <code>_name</code> (or inside interpolation as <code>&lt;_name_&gt;</code>). Script PI batches operators: <code>&lt;! script ( let a 1 let b 2 ) !&gt;</code>.</p>
+<section id="interpolated-text"><h3 id="interpolated-text-1">Interpolated Text</h3>
+<p>Delimited by apostrophes: <code>'Hello &lt;_name_&gt;'</code>. Embedded elements inside must use explicit forms. Expressions are structural replacements; no string escape layer.</p>
+<section id="dynamic-elements"><h3 id="dynamic-elements">Dynamic Elements</h3>
+<p><code>|identifier|</code> resolves through the configured dynamic source resolver (e.g., environment). Content is a single identifier; nested elements are not allowed inside the delimiters in the current implementation.</p>
+<section id="processing-instructions-pis"><h3 id="processing-instructions-pis">Processing Instructions (PIs)</h3>
+<p>Compact: <code>! name value !</code>  Explicit: <code>&lt;! name value !&gt;</code>.
+A PI consists of exactly one key/value pair; the value can be any element (commonly an object for multiple fields). Some PIs introduce bindings or affect subsequent parsing and may be suppressed from serialization after execution.</p>
 <section id="language-specification"><h2 id="language-specification">Language Specification</h2>
 <section id="document-structure"><h3 id="document-structure">Document Structure</h3>
-<p>An XferLang document consists of two main parts: optional <strong>Processing Instructions</strong> followed by a <strong>Root Collection Element</strong>.</p>
-<ul>
-<li><strong>Metadata Processing Instruction (<code>document</code>)</strong>: If present, the <code>document</code> processing instruction must be the very first non-comment element in the document. It defines the document's metadata, such as the XferLang version.</li>
-<li><strong>Additional Processing Instructions</strong>: Other processing instructions besides the <code>document</code> processing instruction may be placed before the root element.</li>
-<li><strong>Root Collection Element</strong>: The main content of the document must be contained within a single collection element (Object, Array, or Tuple). This ensures the document has a well-defined structure and prevents ambiguity in parsing.</li>
-</ul>
-<p>Comments (<code>&lt;/ ... /&gt;</code>) may be placed anywhere in the document.</p>
-<pre><code class="language-xfer">&lt;/ A document processing instruction, which is signified with the reserved keyword `document`
-is optional, but if present it must be the first non-comment element in the document. /&gt;
-&lt;! document { version &quot;1.0&quot; } !&gt;
-
-&lt;/ Other processing instructions may be placed into the document before the root node. /&gt;
-&lt;! id &quot;root&quot; !&gt;
-
-&lt;/ The document root node must be a collection element. /&gt;
-{
-    message &quot;Hello, World!&quot;
-    count 42
-    config { debug ~true }
-}
+<p>Order:</p>
+<ol>
+<li>Zero or more processing instructions.</li>
+<li>Exactly one root collection element (Object, Array, or Tuple).</li>
+</ol>
+<p>Processing instructions each contain one key/value pair. For richer metadata group fields inside an object:</p>
+<pre><code class="language-xfer">&lt;! document { version &quot;1.0&quot; author &quot;Alice&quot; } !&gt;
+&lt;! let greeting &quot;World&quot; !&gt;
+{ message 'Hi &lt;_greeting_&gt;.' }
 </code></pre>
-<p><strong>Valid Root Collection Types:</strong></p>
-<ul>
-<li><strong>Object</strong>: <code>{ key1 value1 key2 value2 }</code> - Most common for structured data</li>
-<li><strong>Array</strong>: <code>[ element1 element2 element3 ]</code> - For homogeneous collections</li>
-<li><strong>Tuple</strong>: <code>( element1 element2 element3 )</code> - For heterogeneous sequences</li>
-</ul>
+<p>Comments (<code>&lt;/ ... /&gt;</code>) may appear anywhere and are ignored.</p>
+<p>Root collection requirement avoids ambiguity and enables streaming parsers.</p>
 <section id="element-syntax-variations"><h3 id="element-syntax-variations">Element Syntax Variations</h3>
 <p>XferLang elements have a flexible syntax with up to three variations. This allows you to choose the most readable and concise form for your data, only using more verbose syntax when necessary to resolve ambiguity.</p>
 <section id="implicit-syntax"><h4 id="implicit-syntax">Implicit Syntax</h4>
@@ -879,7 +1002,20 @@ dynamicContent &lt;'Welcome to &lt;|APP_NAME|&gt; version &lt;&quot;1.0&quot;&gt
 </code></pre>
 </li>
 </ul>
-<p>It is a good practice to use explicit syntax (<code>&lt;' ... '&gt;</code>) when you are unsure whether or not the interpolated values may contain single quotes.</p>
+<p>It is a good practice to use explicit syntax (<code>&lt;' ... '&gt;</code>) when you are unsure whether interpolated values may contain single quotes.</p>
+<p><strong>Dereference Element</strong></p>
+<ul>
+<li><strong>Specifier:</strong> <code>_</code> leading underscores (empty closing delimiter)</li>
+<li><strong>Description:</strong> Replaces the dereference token with a previously bound value (<code>let</code> or script <code>let</code>).</li>
+<li><strong>Syntax:</strong> <code>_name</code>, <code>__name</code> (multiple underscores allowed to disambiguate, must match closing count in explicit form)</li>
+<li><strong>In Interpolated Text:</strong> Use explicit form: <code>'Hello &lt;_name_&gt;'</code>.</li>
+<li><strong>Examples:</strong>
+<pre><code class="language-xfer">&lt;! let host &quot;localhost&quot; !&gt;
+{ apiHost _host message 'Host: &lt;_host_&gt;' }
+</code></pre>
+</li>
+</ul>
+<p>Resolution happens as early as possible; unresolved references may be resolved in a later pass if a subsequent <code>let</code> appears earlier in structural order.</p>
 <section id="document-validation-and-common-mistakes"><h3 id="document-validation-and-common-mistakes">Document Validation and Common Mistakes</h3>
 <section id="xferlang-elements"><h2 id="xferlang-elements">XferLang Elements</h2>
 <p>XferLang supports a rich set of data types designed for clarity, explicitness, and flexibility. Each type is chosen to represent a distinct kind of value, making data both human-readable and machine-precise. The main categories are:</p>
@@ -2021,7 +2157,7 @@ dotnet test --collect:&quot;XPlat Code Coverage&quot;
 </section>
 
         <footer>
-            <p>Documentation generated on 2025-08-06 02:51:42 UTC</p>
+            <p>Documentation generated on 2025-08-11 03:55:42 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

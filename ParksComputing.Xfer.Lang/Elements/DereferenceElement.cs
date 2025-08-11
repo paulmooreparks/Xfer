@@ -7,11 +7,21 @@ namespace ParksComputing.Xfer.Lang.Elements;
 /// Uses empty closing delimiter semantics similar to numeric and boolean elements.
 /// </summary>
 public class DereferenceElement : TypedElement<string> {
+    /// <summary>Name used in serialization for dereference elements.</summary>
     public static readonly string ElementName = "deref";
+    /// <summary>Leading underscore character introducing a dereference.</summary>
     public const char OpeningSpecifier = '_';
+    /// <summary>Closing specifier (same underscore; empty closing semantics).</summary>
     public const char ClosingSpecifier = OpeningSpecifier;
+    /// <summary>Element delimiter with empty closing portion for dereference.</summary>
     public static readonly ElementDelimiter ElementDelimiter = new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
+    /// <summary>
+    /// Creates a dereference element for a previously bound name.
+    /// </summary>
+    /// <param name="name">The binding name to resolve when evaluated.</param>
+    /// <param name="specifierCount">Number of leading underscores (>=1) for stylistic grouping.</param>
+    /// <param name="style">Delimiter style controlling implicit/compact/explicit emission.</param>
     public DereferenceElement(string name, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
         : base(name, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) { }
 
@@ -20,8 +30,10 @@ public class DereferenceElement : TypedElement<string> {
     // Keyword/Identifier implicit forms are handled. The parser immediately attempts binding resolution
     // and substitutes a clone when possible.
 
+    /// <inheritdoc />
     public override string ToXfer() => ToXfer(Formatting.None);
 
+    /// <inheritdoc />
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
         var underscores = new string(OpeningSpecifier, Delimiter.SpecifierCount);
         return underscores + Value;

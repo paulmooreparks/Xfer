@@ -60,6 +60,13 @@ public class DecimalElement : NumericElement<decimal> {
         : this(new NumericValue<decimal>(value), specifierCount, style) {
     }
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="DecimalElement"/> using a <see cref="NumericValue{T}"/> wrapper
+    /// to carry formatting metadata.
+    /// </summary>
+    /// <param name="numericValue">The wrapped decimal value including formatting metadata.</param>
+    /// <param name="specifierCount">The number of delimiter specifier characters to use.</param>
+    /// <param name="style">The delimiter style.</param>
     public DecimalElement(NumericValue<decimal> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
         : base(numericValue, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
     }

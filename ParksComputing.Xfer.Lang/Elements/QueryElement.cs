@@ -2,6 +2,10 @@ using System.Text;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents a query element introduced by semicolon specifiers. Wraps a <see cref="KeyValuePairElement"/>
+/// whose key/value pair expresses the query semantics.
+/// </summary>
 public class QueryElement : TypedElement<KeyValuePairElement> {
     /// <summary>
     /// The element name used for query elements.
@@ -26,7 +30,9 @@ public class QueryElement : TypedElement<KeyValuePairElement> {
     /// <summary>
     /// Initializes a new instance of the QueryElement class with the specified value and name.
     /// </summary>
-    /// <param name="value">The element value for the query element.</param>
+    /// <param name="value">The key/value pair carried by this query element.</param>
+    /// <param name="specifierCount">Number of leading specifier characters.</param>
+    /// <param name="style">Delimiter style controlling serialization.</param>
     public QueryElement(KeyValuePairElement value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
         : base(value, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
         Kvp = value;

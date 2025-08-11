@@ -63,7 +63,10 @@ public abstract class Element {
     /// Each element can have only one tag.
     /// </summary>
     public string? Tag { get; set; }
-
+    /// <summary>
+    /// Optional parsed value associated with this element (e.g., a numeric primitive after lexical analysis).
+    /// Implementations may set during parsing for faster scripting/operator evaluation.
+    /// </summary>
     public virtual object? ParsedValue { get; set; } = null;
 
     /// <summary>

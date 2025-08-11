@@ -3,10 +3,19 @@ using ParksComputing.Xfer.Lang.Elements;
 
 namespace ParksComputing.Xfer.Lang.Scripting.Logical;
 
+/// <summary>
+/// Logical conjunction operator that evaluates arguments left-to-right and short-circuits on the first falsey value.
+/// </summary>
 public class AndOperator : ScriptingOperator {
+    /// <inheritdoc />
     public override string OperatorName => "and";
+    /// <inheritdoc />
     public override string Description => "Logical AND with short-circuit";
-    public override int MinArguments => 2; public override int MaxArguments => int.MaxValue;
+    /// <inheritdoc />
+    public override int MinArguments => 2;
+    /// <summary>Unlimited additional arguments may be supplied.</summary>
+    public override int MaxArguments => int.MaxValue;
+    /// <summary>Returns <c>false</c> for the first falsey argument; otherwise <c>true</c>.</summary>
     public override object? Evaluate(ScriptingContext context, params Element[] arguments) {
         ValidateArguments(arguments);
         foreach (var arg in arguments) {
@@ -17,6 +26,7 @@ public class AndOperator : ScriptingOperator {
         }
         return true;
     }
+    /// <summary>Applies standard truthiness conversion rules.</summary>
     private bool ToBoolean(object? v) => v switch {
         null => false,
         bool b => b,

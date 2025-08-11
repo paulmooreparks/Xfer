@@ -10,31 +10,39 @@ namespace ParksComputing.Xfer.Lang.ProcessingInstructions;
 /// Exception thrown when a conditional element should not be added to the document.
 /// This signals to the parser that the element should be skipped.
 /// </summary>
+/// <summary>
+/// Exception thrown when a conditional element fails its condition and should be skipped.
+/// The parser catches this to avoid adding the element to the document without treating it as a fatal error.
+/// </summary>
 public class ConditionalElementException : Exception {
+    /// <summary>
+    /// Creates a new <see cref="ConditionalElementException"/>.
+    /// </summary>
+    /// <param name="message">Describes the element condition failure.</param>
     public ConditionalElementException(string message) : base(message) { }
 }
 
 /// <summary>
 /// Processing instruction for conditional execution based on expressions.
 /// Evaluates a condition and conditionally affects the target element based on the result.
-/// This PI demonstrates the hybrid approach where PIs delegate to reusable Scripting operators.
+/// Demonstrates the hybrid approach where processing instructions delegate to reusable scripting operators.
 /// </summary>
 /// <example>
 /// Basic usage with defined check:
 /// <code>
-/// <! if defined <|DEBUG_MODE|> !>
+/// &lt;! if defined &lt;|DEBUG_MODE|&gt; !&gt;
 /// debug-settings: { verbose: true }
 /// </code>
 ///
 /// Equality comparison:
 /// <code>
-/// <! if eq["Windows" <|PLATFORM|>] !>
+/// &lt;! if eq["Windows" &lt;|PLATFORM|&gt;] !&gt;
 /// windows-config: "value"
 /// </code>
 ///
 /// Complex expression (when implemented):
 /// <code>
-/// <! if and[defined(<|DEBUG|>) eq["verbose" <|LOG_LEVEL|>]] !>
+/// &lt;! if and[defined(&lt;|DEBUG|&gt;) eq["verbose" &lt;|LOG_LEVEL|&gt;]] !&gt;
 /// verbose-logging: true
 /// </code>
 /// </example>
@@ -86,9 +94,12 @@ public class IfProcessingInstruction : ProcessingInstruction {
     }
 
     /// <summary>
-    /// Initializes a new instance of the IfProcessingInstruction class.
+    /// <summary>
+    /// Initializes a new instance of the <see cref="IfProcessingInstruction"/> class.
+    /// Evaluates the provided condition expression during processing instruction handling.
     /// </summary>
-    /// <param name="conditionExpression">The condition expression to evaluate (any element type).</param>
+    /// <param name="conditionExpression">The expression whose truthiness determines whether the following element is included.</param>
+    /// <param name="parser">Optional parser instance used for emitting warnings.</param>
     private readonly Services.Parser? _parser; // For emitting warnings
 
     public IfProcessingInstruction(Element conditionExpression, Services.Parser? parser = null) : base(conditionExpression, Keyword) {

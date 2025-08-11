@@ -7,13 +7,19 @@ namespace ParksComputing.Xfer.Lang.ProcessingInstructions;
 
 /// <summary>
 /// Processing Instruction that executes scripting operator invocations prior to parsing its target element.
-/// New syntax: <!script ( let name <value> ... )!> <targetElement>
-/// let uses a plain IdentifierElement for the binding name instead of a reference element.
-/// Future operators can be appended in the same tuple.
+/// New syntax example: <c>&lt;! script ( let name &lt;value&gt; ) !&gt; &lt;targetElement&gt;</c>
+/// The <c>let</c> operator uses a plain <see cref="IdentifierElement"/> for the binding name instead of a reference element.
+/// Additional operators may be appended within the same tuple in future extensions.
 /// </summary>
 public class ScriptProcessingInstruction : ProcessingInstruction {
+    /// <summary>
+    /// The processing instruction keyword (<c>script</c>).
+    /// </summary>
     public const string Keyword = "script";
-
+    /// <summary>
+    /// The tuple of operator invocations to execute prior to parsing the target element.
+    /// Currently supports <c>let</c> bindings; future operators may be added.
+    /// </summary>
     public TupleElement? Operations { get; }
     private readonly Parser _parser;
 
@@ -186,6 +192,11 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
         }
     }
 
+    /// <summary>
+    /// Executes supported operators (currently <c>let</c>) before normal element processing and updates
+    /// the target subtree to resolve any dereferences that became available.
+    /// </summary>
+    /// <param name="element">The target element associated with this PI.</param>
     public override void ElementHandler(Element element) {
         // Execute operators now that containing tuple/object content has been parsed.
         ExecuteOperatorsEarly();

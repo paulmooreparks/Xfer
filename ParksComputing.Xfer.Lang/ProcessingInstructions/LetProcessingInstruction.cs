@@ -5,14 +5,17 @@ using ParksComputing.Xfer.Lang.Services;
 namespace ParksComputing.Xfer.Lang.ProcessingInstructions;
 
 /// <summary>
-/// Standalone let processing instruction: <! let name <value> !>
-/// Mirrors the let operator inside script PI but as a first-class PI.
+/// Standalone <c>let</c> processing instruction: <c>&lt;! let name &lt;value&gt; !&gt;</c>
+/// Mirrors the <c>let</c> operator used inside a script processing instruction but as a first-class PI.
 /// </summary>
 public class LetProcessingInstruction : ProcessingInstruction {
+    /// <summary>
+    /// The processing instruction keyword (<c>let</c>).
+    /// </summary>
     public const string Keyword = "let";
     /// <summary>
     /// The identifier introduced into the current binding scope by this PI.
-    /// Distinct from the PI keyword ("let") and no longer shadows <see cref="Element.Name"/>.
+    /// Distinct from the PI keyword ("let").
     /// </summary>
     public string BindingName { get; }
     /// <summary>
@@ -56,6 +59,11 @@ public class LetProcessingInstruction : ProcessingInstruction {
         if (string.IsNullOrEmpty(BindingName)) { throw new InvalidOperationException("let binding name cannot be empty"); }
     }
 
+    /// <summary>
+    /// Binds the resolved value to <see cref="BindingName"/> in the parser scope so subsequent siblings can dereference it.
+    /// Suppresses serialization of the PI itself.
+    /// </summary>
+    /// <param name="element">The target element the PI is attached to.</param>
     public override void ElementHandler(Element element) {
         // Bind immediately so following siblings can resolve
         if (ContainsSelfDereference(BoundValue, BindingName)) { throw new InvalidOperationException($"Self reference in let binding '{BindingName}'."); }

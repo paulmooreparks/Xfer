@@ -9,7 +9,7 @@ namespace ParksComputing.Xfer.Lang.Elements;
 
 /// <summary>
 /// Represents a 64-bit signed integer element in XferLang.
-/// Uses ampersand (&) delimiters and supports attribute-driven hexadecimal or binary formatting.
+/// Uses ampersand (&amp;) delimiters and supports attribute-driven hexadecimal or binary formatting.
 /// </summary>
 public class LongElement : NumericElement<long> {
     /// <summary>

@@ -8,11 +8,24 @@ namespace ParksComputing.Xfer.Lang.Scripting.Comparison;
 /// Supports numeric coercion; for non-numeric comparable types (string) falls back to ordinal comparison.
 /// </summary>
 public class GreaterThanOperator : ScriptingOperator {
+    /// <inheritdoc />
     public override string OperatorName => "gt";
+
+    /// <inheritdoc />
     public override string Description => "Returns true if left > right";
+
+    /// <inheritdoc />
     public override int MinArguments => 2;
+
+    /// <inheritdoc />
     public override int MaxArguments => 2;
 
+    /// <summary>
+    /// Evaluates the operator returning <c>true</c> when the resolved left value is strictly greater than the resolved right value.
+    /// </summary>
+    /// <param name="context">Active scripting context used to resolve element values.</param>
+    /// <param name="arguments">Exactly two elements: left and right.</param>
+    /// <returns><c>true</c> if left > right; otherwise <c>false</c>. If either operand is <c>null</c> the result is <c>false</c>.</returns>
     public override object? Evaluate(ScriptingContext context, params Element[] arguments) {
         ValidateArguments(arguments);
 

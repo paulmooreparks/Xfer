@@ -36,6 +36,10 @@ public class CharacterElement : TypedElement<int> {
 
     private NumericValue<int> _numericValue = new NumericValue<int>(default, NumericBase.Hexadecimal);
 
+    /// <summary>
+    /// Gets or sets the underlying numeric value (code point) plus its base information.
+    /// Setting updates the exposed <see cref="TypedElement{T}.Value"/>.
+    /// </summary>
     public NumericValue<int> NumericValue {
         get { return _numericValue; }
         set { _numericValue = value; Value = _numericValue.Value; }
@@ -53,6 +57,13 @@ public class CharacterElement : TypedElement<int> {
         this(new NumericValue<int>(codePoint, NumericBase.Hexadecimal), specifierCount, style) {
     }
 
+    /// <summary>
+    /// Initializes a new character element from an existing <see cref="NumericValue{T}"/> code point wrapper.
+    /// </summary>
+    /// <param name="numericValue">The numeric value wrapper containing the code point and base.</param>
+    /// <param name="specifierCount">Number of delimiter characters to use (default 1).</param>
+    /// <param name="style">The element style (Compact or Explicit).</param>
+    /// <exception cref="ArgumentOutOfRangeException">If the code point is outside 0..0x10FFFF.</exception>
     public CharacterElement(NumericValue<int> numericValue, int specifierCount = 1, ElementStyle style = ElementStyle.Compact) :
         base(numericValue.Value, ElementName, new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
         if (numericValue.Value < 0 || numericValue.Value > 0x10FFFF) {

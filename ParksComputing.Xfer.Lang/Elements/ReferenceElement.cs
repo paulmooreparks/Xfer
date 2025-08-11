@@ -2,6 +2,9 @@ using System.Text;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
+/// <summary>
+/// Represents a reference wrapper element introduced by backtick specifiers that encloses another element.
+/// </summary>
 public class ReferenceElement : TypedElement<Element> {
     /// <summary>
     /// The element name used for reference elements.
@@ -26,7 +29,9 @@ public class ReferenceElement : TypedElement<Element> {
     /// <summary>
     /// Initializes a new instance of the ReferenceElement class with the specified value and name.
     /// </summary>
-    /// <param name="value">The element value for the reference element.</param>
+    /// <param name="value">The enclosed element being referenced.</param>
+    /// <param name="specifierCount">Number of specifier characters.</param>
+    /// <param name="style">Delimiter style controlling serialization.</param>
     public ReferenceElement(Element value, int specifierCount = 1, ElementStyle style = ElementStyle.Compact)
         : base(value, ElementName, new(OpeningSpecifier, ClosingSpecifier, specifierCount, style)) {
     }

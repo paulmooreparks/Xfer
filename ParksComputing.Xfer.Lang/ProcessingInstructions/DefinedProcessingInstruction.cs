@@ -15,24 +15,24 @@ namespace ParksComputing.Xfer.Lang.ProcessingInstructions;
 /// <example>
 /// Environment variable checking:
 /// <code>
-/// <! defined <|DEBUG_MODE|> !>
-/// <! defined <|PATH|> !>
+/// &lt;! defined &lt;|DEBUG_MODE|&gt; !&gt;
+/// &lt;! defined &lt;|PATH|&gt; !&gt;
 /// </code>
 ///
 /// Character elements (always defined):
 /// <code>
-/// <! defined #42 !>
+/// &lt;! defined #42 !&gt;
 /// </code>
 ///
 /// Reference elements (when implemented):
 /// <code>
-/// <! defined <`some-reference`> !>
+/// &lt;! defined &lt;`some-reference`&gt; !&gt;
 /// </code>
 ///
 /// With dynamic source configuration:
 /// <code>
-/// <! dynamicSource { debug env "DEBUG_MODE" } !>
-/// <! defined <|debug|> !>
+/// &lt;! dynamicSource { debug env &quot;DEBUG_MODE&quot; } !&gt;
+/// &lt;! defined &lt;|debug|&gt; !&gt;
 /// </code>
 /// </example>
 public class DefinedProcessingInstruction : ProcessingInstruction {

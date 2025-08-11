@@ -2205,16 +2205,5 @@ public partial class Parser : IXferParser {
         }
     }
 
-    /// <summary>
-    /// Detects let bindings (let `name` value) inside a collection and records them while removing the trio.
-    /// This runs after new elements are added so bindings can be referenced by later siblings.
-    /// </summary>
-    // Legacy ProcessLetBindings removed.
-
-    /// <summary>
-    /// Forces a final let-binding processing pass on the document root if it is a collection.
-    /// This is a safety net in case the last trio occurs at the tail just before closing the root
-    /// collection and wasn't followed by an additional element that would have triggered processing.
-    /// </summary>
-    // Legacy let finalization & ProcessLetBindings removed (immediate substitution model).
+    // Legacy let binding processing removed (immediate substitution model now active).
 }
