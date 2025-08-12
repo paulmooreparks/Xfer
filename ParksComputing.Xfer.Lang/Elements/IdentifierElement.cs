@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Text.RegularExpressions;
 
 namespace ParksComputing.Xfer.Lang.Elements;
 
@@ -58,7 +57,22 @@ public class IdentifierElement : TextElement {
         int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.ClosingSpecifier);
         Delimiter.SpecifierCount = maxConsecutiveSpecifiers + 1;
 
-        if (!Regex.IsMatch(Value, @"^[A-Za-z_\-\.][A-Za-z0-9_\-\.]*$")) {
+        // Validate identifier using character checks (no regex):
+        // - First char: letter or underscore
+        // - Subsequent chars: letter, digit, underscore, hyphen, or dot
+        bool isValid = false;
+        if (!string.IsNullOrEmpty(Value) && IsIdentifierLeadingChar(Value[0])) {
+            isValid = true;
+            for (int i = 1; i < Value.Length; i++) {
+                char c = Value[i];
+                if (!(char.IsLetterOrDigit(c) || c == '_' || c == '-' || c == '.')) {
+                    isValid = false;
+                    break;
+                }
+            }
+        }
+
+        if (!isValid) {
             Delimiter.Style = ElementStyle.Compact;
 
             if (Value.Count() == 0 || Value.Last() == Delimiter.ClosingSpecifier) {

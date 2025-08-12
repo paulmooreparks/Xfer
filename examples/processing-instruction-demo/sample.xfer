@@ -31,6 +31,7 @@
     <! if <|DEBUG|>!>
     { debug { level "verbose" } }
 
+    <//
     </ These are examples of future object-binding approaches />
     (
         year (getElementById (_document "date"))
@@ -38,6 +39,7 @@
 
         MultiParam (_sampleClass year (getElementById (_document "date")) count (root (_document)))
     )
+    //>
 
 !charDef {
     fooz \zeta

@@ -394,8 +394,6 @@ public class IdentifierElementTests
             ("A", ElementStyle.Implicit),
             ("_", ElementStyle.Implicit),
             ("1", ElementStyle.Compact),    // Doesn't start with letter/underscore
-            ("-", ElementStyle.Implicit),   // Hyphen is allowed as first character in the regex pattern
-            (".", ElementStyle.Implicit),   // Dot is allowed as first character in the regex pattern
             (":", ElementStyle.Explicit),   // Empty content or ends with colon
         };
 

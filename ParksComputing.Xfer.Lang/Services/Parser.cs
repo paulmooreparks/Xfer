@@ -545,12 +545,12 @@ public partial class Parser : IXferParser {
 
     internal bool ReferenceElementOpening(out int specifierCount) {
         // Leading '_' followed by at least one identifier char (letter, digit, '_' or '-')
-        if (CurrentChar == '_' && (char.IsLetterOrDigit(Peek) || Peek == '_' || Peek == '-')) {
+        if (CurrentChar == ReferenceElement.OpeningSpecifier && (char.IsLetterOrDigit(Peek) || Peek == '_' || Peek == '-')) {
             specifierCount = 1;
             LastElementRow = CurrentRow;
             LastElementColumn = CurrentColumn;
             _delimStack.Push(new EmptyClosingElementDelimiter(ReferenceElement.OpeningSpecifier, ReferenceElement.ClosingSpecifier, specifierCount, ElementStyle.Compact));
-            Advance(); // consume leading underscore (similar to ElementOpening behavior)
+            Advance(); // consume leading deref specifier (similar to ElementOpening behavior)
             return true;
         }
         return ElementOpening(ReferenceElement.ElementDelimiter, out specifierCount);
@@ -890,10 +890,7 @@ public partial class Parser : IXferParser {
         (c >= 'a' && c <= 'f') ||
         c == '$' || c == '%' || c == '.' || c == ',';
 
-    private bool IsKeywordChar(char c) {
-        /* We may want to add more characters to this list. */
-        return char.IsLetterOrDigit(c) | c == '_' | c == '-';
-    }
+    // Removed duplicate IsKeywordChar; use CharExtensions.IsKeywordChar instead.
 
     /// <summary>
     /// Parses a string containing XferLang content into an XferDocument.
@@ -1282,10 +1279,6 @@ public partial class Parser : IXferParser {
             }
             else if (ElementOpening(QueryElement.ElementDelimiter, out int querySpecifierCount)) {
                 element = ParseQueryElement(querySpecifierCount);
-            }
-            // explicit dereference (multiple underscores explicitly delimited)
-            else if (ElementOpening(ReferenceElement.ElementDelimiter, out int derefSpecifierCount)) {
-                element = ParseReferenceElement(derefSpecifierCount);
             }
             else if (ElementOpening(NullElement.ElementDelimiter, out int nullSpecifierCount)) {
                 element = ParseNullElement(nullSpecifierCount);
@@ -2316,7 +2309,7 @@ public partial class Parser : IXferParser {
         var name = sb.ToString();
 
         if (string.IsNullOrEmpty(name)) {
-            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Dereference must specify a name after '_'.");
+            throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Dereference must specify a name after '{ReferenceElement.OpeningSpecifier}'.");
         }
 
         if (TryResolveBinding(name, out var bound)) {

@@ -19,12 +19,18 @@ public static class CharacterIdRegistry {
         { "enq", '\x05' },  // Enquiry
         { "ack", '\x06' },  // Acknowledge
         { "bel", '\a' },    // Bell
+        { "a", '\a' },    // Bell
         { "bksp", '\b' },   // Backspace
+        { "b", '\b' },   // Backspace
         { "tab", '\t' },    // Horizontal Tab
+        { "t", '\t' },    // Horizontal Tab
         { "vtab", '\v' },   // Vertical Tab
+        { "v", '\v' },   // Vertical Tab
         { "lf", '\n' },     // Line Feed
         { "nl", '\n' },     // New line (alias for lf)
+        { "n", '\n' },      // New line (alias for lf)
         { "cr", '\r' },     // Carriage Return
+        { "r", '\r' },      // Carriage Return (alias for cr)
         { "ff", '\f' },     // Form Feed
         { "so", '\x0E' },   // Shift Out
         { "si", '\x0F' },   // Shift In
