@@ -9,7 +9,7 @@ public class LetProcessingInstructionTests {
     public void StandaloneLetPI_ResolvesDereference_InFollowingInterpolated() {
         var parser = new Parser();
     // Standalone let syntax uses tuple form: <! let ( name value ) !>
-    var doc = parser.Parse("<! let ( greetee \"World\" ) !> 'Hello, _greetee_.'");
+    var doc = parser.Parse("<! let ( greetee \"World\" ) !> 'Hello, <_greetee_>.'");
         // Expect root to be a tuple containing the interpolated element only (let PI suppressed)
         var output = doc.Root.ToXfer();
         Assert.IsTrue(output.Contains("Hello, World."), $"Expected interpolation to resolve greetee binding. Output: {output}");
@@ -28,7 +28,7 @@ public class LetProcessingInstructionTests {
     [TestMethod]
     public void StandaloneLetPI_InsideTupleThenInterpolated() {
         var parser = new Parser();
-    var doc = parser.Parse("( <! let ( name \"Ada\" ) !> 'Hi, _name_.' )");
+    var doc = parser.Parse("( <! let ( name \"Ada\" ) !> 'Hi, <_name_>.' )");
         var output = doc.Root.ToXfer();
         Assert.IsTrue(output.Contains("Hi, Ada."), output);
     }
