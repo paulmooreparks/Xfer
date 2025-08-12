@@ -38,15 +38,19 @@
         count (root (_document))
 
         MultiParam (_sampleClass year (getElementById (_document "date")) count (root (_document)))
+
+        <! script (
+            let rootNode (root (document "root"))
+        )!>
     )
     //>
 
-!charDef {
-    fooz \zeta
-    theend \omega
-    pin \pushpin
-    answer \$42
-}!
+    !charDef {
+        fooz \zeta
+        theend \omega
+        pin \pushpin
+        answer \$42
+    }!
     [~true ~false ~true ~false]
     (~false ~true ~false ~true)
     {one\1 two#$2 three&%11}
@@ -61,10 +65,6 @@
         e '<\epsilon\>'
         z '<\zeta\>'
     }
-
-    <! script (
-        let rootNode (root (document "root"))
-    )!>
 
     <! if eq["Linux" "<|PLATFORM|>"] !>
     profile{name"Bob"role"admin"verified~true}

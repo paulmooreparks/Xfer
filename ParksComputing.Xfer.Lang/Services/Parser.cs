@@ -23,6 +23,9 @@ public partial class Parser : IXferParser {
     /// Optional: A delegate for resolving charDef keywords. Should return the codepoint for a keyword, or null if not found.
     /// </summary>
     public Func<Element, string, int?>? CharDefResolver { get; set; }
+
+    private const char PlaceholderCharacter = '?';
+
     // Used to assign IDs from inline PIs to subsequent elements
     private Queue<string> _pendingIds = new Queue<string>();
     private readonly List<ProcessingInstruction> _pendingPIs = new();
@@ -1892,9 +1895,6 @@ public partial class Parser : IXferParser {
                 valuePI.ElementHandler(valueElement);
             }
 
-            // Note: Any pending PIs from the parent context will be applied by the calling method
-            // We don't interfere with the global _pendingPIs here
-
             return keyValuePairElement;
         }
 
@@ -1912,14 +1912,14 @@ public partial class Parser : IXferParser {
             Advance();
         }
 
-        int codePoint = '?';
+        int codePoint = PlaceholderCharacter;
         var numericValue = new NumericValue<int>(codePoint, NumericBase.Hexadecimal);
 
         string charString = charContent.ToString();
         if (string.IsNullOrEmpty(charString)) {
             // Add warning for empty character element and use replacement character
             AddWarning(WarningType.EmptyCharacterElement,
-                      $"Empty character element, using '?' as replacement",
+                      $"Empty character element, using '{PlaceholderCharacter}' as replacement",
                       null);
             return new CharacterElement(numericValue, specifierCount, style: style);
         }
@@ -1935,9 +1935,9 @@ public partial class Parser : IXferParser {
             else {
                 // Add warning for unresolved character name
                 AddWarning(WarningType.CharacterResolutionFailure,
-                          $"Unknown character name '{charString}', using '?' (U+003F) as fallback",
+                          $"Unknown character name '{charString}', using '{PlaceholderCharacter}' as fallback",
                           charString);
-                codePoint = '?';
+                codePoint = PlaceholderCharacter;
             }
         }
         else {
@@ -1949,9 +1949,9 @@ public partial class Parser : IXferParser {
             else {
                 // Add warning for invalid character value
                 AddWarning(WarningType.InvalidCharacterValue,
-                          $"Invalid character value '{charString}', using '?' (U+003F) as fallback",
+                          $"Invalid character value '{charString}', using '{PlaceholderCharacter}' as fallback",
                           charString);
-                codePoint = '?';
+                codePoint = PlaceholderCharacter;
             }
         }
 

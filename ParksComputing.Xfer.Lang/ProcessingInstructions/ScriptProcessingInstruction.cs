@@ -44,31 +44,7 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
         for (int i = 0; i < Operations.Children.Count; i++) {
             var child = Operations.Children[i];
 
-            // Form 1: legacy flat token sequence ( let name value ) that we originally designed for.
-            if (child is KeywordElement kwFlat && string.Equals(kwFlat.Value, "let", StringComparison.Ordinal)) {
-                if (i + 2 >= Operations.Children.Count) {
-                    throw new InvalidOperationException("let requires: let <name> <value>");
-                }
-                var nameElement = Operations.Children[i + 1];
-                string name = nameElement switch {
-                    IdentifierElement idElem => idElem.Value,
-                    KeywordElement kwName => kwName.Value,
-                    _ => throw new InvalidOperationException("let binding name must be an identifier or bareword")
-                };
-                var valueElem = Operations.Children[i + 2];
-                if (string.IsNullOrEmpty(name)) { throw new InvalidOperationException("let binding name cannot be empty"); }
-                if (ContainsSelfDereference(valueElem, name)) { throw new InvalidOperationException($"Self reference in let binding '{name}'."); }
-                ResolveDereferences(valueElem, _parser);
-                _parser.BindReference(name, valueElem);
-                // Core binding trace retained (optional) - downgrade by guarding with DEBUG
-#if DEBUG
-                _parser.AddWarning(WarningType.Trace, $"[trace] script PI let '{name}' -> {valueElem.GetType().Name}", name);
-#endif
-                i += 2; // skip name + value
-                continue;
-            }
-
-            // Form 2: Parsed as a KeyValuePairElement with key 'let' and value another KVP representing name/value.
+            // Parsed as a KeyValuePairElement with key 'let' and value another KVP representing name/value.
             if (child is KeyValuePairElement kvp && string.Equals(kvp.Key, "let", StringComparison.Ordinal)) {
                 // Expect kvp.Value to be a KeyValuePairElement (name -> value) or an Object/Tuple/etc (unsupported yet)
                 if (kvp.Value is KeyValuePairElement inner) {
@@ -81,16 +57,16 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
                     #if DEBUG
                     _parser.AddWarning(WarningType.Trace, $"[trace] script PI let '{name}' -> {valueElem.GetType().Name}", name);
                     #endif
-                    continue;
                 }
                 else {
                     // Future enhancement: support tuple/object grouping after 'let'
-                    throw new InvalidOperationException("Unsupported let binding structure; expected ( let name <value> ) or ( let ( name <value> ) ).");
+                    onlyLets = false;
                 }
             }
-
-            // Non-let child: keep PI visible.
-            onlyLets = false;
+            else {
+                // Non-let child: keep PI visible.
+                onlyLets = false;
+            }
         }
     if (onlyLets) { SuppressSerialization = true; }
 #if DEBUG
