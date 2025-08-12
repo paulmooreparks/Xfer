@@ -8,8 +8,17 @@
 [![GitHub issues](https://img.shields.io/github/issues/paulmooreparks/Xfer)](https://github.com/paulmooreparks/Xfer/issues)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Visual Studio Code Extension
+
+A Visual Studio Code extension for XferLang is now available in the Visual Studio marketplace:
+
+https://marketplace.visualstudio.com/items?itemName=paulmooreparks.xferlang
+
+Open any `.xfer` file to activate. See the extension's README for details and changelog.
+
 ## Table of Contents
 - [The XferLang Data-Interchange Format](#the-xferlang-data-interchange-format)
+  - [Visual Studio Code Extension](#visual-studio-code-extension)
   - [Table of Contents](#table-of-contents)
   - [Introduction and Philosophy](#introduction-and-philosophy)
   - [XferLang by Example](#xferlang-by-example)
@@ -64,7 +73,6 @@
   - [Complete Examples](#complete-examples)
     - [Configuration File Example](#configuration-file-example)
     - [User Profile Example](#user-profile-example)
-  - [Grammar Reference](#grammar-reference)
   - [Getting Started with .NET](#getting-started-with-net)
     - [Installation](#installation)
     - [Quick Start Example](#quick-start-example)
@@ -91,6 +99,8 @@
       - [DynamicSource PI](#dynamicsource-pi)
       - [CharDef PI](#chardef-pi)
       - [ID PI](#id-pi)
+      - [Tag PI](#tag-pi)
+      - [Defined PI](#defined-pi)
     - [Dynamic Elements and Source Resolution](#dynamic-elements-and-source-resolution)
       - [Built-in Source Types](#built-in-source-types)
       - [Custom Source Handler Registration](#custom-source-handler-registration)
@@ -98,8 +108,14 @@
       - [Creating Custom PIs](#creating-custom-pis)
       - [PI Registration and Lifecycle](#pi-registration-and-lifecycle)
   - [Writing Custom Processing Instructions](#writing-custom-processing-instructions)
-    - [Conceptual Overview](#conceptual-overview)
-    - [.NET API Usage](#net-api-usage)
+    - [When to Create a PI](#when-to-create-a-pi)
+    - [Parser Registration Model](#parser-registration-model)
+    - [Minimal Custom PI Example (`trace`)](#minimal-custom-pi-example-trace)
+    - [Conditioning the Next Element](#conditioning-the-next-element)
+    - [Validation PI Skeleton](#validation-pi-skeleton)
+    - [Extending Dynamic Resolution (No New PI Required)](#extending-dynamic-resolution-no-new-pi-required)
+    - [Checklist for a New PI](#checklist-for-a-new-pi)
+    - [Lifecycle Summary](#lifecycle-summary)
   - [Building XferLang](#building-xferlang)
     - [Prerequisites](#prerequisites)
     - [Quick Start](#quick-start)
@@ -120,15 +136,13 @@ Guiding principles:
 
 * **Readable by default** – Minimal punctuation; whitespace separates elements when that’s unambiguous. You can pretty‑print or collapse aggressively without changing meaning.
 * **Explicit types** – Every value carries an unambiguous type marker (boolean, decimal, date/time, etc.). Ambiguous heuristics disappear; downstream code stops guessing.
-* **No escape tax** – Instead of backslash escaping inside strings (or other forms), XferLang lets you lengthen the opening/closing specifier run. Need an embedded quote? Double the quotes. Need a pipe inside a dynamic element? Use a longer pipe run. This works uniformly across element kinds.
+* **No escape tax** – Instead of backslash escaping inside strings (or other forms), XferLang lets you lengthen the opening/closing specifier run. Need an embedded quote? Double the quotes. Need a pipe inside a dynamic element? Use a longer pipe run. This works uniformly across element types.
 * **Safe arbitrary embedding** – Because specifiers can lengthen, you can drop in generated fragments, templated chunks, or foreign content without pre‑processing or opaque escaping layers.
 * **Single structured root** – Every document has exactly one root collection (object, array, or tuple). This removes edge ambiguity, enables streaming readers, and aligns cleanly with schema / validation tooling.
 * **Parse‑time intent** – Processing Instructions (PIs) let you bind values, declare dynamic sources, conditionally include elements, and define symbolic characters—without blurring the core data model.
 
-If JSON is a lightweight transport envelope, XferLang is that envelope plus the ergonomics needed for maintainable, evolving, human‑edited configuration at scale.
-
 ## XferLang by Example
-Let’s build intuition first. Each snippet introduces one dimension of capability; together they show how you get power without giving up clarity.
+Let's build intuition first. Each snippet introduces one dimension of capability; together they show how you get power without giving up clarity.
 
 ### A Direct Comparison
 
@@ -189,11 +203,11 @@ sample {
 }
 ```
 
-Arrays are homogeneous; tuples are heterogeneous. Angle‑bracket explicit forms (not shown here) kick in only when needed.
+Arrays are homogeneous; tuples are heterogeneous. Angle‑bracket explicit forms (not shown here) are optional unless needed to prevent ambiguity.
 
 ### Delimiter / Specifier Duplication (Uniform, Escape‑Free Rule)
 
-Instead of escape sequences, XferLang lets you lengthen the delimiter sequence. The parser treats the entire contiguous run as the opening (and requires the same length run to close). Apply this anywhere a specifier pairs with itself or a matching closer:
+Instead of requiring escape sequences, XferLang lets you lengthen an element's delimiter sequence in order to allow special characters to be embedded in the element. The parser treats the entire contiguous run as the opening (and requires the same length run to close). Apply this anywhere a specifier pairs with itself or a matching closer:
 
 * Strings (`"…"`): embed quotes by doubling: `""He said, "Hello".""`
 * Dynamic elements (`|name|`): need a literal `|` inside? Use `||value with | symbol||`.
@@ -229,12 +243,18 @@ A Processing Instruction (PI) is a lightweight directive: exactly one key/value 
 
 ### Dynamic Elements (Late Binding) & Source Overrides
 
-Dynamic elements (`|identifier|`) defer value selection until parse time. Default behavior: lookup the environment variable whose name matches the identifier. The `dynamicSource` PI lets you override that per key—mapping it to a file, a literal constant, or a different environment variable (and custom resolvers can add more sources). Unconfigured keys still fall back to the environment.
+Dynamic elements (`|key|`) defer value resolution until parse time. Resolution order:
+
+1. A preceding `dynamicSource` PI mapping for `key` (e.g., `key file "path"`) invokes the registered handler for that source type.
+2. If no mapping exists, the environment variable named `key` is read.
+3. If still unresolved, the element becomes an empty string (parsed value `null`).
+
+Content inside the pipes is raw text; nested elements are not parsed. For structural composition use interpolated text: `'Hello <|USER|>'`.
 
 ```xfer
 {
-    currentUser |user|
-    greeting 'Hello <|user|>'
+    currentUser |USER|
+    banner 'Hello <|USER|>'
 }
 ```
 
@@ -262,7 +282,9 @@ You have now met two PIs (`document`, `dynamicSource`). Additional built‑ins:
 * `let` – bind a name to a value for later dereference
 * `script` – batch multiple `let` bindings (let‑only today) so they all execute before the next element
 * `if` – conditionally suppress the immediately following element (PI itself is always stripped)
+* `defined` – test whether an element (binding / dynamic / literal) currently yields a meaningful value
 * `chardef` – define symbolic character aliases
+* `id` / `tag` – attach stable identifiers or free‑form tags to the following element
 
 Shape: `<! name value !>` where `value` may be any element (often an object for multiple fields).
 
@@ -365,8 +387,9 @@ Define symbolic character aliases for readability (keyword → Unicode code poin
 4. Structured interpolation (no ad‑hoc escaping)
 5. Local structural reuse with `let` and dereference (`_name` / `<_name_>`)
 6. Batched let bindings via `script` (let-only today)
-7. Conditional element inclusion with `if` (value test & defined test)
+7. Conditional element inclusion with `if` (value truthiness & existence checks)
 8. Custom symbolic characters with `chardef`
+9. Existence evaluation with `defined`
 
 These examples intentionally stop short of exhaustive syntax or full operator semantics; the following sections (Core Concepts → Language Specification) formalize everything just previewed.
 
@@ -386,8 +409,9 @@ Every value is an element. Most elements support three styles:
 - Tuple: `( value value ... )` (heterogeneous)
 
 ### Keywords vs Identifiers
-- Keywords (object keys) are implicit barewords or `=...=` when containing characters outside `[A-Za-z0-9_]`.
-- Identifiers (`:name:`) are symbolic values, not keys.
+- Keywords (object keys) are implicit barewords composed only of letters, digits, and underscore: `[A-Za-z_][A-Za-z0-9_]*`.
+- If a key needs any other character (dash, space, etc.) wrap it with leading & trailing `=` specifier runs: `=first-name=` (lengthen the run if it appears within the key itself).
+- Identifiers (`:name:`) are value elements (never keys). They always use leading and trailing `:`; they cannot contain whitespace or punctuation other than underscore.
 
 ### Numbers
 Integers (`#` or implicit), longs (`&`), decimals (`*` high precision), doubles (`^`). Alternate bases for integers/longs: hex `$`, binary `%`.
@@ -880,26 +904,21 @@ For documents with heterogeneous top-level content, use Tuple:
 
 **Dynamic Element**
 *   **Specifier:** `|` (Pipe)
-*   **Description:** Represents a value to be substituted at runtime, by default from an environment variable. You can override the default dynamic value resolution by subclassing `DefaultDynamicSourceResolver` or by implementing the `IDynamicSourceResolver` interface. This allows you to provide custom logic for resolving dynamic values in your XferLang documents. Inside dynamic elements, all nested elements must use explicit syntax.
+*   **Description:** Represents a value resolved via the dynamic source pipeline (dynamicSource PI mapping → custom handler → environment fallback). Content is plain text; no nested element evaluation occurs inside the pipes.
 *   **Syntax:**
     *   **Compact:** `|USERNAME|`, `|DB_PASSWORD|`
-    *   **Explicit:** `<|USERNAME|>`, `<|DB_PASSWORD|>`
+    *   **Explicit:** `<|USERNAME|>` (rarely needed—delimiter lengthening works in compact form)
 *   **Examples:**
     ```xfer
     </ Compact syntax />
     username |USER|
     password |DB_PASSWORD|
-    apiKey |vault:api-key|
-
-    </ Explicit syntax />
-    greeting <|USERNAME|>
-    config <|file:app.config|>
 
     </ Within interpolated strings />
-    message 'Hello, <|USERNAME|>!'
+    message 'Hello <|USER|>!'
 
-    </ Complex dynamic content with explicit syntax required inside />
-    template |<"Hello, "><|USER|><"!">|
+    </ Delimiter lengthening for a literal pipe />
+    literalPipe ||contains | literally||
     ```
 
 **Interpolated Text Element**
@@ -1136,9 +1155,9 @@ port 8080    </ Development server port />
 
 ### Dynamic
 
-Dynamic elements represent values that are resolved at parse-time or runtime, typically from environment variables, configuration files, or custom sources. They provide powerful templating and configuration capabilities. Inside dynamic elements, all nested elements must use explicit syntax.
+Dynamic elements represent values that are resolved at parse-time through the dynamic source pipeline (dynamicSource PI mapping → registered handler → environment fallback). The interior is an opaque text key; nested element syntax is not interpreted.
 
-**Syntax:** `|value_key|` or `<|value_key|>`
+**Syntax:** `|key|` (explicit `<|key|>` form optional)
 
 **Examples:**
 ```xfer
@@ -1147,9 +1166,8 @@ username |USER|
 password |DB_PASSWORD|
 
 </ Within interpolated strings />
-greeting <'Hello, <|USERNAME|>!'>
+greeting 'Hello <|USER|>!'
 message 'Server running on port <|PORT|>'
-
 ```
 
 **Configuration via Processing Instructions:**
@@ -1160,15 +1178,15 @@ message 'Server running on port <|PORT|>'
     config file "settings.json"
 } !>
 {
-    message <'<|greeting|>'>
-    user <'<|username|>'>
-    settings <'<|config|>'>
+    message '<|greeting|>'
+    user '<|username|>'
+    settings '<|config|>'
 }
 ```
 
 **Rules:**
-- Inside dynamic elements, all nested elements must use explicit syntax
-- This ensures unambiguous parsing when dynamic content is resolved
+- Content is raw text only; no nested parsing inside `|...|`
+- Use interpolated text when you need to mix dynamic content with structured element outputs
 
 ### Identifier
 
@@ -1319,7 +1337,6 @@ Here are comprehensive examples showing XferLang in real-world scenarios:
     logging {
         level "info"
         destinations [ "console" "file" "syslog" ]
-        format "{timestamp} [{level}] {message}"
     }
 
     features {
@@ -1397,195 +1414,13 @@ Here are comprehensive examples showing XferLang in real-world scenarios:
 }
 ```
 
-## Grammar Reference
-
-For those who want to implement parsers or need the complete technical specification, here's the formal grammar for XferLang:
-
-```bnf
-/* XferLang Grammar (BNF)
- *
- * Key Requirements:
- * - All XferLang documents must have exactly one root collection element (Object, Array, or Tuple)
- * - Optional processing instructions may precede the root collection
- * - Processing instructions provide document metadata and configuration
- *
- * Examples of valid documents:
- * - { name "Alice" age 30 }                                    (Object root)
- * - [ 1 2 3 ]                                                 (Array root)
- * - ( "title" 42 ~true )                                      (Tuple root)
- * - <! document { version "1.0" } !> { config "value" }       (With processing instructions)
- */
-
-<document> ::= <opt_whitespace> <processing_instructions>? <opt_whitespace> <collection_element> <opt_whitespace>
-
-<collection_element> ::= <object_element> | <array_element> | <tuple_element>
-
-<processing_instructions> ::= <processing_instruction>+
-
-<processing_instruction> ::= <processing_instruction_explicit> | <processing_instruction_compact>
-<processing_instruction_explicit> ::= <element_open> <pi_specifier> <opt_whitespace> <key_value_pair>+ <opt_whitespace> <pi_specifier> <element_close>
-<processing_instruction_compact> ::= <pi_specifier> <opt_whitespace> <key_value_pair>+ <opt_whitespace> <pi_specifier>
-
-<body_element> ::= <opt_whitespace> (
-      <key_value_pair>
-    | <string_element>
-    | <character_element>
-    | <integer_element>
-    | <long_element>
-    | <double_element>
-    | <decimal_element>
-    | <boolean_element>
-    | <datetime_element>
-    | <date_element>
-    | <time_element>
-    | <timespan_element>
-    | <null_element>
-    | <object_element>
-    | <array_element>
-    | <tuple_element>
-    | <dynamic_element>
-    | <interpolated_element>
-    | <comment_element>
-    | <identifier_element>
-) <opt_whitespace>
-
-<key_value_pair> ::= <identifier_element> <whitespace> <body_element>
-
-/* Collection Elements */
-<object_element> ::= <object_element_explicit> | <object_element_compact>
-<object_element_explicit> ::= <element_open> <object_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_close> <element_close>
-<object_element_compact> ::= <object_open> <opt_whitespace> <key_value_pair>* <opt_whitespace> <object_close>
-
-<array_element> ::= <array_element_explicit> | <array_element_compact>
-<array_element_explicit> ::= <element_open> <array_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_close> <element_close>
-<array_element_compact> ::= <array_open> <opt_whitespace> <body_element>* <opt_whitespace> <array_close>
-
-<tuple_element> ::= <tuple_element_explicit> | <tuple_element_compact>
-<tuple_element_explicit> ::= <element_open> <tuple_open> <opt_whitespace> <body_element>* <opt_whitespace> <tuple_close> <element_close>
-<tuple_element_compact> ::= <tuple_open> <opt_whitespace> <body_element>* <opt_whitespace> <tuple_close>
-
-/* Basic Data Elements */
-<string_element> ::= <string_element_explicit> | <string_element_compact>
-<string_element_explicit> ::= <element_open> <string_specifier>+ <string_content> <string_specifier>+ <element_close>
-<string_element_compact> ::= <string_specifier>+ <string_content> <string_specifier>+
-
-<character_element> ::= <character_element_explicit> | <character_element_compact>
-<character_element_explicit> ::= <element_open> <character_specifier> <character_content> <element_close>
-<character_element_compact> ::= <character_specifier> <character_content>
-
-<integer_element> ::= <integer_element_explicit> | <integer_element_compact> | <integer_element_implicit>
-<integer_element_explicit> ::= <element_open> <integer_specifier> <integer_content> <element_close>
-<integer_element_compact> ::= <integer_specifier> <integer_content>
-<integer_element_implicit> ::= <integer_content>
-
-<long_element> ::= <long_element_explicit> | <long_element_compact>
-<long_element_explicit> ::= <element_open> <long_specifier> <long_content> <element_close>
-<long_element_compact> ::= <long_specifier> <long_content>
-
-<double_element> ::= <double_element_explicit> | <double_element_compact>
-<double_element_explicit> ::= <element_open> <double_specifier> <double_content> <element_close>
-<double_element_compact> ::= <double_specifier> <double_content>
-
-<decimal_element> ::= <decimal_element_explicit> | <decimal_element_compact>
-<decimal_element_explicit> ::= <element_open> <decimal_specifier> <decimal_content> <element_close>
-<decimal_element_compact> ::= <decimal_specifier> <decimal_content>
-
-<boolean_element> ::= <boolean_element_explicit> | <boolean_element_compact>
-<boolean_element_explicit> ::= <element_open> <boolean_specifier> <boolean_content> <element_close>
-<boolean_element_compact> ::= <boolean_specifier> <boolean_content>
-
-<datetime_element> ::= <datetime_element_explicit> | <datetime_element_compact>
-<datetime_element_explicit> ::= <element_open> <datetime_specifier> <datetime_content> <datetime_specifier> <element_close>
-<datetime_element_compact> ::= <datetime_specifier> <datetime_content> <datetime_specifier>
-
-<null_element> ::= <null_element_explicit> | <null_element_compact>
-<null_element_explicit> ::= <element_open> <null_specifier>+ <element_close>
-<null_element_compact> ::= <null_specifier>+
-
-/* Special Elements */
-<dynamic_element> ::= <dynamic_element_explicit> | <dynamic_element_compact>
-<dynamic_element_explicit> ::= <element_open> <dynamic_specifier> <dynamic_content> <dynamic_specifier> <element_close>
-<dynamic_element_compact> ::= <dynamic_specifier> <dynamic_content> <dynamic_specifier>
-
-<interpolated_element> ::= <interpolated_element_explicit> | <interpolated_element_compact>
-<interpolated_element_explicit> ::= <element_open> <interpolated_specifier>+ <interpolated_content> <interpolated_specifier>+ <element_close>
-<interpolated_element_compact> ::= <interpolated_specifier>+ <interpolated_content> <interpolated_specifier>+
-
-<comment_element> ::= <element_open> <comment_specifier>+ <comment_content> <comment_specifier>+ <element_close>
-
-<identifier_element> ::= <identifier_element_explicit> | <identifier_element_implicit>
-<identifier_element_explicit> ::= <identifier_specifier> <identifier_content> <identifier_specifier>
-<identifier_element_implicit> ::= <identifier_content>
-
-/* Specifiers and Delimiters */
-<element_open> ::= "<"
-<element_close> ::= ">"
-
-<object_open> ::= "{"
-<object_close> ::= "}"
-<array_open> ::= "["
-<array_close> ::= "]"
-<tuple_open> ::= "("
-<tuple_close> ::= ")"
-
-<string_specifier> ::= "\""
-<character_specifier> ::= "\\"
-<integer_specifier> ::= "#"
-<long_specifier> ::= "&"
-<double_specifier> ::= "^"
-<decimal_specifier> ::= "*"
-<boolean_specifier> ::= "~"
-<datetime_specifier> ::= "@"
-<null_specifier> ::= "?"
-<dynamic_specifier> ::= "|"
-<interpolated_specifier> ::= "'"
-<comment_specifier> ::= "/"
-<identifier_specifier> ::= ":"
-<pi_specifier> ::= "!"
-
-/* Content Patterns */
-<string_content> ::= <any_character_except_delimiter>*
-<character_content> ::= <unicode_codepoint> | <character_keyword>
-<integer_content> ::= <decimal_digits> | <hex_digits> | <binary_digits>
-<long_content> ::= <decimal_digits> | <hex_digits> | <binary_digits>
-<double_content> ::= <floating_point_number>
-<decimal_content> ::= <decimal_number>
-<boolean_content> ::= "true" | "false"
-<datetime_content> ::= <iso8601_datetime>
-<dynamic_content> ::= <identifier_chars>
-<interpolated_content> ::= <any_character_or_element>*
-<comment_content> ::= <any_character_except_delimiter>*
-<identifier_content> ::= <identifier_chars>
-
-/* Whitespace */
-<whitespace> ::= <space> | <tab> | <newline> | <carriage_return>
-<opt_whitespace> ::= <whitespace>*
-
-/* Character Classes */
-<decimal_digits> ::= ["-"]? [0-9]+
-<hex_digits> ::= "$" [0-9A-Fa-f]+
-<binary_digits> ::= "%" [01]+
-<floating_point_number> ::= ["-"]? [0-9]+ "." [0-9]+ (("e" | "E") ["-"]? [0-9]+)?
-<decimal_number> ::= ["-"]? [0-9]+ ("." [0-9]+)?
-<iso8601_datetime> ::= [0-9]{4} "-" [0-9]{2} "-" [0-9]{2} ("T" [0-9]{2} ":" [0-9]{2} ":" [0-9]{2} ("." [0-9]+)? ("Z" | [+-] [0-9]{2} ":" [0-9]{2})?)?
-<identifier_chars> ::= [a-zA-Z_] [a-zA-Z0-9_]*
-<unicode_codepoint> ::= [0-9]+ | "$" [0-9A-Fa-f]+ | "%" [01]+
-<character_keyword> ::= "tab" | "space" | "newline" | "cr" | "lf" | "crlf" | "null" | "bell" | ...
-<any_character_except_delimiter> ::= <any_unicode_character_except_current_delimiter>
-<any_character_or_element> ::= <any_unicode_character> | <body_element>
-<space> ::= " "
-<tab> ::= "\t"
-<newline> ::= "\n"
-<carriage_return> ::= "\r"
-```
-
 ## Getting Started with .NET
 
 The XferLang .NET library provides a robust implementation for parsing, generating, and working with XferLang documents programmatically.
 
 ### Installation
 
-Install the NuGet package in your .NET project:
+Install the [NuGet package](https://www.nuget.org/packages/ParksComputing.Xfer.Lang) in your .NET project:
 
 ```bash
 dotnet add package ParksComputing.Xfer.Lang
@@ -1999,6 +1834,31 @@ The `id` PI assigns identifiers to elements for referencing and linking:
 }
 ```
 
+#### Tag PI
+
+The `tag` PI attaches free‑form classification metadata to the immediately following element. Multiple `tag` PIs can be stacked; tags are preserved in element metadata but have no built‑in semantic effect.
+
+```xfer
+<! tag "experimental" !>
+<! tag "search-index" !>
+feature { enabled ~true }
+```
+
+#### Defined PI
+
+The `defined` PI evaluates whether its value element yields a meaningful value (non‑null / non‑empty). It is commonly used in conjunction with `if` when you need pure existence tests.
+
+```xfer
+<! let debug ~false !>
+<! defined _debug !>               </ true: binding exists even if value is false />
+<! if defined _debug !> { note 'debug binding exists' }
+
+<! dynamicSource { optFlag env "OPTIONAL_FLAG" } !>
+<! if defined <|optFlag|> !> { note 'OPTIONAL_FLAG present' }
+```
+
+Evaluation occurs during PI processing; the PI itself is suppressed from serialization.
+
 ### Dynamic Elements and Source Resolution
 
 Dynamic elements provide runtime value substitution with an extensible source system.
@@ -2117,39 +1977,112 @@ This extensible PI system makes XferLang highly adaptable for domain-specific ne
 
 ## Writing Custom Processing Instructions
 
-XferLang.NET allows you to extend the parser and deserializer by implementing custom logic for Processing Instructions (PIs). This is useful for advanced configuration, runtime directives, schema association, and dynamic value resolution.
+You can add new Processing Instruction (PI) keywords without modifying the core parser by registering a factory that creates a `ProcessingInstruction` subclass. This lets you introduce custom metadata, validation passes, conditional logic, or side‑effects at parse time.
 
-### Conceptual Overview
+### When to Create a PI
+Create a PI when you need to:
+* Run setup logic before the next element is parsed (`ProcessingInstructionHandler`).
+* Optionally suppress or transform the immediately following element (`ElementHandler`).
+* Carry operational intent that should not appear in serialized output (set `SuppressSerialization = true`).
 
-- PIs are metadata blocks that can control parsing, validation, and runtime behavior.
-- Custom PI processors let you interpret and act on PIs in your own way.
-- Common use cases: environment overrides, feature flags, schema binding, dynamic sources.
+Do NOT create a PI just to change how `|dynamic|` values resolve—use a custom `IDynamicSourceResolver` for that (see “Dynamic Elements and Source Resolution”).
 
-### .NET API Usage
-
-To handle custom PIs, implement or extend the relevant resolver or processor interface. For example, to handle `dynamicSource` PIs, implement `IDynamicSourceResolver` or subclass `DefaultDynamicSourceResolver`:
-
+### Parser Registration Model
+The parser exposes two overloads of `RegisterPIProcessor`:
 ```csharp
-public class MyDynamicSourceResolver : DefaultDynamicSourceResolver
-{
-    public override string? Resolve(string key)
-    {
-        // Custom logic for dynamic keys
-        if (key == "special")
-            return "custom-value";
-        // Fallback to default
-        return base.Resolve(key);
+// (1) Low-level: attach raw callbacks for existing PIs
+void RegisterPIProcessor(string key, Action<KeyValuePairElement> processor);
+
+// (2) Factory: create a strongly-typed ProcessingInstruction instance
+void RegisterPIProcessor(string key, Parser.PIProcessor factory); // factory: (kvp, parser) => ProcessingInstruction
+```
+Built‑ins are installed via the factory form inside `RegisterBuiltInPIProcessors()`.
+
+### Minimal Custom PI Example (`trace`)
+```csharp
+public sealed class TraceProcessingInstruction : ProcessingInstruction {
+    public const string Keyword = "trace";
+    public TraceProcessingInstruction(Element value) : base(value, Keyword) {
+        SuppressSerialization = true; // operational only
+    }
+    public override void ProcessingInstructionHandler() {
+        Console.WriteLine($"[TRACE-PI] {Value}");
     }
 }
 
-// Usage:
-var settings = new XferSerializerSettings
-{
-    DynamicSourceResolver = new MyDynamicSourceResolver()
-};
+static ProcessingInstruction CreateTracePI(KeyValuePairElement kvp, Parser p) =>
+    new TraceProcessingInstruction(kvp.Value);
 
-var obj = XferConvert.Deserialize<MyConfig>(xferString, settings);
+var parser = new Parser();
+parser.RegisterPIProcessor(TraceProcessingInstruction.Keyword, CreateTracePI);
 ```
+Usage:
+```xfer
+<! trace "Starting build" !>
+{ pipeline { stage "compile" } }
+```
+
+### Conditioning the Next Element
+To influence the element that immediately follows the PI, override `ElementHandler`. Pattern (see `IfProcessingInstruction` in source):
+```csharp
+public override void ElementHandler(Element element) {
+    if (!ShouldKeep(element)) {
+        // Throw the same suppression exception style used by built-ins if you want to remove it
+        throw new ConditionalElementException("Suppressed by custom PI");
+    }
+}
+```
+
+### Validation PI Skeleton
+```csharp
+public sealed class ValidationProcessingInstruction : ProcessingInstruction {
+    public const string Keyword = "validation";
+    public ValidationProcessingInstruction(ObjectElement value) : base(value, Keyword) {
+        SuppressSerialization = true;
+    }
+    public override void ProcessingInstructionHandler() {
+        if (Value is not ObjectElement obj) throw new InvalidOperationException("validation PI expects object value");
+        foreach (var kv in obj.Dictionary.Values) {
+            var field = kv.Key;
+            var ruleSpec = kv.Value;
+            ValidationRegistry.Register(field, ruleSpec);
+        }
+    }
+    public override void ElementHandler(Element element) => ValidationRegistry.Validate(element);
+}
+
+static ProcessingInstruction CreateValidationPI(KeyValuePairElement kvp, Parser p) =>
+    new ValidationProcessingInstruction((ObjectElement)kvp.Value);
+
+parser.RegisterPIProcessor(ValidationProcessingInstruction.Keyword, CreateValidationPI);
+```
+
+### Extending Dynamic Resolution (No New PI Required)
+If you just need custom resolution for `|key|`, implement a resolver:
+```csharp
+public class MyDynamicSourceResolver : DefaultDynamicSourceResolver {
+    public override string? Resolve(string key) => key == "special" ? "custom-value" : base.Resolve(key);
+}
+var settings = new XferSerializerSettings { DynamicSourceResolver = new MyDynamicSourceResolver() };
+```
+
+### Checklist for a New PI
+1. Define a constant `Keyword`.
+2. Subclass `ProcessingInstruction`.
+3. (Optional) Set `SuppressSerialization` in constructor.
+4. Override `ProcessingInstructionHandler` for one-time setup.
+5. Override `ElementHandler` if you must inspect or suppress the following element.
+6. Register a factory with `parser.RegisterPIProcessor(Keyword, Factory)`.
+7. Add tests covering: creation, handler execution order, suppression (if any), serialization visibility.
+
+### Lifecycle Summary
+1. Parser encounters `<! keyword value !>`.
+2. Registered factory creates PI instance.
+3. Parser calls `ProcessingInstructionHandler()` immediately.
+4. When the next element is parsed, `ElementHandler()` runs (if overridden).
+5. PI may be omitted from serialization if `SuppressSerialization` is true.
+
+This model keeps the core grammar stable while enabling domain‑specific behaviors.
 
 ## Building XferLang
 
@@ -2238,4 +2171,4 @@ This is an open-source project, and contributions are always welcome! If you are
 
 ## Grammar
 
-The formal Backus–Naur form (BNF) grammar for XferLang can be found in the repository: [xfer.bnf](https://github.com/paulmooreparks/Xfer/blob/master/xfer.bnf).
+The formal Backus–Naur form (BNF) grammar for XferLang can be found in the XferLang GitHub repository: [xfer.bnf](https://github.com/paulmooreparks/Xfer/blob/master/xfer.bnf).

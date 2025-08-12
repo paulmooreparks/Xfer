@@ -109,6 +109,70 @@
 				"clear": false
 			},
 			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "run tests once",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"Xfer.sln",
+				"--configuration",
+				"Release",
+				"--no-build"
+			],
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "test"
+		},
+		{
+			"label": "dotnet test once",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"Xfer.sln",
+				"--configuration",
+				"Release",
+				"--no-build"
+			],
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "test"
+		},
+		{
+			"label": "dotnet test once",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"Xfer.sln",
+				"--configuration",
+				"Release",
+				"--no-build"
+			],
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "test"
+		},
+		{
+			"label": "dotnet test once",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"Xfer.sln",
+				"--configuration",
+				"Release",
+				"--no-build"
+			],
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "test"
 		}
 	]
 }

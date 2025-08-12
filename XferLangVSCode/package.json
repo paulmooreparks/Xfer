@@ -1,14 +1,37 @@
 {
-  "name": "xfer",
+  "name": "xferlang",
   "displayName": "XferLang",
-  "description": "Syntax highlighting and language support for XferLang (.xfer files)",
-  "version": "0.0.1",
+  "description": "Syntax highlighting and language basics for XferLang (.xfer) – delimiter lengthening, processing instructions, dynamic & interpolation.",
+  "version": "0.15.3",
+  "publisher": "paulmooreparks",
+  "license": "MIT",
+  "homepage": "https://xferlang.org/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paulmooreparks/Xfer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/paulmooreparks/Xfer/issues"
+  },
   "engines": {
     "vscode": "^1.102.0"
   },
   "categories": [
     "Programming Languages"
   ],
+  "keywords": [
+    "xferlang",
+    "configuration",
+    "data-format",
+    "processing-instruction",
+    "dynamic",
+    "interpolation"
+  ],
+  "icon": "XferLang-128.png",
+  "galleryBanner": {
+    "color": "#0b1b2b",
+    "theme": "dark"
+  },
   "contributes": {
     "languages": [{
       "id": "xferlang",

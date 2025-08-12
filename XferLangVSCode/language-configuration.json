@@ -68,4 +68,42 @@
         ["<^", "^>"],
         ["<*", "*>"]
     ]
+,
+    "onEnterRules": [
+        {
+            "beforeText": "^\\s*\\{+\\s*$",
+            "afterText": "^\\s*\\}+\\s*$",
+            "action": { "indent": "indentOutdent" }
+        },
+        {
+            "beforeText": "^\\s*\\[+\\s*$",
+            "afterText": "^\\s*\\]+\\s*$",
+            "action": { "indent": "indentOutdent" }
+        },
+        {
+            "beforeText": "^\\s*\\(+\\s*$",
+            "afterText": "^\\s*\\)+\\s*$",
+            "action": { "indent": "indentOutdent" }
+        },
+        {
+            "beforeText": "^\\s*<\\{+\\s*$",
+            "afterText": "^\\s*\\}+>\\s*$",
+            "action": { "indent": "indentOutdent" }
+        },
+        {
+            "beforeText": "^\\s*<\\[+\\s*$",
+            "afterText": "^\\s*\\]+>\\s*$",
+            "action": { "indent": "indentOutdent" }
+        },
+        {
+            "beforeText": "^\\s*<\\(+\\s*$",
+            "afterText": "^\\s*\\)+>\\s*$",
+            "action": { "indent": "indentOutdent" }
+        },
+        {
+            "beforeText": "^\\s*<!+\\s*$",
+            "afterText": "^\\s*!+>\\s*$",
+            "action": { "indent": "indentOutdent" }
+        }
+    ]
 }

@@ -13,8 +13,22 @@
 
 
 (
-    <! script ( let first "Alice" let greeting 'Hi <_first_>' let answer 42 ) !>
+    <! script (
+        let first "Alice"
+        let greeting 'Hi <_first_>'
+        let answer 42
+    )!>
     { message _greeting number _answer }
+
+    <! script(
+        let greetee "World"
+        let score *99.5
+    )!>
+    {
+        summary 'Hello, <_greetee_>. Your score is <_score_>.'
+    }
+
+    <'It's <_greetee_>'>
 
     <! script (
         let host "localhost"
@@ -38,11 +52,6 @@
 
         MultiParam (_sampleClass year (getElementById (_document "date")) count (root (_document)))
     )
-
-    <! script ( let greetee "World" let score *99.5 ) !>
-    {
-        summary 'Hello, <_greetee_>. Your score is <_score_>.'
-    }
 
     [~true ~false ~true ~false]
     (~false ~true ~false ~true)
@@ -77,7 +86,4 @@
     foo"bar"
 
     <! id "array" !> [<! id "one"!> 1 2 3]
-
 )
-
-
