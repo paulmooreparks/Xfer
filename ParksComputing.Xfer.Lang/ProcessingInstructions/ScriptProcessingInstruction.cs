@@ -54,6 +54,8 @@ public class ScriptProcessingInstruction : ProcessingInstruction {
                     if (ContainsSelfDereference(valueElem, name)) { throw new InvalidOperationException($"Self reference in let binding '{name}'."); }
                     ResolveDereferences(valueElem, _parser);
                     _parser.BindReference(name, valueElem);
+                    // If this name was used before its binding, downgrade any earlier unresolved warnings now
+                    SuppressEarlierUnresolved(name);
                     #if DEBUG
                     _parser.AddWarning(WarningType.Trace, $"[trace] script PI let '{name}' -> {valueElem.GetType().Name}", name);
                     #endif

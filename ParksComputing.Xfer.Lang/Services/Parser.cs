@@ -1140,10 +1140,21 @@ public partial class Parser : IXferParser {
             // Re-parse the interpolated string using the real parser to resolve any
             // explicit elements (e.g., <_name_>) now that bindings are available.
             try {
+                var before = ie.Value ?? string.Empty;
+                var beforeNames = ExtractDereferenceNames(before);
                 var serialized = ie.ToXfer(); // produce a canonical interpolated literal with proper quoting
                 if (!string.IsNullOrEmpty(serialized)) {
                     if (ParseFragment(serialized) is InterpolatedElement reparsed && reparsed.Value != ie.Value) {
                         ie.Value = reparsed.Value;
+                        var after = ie.Value ?? string.Empty;
+                        var afterNames = ExtractDereferenceNames(after);
+                        // Any names that were present before but no longer present after reparse were resolved
+                        foreach (var resolvedName in beforeNames.Except(afterNames)) {
+                            if (_currentDocument != null) {
+                                _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] post-pass resolved '{resolvedName}' in interpolated", CurrentRow, CurrentColumn, resolvedName));
+                            }
+                            SuppressEarlierUnresolvedReferenceWarning(resolvedName);
+                        }
                     }
                 }
             } catch {
@@ -1179,6 +1190,17 @@ public partial class Parser : IXferParser {
                 w.Message += " (resolved later – suppressed)";
                 w.Type = WarningType.Trace;
                 break;
+            }
+        }
+    }
+
+    private static IEnumerable<string> ExtractDereferenceNames(string text) {
+        if (string.IsNullOrEmpty(text)) { yield break; }
+        // Match explicit deref tokens: <__name__> where underscore counts match (captured via backreference)
+        var matches = System.Text.RegularExpressions.Regex.Matches(text, @"<(_+)([A-Za-z0-9_-]+)\1>");
+        foreach (System.Text.RegularExpressions.Match m in matches) {
+            if (m.Success && m.Groups.Count >= 3) {
+                yield return m.Groups[2].Value;
             }
         }
     }
@@ -1988,15 +2010,10 @@ public partial class Parser : IXferParser {
 
             if (ElementExplicitOpening(ReferenceElement.ElementDelimiter, out int referenceElementCount)) {
                 Element referenceElement = ParseReferenceElement(referenceElementCount);
-                // If unresolved during ParseReferenceElement (returned ReferenceElement), attempt a late bind here
-                if (referenceElement is ReferenceElement dLate) {
-                    if (TryResolveBinding(dLate.Value, out var lateBound) && lateBound is not null) {
-                        valueBuilder.Append(ElementToInterpolatedText(lateBound));
-                    }
-                    else {
-                        // Preserve the explicit dereference token so final re-parse can resolve it later.
-                        valueBuilder.Append(dLate.Delimiter.ExplicitOpening).Append(dLate.Value).Append(dLate.Delimiter.ExplicitClosing);
-                    }
+                // If unresolved during ParseReferenceElement (returned ReferenceElement), just preserve the token;
+                // immediate resolution has already been attempted there.
+                if (referenceElement is ReferenceElement unresolved) {
+                    valueBuilder.Append(unresolved.ToXfer(Formatting.None));
                 }
                 else {
                     // Already resolved to a cloned element; use its textual representation (unquoted for strings)

@@ -7,17 +7,17 @@ namespace ParksComputing.Xfer.Lang.Elements;
 /// Uses empty closing delimiter semantics similar to numeric and boolean elements.
 /// </summary>
 public class ReferenceElement : TypedElement<string> {
-    /// <summary>Name used in serialization for dereference elements.</summary>
-    public static readonly string ElementName = "deref";
-    /// <summary>Leading underscore character introducing a dereference.</summary>
+    /// <summary>Name used in serialization for reference elements.</summary>
+    public static readonly string ElementName = "reference";
+    /// <summary>Leading underscore character introducing a reference.</summary>
     public const char OpeningSpecifier = '_';
     /// <summary>Closing specifier (same underscore; empty closing semantics).</summary>
     public const char ClosingSpecifier = OpeningSpecifier;
-    /// <summary>Element delimiter with empty closing portion for dereference.</summary>
+    /// <summary>Element delimiter with empty closing portion for reference.</summary>
     public static readonly ElementDelimiter ElementDelimiter = new EmptyClosingElementDelimiter(OpeningSpecifier, ClosingSpecifier);
 
     /// <summary>
-    /// Creates a dereference element for a previously bound name.
+    /// Creates a reference element for a previously bound name.
     /// </summary>
     /// <param name="name">The binding name to resolve when evaluated.</param>
     /// <param name="specifierCount">Number of leading underscores (>=1) for stylistic grouping.</param>
@@ -30,17 +30,20 @@ public class ReferenceElement : TypedElement<string> {
     /// </summary>
     public bool IsClone { get; init; }
 
-    // Note: Dereference elements are parsed via a lightweight opening predicate (DereferenceElementOpening)
-    // that treats a leading '_' followed by identifier characters as a dereference token, similar to how
-    // Keyword/Identifier implicit forms are handled. The parser immediately attempts binding resolution
-    // and substitutes a clone when possible.
-
     /// <inheritdoc />
     public override string ToXfer() => ToXfer(Formatting.None);
 
     /// <inheritdoc />
     public override string ToXfer(Formatting formatting, char indentChar = ' ', int indentation = 2, int depth = 0) {
-        var underscores = new string(OpeningSpecifier, Delimiter.SpecifierCount);
-        return underscores + Value;
+        var sb = new StringBuilder();
+
+        if (Delimiter.Style == ElementStyle.Compact) {
+            sb.Append($"{Delimiter.CompactOpening}{Value}{Delimiter.CompactClosing}");
+        }
+        else {
+            sb.Append($"{Delimiter.ExplicitOpening}{Value}{Delimiter.ExplicitClosing}");
+        }
+
+        return sb.ToString();
     }
 }
