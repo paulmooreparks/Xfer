@@ -180,12 +180,9 @@ public partial class Parser : IXferParser {
         RegisterPIProcessor(TagProcessingInstruction.Keyword, CreateTagProcessingInstruction);
         RegisterPIProcessor(DynamicSourceProcessingInstruction.Keyword, CreateDynamicSourceProcessingInstruction);
         RegisterPIProcessor(DefinedProcessingInstruction.Keyword, CreateDefinedProcessingInstruction);
-    // Conditional processing instruction (if) enabling conditional inclusion of the next element
-    RegisterPIProcessor(IfProcessingInstruction.Keyword, CreateIfProcessingInstruction);
-    // Script processing instruction enabling scoped scripting operators (e.g., let)
-    RegisterPIProcessor(ScriptProcessingInstruction.Keyword, CreateScriptProcessingInstruction);
-    // Standalone let processing instruction
-    RegisterPIProcessor(LetProcessingInstruction.Keyword, CreateLetProcessingInstruction);
+        RegisterPIProcessor(IfProcessingInstruction.Keyword, CreateIfProcessingInstruction);
+        RegisterPIProcessor(ScriptProcessingInstruction.Keyword, CreateScriptProcessingInstruction);
+        RegisterPIProcessor(LetProcessingInstruction.Keyword, CreateLetProcessingInstruction);
     }
 
     // Built-in PI processor factory methods
@@ -267,6 +264,128 @@ public partial class Parser : IXferParser {
     public Encoding Encoding { get; private set; } = Encoding.UTF8;
 
     private string _scanString = string.Empty;
+
+    internal class ParserState {
+        // Core buffer window
+        internal string ScanString { get; set; } = string.Empty;
+        internal int Start { get; set; } = 0;
+        internal int Position { get; set; } = 0;
+
+        // Cursor/diagnostics
+        internal int CurrentRow { get; set; } = 1;
+        internal int CurrentColumn { get; set; } = 1;
+        internal int LastElementRow { get; set; } = 1;
+        internal int LastElementColumn { get; set; } = 1;
+
+        // Delimiter stack snapshot (bottom->top order to allow accurate reconstruction)
+        internal ElementDelimiter[] DelimStackSnapshot { get; set; } = Array.Empty<ElementDelimiter>();
+
+        // Transient parse state to isolate across nested parses
+        internal List<ProcessingInstruction> PendingPIs { get; set; } = new();
+        internal string[] PendingIds { get; set; } = Array.Empty<string>();
+        internal List<string> UsedIds { get; set; } = new();
+
+        // Bindings and references
+        internal List<Dictionary<string, Element>> BindingScopes { get; set; } = new();
+        internal Dictionary<string, Element> ReferenceBindings { get; set; } = new(StringComparer.Ordinal);
+
+        // Document pointer (for warnings, etc.)
+        internal XferDocument? CurrentDocument { get; set; } = null;
+    }
+
+    private Stack<ParserState> _parserStateStack = new Stack<ParserState>();
+
+    private void PushParserState() {
+        // Snapshot delimiter stack as bottom->top
+        var delimArray = _delimStack.ToArray(); // top->bottom
+        Array.Reverse(delimArray); // bottom->top
+
+        // Snapshot binding scopes as bottom->top and clone each dictionary
+        var scopesArray = _bindingScopes.ToArray(); // top->bottom
+        Array.Reverse(scopesArray); // bottom->top
+        var scopesClone = new List<Dictionary<string, Element>>(scopesArray.Length);
+        foreach (var scope in scopesArray) {
+            scopesClone.Add(new Dictionary<string, Element>(scope));
+        }
+
+        var state = new ParserState {
+            // Core buffer window
+            ScanString = ScanString,
+            Start = Start,
+            Position = Position,
+
+            // Cursor/diagnostics
+            CurrentRow = CurrentRow,
+            CurrentColumn = CurrentColumn,
+            LastElementRow = LastElementRow,
+            LastElementColumn = LastElementColumn,
+
+            // Delimiters
+            DelimStackSnapshot = delimArray,
+
+            // Transient parse state
+            PendingPIs = new List<ProcessingInstruction>(_pendingPIs),
+            PendingIds = _pendingIds.ToArray(),
+            UsedIds = new List<string>(_usedIds),
+
+            // Bindings and references
+            BindingScopes = scopesClone,
+            ReferenceBindings = new Dictionary<string, Element>(_referenceBindings),
+
+            // Document
+            CurrentDocument = _currentDocument,
+        };
+
+        _parserStateStack.Push(state);
+
+        // Isolate transient state for nested parse
+        _pendingPIs.Clear();
+        _pendingIds.Clear();
+        _usedIds.Clear();
+
+        // Start nested parse with a clean delimiter stack environment
+        _delimStack = new Stack<ElementDelimiter>();
+        // Note: We keep live bindings available for resolution but they will be restored on Pop
+    }
+
+    private void PopParserState() {
+        if (_parserStateStack.Count > 0) {
+            var state = _parserStateStack.Pop();
+
+            // Restore delimiter stack from bottom->top snapshot
+            _delimStack = new Stack<ElementDelimiter>(state.DelimStackSnapshot);
+
+            // Restore transient collections
+            _pendingPIs.Clear();
+            _pendingPIs.AddRange(state.PendingPIs);
+
+            _pendingIds.Clear();
+            foreach (var id in state.PendingIds) { _pendingIds.Enqueue(id); }
+
+            _usedIds.Clear();
+            foreach (var id in state.UsedIds) { _usedIds.Add(id); }
+
+            // Restore bindings (rebuild bottom->top)
+            _bindingScopes.Clear();
+            foreach (var scope in state.BindingScopes) {
+                _bindingScopes.Push(new Dictionary<string, Element>(scope));
+            }
+
+            _referenceBindings.Clear();
+            foreach (var kv in state.ReferenceBindings) { _referenceBindings[kv.Key] = kv.Value; }
+
+            _currentDocument = state.CurrentDocument;
+
+            // Critical: restore ScanString before Start/Position to avoid setter reset
+            ScanString = state.ScanString;
+            Start = state.Start;
+            Position = state.Position;
+            CurrentRow = state.CurrentRow;
+            CurrentColumn = state.CurrentColumn;
+            LastElementRow = state.LastElementRow;
+            LastElementColumn = state.LastElementColumn;
+        }
+    }
 
     private int Start { get; set; } = 0;
 
@@ -543,7 +662,7 @@ public partial class Parser : IXferParser {
 
     internal bool InterpolatedElementClosing() {
         Debug.Assert(_delimStack.Peek().ClosingSpecifier == InterpolatedElement.ClosingSpecifier);
-        return ElementCompactClosing();
+        return ElementClosing();
     }
 
     internal bool DynamicElementClosing() {
@@ -816,6 +935,74 @@ public partial class Parser : IXferParser {
 
         return document!;
     }
+
+    /// <summary>
+    /// Parses a standalone XferLang fragment into a single Element using a sandboxed parser state.
+    /// Useful for nested parsing scenarios (e.g., interpolated content) without disturbing outer state.
+    /// </summary>
+    /// <param name="fragment">The XferLang text representing a single element.</param>
+    /// <returns>The parsed Element.</returns>
+    /// <exception cref="InvalidOperationException">When no element is found or extra trailing tokens remain.</exception>
+    public Element ParseFragment(string fragment) {
+        if (fragment is null) { throw new ArgumentNullException(nameof(fragment)); }
+        PushParserState();
+        try {
+            // Initialize scan for fragment (resets Start/Position)
+            ScanString = fragment;
+            CurrentRow = 1; CurrentColumn = 1;
+            LastElementRow = 1; LastElementColumn = 1;
+
+            SkipBOM();
+            SkipWhitespace();
+
+            // Parse exactly one element from the fragment
+            var element = ParseElement();
+
+            // After parsing the element, ensure only trailing whitespace remains
+            SkipWhitespace();
+            if (IsCharAvailable()) {
+                throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected trailing content in fragment.");
+            }
+
+            return element;
+        }
+        finally {
+            PopParserState();
+        }
+    }
+
+    /// <summary>
+    /// Parses a fragment that may contain zero or more elements; returns a TupleElement of parsed children.
+    /// State is fully sandboxed and restored on exit.
+    /// </summary>
+    /// <param name="fragment">The XferLang text with one or more elements.</param>
+    /// <returns>A TupleElement containing all parsed elements in order.</returns>
+    public TupleElement ParseFragmentMany(string fragment) {
+        if (fragment is null) { throw new ArgumentNullException(nameof(fragment)); }
+        PushParserState();
+        try {
+            ScanString = fragment;
+            CurrentRow = 1; CurrentColumn = 1;
+            LastElementRow = 1; LastElementColumn = 1;
+
+            SkipBOM();
+            var tuple = new TupleElement();
+
+            while (IsCharAvailable()) {
+                SkipWhitespace();
+                if (!IsCharAvailable()) { break; }
+                var element = ParseElement();
+                if (element is not EmptyElement) {
+                    tuple.Add(element);
+                }
+            }
+
+            return tuple;
+        }
+        finally {
+            PopParserState();
+        }
+    }
     internal XferDocument ParseDocument()
     {
         var document = new XferDocument();
@@ -950,35 +1137,17 @@ public partial class Parser : IXferParser {
             }
         }
         else if (element is InterpolatedElement ie) {
-            // Final fallback: resolve any lingering implicit _name or _name_ tokens in interpolated text
-            // that were not resolved during initial parse (e.g., due to late let binding visibility edge cases).
-            if (ie.Value.Contains('_')) {
-                List<string> resolvedNames = new();
-                var replaced = Regex.Replace(ie.Value, @"_([A-Za-z0-9_\-]+)_?", m => {
-                    var name = m.Groups[1].Value;
-                    if (TryResolveBinding(name, out var bound) && bound != null) {
-                        resolvedNames.Add(name);
-                        return ElementToInterpolatedText(bound);
-                    }
-                    if (name.EndsWith('_')) { // defensive: try trimmed variant
-                        var trimmed = name.TrimEnd('_');
-                        if (TryResolveBinding(trimmed, out var boundTrim) && boundTrim != null) {
-                            resolvedNames.Add(trimmed);
-                            return ElementToInterpolatedText(boundTrim);
-                        }
-                    }
-                    return m.Value; // leave unresolved
-                });
-                if (!ReferenceEquals(replaced, ie.Value)) {
-                    ie.Value = replaced; // update in-place
-                    // Suppress earlier unresolved warnings for any names now resolved via fallback
-                    foreach (var rn in resolvedNames.Distinct()) {
-                        SuppressEarlierUnresolvedReferenceWarning(rn);
-                        if (_currentDocument != null) {
-                            _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] post-pass interpolated resolved '{rn}'", CurrentRow, CurrentColumn, rn));
-                        }
+            // Re-parse the interpolated string using the real parser to resolve any
+            // explicit elements (e.g., <_name_>) now that bindings are available.
+            try {
+                var serialized = ie.ToXfer(); // produce a canonical interpolated literal with proper quoting
+                if (!string.IsNullOrEmpty(serialized)) {
+                    if (ParseFragment(serialized) is InterpolatedElement reparsed && reparsed.Value != ie.Value) {
+                        ie.Value = reparsed.Value;
                     }
                 }
+            } catch {
+                // If re-parse fails for any reason, leave value as-is.
             }
         }
         else if (element is CollectionElement coll) {
@@ -1456,6 +1625,8 @@ public partial class Parser : IXferParser {
         var localPendingPIs = new List<ProcessingInstruction>();
 
         while (IsCharAvailable()) {
+            // Allow whitespace before closing or next member
+            SkipWhitespace();
             if (ObjectElementClosing()) {
                 return objectElement;
             }
@@ -1816,53 +1987,6 @@ public partial class Parser : IXferParser {
         var style = _delimStack.Peek().Style;
 
         while (IsCharAvailable()) {
-            // Support embedded dereference tokens inside interpolated strings using implicit syntax
-            // Examples: 'Hello, _name.'  or 'Hello, _name_.' (trailing underscore treated as empty-closing)
-            if (CurrentChar == '_' && (char.IsLetterOrDigit(Peek) || Peek == '_' || Peek == '-')) {
-                int savePos = Position;
-                int saveRow = CurrentRow;
-                int saveCol = CurrentColumn;
-                // Consume leading underscores as specifier count (currently stylistic)
-                int leadingUnderscores = 0;
-                while (IsCharAvailable() && CurrentChar == '_') { leadingUnderscores++; Advance(); }
-
-                // Require at least one identifier char after underscores to treat as dereference
-                if (IsCharAvailable() && (char.IsLetterOrDigit(CurrentChar) || CurrentChar == '_' || CurrentChar == '-')) {
-                    var nameBuilder = new StringBuilder();
-                    while (IsCharAvailable() && (char.IsLetterOrDigit(CurrentChar) || CurrentChar == '_' || CurrentChar == '-')) {
-                        // If current is underscore and next char is NOT an identifier constituent, treat as closing underscore
-                        if (CurrentChar == '_' && !(char.IsLetterOrDigit(Peek) || Peek == '_' || Peek == '-')) {
-                            break; // leave underscore for optional closing consumption logic below
-                        }
-                        nameBuilder.Append(CurrentChar);
-                        Advance();
-                    }
-                    // Optional closing underscore (empty-closing style) if followed by non-identifier char
-                    bool consumedClosing = false;
-                    if (IsCharAvailable() && CurrentChar == '_' && !(char.IsLetterOrDigit(Peek) || Peek == '_' || Peek == '-')) {
-                        consumedClosing = true;
-                        Advance();
-                    }
-                    var name = nameBuilder.ToString();
-                    if (!string.IsNullOrEmpty(name)) {
-                        if (TryResolveBinding(name, out var bound) && bound != null) {
-                            valueBuilder.Append(ElementToInterpolatedText(bound));
-                            continue; // resolved dereference appended
-                        }
-                        else {
-                            // Unresolved: re-emit original token for visibility
-                            var originalToken = new StringBuilder();
-                            originalToken.Append(new string('_', leadingUnderscores));
-                            originalToken.Append(name);
-                            if (consumedClosing) { originalToken.Append('_'); }
-                            valueBuilder.Append(originalToken.ToString());
-                            continue;
-                        }
-                    }
-                }
-                // If pattern failed, rewind and treat as normal char
-                Position = savePos; CurrentRow = saveRow; CurrentColumn = saveCol; // minimal rewind (column/row restore)
-            }
             if (ElementExplicitOpening(StringElement.ElementDelimiter, out int stringSpecifierCount)) {
                 StringElement stringElement = ParseStringElement(stringSpecifierCount);
                 valueBuilder.Append(stringElement.Value);
@@ -1875,18 +1999,13 @@ public partial class Parser : IXferParser {
                 if (referenceElement is ReferenceElement dLate) {
                     if (TryResolveBinding(dLate.Value, out var lateBound) && lateBound is not null) {
                         valueBuilder.Append(ElementToInterpolatedText(lateBound));
-                    } else {
-                        // Re-emit a synthetic implicit dereference token ( _name_ ) so that the
-                        // final interpolation fallback pass can still resolve it once the binding
-                        // becomes available (e.g., later in the same script PI). If we were to
-                        // append only the bare name (previous behavior) the token would be lost
-                        // and could never resolve, producing incorrect output like 'Hi first'
-                        // instead of 'Hi Alice'. We intentionally drop the explicit angle brackets
-                        // so the final resolved text omits them unless the user provided literal
-                        // angle brackets outside the token.
-                        valueBuilder.Append('_').Append(dLate.Value).Append('_');
                     }
-                } else {
+                    else {
+                        // Preserve the explicit dereference token so final re-parse can resolve it later.
+                        valueBuilder.Append(dLate.Delimiter.ExplicitOpening).Append(dLate.Value).Append(dLate.Delimiter.ExplicitClosing);
+                    }
+                }
+                else {
                     // Already resolved to a cloned element; use its textual representation (unquoted for strings)
                     valueBuilder.Append(ElementToInterpolatedText(referenceElement));
                 }
@@ -1961,30 +2080,18 @@ public partial class Parser : IXferParser {
                 continue;
             }
 
-            if (ElementClosing()) {
+            if (InterpolatedElementClosing()) {
                 var raw = valueBuilder.ToString();
-                // Fallback substitution pass: replace any remaining _name or _name_ tokens with bound values
-                if (raw.Contains('_')) {
-                    raw = Regex.Replace(raw, @"_([A-Za-z0-9_\-]+)_?", m => {
-                        var name = m.Groups[1].Value;
-                        // If name ends with underscore and direct lookup fails, attempt trimmed variant
-                        if (TryResolveBinding(name, out var bound) && bound != null) {
-                            return ElementToInterpolatedText(bound);
-                        }
-                        if (name.EndsWith('_')) {
-                            var trimmed = name.TrimEnd('_');
-                            if (TryResolveBinding(trimmed, out var boundTrim) && boundTrim != null) {
-                                return ElementToInterpolatedText(boundTrim);
-                            }
-                        }
-                        return m.Value; // leave unresolved for visibility
-                    });
-                }
                 return new InterpolatedElement(raw.Normalize(NormalizationForm.FormC), specifierCount, style);
             }
 
             valueBuilder.Append(CurrentChar);
             Expand();
+        }
+        // If we reach end of input, treat as closed for compact/implicit style (consistent with other scalar parsers)
+        if (style == ElementStyle.Compact || style == ElementStyle.Implicit) {
+            var rawAtEof = valueBuilder.ToString();
+            return new InterpolatedElement(rawAtEof.Normalize(NormalizationForm.FormC), specifierCount, style);
         }
 
         throw new InvalidOperationException($"At row {CurrentRow}, column {CurrentColumn}: Unexpected end of {InterpolatedElement.ElementName} element.");

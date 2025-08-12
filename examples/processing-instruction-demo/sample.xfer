@@ -1,17 +1,3 @@
-</ Start your day with a comment! />
-!document {
-    xfer "11.1"
-    id "top"
-}!
-
-!charDef {
-    fooz \zeta
-    theend \omega
-    pin \pushpin
-    answer \$42
-}!
-
-
 (
     <! script (
         let first "Alice"
@@ -53,6 +39,12 @@
         MultiParam (_sampleClass year (getElementById (_document "date")) count (root (_document)))
     )
 
+!charDef {
+    fooz \zeta
+    theend \omega
+    pin \pushpin
+    answer \$42
+}!
     [~true ~false ~true ~false]
     (~false ~true ~false ~true)
     {one\1 two#$2 three&%11}

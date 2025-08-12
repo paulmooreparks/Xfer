@@ -71,7 +71,14 @@ public class LetProcessingInstruction : ProcessingInstruction {
         ScriptProcessingInstruction.ResolveDereferences(BoundValue, _parser);
         // Avoid double-binding if ElementHandler invoked after early execution
         if (!_parser.TryResolveBinding(BindingName, out var _existing)) {
-            _parser.BindReference(BindingName, BoundValue);
+                // Pre-bind the variable name with a placeholder so references in subsequent lets can resolve
+                // Use a NullElement as placeholder (could be replaced with a dedicated PlaceholderElement if needed)
+                if (!_parser.TryResolveBinding(BindingName, out _)) {
+                    _parser.BindReference(BindingName, new NullElement());
+                }
+
+                // Update the binding with the real value
+                _parser.BindReference(BindingName, BoundValue);
         }
         SuppressSerialization = true; // let PI should disappear after binding
         base.ElementHandler(element);
