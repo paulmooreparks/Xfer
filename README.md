@@ -102,6 +102,16 @@ Instead of using escape sequences, you may lengthen the opening and closing spec
 
 Pick the shortest run that avoids ambiguity.
 
+### Interpolated Text
+
+Interpolated‑text elements evaluate embedded elements to render a final text element. Like string elements, these will deserialize to a string type.
+
+```xfer
+<! dynamicSource { username env "USER" } !>
+</ Value will render as 'User=paul LoggedIn=True Since 1 Aug 2025 09:30:00' />
+banner 'User=<|username|> LoggedIn=<~true~> Since <@2025-08-01T09:30:00@>'
+```
+
 ### Processing Instructions
 
 Processing instructions (PIs) are single key/value directives that the parser consumes before continuing to parse. They use the form `<! name <value> !>`. The built‑in PIs include:
@@ -120,95 +130,6 @@ Processing instructions (PIs) are single key/value directives that the parser co
 <! dynamicSource { apiKey file "secrets/api-key.txt" user env "USER" tag const "2025.08.11" } !>
 <! if defined |apiKey| !> { auth { key |apiKey| user |user| tag |tag| } }
 ```
-
-### Interpolated Text
-
-Interpolated‑text elements evaluate embedded elements to render a final text element. Like string elements, these will deserialize to a string type.
-
-```xfer
-<! dynamicSource { username env "USER" } !>
-</ Value will render as 'User=paul LoggedIn=True Since 1 Aug 2025 09:30:00' />
-banner 'User=<|username|> LoggedIn=<~true~> Since <@2025-08-01T09:30:00@>'
-```
-
----
-## Introduction to the .NET Library
-
-Install the NuGet package [ParksComputing.Xfer.Lang](https://www.nuget.org/packages/ParksComputing.Xfer.Lang) to parse and serialize XferLang in .NET projects.
-
-### Parse and Serialize
-
-```csharp
-using ParksComputing.Xfer.Lang.Services;
-
-var parser = new Parser();
-var doc = parser.Parse("{ name \"Alice\" age 30 }");
-
-// Work with the document
-var roundTrip = doc.ToXfer(); // Serialize back to XferLang
-```
-
-Warnings include row/column anchors to help locate issues:
-
-```csharp
-foreach (var w in doc.Warnings) {
-        Console.WriteLine($"{w.Type} @ {w.Row}:{w.Column} — {w.Message} [{w.Context}]");
-}
-```
-
-### Object Mapping (XferConvert)
-
-`XferConvert` turns CLR objects into Xfer elements and back. This is useful for configuration scenarios and typed round‑trips.
-
-```csharp
-using ParksComputing.Xfer.Lang;
-using ParksComputing.Xfer.Lang.Configuration;
-
-var settings = new XferSerializerSettings();
-
-var person = new Person { Name = "Ada", Age = 36 };
-var element = XferConvert.FromObject(person, settings);  // ObjectElement
-var xfer = element.ToXfer();
-
-var back = XferConvert.ToObject<Person>((ObjectElement)element, settings);
-```
-
-Attributes influence names and number formatting:
-
-```csharp
-using ParksComputing.Xfer.Lang.Attributes;
-
-public class Person {
-    [XferProperty("fullName")] public string Name { get; set; } = string.Empty;
-    [XferNumericFormat(XferNumericFormat.Hex)] public int Favorite { get; set; }
-}
-```
-
-### Configuration (XferSerializerSettings)
-
-`XferSerializerSettings` controls naming, numeric formatting, decimal precision, and extension points. Highlights:
-
-- ContractResolver (default: `DefaultContractResolver`)
-- Converters (`IXferConverter`) — optional custom type converters
-- Decimal and double precision (`XferDecimalPrecisionAttribute`)
-- Integer/long formatting (`XferNumericFormatAttribute`)
-
-```csharp
-using ParksComputing.Xfer.Lang.Configuration;
-using ParksComputing.Xfer.Lang.ContractResolvers;
-using ParksComputing.Xfer.Lang.Converters;
-
-var settings = new XferSerializerSettings {
-    ContractResolver = new DefaultContractResolver()
-};
-
-// Optional: add custom converters when you need specialized handling
-settings.Converters.Add(new MySpecialConverter());
-```
-
-Note: Advanced serializer extension points (custom converters and custom contract resolvers) are supported and evolving. Keep tests nearby when extending.
-
----
 
 ### Binding References with `let`
 
@@ -292,6 +213,83 @@ Define symbolic character aliases for readability (keyword → Unicode code poin
 <! chardef { bullet \$2022 arrow \$2192 } !>
 { list ("Item" \bullet "Next" \arrow ) }
 ```
+
+---
+## Introduction to the .NET Library
+
+Install the NuGet package [ParksComputing.Xfer.Lang](https://www.nuget.org/packages/ParksComputing.Xfer.Lang) to parse and serialize XferLang in .NET projects.
+
+### Parse and Serialize
+
+```csharp
+using ParksComputing.Xfer.Lang.Services;
+
+var parser = new Parser();
+var doc = parser.Parse("{ name \"Alice\" age 30 }");
+
+// Work with the document
+var roundTrip = doc.ToXfer(); // Serialize back to XferLang
+```
+
+Warnings include row/column anchors to help locate issues:
+
+```csharp
+foreach (var w in doc.Warnings) {
+        Console.WriteLine($"{w.Type} @ {w.Row}:{w.Column} — {w.Message} [{w.Context}]");
+}
+```
+
+### Object Mapping (XferConvert)
+
+`XferConvert` turns CLR objects into Xfer elements and back. This is useful for configuration scenarios and typed round‑trips.
+
+```csharp
+using ParksComputing.Xfer.Lang;
+using ParksComputing.Xfer.Lang.Configuration;
+
+var settings = new XferSerializerSettings();
+
+var person = new Person { Name = "Ada", Age = 36 };
+var element = XferConvert.FromObject(person, settings);  // ObjectElement
+var xfer = element.ToXfer();
+
+var back = XferConvert.ToObject<Person>((ObjectElement)element, settings);
+```
+
+Attributes influence names and number formatting:
+
+```csharp
+using ParksComputing.Xfer.Lang.Attributes;
+
+public class Person {
+    [XferProperty("fullName")] public string Name { get; set; } = string.Empty;
+    [XferNumericFormat(XferNumericFormat.Hex)] public int Favorite { get; set; }
+}
+```
+
+### Configuration (XferSerializerSettings)
+
+`XferSerializerSettings` controls naming, numeric formatting, decimal precision, and extension points. Highlights:
+
+- ContractResolver (default: `DefaultContractResolver`)
+- Converters (`IXferConverter`) — optional custom type converters
+- Decimal and double precision (`XferDecimalPrecisionAttribute`)
+- Integer/long formatting (`XferNumericFormatAttribute`)
+
+```csharp
+using ParksComputing.Xfer.Lang.Configuration;
+using ParksComputing.Xfer.Lang.ContractResolvers;
+using ParksComputing.Xfer.Lang.Converters;
+
+var settings = new XferSerializerSettings {
+    ContractResolver = new DefaultContractResolver()
+};
+
+// Optional: add custom converters when you need specialized handling
+settings.Converters.Add(new MySpecialConverter());
+```
+
+Note: Advanced serializer extension points (custom converters and custom contract resolvers) are supported and evolving. Keep tests nearby when extending.
 
 ---
 ## Core Concepts
@@ -1694,7 +1692,7 @@ The XferLang solution contains several projects and folders:
 
 - **ParksComputing.Xfer.Lang** - Main library
 - **ParksComputing.Xfer.Lang.Tests** - Unit tests and integration tests
-- **XferService** - Example web service implementation (optional)
+- **XferService** - Example web service implementation
 - **XferDocBuilder** - Custom tool for generating documentation
 - **examples** - Command-line examples demonstrating various uses of XferLang
 - **tools** - Development tools and utilities
