@@ -96,6 +96,24 @@ public partial class Parser : IXferParser {
     }
 
     /// <summary>
+    /// Adds a warning at a specific row/column location. Use when the logical
+    /// source of the issue is earlier than the current cursor position.
+    /// </summary>
+    internal void AddWarningAt(WarningType type, string message, int row, int column, string? context = null) {
+        if (_currentDocument != null) {
+            _currentDocument.Warnings.Add(new ParseWarning(type, message, row, column, context));
+        }
+    }
+
+    /// <summary>
+    /// Adds a warning anchored to the start of the most recently opened element
+    /// (tracked in LastElementRow/LastElementColumn).
+    /// </summary>
+    internal void AddWarningAtElementStart(WarningType type, string message, string? context = null) {
+        AddWarningAt(type, message, LastElementRow, LastElementColumn, context);
+    }
+
+    /// <summary>
     /// Validates and registers an ID to ensure uniqueness within the document.
     /// </summary>
     /// <param name="id">The ID to validate and register</param>
@@ -1940,7 +1958,7 @@ public partial class Parser : IXferParser {
         string charString = charContent.ToString();
         if (string.IsNullOrEmpty(charString)) {
             // Add warning for empty character element and use replacement character
-            AddWarning(WarningType.EmptyCharacterElement,
+            AddWarningAtElementStart(WarningType.EmptyCharacterElement,
                       $"Empty character element, using '{PlaceholderCharacter}' as replacement",
                       null);
             return new CharacterElement(numericValue, specifierCount, style: style);
@@ -1956,7 +1974,7 @@ public partial class Parser : IXferParser {
             }
             else {
                 // Add warning for unresolved character name
-                AddWarning(WarningType.CharacterResolutionFailure,
+                AddWarningAtElementStart(WarningType.CharacterResolutionFailure,
                           $"Unknown character name '{charString}', using '{PlaceholderCharacter}' as fallback",
                           charString);
                 codePoint = PlaceholderCharacter;
@@ -1970,7 +1988,7 @@ public partial class Parser : IXferParser {
             }
             else {
                 // Add warning for invalid character value
-                AddWarning(WarningType.InvalidCharacterValue,
+                AddWarningAtElementStart(WarningType.InvalidCharacterValue,
                           $"Invalid character value '{charString}', using '{PlaceholderCharacter}' as fallback",
                           charString);
                 codePoint = PlaceholderCharacter;
@@ -2331,16 +2349,19 @@ public partial class Parser : IXferParser {
 
         if (TryResolveBinding(name, out var bound)) {
             if (_currentDocument != null) {
+                // Keep trace at current cursor; it reflects resolution moment
                 _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] deref '{name}' resolved immediately", CurrentRow, CurrentColumn, name));
             }
             return Helpers.ElementCloner.Clone(bound!);
         }
 
         if (_currentDocument != null) {
-            _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] deref '{name}' unresolved (will attempt post-pass)", CurrentRow, CurrentColumn, name));
+            // Anchor the trace to the start of the element so caret navigation points to the token
+            _currentDocument.Warnings.Add(new ParseWarning(WarningType.Trace, $"[trace] deref '{name}' unresolved (will attempt post-pass)", LastElementRow, LastElementColumn, name));
         }
 
-        AddWarning(WarningType.UnresolvedReference, $"Unresolved reference '{name}'", name);
+        // Primary warning: point to the deref token start
+        AddWarningAtElementStart(WarningType.UnresolvedReference, $"Unresolved reference '{name}'", name);
         return new ReferenceElement(name, specifierCount, style);
     }
 

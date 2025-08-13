@@ -32,4 +32,16 @@ public class ReferenceElementTests {
         Assert.IsTrue(output.Contains("_missing"), "Unresolved dereference should remain serialized");
         Assert.IsTrue(doc.Warnings.Exists(w => w.Type == WarningType.UnresolvedReference), "UnresolvedReference warning expected");
     }
+
+    [TestMethod]
+    public void UnresolvedDereference_WarningAnchorsToTokenStart() {
+        var parser = new Parser();
+        var doc = parser.Parse("(_missing)");
+        var txt = doc.ToXfer();
+        var warn = doc.Warnings.Find(w => w.Type == WarningType.UnresolvedReference && w.Context == "missing");
+        Assert.IsNotNull(warn, "Expected UnresolvedReference warning for 'missing'");
+        Assert.AreEqual(1, warn!.Row, "Warning row should be 1 for single-line input");
+        // In "(_missing)", the '_' starts at column 2 (after the opening '(')
+        Assert.AreEqual(2, warn.Column, $"Warning should point to deref token start (expected col 2, got {warn.Column})");
+    }
 }

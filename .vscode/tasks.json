@@ -173,6 +173,34 @@
 				"$msCompile"
 			],
 			"group": "test"
+		},
+		{
+			"label": "build (diagnostic anchors)",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"Xfer.sln",
+				"--configuration",
+				"Release"
+			],
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build"
+		},
+		{
+			"label": "test (warning anchors)",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"test",
+				"Xfer.sln",
+				"--configuration",
+				"Release",
+				"--no-build"
+			],
+			"group": "test"
 		}
 	]
 }
