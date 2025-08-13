@@ -5418,7 +5418,7 @@
 <div class="method-doc">
 <h5>Constructor</h5>
 <code>ReferenceElement(string name, int specifierCount, ElementStyle style)</code>
-<p>Creates a dereference element for a previously bound name.</p>
+<p>Creates a reference element for a previously bound name.</p>
 <h6>Parameters</h6>
 <table class="api-table">
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
@@ -6427,9 +6427,84 @@
 <thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
 <tbody>
 <tr>
-<td><code>CustomCharIds</code></td>
-<td><code>Dictionary&lt;string, int&gt;</code></td>
-<td>Gets a dictionary of custom character IDs defined for this document. Maps custom character names to their corresponding Unicode code points.</td>
+<td><code>Author</code></td>
+<td><code>StringElement</code></td>
+<td>Primary author/owner (use Authors for multiples).</td>
+</tr>
+<tr>
+<td><code>Authors</code></td>
+<td><code>ArrayElement</code></td>
+<td>Authors list.</td>
+</tr>
+<tr>
+<td><code>CreatedAt</code></td>
+<td><code>DateTimeElement</code></td>
+<td>Creation timestamp.</td>
+</tr>
+<tr>
+<td><code>Description</code></td>
+<td><code>StringElement</code></td>
+<td>Short description or summary.</td>
+</tr>
+<tr>
+<td><code>DocumentId</code></td>
+<td><code>StringElement</code></td>
+<td>Document identifier (string or GUID as string).</td>
+</tr>
+<tr>
+<td><code>Environment</code></td>
+<td><code>StringElement</code></td>
+<td>Environment name (e.g., dev/test/prod).</td>
+</tr>
+<tr>
+<td><code>Item</code></td>
+<td><code>Element</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>License</code></td>
+<td><code>StringElement</code></td>
+<td>License identifier or text.</td>
+</tr>
+<tr>
+<td><code>Object</code></td>
+<td><code>ObjectElement</code></td>
+<td>The underlying object that stores all document properties.</td>
+</tr>
+<tr>
+<td><code>Profile</code></td>
+<td><code>StringElement</code></td>
+<td>Profile or variant identifier.</td>
+</tr>
+<tr>
+<td><code>Properties</code></td>
+<td><code>IReadOnlyDictionary&lt;string, KeyValuePairElement&gt;</code></td>
+<td>Gets all properties as a read-only dictionary.</td>
+</tr>
+<tr>
+<td><code>Tags</code></td>
+<td><code>ArrayElement</code></td>
+<td>Freeform tags/labels.</td>
+</tr>
+<tr>
+<td><code>Title</code></td>
+<td><code>StringElement</code></td>
+<td>Document title/name.</td>
+</tr>
+<tr>
+<td><code>UpdatedAt</code></td>
+<td><code>DateTimeElement</code></td>
+<td>Last updated timestamp.</td>
+</tr>
+<tr>
+<td><code>Version</code></td>
+<td><code>StringElement</code></td>
+<td>Human or semantic version string.</td>
+</tr>
+<tr>
+<td><code>XferLang</code></td>
+<td><code>StringElement</code></td>
+<td>The version of XferLang targeted by this document.</td>
 </tr>
 </tbody>
 </table>
@@ -6454,6 +6529,66 @@
 <h5>Constructor</h5>
 <code>DocumentProcessingInstruction()</code>
 <p>Initializes a new instance of the DocumentProcessingInstruction class with an empty object value.</p>
+</div>
+<div class="method-doc">
+<h5>Configure</h5>
+<code>DocumentProcessingInstruction Configure(Action&lt;ObjectElement&gt; configure)</code>
+<p>Configure the document processing instruction.</p>
+</div>
+<div class="method-doc">
+<h5>Create</h5>
+<code>DocumentProcessingInstruction Create(Action&lt;ObjectElement&gt; configure)</code>
+<p>Create a new instance with the specified configuration.</p>
+</div>
+<div class="method-doc">
+<h5>From</h5>
+<code>DocumentProcessingInstruction From(IDictionary&lt;string, Element&gt; properties)</code>
+<p>Create an instance from a dictionary of element values.</p>
+</div>
+<div class="method-doc">
+<h5>Get</h5>
+<code>TElement Get(string key)</code>
+<p>Get a typed element by key.</p>
+</div>
+<div class="method-doc">
+<h5>Remove</h5>
+<code>bool Remove(string key)</code>
+<p>Remove a property by key.</p>
+</div>
+<div class="method-doc">
+<h5>RemoveProperty</h5>
+<code>bool RemoveProperty(string key)</code>
+<p>Remove a property by key.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>key</code></td>
+<td><code>string</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="method-doc">
+<h5>Set</h5>
+<code>void Set(string key, Element element)</code>
+<p>Set a typed element by key.</p>
+</div>
+<div class="method-doc">
+<h5>SetCustom</h5>
+<code>void SetCustom(string key, Element element)</code>
+<p>Set a custom element value by key.</p>
+</div>
+<div class="method-doc">
+<h5>ToDictionary</h5>
+<code>Dictionary&lt;string, Element&gt; ToDictionary()</code>
+<p>Convert to a dictionary of element values.</p>
+</div>
+<div class="method-doc">
+<h5>TryGetCustom</h5>
+<code>bool TryGetCustom(string key, TElement& element)</code>
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-processinginstructions-dynamicsourceprocessinginstruction"><h3>Class: DynamicSourceProcessingInstruction</h3>
@@ -8725,6 +8860,42 @@
 <p>An XferDocument containing the parsed elements and metadata.</p>
 </div>
 <div class="method-doc">
+<h5>ParseFragment</h5>
+<code>Element ParseFragment(string fragment)</code>
+<p>Parses a standalone XferLang fragment into a single Element using a sandboxed parser state. Useful for nested parsing scenarios (e.g., interpolated content) without disturbing outer state.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>fragment</code></td>
+<td><code>string</code></td>
+<td>The XferLang text representing a single element.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>The parsed Element.</p>
+</div>
+<div class="method-doc">
+<h5>ParseFragmentMany</h5>
+<code>TupleElement ParseFragmentMany(string fragment)</code>
+<p>Parses a fragment that may contain zero or more elements; returns a TupleElement of parsed children. State is fully sandboxed and restored on exit.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>fragment</code></td>
+<td><code>string</code></td>
+<td>The XferLang text with one or more elements.</td>
+</tr>
+</tbody>
+</table>
+<h6>Returns</h6>
+<p>A TupleElement containing all parsed elements in order.</p>
+</div>
+<div class="method-doc">
 <h5>RegisterElementProcessor</h5>
 <code>void RegisterElementProcessor(Action&lt;Element&gt; processor)</code>
 <p>Register an element processor. Called with each element as it is constructed.</p>
@@ -8748,7 +8919,7 @@
 
 
         <footer>
-            <p>Documentation generated on 2025-08-11 13:55:03 UTC</p>
+            <p>Documentation generated on 2025-08-13 13:01:20 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

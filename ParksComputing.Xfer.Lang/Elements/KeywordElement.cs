@@ -46,7 +46,7 @@ public class KeywordElement : TextElement
     /// <param name="c">The character to test.</param>
     /// <returns>True if the character can start a keyword; otherwise, false.</returns>
     public static bool IsKeywordLeadingChar(char c) {
-        return char.IsLetter(c) || c == '_';
+        return char.IsLetter(c);
     }
 
     /// <summary>
@@ -57,10 +57,8 @@ public class KeywordElement : TextElement
         int maxConsecutiveSpecifiers = GetMaxConsecutiveSpecifiers(Value, Delimiter.ClosingSpecifier);
         Delimiter.SpecifierCount = maxConsecutiveSpecifiers + 1;
 
-        // Validate keyword using character checks (no regex):
-        // - First char: letter or underscore
-        // - Subsequent chars: letter, digit, underscore, hyphen, or dot
         bool isValid = false;
+
         if (!string.IsNullOrEmpty(Value) && IsKeywordLeadingChar(Value[0])) {
             isValid = true;
             for (int i = 1; i < Value.Length; i++) {
@@ -72,15 +70,12 @@ public class KeywordElement : TextElement
             }
         }
 
-        if (!isValid) {
+        if (Delimiter.Style == ElementStyle.Implicit && !isValid) {
             Delimiter.Style = ElementStyle.Compact;
 
-            if (Value.Count() == 0 || Value.Last() == Delimiter.ClosingSpecifier) {
+            if (Value.Length == 0 || Value.Last() == Delimiter.ClosingSpecifier) {
                 Delimiter.Style = ElementStyle.Explicit;
             }
-        }
-        else {
-            Delimiter.Style = ElementStyle.Implicit;
         }
     }
 

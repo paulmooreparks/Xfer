@@ -2,7 +2,7 @@
   "name": "xferlang",
   "displayName": "XferLang",
   "description": "Syntax highlighting and language basics for XferLang (.xfer) – delimiter lengthening, processing instructions, dynamic & interpolation.",
-  "version": "0.15.3",
+  "version": "0.15.4",
   "publisher": "paulmooreparks",
   "license": "MIT",
   "homepage": "https://xferlang.org/",

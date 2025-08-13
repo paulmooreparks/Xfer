@@ -1,0 +1,12 @@
+{
+  "person": {
+    "name": "Alice",
+    "age": 30,
+    "isMember": true,
+    "tags": ["admin", "user"],
+    "address": {
+      "city": "Wonderland",
+      "zip": "12345"
+    }
+  }
+}

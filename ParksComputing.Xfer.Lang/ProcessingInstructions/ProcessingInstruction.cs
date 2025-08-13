@@ -103,11 +103,12 @@ public class ProcessingInstruction : TypedElement<Element> {
         }
 
         if (isIndented) {
-            sb.Append(Environment.NewLine);
+            // sb.Append(Environment.NewLine);
+            // sb.Append(nestIndent);
         }
 
-        if (isIndented) {
-            sb.Append(nestIndent);
+        if (isSpaced) {
+            sb.Append(' ');
         }
 
         sb.Append(Kvp?.ToXfer(formatting, indentChar, indentation, depth + 1));
@@ -115,9 +116,13 @@ public class ProcessingInstruction : TypedElement<Element> {
         // ProcessingInstructions only contain their core KVP - no additional children
         // Target is not included in serialization as it's a reference, not content
 
+        if (isSpaced) {
+            sb.Append(' ');
+        }
+
         if (isIndented) {
-            sb.Append(Environment.NewLine);
-            sb.Append(rootIndent);
+            // sb.Append(Environment.NewLine);
+            // sb.Append(rootIndent);
         }
 
         switch (Delimiter.Style) {

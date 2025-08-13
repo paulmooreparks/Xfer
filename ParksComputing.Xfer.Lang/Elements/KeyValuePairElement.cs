@@ -110,7 +110,8 @@ public class KeyValuePairElement : TypedElement<Element> {
         // Add space between key and value only when needed for disambiguation
         // No space when value has closing delimiters (unambiguous): name"value"
         // Space when value is implicit/no delimiters (ambiguous): name active
-        bool needsSpace = false;
+        bool needsSpace = isSpaced;
+
         if (Value != null) {
             // Add space if value is implicit (no delimiters) or compact with no closing delimiter
             if (Value.Delimiter.Style == ElementStyle.Implicit) {

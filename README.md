@@ -1,6 +1,6 @@
 ![XferLogo](https://raw.githubusercontent.com/paulmooreparks/Xfer/master/logo/XferLang-sm.png)
 
-# The XferLang Data-Interchange Format
+# XferLang
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/paulmooreparks/Xfer)](https://github.com/paulmooreparks/Xfer)
 [![.NET Build Status](https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml/badge.svg)](https://github.com/paulmooreparks/Xfer/actions/workflows/dotnet.yml)
@@ -8,145 +8,62 @@
 [![GitHub issues](https://img.shields.io/github/issues/paulmooreparks/Xfer)](https://github.com/paulmooreparks/Xfer/issues)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Visual Studio Code Extension
+---
+## Introduction
 
-A Visual Studio Code extension for XferLang is now available in the Visual Studio marketplace:
+XferLang is a typed, delimiter‑driven data format for data transfer, configuration, and structured content. If you know JSON, you'll feel at home using XferLang, but then you'll begin to notice what's different: explicit types, interpolated strings, no escape sequences, bound data references, and extensible processing instructions.
 
-https://marketplace.visualstudio.com/items?itemName=paulmooreparks.xferlang
+---
+## Getting Started
 
-Open any `.xfer` file to activate. See the extension's README for details and changelog.
+### Why XferLang
 
-## Table of Contents
-- [The XferLang Data-Interchange Format](#the-xferlang-data-interchange-format)
-  - [Visual Studio Code Extension](#visual-studio-code-extension)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction and Philosophy](#introduction-and-philosophy)
-  - [XferLang by Example](#xferlang-by-example)
-    - [A Direct Comparison](#a-direct-comparison)
-    - [Core XferPath](#core-xferpath)
-    - [Delimiter / Specifier Duplication (Uniform, Escape‑Free Rule)](#delimiter--specifier-duplication-uniform-escapefree-rule)
-    - [Adding Document Metadata (Document PI)](#adding-document-metadata-document-pi)
-    - [Dynamic Elements (Late Binding) \& Source Overrides](#dynamic-elements-late-binding--source-overrides)
-      - [File, Env, and Const Together](#file-env-and-const-together)
-    - [A Quick Tour of Processing Instructions](#a-quick-tour-of-processing-instructions)
-    - [Interpolated Text (Structured, Not Escaped)](#interpolated-text-structured-not-escaped)
-    - [Local Bindings with `let` (Dereference for Reuse)](#local-bindings-with-let-dereference-for-reuse)
-    - [Grouped Let Bindings (`script` PI)](#grouped-let-bindings-script-pi)
-    - [Conditional Inclusion (`if` PI)](#conditional-inclusion-if-pi)
-    - [Character Definitions](#character-definitions)
-    - [What You Just Saw (Feature Progression)](#what-you-just-saw-feature-progression)
-  - [Core Concepts](#core-concepts)
-    - [Elements and Syntax Forms](#elements-and-syntax-forms)
-    - [Collections](#collections)
-    - [Keywords vs Identifiers](#keywords-vs-identifiers)
-    - [Numbers](#numbers)
-    - [Text and Characters](#text-and-characters)
-    - [Date / Time](#date--time)
-    - [Null](#null)
-    - [Binding and Dereference](#binding-and-dereference)
-    - [Interpolated Text](#interpolated-text)
-    - [Dynamic Elements](#dynamic-elements)
-    - [Processing Instructions (PIs)](#processing-instructions-pis)
-  - [Language Specification](#language-specification)
-    - [Document Structure](#document-structure)
-    - [Element Syntax Variations](#element-syntax-variations)
-      - [Implicit Syntax](#implicit-syntax)
-      - [Compact Syntax](#compact-syntax)
-      - [Explicit Syntax](#explicit-syntax)
-    - [Element Reference](#element-reference)
-      - [Primitive Types](#primitive-types)
-      - [Hexadecimal and Binary Formatting](#hexadecimal-and-binary-formatting)
-      - [Structural Types](#structural-types)
-      - [Common Document Patterns](#common-document-patterns)
-      - [Special-Purpose Types](#special-purpose-types)
-    - [Document Validation and Common Mistakes](#document-validation-and-common-mistakes)
-  - [XferLang Elements](#xferlang-elements)
-    - [Array](#array)
-    - [Key/Value Pair](#keyvalue-pair)
-    - [Object](#object)
-    - [Tuple](#tuple)
-    - [Comment](#comment)
-    - [Dynamic](#dynamic)
-    - [Identifier](#identifier)
-    - [Integer](#integer)
-    - [Long](#long)
-  - [Complete Examples](#complete-examples)
-    - [Configuration File Example](#configuration-file-example)
-    - [User Profile Example](#user-profile-example)
-  - [Getting Started with .NET](#getting-started-with-net)
-    - [Installation](#installation)
-    - [Quick Start Example](#quick-start-example)
-    - [Working with Collections](#working-with-collections)
-  - [The `.NET XferLang Library`](#the-net-xferlang-library)
-    - [Basic Serialization and Deserialization](#basic-serialization-and-deserialization)
-    - [Advanced Usage with `XferSerializerSettings`](#advanced-usage-with-xferserializersettings)
-      - [Null Value Handling](#null-value-handling)
-      - [Customizing Property Names with `IContractResolver`](#customizing-property-names-with-icontractresolver)
-      - [Custom Type Converters with `IXferConverter`](#custom-type-converters-with-ixferconverter)
-      - [Numeric Formatting with Attributes](#numeric-formatting-with-attributes)
-  - [Serializer Settings](#serializer-settings)
-    - [Element Style Preferences](#element-style-preferences)
-    - [Configuration Example](#configuration-example)
-    - [Available Settings](#available-settings)
-  - [Property Attributes](#property-attributes)
-    - [XferPropertyAttribute](#xferpropertyattribute)
-    - [XferNumericFormatAttribute](#xfernumericformatattribute)
-    - [XferDecimalPrecisionAttribute](#xferdecimalprecisionattribute)
-    - [Safety Notes](#safety-notes)
-  - [Processing Instructions and Dynamic Content](#processing-instructions-and-dynamic-content)
-    - [Built-in Processing Instructions](#built-in-processing-instructions)
-      - [Document Metadata PI](#document-metadata-pi)
-      - [DynamicSource PI](#dynamicsource-pi)
-      - [CharDef PI](#chardef-pi)
-      - [ID PI](#id-pi)
-      - [Tag PI](#tag-pi)
-      - [Defined PI](#defined-pi)
-    - [Dynamic Elements and Source Resolution](#dynamic-elements-and-source-resolution)
-      - [Built-in Source Types](#built-in-source-types)
-      - [Custom Source Handler Registration](#custom-source-handler-registration)
-    - [Extending Processing Instructions](#extending-processing-instructions)
-      - [Creating Custom PIs](#creating-custom-pis)
-      - [PI Registration and Lifecycle](#pi-registration-and-lifecycle)
-  - [Writing Custom Processing Instructions](#writing-custom-processing-instructions)
-    - [When to Create a PI](#when-to-create-a-pi)
-    - [Parser Registration Model](#parser-registration-model)
-    - [Minimal Custom PI Example (`trace`)](#minimal-custom-pi-example-trace)
-    - [Conditioning the Next Element](#conditioning-the-next-element)
-    - [Validation PI Skeleton](#validation-pi-skeleton)
-    - [Extending Dynamic Resolution (No New PI Required)](#extending-dynamic-resolution-no-new-pi-required)
-    - [Checklist for a New PI](#checklist-for-a-new-pi)
-    - [Lifecycle Summary](#lifecycle-summary)
-  - [Building XferLang](#building-xferlang)
-    - [Prerequisites](#prerequisites)
-    - [Quick Start](#quick-start)
-    - [Project Structure](#project-structure)
-    - [Development Commands](#development-commands)
-  - [Community and Resources](#community-and-resources)
-    - [Learning Resources](#learning-resources)
-    - [Getting Help](#getting-help)
-  - [Project Status and Roadmap](#project-status-and-roadmap)
-  - [Contributing](#contributing)
-  - [Grammar](#grammar)
+- **XferLang is readable without ceremony.** Whitespace separates elements, and you may expand or collapse formatting without changing meaning.
+- **Types are explicit.** There are no heuristics or guesswork.
+- **There is no escape tax.** When content would collide with a delimiter, you may lengthen the delimiter instead of inserting backslashes.
+- **Parsing is programmable.** Processing instructions declare metadata, bind names to elements for dynamic insertion, control parsing output, and compose elements from external sources. You may even develop your own custom processing instructions or extend the built-in ones.
 
-## Introduction and Philosophy
+### Quick XferLang Example
 
-XferLang is a strongly‑typed, delimiter‑driven data‑interchange format for configuration, structured content, and templated runtime inputs. It aims to feel instantly familiar to anyone who knows JSON—then give you the things you keep wishing JSON had: explicit types, whitespace flexibility, structured interpolation, safe embedding without escape sequences, late binding, and parse‑time directives.
+```xfer
+<! document { version "1" } !>
+{
+    title "Demo"
+    active ~true
+    retries 3
+    ratio *0.8125
+    launched @2025-08-01T09:30:00Z@
+    tags [ "alpha" "preview" ]
+    location ( *42.3601 *-71.0589 )
+    banner 'User=<|USER|> ok=<~true~>'
+}
+```
 
-Guiding principles:
+### Visual Studio Code Extension
 
-* **Readable by default** – Minimal punctuation; whitespace separates elements when that’s unambiguous. You can pretty‑print or collapse aggressively without changing meaning.
-* **Explicit types** – Every value carries an unambiguous type marker (boolean, decimal, date/time, etc.). Ambiguous heuristics disappear; downstream code stops guessing.
-* **No escape tax** – Instead of backslash escaping inside strings (or other forms), XferLang lets you lengthen the opening/closing specifier run. Need an embedded quote? Double the quotes. Need a pipe inside a dynamic element? Use a longer pipe run. This works uniformly across element types.
-* **Safe arbitrary embedding** – Because specifiers can lengthen, you can drop in generated fragments, templated chunks, or foreign content without pre‑processing or opaque escaping layers.
-* **Single structured root** – Every document has exactly one root collection (object, array, or tuple). This removes edge ambiguity, enables streaming readers, and aligns cleanly with schema / validation tooling.
-* **Parse‑time intent** – Processing Instructions (PIs) let you bind values, declare dynamic sources, conditionally include elements, and define symbolic characters—without blurring the core data model.
+Install the XferLang extension from the Visual Studio Marketplace to enable syntax highlighting and basic diagnostics.
 
-## XferLang by Example
-Let's build intuition first. Each snippet introduces one dimension of capability; together they show how you get power without giving up clarity.
+Marketplace: https://marketplace.visualstudio.com/items?itemName=paulmooreparks.xferlang
 
-### A Direct Comparison
+Open a file with a .xfer file extension to activate the XferLang extension.
 
-Simple XferLang document:
+---
+## Project Status and Roadmap
+
+The .NET implementation of XferLang is becoming more robust, with a focus on professional-grade features like custom converters and contract resolvers. However, the project as a whole is still experimental.
+
+The future roadmap includes:
+*   Completing the .NET implementation to achieve a production-quality 1.0 release
+*   Reimplementing the core library in Rust
+*   Exposing a C ABI from the Rust implementation
+*   Creating language wrappers (e.g., for C#, Python, JavaScript) that communicate with the C ABI
+
+The goal of moving to a Rust core is to provide a single, high-performance, and memory-safe core for all future XferLang implementations. I'm looking for [contributors and collaborators](#contributing) to get that work started.
+
+---
+## XferLang Basics
+
+### Elements and Collections
 
 ```xfer
 {
@@ -158,187 +75,186 @@ Simple XferLang document:
         email "alice@example.com"
         joinedDate @2023-01-15T12:00:00@
     }
-}
-```
-
-Equivalent JSON:
-
-```json
-{
-  "name": "Alice",
-  "age": 30,
-  "isMember": true,
-  "scores": [85, 90, 78.5],
-  "profile": {
-    "email": "alice@example.com",
-    "joinedDate": "2023-01-15T12:00:00"
-  }
-}
-```
-
-Newlines are optional in XferLang, and whitespace can be reduced to only the minimum necessary to separate elements. Therefore, the same XferLang document shown above can be written very compactly:
-
-```xfer
-{name"Alice"age 30 isMember~true scores[*85 *90 *78.5]profile{email"alice@example.com"joinedDate@2023-01-15T12:00:00@}}
-```
-
----
-
-### Core XferPath
-
-Explicit typing in XferLang clarifies intent and removes ambiguity while remaining terse:
-
-```xfer
-sample {
-    title "Demo"
-    retries 3          </ implicit integer />
-    ratio *0.8125      </ high‑precision decimal />
-    threshold ^0.5     </ double />
-    active ~true       </ boolean />
-    launched @2025-08-01T09:30:00Z@
-    tags [ "alpha" "preview" ]
-    point ( *42.3601 *-71.0589 )
-    notes ""No escaping needed: "quotes" stay simple.""
+    point (*42.3601 *-71.0589)
     optional ?
 }
 ```
 
-Arrays are homogeneous; tuples are heterogeneous. Angle‑bracket explicit forms (not shown here) are optional unless needed to prevent ambiguity.
+Objects (`{}`) hold key/value pairs. Arrays (`[]`) are ordered and homogeneous (each item must be the same element type). Tuples (`()`) are ordered and heterogeneous (may contain multiple element types).
 
-### Delimiter / Specifier Duplication (Uniform, Escape‑Free Rule)
+### Specifiers and the "No Escapes" Rule
 
-Instead of requiring escape sequences, XferLang lets you lengthen an element's delimiter sequence in order to allow special characters to be embedded in the element. The parser treats the entire contiguous run as the opening (and requires the same length run to close). Apply this anywhere a specifier pairs with itself or a matching closer:
+Instead of using escape sequences, you may lengthen the opening and closing specifier runs in order to enclose problematic content. The parser treats the contiguous run as the delimiter.
 
-* Strings (`"…"`): embed quotes by doubling: `""He said, "Hello".""`
-* Dynamic elements (`|name|`): need a literal `|` inside? Use `||value with | symbol||`.
-* Interpolated text (`'…'`): nest or include apostrophes by lengthening: `''Outer 'inner' still fine''`.
-* Comments (`</ … />`): if interior contains `</`, lengthen the leading `/` run: `<// A comment with </inner/> safely //>`.
-* Any explicit form (`<…>`): angle‑bracket wrapper isolates interior specifier runs when needed.
-
-Examples:
+- Strings use `"…"`, and a longer run allows embedded quotes: `""He said, \"Hello\".""`.
+- Interpolated text uses `'…'`, and a longer run allows embedded apostrophes: `''Outer 'inner' still fine''`.
+- Comments use `</ … />`, and a longer run allows nested markers: `<// contains </ safely //>`.
+- Use an explicit form by wrapping with `<…>` when you need to isolate internals.
 
 ```xfer
-example {
-    plain "Alpha"
+{
     nestedQuotes ""He said, "Hello" then left.""
-    dynamicWithPipe ||status|ok||        </ inner single | stays literal />
-    commentDemo <// Outer </ inner /> still fine //>
-    dateExample <@2025-08-01T12:00:00@>  </ explicit form keeps internal @ sequences unambiguous />
+    dynamicWithPipe ||status|ok||
+    <// Outer comments containing </ inner comments /> are fine //>
+    explicitDate <@2025-08-01T12:00:00@>
 }
 ```
 
-Guideline: choose the shortest delimiter length that avoids ambiguity; lengthen only when the content would otherwise prematurely terminate the element. This rule lets you embed arbitrarily complex content (including what look like closing tokens) without escapes.
+Pick the shortest run that avoids ambiguity.
 
-### Adding Document Metadata (Document PI)
+### Processing Instructions
 
-A Processing Instruction (PI) is a lightweight directive: exactly one key/value pair that the parser consumes before (optionally) influencing subsequent parsing. The `document` PI attaches version and other top‑level metadata:
+Processing instructions (PIs) are single key/value directives that the parser consumes before continuing to parse. They use the form `<! name <value> !>`. The built‑in PIs include:
+
+- `document` – document metadata
+- `dynamicSource` – map names to source handlers (file/env/const)
+- `let` – bind a name to a value
+- `script` – batch multiple operators and apply them before the next element
+- `if` – conditionally suppress the next element
+- `chardef` – define character aliases
+- `id` - assign a unique identifier to the following element
+- `tag` – assign a categorization tag to the following element
 
 ```xfer
-<! document { version "1.2" environment "prod" } !>
-{
-    service { host "api.example.com" port 8443 ssl ~true }
-    maintenance ( @2025-01-15T02:00:00Z@ *2.5 ) </ start, hours />
+<! document { version "1.2" env "prod" } !>
+<! dynamicSource { apiKey file "secrets/api-key.txt" user env "USER" tag const "2025.08.11" } !>
+<! if defined |apiKey| !> { auth { key |apiKey| user |user| tag |tag| } }
+```
+
+### Interpolated Text
+
+Interpolated‑text elements evaluate embedded elements to render a final text element. Like string elements, these will deserialize to a string type.
+
+```xfer
+<! dynamicSource { username env "USER" } !>
+</ Value will render as 'User=paul LoggedIn=True Since 1 Aug 2025 09:30:00' />
+banner 'User=<|username|> LoggedIn=<~true~> Since <@2025-08-01T09:30:00@>'
+```
+
+---
+## Introduction to the .NET Library
+
+Install the NuGet package [ParksComputing.Xfer.Lang](https://www.nuget.org/packages/ParksComputing.Xfer.Lang) to parse and serialize XferLang in .NET projects.
+
+### Parse and Serialize
+
+```csharp
+using ParksComputing.Xfer.Lang.Services;
+
+var parser = new Parser();
+var doc = parser.Parse("{ name \"Alice\" age 30 }");
+
+// Work with the document
+var roundTrip = doc.ToXfer(); // Serialize back to XferLang
+```
+
+Warnings include row/column anchors to help locate issues:
+
+```csharp
+foreach (var w in doc.Warnings) {
+        Console.WriteLine($"{w.Type} @ {w.Row}:{w.Column} — {w.Message} [{w.Context}]");
 }
 ```
 
-### Dynamic Elements (Late Binding) & Source Overrides
+### Object Mapping (XferConvert)
 
-Dynamic elements (`|key|`) defer value resolution until parse time. Resolution order:
+`XferConvert` turns CLR objects into Xfer elements and back. This is useful for configuration scenarios and typed round‑trips.
 
-1. A preceding `dynamicSource` PI mapping for `key` (e.g., `key file "path"`) invokes the registered handler for that source type.
-2. If no mapping exists, the environment variable named `key` is read.
-3. If still unresolved, the element becomes an empty string (parsed value `null`).
+```csharp
+using ParksComputing.Xfer.Lang;
+using ParksComputing.Xfer.Lang.Configuration;
 
-Content inside the pipes is raw text; nested elements are not parsed. For structural composition use interpolated text: `'Hello <|USER|>'`.
+var settings = new XferSerializerSettings();
 
-```xfer
-{
-    currentUser |USER|
-    banner 'Hello <|USER|>'
+var person = new Person { Name = "Ada", Age = 36 };
+var element = XferConvert.FromObject(person, settings);  // ObjectElement
+var xfer = element.ToXfer();
+
+var back = XferConvert.ToObject<Person>((ObjectElement)element, settings);
+```
+
+Attributes influence names and number formatting:
+
+```csharp
+using ParksComputing.Xfer.Lang.Attributes;
+
+public class Person {
+    [XferProperty("fullName")] public string Name { get; set; } = string.Empty;
+    [XferNumericFormat(XferNumericFormat.Hex)] public int Favorite { get; set; }
 }
 ```
 
-#### File, Env, and Const Together
+### Configuration (XferSerializerSettings)
 
-The `dynamicSource` processing instruction provides three built‑in source types: `const`, `env`, and `file`. Each key inside the `dynamicSource` object maps a dynamic element name to a configuration expressed as a key/value pair: `<name> <sourceType> <sourceValue>`. Resolution delegates to a handler registered for the source type.
+`XferSerializerSettings` controls naming, numeric formatting, decimal precision, and extension points. Highlights:
 
-```xfer
-<! dynamicSource {
-    apiKey    file "secrets/api-key.txt"   </ contents of file used as value />
-    userName  env  "USER"                  </ environment variable />
-    buildTag  const "2025.08.11"           </ literal constant />
-} !>
-{
-    auth { key |apiKey| user |userName| tag |buildTag| }
-    banner 'Deploy <|buildTag|> for <|userName|> (key length <#( len |apiKey| )#>)'
-}
+- ContractResolver (default: `DefaultContractResolver`)
+- Converters (`IXferConverter`) — optional custom type converters
+- Decimal and double precision (`XferDecimalPrecisionAttribute`)
+- Integer/long formatting (`XferNumericFormatAttribute`)
+
+```csharp
+using ParksComputing.Xfer.Lang.Configuration;
+using ParksComputing.Xfer.Lang.ContractResolvers;
+using ParksComputing.Xfer.Lang.Converters;
+
+var settings = new XferSerializerSettings {
+    ContractResolver = new DefaultContractResolver()
+};
+
+// Optional: add custom converters when you need specialized handling
+settings.Converters.Add(new MySpecialConverter());
 ```
 
-At this stage we've seen explicit types, metadata PI, and dynamic resolution. These features are already beyond JSON while remaining approachable.
+Note: Advanced serializer extension points (custom converters and custom contract resolvers) are supported and evolving. Keep tests nearby when extending.
 
-### A Quick Tour of Processing Instructions
+---
 
-You have now met two PIs (`document`, `dynamicSource`). Additional built‑ins:
-* `let` – bind a name to a value for later dereference
-* `script` – batch multiple `let` bindings (let‑only today) so they all execute before the next element
-* `if` – conditionally suppress the immediately following element (PI itself is always stripped)
-* `defined` – test whether an element (binding / dynamic / literal) currently yields a meaningful value
-* `chardef` – define symbolic character aliases
-* `id` / `tag` – attach stable identifiers or free‑form tags to the following element
+### Binding References with `let`
 
-Shape: `<! name value !>` where `value` may be any element (often an object for multiple fields).
-
-### Interpolated Text (Structured, Not Escaped)
-
-Interpolated text (apostrophe‑delimited) embeds **real elements**, not ad‑hoc string fragments. Inside the body, wrap each embedded element in `< … >` using that element’s explicit form. The engine evaluates them structurally before producing the final string.
+You may bind names to element values with the `let` processing instruction, and you may reference them in your document as reference elements.
 
 ```xfer
-<! dynamicSource { user env "USER" } !>
-{
-    banner 'User=<|user|> LoggedIn=<~true~> Since <@2025-08-01T09:30:00Z@>'
-}
+<! let greeting "world" !>
+message 'Hello <_greeting_>' </ <_greeting_> is replaced with "world" at parse time />
+tuple ( _greeting _greeting ) </ Renders as tuple ("world" "world") />
 ```
 
-No string escape layer -— embedded parts are real elements, not ad‑hoc templating.
+If a reference cannot be resolved at parse time, the reference element is rendered as-is and the parser reports a warning.
 
-### Local Bindings with `let` (Dereference for Reuse)
+### Grouped Let Bindings with `script`
 
-Bind once, reuse structurally. A `let` PI introduces a name whose value you can later insert via a dereference element (leading underscore). Binding occurs before parsing subsequent siblings, so dereferences see earlier values.
-
-```xfer
-<! let base { host "localhost" port 8080 } !>
-{
-    primary _base
-    secondary { host "localhost" port 8081 }
-}
-```
-
-Bindings may be evaluated inside an interpolated string by using explicit syntax for the dereference element, `<_name_>`:
-
-```xfer
-<! let appName "XferDemo" !>
-{ banner 'Launching <_appName_>...' }
-```
-
-### Grouped Let Bindings (`script` PI)
-
-The `script` PI batches multiple `let` bindings so they all complete before the next element parses. (Today: only `let` forms are recognized; future operator expressions may be enabled.)
+The `script` PI groups multiple `let` operators together.
 
 ```xfer
 <! script (
-    let host "localhost"
-    let port 8080
+    let x "Hello"
+    let y 'X=<_x_>'
 ) !>
-{
-    serviceUrl 'https://<_host_>:<_port_>/'
-}
+(
+    _x    </ Renders as "Hello" />
+    _y    </ Renders as "X=Hello" />
+)
 ```
 
-Bindings are processed left‑to‑right. Later bindings may dereference earlier ones. Because the `script` PI contains only `let` bindings it is suppressed from serialized output.
+In the future, additional keywords will be available for scripting as well.
 
-### Conditional Inclusion (`if` PI)
+### Dynamic Elements and Sources
 
-The `if` PI evaluates a condition; if it’s false the immediately following element is never added to the document. The PI itself is always stripped regardless of outcome.
+Dynamic elements (`|name|`) resolve from sources configured by `dynamicSource` or, absent a mapping, from environment variables. The built‑in source types are `env` to read environment variables, `file` to read files, and `const` for constant values.
+
+```xfer
+<! dynamicSource {
+    apiKey file "secrets/api-key.txt"
+    user   env  "USER"
+    build  const "2025.08.11"
+} !>
+{ key '|apiKey|' user '|user|' tag '|build|' }
+```
+
+### Conditional Element Inclusion with `if`
+
+The `if` PI evaluates a condition. If the condition is false, the following sibling element is not added to the document. The `if` processing instruction itself is always stripped from output regardless of evaluation outcome.
 
 ```xfer
 <! let showDebug ~false !>
@@ -346,10 +262,10 @@ The `if` PI evaluates a condition; if it’s false the immediately following ele
 { debug { level "verbose" } }
 ```
 
-Defined vs undefined (existence test) also matters:
+Defined vs undefined (existence test) may also be used:
 
 ```xfer
-<! if defined _showDebug !> { note 'Binding exists even if false.' }
+<! if defined _showDebug !> { note 'Evaluates as true even if the value is ~false.' }
 ```
 
 Behavior & serialization rules:
@@ -358,7 +274,7 @@ Behavior & serialization rules:
 * If the condition evaluates to true, the target element is retained.
 * Regardless of outcome (true, false, evaluation error, or unknown operator name) the `if` processing instruction itself is always stripped from serialization output. It acts only as a directive at parse time.
 * An unknown operator name inside the condition currently acts as a no‑op (treated as truthy so the element is preserved) but the PI is still stripped. Future versions may surface a warning; do not rely on serialization visibility for diagnostics.
-* Direct dereference conditions (`<! if _flag !>`) test the bound value's truthiness; use `defined` to distinguish between an undefined binding and a defined but falsy value.
+* Direct reference conditions (`<! if _flag !>`) test the bound value's truthiness; use `defined` to distinguish between an undefined binding and a defined but falsy value.
 
 Example showing outcomes (serialized form shown on right):
 
@@ -378,23 +294,6 @@ Define symbolic character aliases for readability (keyword → Unicode code poin
 ```
 
 ---
-
-### What You Just Saw (Feature Progression)
-
-1. Plain explicit types (numbers, booleans, dates, tuples, arrays, objects, null, interpolated text)
-2. Metadata via `document` PI
-3. Dynamic values + overriding resolution with `dynamicSource`
-4. Structured interpolation (no ad‑hoc escaping)
-5. Local structural reuse with `let` and dereference (`_name` / `<_name_>`)
-6. Batched let bindings via `script` (let-only today)
-7. Conditional element inclusion with `if` (value truthiness & existence checks)
-8. Custom symbolic characters with `chardef`
-9. Existence evaluation with `defined`
-
-These examples intentionally stop short of exhaustive syntax or full operator semantics; the following sections (Core Concepts → Language Specification) formalize everything just previewed.
-
-The remainder of this document now drills into the core concepts, the formal language, and the .NET APIs.
-
 ## Core Concepts
 
 ### Elements and Syntax Forms
@@ -417,17 +316,16 @@ Every value is an element. Most elements support three styles:
 Integers (`#` or implicit), longs (`&`), decimals (`*` high precision), doubles (`^`). Alternate bases for integers/longs: hex `$`, binary `%`.
 
 ### Text and Characters
-Strings: `"..."` (repeat `"` to include the delimiter) or explicit `<"...">`.
-Characters: `\65`, `\$41`, `\%01000001`, or predefined keywords (`\tab`).
+Strings use quotation marks, for example `"..."`. To include the delimiter itself, repeat it or switch to the explicit form `<"...">`. Characters may be written using decimal (`\\65`), hexadecimal (`\\$41`), binary (`\\%01000001`), or predefined character keywords such as `\\tab`.
 
-### Date / Time
-Date/time values use `@...@` with ISO‑8601 forms. (Date-only and time-only forms may be parsed where implemented.)
+### Date and Time
+Date and time values use the `@...@` form with ISO‑8601 formats. Where implemented, date‑only and time‑only forms may also be parsed.
 
 ### Null
-`?` represents a null value.
+The `?` element represents a null value.
 
-### Binding and Dereference
-`<! let name <value> !>` binds `name` to `<value>`. Inside subsequent elements the value can be dereferenced with `_name` (or inside interpolation as `<_name_>`).
+### Binding and Reference
+`<! let name <value> !>` binds `name` to `<value>`. Inside subsequent elements the value may be referenced with `_name` (or inside interpolation as `<_name_>`).
 
 Batching bindings: The `script` processing instruction currently supports only the `let` operator. (Additional operators will be added prior to general release.) You can group several sequential `let` bindings inside a single tuple so they all execute before the next element parses:
 
@@ -439,34 +337,24 @@ Batching bindings: The `script` processing instruction currently supports only t
 All listed `let` bindings are evaluated in order; later bindings can reference earlier ones (as with `_first` inside the interpolated greeting) but self‑reference is prevented. Because the script PI here contains only `let` bindings it does not serialize into the output (it is suppressed after execution).
 
 ### Interpolated Text
-Delimited by apostrophes: `'Hello <_name_>'`. Embedded elements inside must use explicit forms. Expressions are structural replacements; no character escaping is required.
+Interpolated text is delimited by apostrophes, for example `'Hello <_name_>'`. Embedded elements inside must use explicit forms. The expressions are structural replacements, so no character escaping is required.
 
 ### Dynamic Elements
 `|identifier|` resolves through the configured dynamic source resolver (e.g., environment). Content is a single identifier; nested elements are not allowed inside the delimiters in the current implementation.
 
 ### Processing Instructions (PIs)
-Compact: `! name <value> !`  Explicit: `<! name <value> !>`.
-A PI consists of exactly one key/value pair; the value can be any element. Some PIs introduce bindings or affect subsequent parsing and may be suppressed from serialization after execution.
+Processing instructions have a compact form `! name <value> !` and an explicit form `<! name <value> !>`. Each PI consists of exactly one key/value pair, where the value may be any element. Some PIs introduce bindings or affect subsequent parsing and may be suppressed from serialization after execution.
 
-## Language Specification
+---
+## XferLang Language Specification
 
 ### Document Structure
 
-Order:
+The document order is as follows:
 1. Zero or more processing instructions.
 2. Exactly one root collection element (Object, Array, or Tuple).
 
-Processing instructions each contain one key/value pair. For richer metadata group fields inside an object:
-
-```xfer
-<! document { version "1.0" author "Alice" } !>
-<! let greeting "World" !>
-{ message 'Hi <_greeting_>.' }
-```
-
-Comments (`</ ... />`) may appear anywhere and are ignored.
-
-Root collection requirement avoids ambiguity and enables streaming parsers.
+Comments (`</ ... />`) may appear anywhere and are ignored by the parser.
 
 ### Element Syntax Variations
 
@@ -481,44 +369,50 @@ name "Alice"        </ A key/value pair with implicit keyword 'name' and a strin
 ```
 
 #### Compact Syntax
-Most elements use a single specifier character (or a pair for collections) to denote the type. This is the most common syntax. Keywords require the `=` specifier with trailing specifiers, while identifiers require the `:` specifier.
+Most elements use either a single specifier character or an enclosing pair of specifiers to denote the type. This is the most common syntax. Keywords containing whitespace or other special characters require the `=` specifier, while identifiers require the `:` specifier.
 
 ```xfer
-~true                   </ A boolean />
-*123.45                 </ A decimal />
-"Hello, World!"         </ A string />
-[ 1 2 3 ]               </ An array of integers />
-=special keyword= 42    </ A keyword with an embedded space />
-:identifier:            </ An identifier using : specifiers />
+(
+    ~true                   </ A Boolean value />
+    *123.45                 </ A decimal value />
+    "Hello, World!"         </ A string />
+    [ #1 #2 #3 ]            </ An array of integers />
+    =special keyword= #42    </ A keyword with an embedded space />
+)
 ```
 
-The specifier character may be repeated as many times as necessary to enable an element to contain that same specifier character.
+Enclosing specifier characters may be repeated as many times as necessary to enable an element to contain that same specifier character.
 
 ```xfer
-""This string contains a " character with impunity.""
+( ""This string contains a " character with impunity."" )
 ```
 
 #### Explicit Syntax
-When an element's content might be ambiguous (e.g., a string containing a quote), you can wrap the compact form in angle brackets (`<` and `>`). This is the most verbose but also the most powerful form, as it allows for delimiter repetition to avoid any collision.
+When an element's content might be ambiguous (e.g., a string containing a quote), you may wrap the compact form in angle brackets (`<` and `>`). This is the most verbose but also the most powerful form, as it affords the most flexibility for containing special characters.
 
 ```xfer
-<"Alice said, "Boo!"">
-<// A comment containing </another comment/> //>
-<=first-name=> "Alice" </ An explicit keyword key with = specifiers />
+<(
+    <"Alice said, "Boo!"">
+    <// A comment containing </another comment/> //>
+    <=object description=> <"This tuple is inside <()> delimiters.">
+)>
 ```
 
-### Element Reference
+---
+## XferLang Element Reference
 
-This section provides a detailed reference for each XferLang element type.
+XferLang supports a rich set of data types designed for clarity, explicitness, and flexibility. Each type is chosen to represent a distinct kind of value, making data both human-readable and machine-precise.
 
-#### Primitive Types
+### Primitive Types
 
-**String Element**
+#### String Element
+A string element contains text data. The content is stored verbatim. To include a `"` character that would conflict with the closing delimiter, repeat the specifier (e.g., `""...""`) or use explicit syntax (`<"..."">`).
+
 *   **Specifier:** `"` (Quotation Mark)
-*   **Description:** Contains text data. The content is stored verbatim. To include a `"` character that would conflict with the closing delimiter, repeat the specifier (e.g., `""...""`) or use explicit syntax (`<"..."">`).
 *   **Syntax:**
     *   **Compact:** `"Hello, World!"`
-    *   **Explicit:** `<"Alice said, "Boo!"">` or `<"A quote is a " character.">` or `<""XferLang supports <"strings">."">` (delimiter repetition)
+    *   **Explicit:** `<"Alice said, "Boo!"">`
+
 *   **Examples:**
     ```xfer
     </ Compact syntax />
@@ -527,13 +421,14 @@ This section provides a detailed reference for each XferLang element type.
     </ Explicit syntax with quotes />
     quote <"Alice said, "Boo!"">
 
-    </ Delimiter repetition />
+    </ Compact syntax with delimiter repetition />
     description ""A quote is a " character.""
     ```
 
-**Character Element**
+#### Character Element
+A character element represents a single UTF-8 character, specified by its codepoint in decimal, hex (`$`), or binary (`%`), or by a predefined keyword (e.g., `tab`, `lf`, `gt`).
+
 *   **Specifier:** `\` (Backslash)
-*   **Description:** Represents a single character, specified by its Unicode codepoint in decimal, hex (`$`), or binary (`%`), or by a predefined keyword (e.g., `tab`, `lf`, `gt`).
 *   **Syntax:**
     *   **Compact:** `\65`, `\$41`, `\%01000001`, `\gt`
     *   **Explicit:** `<\65\>`, `<\$41\>`, `<\gt\>`
@@ -556,13 +451,15 @@ This section provides a detailed reference for each XferLang element type.
     specialChar <\$2665\>  </ Heart symbol />
     ```
 
-**Integer Element**
+#### Integer Element
+An integer element represents a 32-bit signed integer. The value may be written in decimal, hex (`$`), or binary (`%`). The specifier is optional if the value is unambiguous (implicit syntax).
+
 *   **Specifier:** `#` (Number Sign)
-*   **Description:** A 32-bit signed integer. Can be written in decimal, hex (`$`), or binary (`%`). The specifier is optional if the syntax is unambiguous (implicit syntax).
 *   **Syntax:**
-    *   **Implicit:** `42`, `-123` (when unambiguous)
+    *   **Implicit:** `42`, `-123`
     *   **Compact:** `#42`, `#$2A`, `#%-123`, `#%00101010`
     *   **Explicit:** `<#42#>`, `<#$2A#>`, `<#%00101010#>`
+*   **Range:** -2,147,483,648 to 2,147,483,647
 *   **Examples:**
     ```xfer
     </ Implicit syntax (most common) />
@@ -582,12 +479,14 @@ This section provides a detailed reference for each XferLang element type.
     binaryFlags <#%11110000#>
     ```
 
-**Long Element**
+#### Long Element
+A long element represents a 64-bit signed integer. The value may be written in decimal, hex (`$`), or binary (`%`).
+
 *   **Specifier:** `&` (Ampersand)
-*   **Description:** A 64-bit signed integer. Can be written in decimal, hex (`$`), or binary (`%`).
 *   **Syntax:**
     *   **Compact:** `&5000000000`, `&$12A05F200`, `&%1001010100000010111110010000000000`
     *   **Explicit:** `<&5000000000&>`, `<&$12A05F200&>`, `<&%1001010100000010111110010000000000&>`
+*   **Range:** -9,223,372,036,854,775,808 to 9,223,372,036,854,775,807
 *   **Examples:**
     ```xfer
     </ Compact syntax />
@@ -608,9 +507,10 @@ This section provides a detailed reference for each XferLang element type.
     binaryMask <&%1111111111111111111111111111111111111111111111111111111111111111&>
     ```
 
-**Double Element**
+#### Double Element
+A double element represents a 64-bit floating-point number.
+
 *   **Specifier:** `^` (Caret)
-*   **Description:** A 64-bit floating-point number.
 *   **Syntax:**
     *   **Compact:** `^3.14159`, `^-2.5`
     *   **Explicit:** `<^3.14159^>`, `<^-2.5^>`
@@ -627,9 +527,10 @@ This section provides a detailed reference for each XferLang element type.
     ratio <^0.618033988749^>
     ```
 
-**Decimal Element**
+#### Decimal Element
+A decimal element represents a high-precision decimal value.
+
 *   **Specifier:** `*` (Asterisk)
-*   **Description:** A high-precision decimal value.
 *   **Syntax:**
     *   **Compact:** `*123.45`, `*-456.789`, `*0.000001`
     *   **Explicit:** `<*123.45*>`, `<*-456.789*>`, `<*0.000001*>`
@@ -646,9 +547,11 @@ This section provides a detailed reference for each XferLang element type.
     calculation <*0.123456789012345*>
     ```
 
-**Boolean Element**
+#### Boolean Element
+A Boolean element represents a `true` or `false` value.
+
 *   **Specifier:** `~` (Tilde)
-*   **Description:** Represents a `true` or `false` value.
+   **Description:**
 *   **Syntax:**
     *   **Compact:** `~true`, `~false`
     *   **Explicit:** `<~true~>`, `<~false~>`
@@ -665,9 +568,10 @@ This section provides a detailed reference for each XferLang element type.
     verified <~true~>
     ```
 
-**Date/Time Element**
+#### Date/Time Element
+A date/time element represents a date and time value in ISO 8601 format.
+
 *   **Specifier:** `@` (At Sign)
-*   **Description:** Represents a date and time value in ISO 8601 format.
 *   **Syntax:**
     *   **Compact:** `@2025-07-23T10:00:00@`, `@2023-12-25@`, `@2023-01-01T00:00:00Z@`
     *   **Explicit:** `<@2025-07-23T10:00:00@>`, `<@2023-12-25@>`, `<@2023-01-01T00:00:00Z@>`
@@ -684,9 +588,10 @@ This section provides a detailed reference for each XferLang element type.
     eventTime <@2023-12-31T23:59:59.999@>
     ```
 
-**Null Element**
+#### Null Element
+A null element represents a null value.
+
 *   **Specifier:** `?` (Question Mark)
-*   **Description:** Represents a null value.
 *   **Syntax:**
     *   **Compact:** `?`
     *   **Explicit:** `<??>`
@@ -702,7 +607,7 @@ This section provides a detailed reference for each XferLang element type.
     missingInfo <??>
     ```
 
-#### Hexadecimal and Binary Formatting
+### Hexadecimal and Binary Formatting
 
 Integer and Long elements support alternative numeric representations for improved readability in specific contexts:
 
@@ -714,28 +619,29 @@ Integer and Long elements support alternative numeric representations for improv
 
 **Binary Format**
 *   **Syntax:** `%` prefix followed by binary digits (e.g., `#%101010`, `&%1001010100000010111110010000000000`)
-*   **Use Cases:** Bit manipulation, flags, educational purposes, embedded systems
+*   **Use Cases:** Bit manipulation, feature flags
 *   **Attributes:** Use `[XferNumericFormat(XferNumericFormat.Binary, MinBits = 8)]` for zero-padding
 
 **Examples:**
 ```xfer
 {
-    </ Decimal 42 in different formats />
+    </ Decimal integer 42 in different formats />
     decimal 42
     hex #$2A
     binary #%101010
-    padded_hex #$002A    </ MinDigits = 4 />
-    padded_binary #%00101010  </ MinBits = 8 />
+    padded_hex #$002A
+    padded_binary #%00101010
 }
 ```
 
-**Safety Note:** Hex and binary formatting are only supported for integer types (`int`, `long`). Decimal and double types preserve fractional precision and do not support these formats.
+Hexadecimal and binary formatting are only supported for character, integer, and long element types. Decimal and double types preserve fractional precision and do not support these formats.
 
-#### Structural Types
+### Collection Elements
 
-**Object Element**
+#### Object Element
+An object is a collection of key/value pairs. Keys are keyword elements, and values may be any XferLang element.
+
 *   **Specifiers:** `{` and `}` (Curly Brackets)
-*   **Description:** A collection of key/value pairs. Keys are typically implicit keywords, and values can be any XferLang element.
 *   **Syntax:**
     *   **Compact:** `{ name "Alice" age 30 }`
     *   **Explicit:** `<{ name "Alice" age 30 }>`
@@ -750,9 +656,10 @@ Integer and Long elements support alternative numeric representations for improv
     settings <{ theme "dark" notifications ~true }>
     ```
 
-**Array Element**
+#### Array Element
+An array is a collection of elements of the same type (e.g., all integers, all strings, all objects).
+
 *   **Specifiers:** `[` and `]` (Square Brackets)
-*   **Description:** A collection of elements of the **same type**.
 *   **Syntax:**
     *   **Compact:** `[ 1 2 3 ]`, `[ "a" "b" "c" ]`
     *   **Explicit:** `<[ 1 2 3 ]>`, `<[ "a" "b" "c" ]>`
@@ -769,9 +676,10 @@ Integer and Long elements support alternative numeric representations for improv
     flags <[ ~true ~true ~false ]>
     ```
 
-**Tuple Element**
+#### Tuple Element
+A tuple is an ordered collection of elements that may be of **any type**, similar to arrays in JSON. Tuples are ideal for containing heterogeneous data like coordinates, records, or mixed-type sequences.
+
 *   **Specifiers:** `(` and `)` (Parentheses)
-*   **Description:** A collection of elements of **any type**, similar to a JSON array.
 *   **Syntax:**
     *   **Compact:** `( "Alice" 30 ~true )`
     *   **Explicit:** `<( "Alice" 30 ~true )>`
@@ -787,15 +695,19 @@ Integer and Long elements support alternative numeric representations for improv
     dataPoint <( "Experiment A" @2023-12-01T10:00:00@ *98.7 )>
     ```
 
-**Keyword Element and Key/Value Pairs**
-*   **Description:** A keyword is the key in a key/value pair. If it contains only letters, numbers, and underscores, it can be written implicitly. Keywords used as keys require the `=` specifier. Identifiers (non-key keywords) use the `:` specifier.
+### Special-Purpose Types
+
+#### Keyword Element and Key/Value Pairs
+The key/value pair is the fundamental building block of XferLang objects. The key must be a keyword element, and the value may be any XferLang element. Key-value pairs form the basis of structured data in objects.
+
+*   **Specifier:** `=` (Equal Sign)
 *   **Syntax:**
     *   **Implicit:** `name`, `user_id`, `isActive` (letters, numbers, underscores only - valid only as keys)
     *   **Compact:** `=first-name=`, `=email-address=`, `=API-Key=` (keywords as keys with `=` specifier)
-    *   **Explicit:** `<=first-name=>`, `<=email-address=>`, `<=API-Key=>` (keywords as keys with explicit syntax)
-    *   **Identifier:** `:identifier:`, `<:identifier:>` (identifiers with `:` specifier)
+    *   **Explicit:** `<=first name=>`, `<=email address=>`, `<=API Key=>` (keywords as keys with explicit syntax)
 *   **Examples:**
-    ```xfer
+```xfer
+{
     </ Implicit syntax - only valid as keys />
     name "Paul"
     age 30
@@ -808,18 +720,123 @@ Integer and Long elements support alternative numeric representations for improv
     =email-address= "user@example.com"
 
     </ Explicit syntax for keywords as keys />
-    <=first-name=> "Alice"
-    <=email-address=> "user@example.com"
-    <=API-Key=> "secret123"
-    <=content-type=> "application/json"
+    <=first name=> "Alice"
+    <=email address=> "user@example.com"
+    <=API Key=> "secret123"
+    <=content type=> "application/json"
+}
+```
 
-    </ Identifiers (not keys) />
-    type :user:
-    category :admin:
-    status :active:
-    ```
+Key/value pairs may recurse; that is, the value in the key value pair may itself be a key/value pair.
 
-#### Common Document Patterns
+```xfer
+{
+    key1 key2 "key1's value is a key/value pair"
+}
+```
+
+#### Processing Instruction Element
+Contains processing instructions for the document, such as the `document` PI which stores document metadata.
+
+*   **Specifier:** `!` (Exclamation Mark)
+*   **Syntax:**
+    *   **Compact:** `! document { version "1.0" } !`
+    *   **Explicit:** `<! document { version "1.0" } !>`
+*   **Examples:**
+```xfer
+</ Compact syntax />
+! document { version "1.0" author "John Doe" } !
+! id "user-config" !
+! chardef { bullet \$2022 arrow \$2192 } !
+
+</ Explicit syntax />
+<! document { version "1.0" description "Sample document" } !>
+<! dynamicSource { username env "USER" } !>
+```
+
+#### Comment Element
+Comments provide documentation and annotations within XferLang documents. They are ignored during parsing and may be used for explanations, notes, or temporarily disabling content.
+
+*   **Specifier:** `/` (Slash)
+*   **Syntax:**
+    *   **Explicit:** `</ comment />`, `<// nested </comment/> via delimiter repetition //>`
+*   **Examples:**
+```xfer
+</ Basic comments />
+</ This is a simple comment />
+</ Multi-line comment
+    spanning several lines />
+
+</ Delimiter repetition for nested content />
+<// This comment contains / characters and nested </comments/> //>
+</// Multi-level nesting for complex content ///>
+```
+
+#### Dynamic Element
+Represents a value resolved via the dynamic source pipeline (dynamicSource PI mapping → custom handler → environment fallback).
+
+*   **Specifier:** `|` (Pipe)
+*   **Syntax:**
+    *   **Compact:** `|USERNAME|`, `|DB_PASSWORD|`
+    *   **Explicit:** `<|USERNAME|>`
+*   **Examples:**
+```xfer
+</ Compact syntax />
+username |USER|
+password |DB_PASSWORD|
+
+</ Within interpolated strings />
+message 'Hello <|USER|>!'
+
+**Configuration via Processing Instructions:**
+```xfer
+<! dynamicSource {
+    greeting const "Welcome to XferLang" </ Constant string/>
+    username env "USER" </ Environment variable />
+    config file "settings.xfer" </ File />
+} !>
+{
+    message '<|greeting|>' </ Constant string replaces <|greeting|>. />
+    user '<|username|>' </ USER environment-variable value replaces <|username|>. />
+    settings '<|config|>' </ File contents replace <|config|>. />
+}
+```
+
+#### Interpolated String Element
+Interpolated elements render the contents of embedded elements into a string. Otherwise, they are deserialized to a string type just like the string element. Embedded elements must use explicit syntax in order to be evaluated and rendered.
+
+*   **Specifier:** `'` (Apostrophe)
+*   **Syntax:**
+    *   **Compact:** `'The value is <#42#>'`, `'Hello, <|NAME|>!'`
+    *   **Explicit:** `<'The value is <#42#>'>`, `<'Hello, <|NAME|>!'>`
+*   **Examples:**
+```xfer
+</ Compact syntax />
+message 'The value is <#42#>'
+greeting 'Hello, <|USERNAME|>!'
+template 'User <"Alice"> has <#5#> items'
+
+</ Explicit syntax />
+complexMessage <'The result is <*99.5*> and status is <~true~>'>
+dynamicContent <'Welcome to <|APP_NAME|> version <"1.0">'>
+```
+
+It is a good practice to use explicit syntax (`<' ... '>`) when you are unsure whether interpolated values may contain single quotes.
+
+#### Reference Element
+When the keyword inside a reference element has been bound to an element using the `let` processing instruction or a `let` operator inside a `script` processing instruction, the parser replaces the entire reference element with a clone of the bound element.
+
+* **Specifier:** `_` (Underscore)
+* **Syntax:**
+    *   **Compact:** `_bindingName`
+    *   **Explicit:** `<_bindingName_>`
+* **Examples:**
+```xfer
+<! let host "localhost" !>
+{ apiHost _host message 'Host: <_host_>' }
+```
+
+### Common Document Patterns
 
 **Configuration Documents**
 Most configuration files use Object as the root collection:
@@ -865,427 +882,7 @@ For documents with heterogeneous top-level content, use Tuple:
 )
 ```
 
-#### Special-Purpose Types
-
-**Processing Instruction Element**
-*   **Specifier:** `!` (Exclamation Mark)
-*   **Description:** Contains processing instructions for the document, such as the `document` PI which stores document metadata.
-*   **Syntax:**
-    *   **Compact:** `! document { version "1.0" } !`
-    *   **Explicit:** `<! document { version "1.0" } !>`
-*   **Examples:**
-    ```xfer
-    </ Compact syntax />
-    ! document { version "1.0" author "John Doe" } !
-    ! id "user-config" !
-    ! chardef { bullet \$2022 arrow \$2192 } !
-
-    </ Explicit syntax />
-    <! document { version "1.0" description "Sample document" } !>
-    <! dynamicSource { username env "USER" } !>
-    ```
-
-**Comment Element**
-*   **Specifier:** `/` (Slash)
-*   **Description:** A comment that is ignored by the parser. It always requires explicit syntax.
-*   **Syntax:**
-    *   **Explicit:** `</ comment />`, `<// nested </comment/> via delimiter repetition //>`
-*   **Examples:**
-    ```xfer
-    </ Basic comments />
-    </ This is a simple comment />
-    </ Multi-line comment
-       spanning several lines />
-
-    </ Delimiter repetition for nested content />
-    <// This comment contains / characters and nested </comments/> //>
-    </// Multi-level nesting for complex content ///>
-    ```
-
-**Dynamic Element**
-*   **Specifier:** `|` (Pipe)
-*   **Description:** Represents a value resolved via the dynamic source pipeline (dynamicSource PI mapping → custom handler → environment fallback). Content is plain text; no nested element evaluation occurs inside the pipes.
-*   **Syntax:**
-    *   **Compact:** `|USERNAME|`, `|DB_PASSWORD|`
-    *   **Explicit:** `<|USERNAME|>` (rarely needed—delimiter lengthening works in compact form)
-*   **Examples:**
-    ```xfer
-    </ Compact syntax />
-    username |USER|
-    password |DB_PASSWORD|
-
-    </ Within interpolated strings />
-    message 'Hello <|USER|>!'
-
-    </ Delimiter lengthening for a literal pipe />
-    literalPipe ||contains | literally||
-    ```
-
-**Interpolated Text Element**
-*   **Specifier:** `'` (Apostrophe)
-*   **Description:** Similar to a string, but embedded elements are evaluated and their values are interpolated into the final text.
-*   **Syntax:**
-    *   **Compact:** `'The value is <#42#>'`, `'Hello, <|NAME|>!'`
-    *   **Explicit:** `<'The value is <#42#>'>`, `<'Hello, <|NAME|>!'>`
-*   **Examples:**
-    ```xfer
-    </ Compact syntax />
-    message 'The value is <#42#>'
-    greeting 'Hello, <|USERNAME|>!'
-    template 'User <"Alice"> has <#5#> items'
-
-    </ Explicit syntax />
-    complexMessage <'The result is <*99.5*> and status is <~true~>'>
-    dynamicContent <'Welcome to <|APP_NAME|> version <"1.0">'>
-    ```
-
-It is a good practice to use explicit syntax (`<' ... '>`) when you are unsure whether interpolated values may contain single quotes.
-
-**Dereference Element**
-* **Specifier:** `_` leading underscores (empty closing delimiter)
-* **Description:** Replaces the dereference token with a previously bound value (`let` or script `let`).
-* **Syntax:** `_name`, `__name` (multiple underscores allowed to disambiguate, must match closing count in explicit form)
-* **In Interpolated Text:** Use explicit form: `'Hello <_name_>'`.
-* **Examples:**
-    ```xfer
-    <! let host "localhost" !>
-    { apiHost _host message 'Host: <_host_>' }
-    ```
-
-Resolution happens as early as possible; unresolved references may be resolved in a later pass if a subsequent `let` appears earlier in structural order.
-
-### Document Validation and Common Mistakes
-
-## XferLang Elements
-
-XferLang supports a rich set of data types designed for clarity, explicitness, and flexibility. Each type is chosen to represent a distinct kind of value, making data both human-readable and machine-precise. The main categories are:
-
-- **Numbers**: Integers, longs, decimals, and doubles for numeric values.
-- **Booleans**: True/false values for logic and state.
-- **Characters**: Character data with a large set of pre-defined character keywords and facilities to define custom keywords.
-- **Strings**: Textual data, including interpolated strings.
-- **Dates and Times**: ISO Date/time values.
-- **Nulls**: Explicit representation of missing or undefined values.
-- **Objects**: Named key-value pairs for structured records.
-- **Arrays and Tuples**: Collections, either typed (arrays) or mixed (tuples).
-- **Dynamic**: Values that can be resolved at runtime, such as environment variables or secrets.
-- **Processing Instructions**: Document-level processing instructions for configuration and extensibility.
-
-### Array
-
-Represents a typed array of elements. Arrays are enclosed in square brackets `[ ... ]` and all elements must be of the same type.
-
-**Syntax:** `[ element1 element2 element3 ... ]`
-
-**Examples:**
-```xfer
-numbers [1 2 3 4 5]             </ All integer elements />
-names ["Alice" "Bob" "Charlie"] </ All string elements />
-decimals [*12.3 *45.6 *78.9]    </ All decimal elements />
-booleans [~true ~false ~true]   </ All Boolean elements />
-chars [\$41 \$42 \$43]          </ All character elements />
-error [#42 &99]                 </ Error: Mixed types (integer and long) />
-```
-
-Arrays can be nested or contain objects:
-```xfer
-matrix [
-    [1 2 3]
-    [4 5 6]
-    [7 8 9]
-]
-users [
-    { name "Alice" age 30 }
-    { name "Bob" age 25 }
-]
-```
-
-### Key/Value Pair
-
-Represents the fundamental building block of XferLang objects - a key-value association. The key must be a keyword element (not an identifier), and the value can be any XferLang element. Key-value pairs form the basis of structured data in objects.
-
-**Syntax:** `keyword value`
-
-**Key Types:**
-- Implicit keyword: `name "Alice"` (letters, numbers, underscores only)
-- Compact keyword: `=first-name= "Alice"` (uses `=` specifier)
-- Explicit keyword: `<=first-name=> "Alice"` (explicit syntax with `=` specifier)
-
-**Examples:**
-```xfer
-</ Basic key-value pairs with implicit keywords />
-name "Alice"
-age 30
-isActive ~true
-score *99.5
-lastLogin @2023-12-25T10:30:00Z@
-
-</ Keys with special characters using = specifier />
-=first-name= "John"
-=email-address= "user@example.com"
-=content-type= "application/json"
-=user-id= 12345
-
-</ Explicit syntax for complex keys />
-<=first-name=> "Alice"
-<=API-Key=> "secret123"
-<=cache-control=> "no-cache"
-
-</ Complex values />
-profile {
-    personal {
-        name "Alice Smith"
-        birth_date @1990-05-15@
-    }
-    settings {
-        theme "dark"
-        notifications ~true
-    }
-}
-
-</ Arrays as values />
-roles [ "admin" "user" "moderator" ]
-scores [ *85.5 *92.0 *78.3 ]
-
-</ Mixed data types />
-metadata {
-    created @2023-12-25T10:30:00Z@
-    version "1.0"
-    enabled ~true
-    priority 5
-    tags [ "important" "urgent" ]
-    config ?
-}
-```
-
-**Rules:**
-- Keys must be keywords (using `=` specifier or implicit syntax), not identifiers (`:` specifier)
-- Keys must be unique within the same object
-- Whitespace separates the key from its value
-- Only keywords can be used as keys; identifiers cannot be keys
-
-### Object
-
-Represents a collection of key-value pairs enclosed in curly braces. Objects are the most common structural element in XferLang, equivalent to objects in JSON or dictionaries in Python.
-
-**Syntax:** `{ key1 value1 key2 value2 ... }`
-
-**Examples:**
-```xfer
-</ Simple object />
-user {
-    name "Alice"
-    age 30
-    active ~true
-}
-
-</ Nested objects />
-config {
-    database {
-        host "localhost"
-        port 5432
-        ssl ~true
-    }
-    cache {
-        enabled ~true
-        ttl 3600
-    }
-}
-
-</ Compact form />
-profile{name"Bob"role"admin"verified~true}
-```
-
-### Tuple
-
-Represents an ordered collection of elements that can be of **any type**, similar to arrays in JSON. Tuples are enclosed in parentheses and are perfect for heterogeneous data like coordinates, records, or mixed-type sequences.
-
-**Syntax:** `( element1 element2 element3 ... )`
-
-**Examples:**
-```xfer
-</ Geographic coordinates (latitude, longitude) />
-location (*42.3601 *-71.0589)
-
-</ Mixed types: name, age, active status />
-userRecord ("John Doe" 30 ~true)
-
-</ Complex tuple with various types />
-dataPoint (
-    "Sample A"
-    @2023-12-25T10:30:00@
-    *98.7
-    ~true
-    [ "tag1" "tag2" "tag3" ]
-    { metadata "experimental" }
-)
-
-</ Compact form />
-rgb (#255 #128 #64)
-```
-
-**Key Difference:** Tuples allow mixed types, while Arrays require all elements to be the same type.
-
-### Comment
-
-Comments provide documentation and annotations within XferLang documents. They are ignored during parsing and can be used for explanations, notes, or temporarily disabling content.
-
-**Syntax:** Always requires explicit form: `</ comment text />`
-
-**Delimiter Repetition:** For comments containing `/` characters, repeat the delimiter:
-```xfer
-</ This is a simple comment />
-
-<// This comment contains / characters and nested </comments/> //>
-
-</// Multi-level nesting for complex content ///>
-
-</
-Multi-line comments
-can span several lines
-and include any content
-/>
-```
-
-**Inline Usage:**
-```xfer
-name "Alice" </ User's display name />
-port 8080    </ Development server port />
-```
-
-### Dynamic
-
-Dynamic elements represent values that are resolved at parse-time through the dynamic source pipeline (dynamicSource PI mapping → registered handler → environment fallback). The interior is an opaque text key; nested element syntax is not interpreted.
-
-**Syntax:** `|key|` (explicit `<|key|>` form optional)
-
-**Examples:**
-```xfer
-</ Environment variable substitution />
-username |USER|
-password |DB_PASSWORD|
-
-</ Within interpolated strings />
-greeting 'Hello <|USER|>!'
-message 'Server running on port <|PORT|>'
-```
-
-**Configuration via Processing Instructions:**
-```xfer
-<! dynamicSource {
-    greeting const "Welcome to XferLang"
-    username env "USER"
-    config file "settings.json"
-} !>
-{
-    message '<|greeting|>'
-    user '<|username|>'
-    settings '<|config|>'
-}
-```
-
-**Rules:**
-- Content is raw text only; no nested parsing inside `|...|`
-- Use interpolated text when you need to mix dynamic content with structured element outputs
-
-### Identifier
-
-Identifiers represent symbolic names which are not necessarily string values, semantically. Identifiers use the `:` specifier and cannot be used as keys in key/value pairs.
-
-**Compact Syntax:** `:identifier:`
-**Explicit Syntax:** `<:identifier:>`
-
-**Examples:**
-```xfer
-</ Simple identifiers (compact) />
-option :formatted:
-varname :integer:
-type :user:
-
-</ Explicit syntax />
-category <:admin:>
-status <:active:>
-
-</ In objects as values (not keys) />
-config {
-    logLevel :warning:
-    cacheMode :enabled:
-    userType :premium:
-}
-```
-
-**Rules:**
-- Identifiers always require the `:` specifier with trailing delimiters
-- Identifiers cannot be used as keys in key/value pairs (only keywords can be keys)
-- Use explicit syntax when the identifier content might be ambiguous
-
-### Integer
-
-Represents a 32-bit signed integer value. Integers can be written in decimal, hexadecimal, or binary formats and support implicit syntax when the context is unambiguous.
-
-**Syntax:**
-- Implicit: `42` (when unambiguous)
-- Compact: `#42`
-- Explicit: `<#42#>`
-- Hexadecimal: `#$2A`
-- Binary: `#%101010`
-
-**Examples:**
-```xfer
-</ Implicit form (most common) />
-age 30
-count 1000
-negative -42
-
-</ Compact form />
-port #8080
-timeout #30
-
-</ Explicit form  />
-<'https://<|address|>:<#80#>/'>
-
-</ Alternative number bases />
-colorRed #$FF
-permissions #%11110000
-memoryAddress #$DEADBEEF
-
-</ In collections />
-numbers [ 1 2 3 4 5 ]
-ports [ #80 #443 #8080 ]
-```
-
-**Range:** -2,147,483,648 to 2,147,483,647
-
-### Long
-
-Represents a 64-bit signed integer value for larger numbers that exceed the 32-bit integer range. Always requires the `&` prefix to distinguish from regular integers.
-
-**Syntax:**
-- Decimal: `&5000000000`
-- Hexadecimal: `&$12A05F200`
-- Binary: `&%1001010100000010111110010000000000`
-
-**Examples:**
-```xfer
-</ Large numbers />
-population &7800000000
-fileSize &5368709120
-timestamp &1672531200000
-
-</ Hexadecimal (common for IDs, addresses) />
-userId &$1A2B3C4D5E6F
-memoryOffset &$7FF6C2E40000
-
-</ Binary (for flags, masks) />
-featureFlags &%1111000011110000111100001111
-
-</ In configuration />
-limits {
-    maxFileSize &2147483648
-    maxUsers &1000000
-}
-```
-
+---
 ## Complete Examples
 
 Here are comprehensive examples showing XferLang in real-world scenarios:
@@ -1414,11 +1011,16 @@ Here are comprehensive examples showing XferLang in real-world scenarios:
 }
 ```
 
-## Getting Started with .NET
+---
+## The .NET XferLang Library
+
+The primary implementation of XferLang is the `ParksComputing.Xfer.Lang` library for .NET. It provides a comprehensive object model, a robust parser, and a powerful serialization/deserialization utility class, `XferConvert`.
+
+### Getting Started with .NET
 
 The XferLang .NET library provides a robust implementation for parsing, generating, and working with XferLang documents programmatically.
 
-### Installation
+#### Installation
 
 Install the [NuGet package](https://www.nuget.org/packages/ParksComputing.Xfer.Lang) in your .NET project:
 
@@ -1432,7 +1034,7 @@ Or via Package Manager Console in Visual Studio:
 Install-Package ParksComputing.Xfer.Lang
 ```
 
-### Quick Start Example
+### Basic Serialization and Deserialization
 
 ```csharp
 using ParksComputing.Xfer.Lang;
@@ -1481,40 +1083,12 @@ string xferObject = XferConvert.Serialize(config);
 // Result: { host "localhost" port 8080 ssl ~true }
 ```
 
-## The `.NET XferLang Library`
-
-The primary implementation of XferLang is the `ParksComputing.Xfer.Lang` library for .NET. It provides a comprehensive object model, a robust parser, and a powerful serialization/deserialization utility class, `XferConvert`.
-
-### Basic Serialization and Deserialization
-
-The `XferConvert` class provides a simple, static interface for converting between .NET objects and XferLang strings. The library automatically ensures that serialized objects are wrapped in a proper root collection element.
-
-```csharp
-public class MyData {
-    public string Name { get; set; }
-    public int Value { get; set; }
-}
-
-var data = new MyData { Name = "Example", Value = 123 };
-
-// Serialize to an Xfer string (automatically creates root object)
-string xfer = XferConvert.Serialize(data, Formatting.Indented);
-
-// {
-//     Name "Example"
-//     Value 123
-// }
-
-// Deserialize back to an object
-var deserializedData = XferConvert.Deserialize<MyData>(xfer);
-```
-
 ### Advanced Usage with `XferSerializerSettings`
 
-For more control, you can pass an instance of `XferSerializerSettings` to the `Serialize` and `Deserialize` methods.
+For more control, you may pass an instance of `XferSerializerSettings` to the `Serialize` and `Deserialize` methods.
 
 #### Null Value Handling
-By default, properties with `null` values are included. You can set `NullValueHandling` to `Ignore` to omit them.
+Properties with `null` values are included. You may set `NullValueHandling` to `Ignore` to omit them.
 
 ```csharp
 var settings = new XferSerializerSettings {
@@ -1523,7 +1097,7 @@ var settings = new XferSerializerSettings {
 ```
 
 #### Customizing Property Names with `IContractResolver`
-You can change how property names are serialized by creating a custom contract resolver. For example, to make all property names lowercase:
+You may change how property names are serialized by creating a custom contract resolver. For example, to make all property names lowercase:
 
 ```csharp
 public class LowerCaseContractResolver : DefaultContractResolver {
@@ -1538,7 +1112,7 @@ var settings = new XferSerializerSettings {
 ```
 
 #### Custom Type Converters with `IXferConverter`
-For complete control over how a specific type is handled, you can create a custom converter. This is useful for types that don't map well to standard object serialization or for creating a more compact representation.
+For complete control over how a specific type is handled, you may create a custom converter. This is useful for types that don't map well to standard object serialization or for creating a more compact representation.
 
 **Example: A custom converter for a `Person` class**
 
@@ -1616,9 +1190,10 @@ string xfer = XferConvert.Serialize(config);
 - `decimal` and `double` types ignore formatting attributes to preserve fractional precision
 - Custom formatting respects the configured `ElementStylePreference` for syntax style
 
+---
 ## Serializer Settings
 
-For more control over serialization and deserialization, you can use the `XferSerializerSettings` class. This allows you to configure element styles, null handling, contract resolvers, and custom converters.
+For more control over serialization and deserialization, you may use the `XferSerializerSettings` class. This allows you to configure element styles, null handling, contract resolvers, and custom converters.
 
 ### Element Style Preferences
 
@@ -1652,6 +1227,7 @@ string xferString = XferConvert.Serialize(user, Formatting.None, settings);
 - `ContractResolver` - Custom property name resolution
 - `Converters` - Collection of custom type converters
 
+---
 ## Property Attributes
 
 The library provides several attributes to control how properties are serialized and deserialized.
@@ -1756,17 +1332,17 @@ string xfer = XferConvert.Serialize(data);
 - `decimal` and `double` types ignore numeric formatting attributes to preserve fractional precision
 - Custom formatting respects the configured `ElementStylePreference` for syntax style
 
-## Processing Instructions and Dynamic Content
+### Processing Instructions and Dynamic Content
 
-XferLang supports Processing Instructions (PIs) that provide metadata and configuration for documents. PIs are special elements that control parsing behavior, define document metadata, and enable powerful dynamic content features. The PI system is fully extensible, allowing you to create custom instructions for specialized use cases.
+XferLang supports Processing Instructions (PIs) that provide metadata and configuration for documents. PIs are special elements that control parsing behavior, define document metadata, and enable powerful dynamic content features. The processing-instruction system is fully extensible, allowing you to create custom instructions for specialized use cases.
 
 ### Built-in Processing Instructions
 
 XferLang includes several built-in PIs that address common document needs:
 
-#### Document Metadata PI
+#### Document Metadata - `document`
 
-The `document` PI stores metadata about the XferLang document itself and must appear first if present:
+The `document` processing instruction stores metadata about the XferLang document itself and must appear first if present:
 
 ```xfer
 <! document {
@@ -1786,9 +1362,9 @@ The `document` PI stores metadata about the XferLang document itself and must ap
 - Supports any metadata fields as key-value pairs
 - Accessible programmatically through `XferDocument.ProcessingInstructions`
 
-#### DynamicSource PI
+#### Dynamic-Element Data Sources - `dynamicSource`
 
-The `dynamicSource` PI configures how dynamic elements `<|key|>` are resolved, providing flexible runtime value substitution:
+The `dynamicSource` processing instruction configures how dynamic elements `<|key|>` are resolved, providing flexible runtime value substitution:
 
 ```xfer
 <! dynamicSource {
@@ -1805,9 +1381,9 @@ The `dynamicSource` PI configures how dynamic elements `<|key|>` are resolved, p
 }
 ```
 
-#### CharDef PI
+#### Custom Character Definitions - `chardef`
 
-The `chardef` PI allows you to define custom character aliases for use in character elements:
+The `chardef` processing instruction allows you to define custom character aliases for use in character elements:
 
 ```xfer
 <! chardef {
@@ -1820,9 +1396,9 @@ The `chardef` PI allows you to define custom character aliases for use in charac
 }
 ```
 
-#### ID PI
+#### Element ID - `id`
 
-The `id` PI assigns identifiers to elements for referencing and linking:
+The `id` processing instruction assigns identifiers to elements for referencing and linking:
 
 ```xfer
 {
@@ -1834,9 +1410,9 @@ The `id` PI assigns identifiers to elements for referencing and linking:
 }
 ```
 
-#### Tag PI
+#### Element Tagging - `tag`
 
-The `tag` PI attaches free‑form classification metadata to the immediately following element. Multiple `tag` PIs can be stacked; tags are preserved in element metadata but have no built‑in semantic effect.
+The `tag` processing instruction attaches free‑form classification metadata to the immediately following element. Multiple `tag` processing instructions may be stacked; tags are preserved in element metadata but have no built‑in semantic effect.
 
 ```xfer
 <! tag "experimental" !>
@@ -1844,20 +1420,21 @@ The `tag` PI attaches free‑form classification metadata to the immediately fol
 feature { enabled ~true }
 ```
 
-#### Defined PI
+#### Conditional Element Parsing and Output - `if defined`
 
-The `defined` PI evaluates whether its value element yields a meaningful value (non‑null / non‑empty). It is commonly used in conjunction with `if` when you need pure existence tests.
+The `if defined` processing instruction evaluates whether its value element yields a meaningful value (non‑null / non‑empty). When the value is defined, the associated content is parsed and output; otherwise, it is skipped.
 
 ```xfer
 <! let debug ~false !>
-<! defined _debug !>               </ true: binding exists even if value is false />
-<! if defined _debug !> { note 'debug binding exists' }
+<! if defined _debug !>
+{ note 'debug binding exists' }
 
 <! dynamicSource { optFlag env "OPTIONAL_FLAG" } !>
-<! if defined <|optFlag|> !> { note 'OPTIONAL_FLAG present' }
+<! if defined <|optFlag|> !>
+{ note 'OPTIONAL_FLAG present' }
 ```
 
-Evaluation occurs during PI processing; the PI itself is suppressed from serialization.
+Evaluation occurs during processing-instruction processing; the processing instruction itself is suppressed from serialization.
 
 ### Dynamic Elements and Source Resolution
 
@@ -1960,12 +1537,12 @@ var xferContent = @"
 }";
 ```
 
-**PI Lifecycle:**
+**Processing-Instruction Lifecycle:**
 1. **Discovery**: PIs are identified during metadata parsing
 2. **Creation**: Registered processors create PI instances
 3. **Processing**: `ProcessingInstructionHandler()` is called for document-level setup
 4. **Element Processing**: `ElementHandler()` is called for each relevant element
-5. **Cleanup**: PIs can register cleanup logic if needed
+5. **Cleanup**: PIs may register cleanup logic if needed
 
 **Advanced Features:**
 - **Scoped PIs**: Apply to specific document sections
@@ -1975,9 +1552,9 @@ var xferContent = @"
 
 This extensible PI system makes XferLang highly adaptable for domain-specific needs, from configuration management to data validation and transformation pipelines.
 
-## Writing Custom Processing Instructions
+### Writing Custom Processing Instructions
 
-You can add new Processing Instruction (PI) keywords without modifying the core parser by registering a factory that creates a `ProcessingInstruction` subclass. This lets you introduce custom metadata, validation passes, conditional logic, or side‑effects at parse time.
+You may add new Processing Instruction (PI) keywords without modifying the core parser by registering a factory that creates a `ProcessingInstruction` subclass. This lets you introduce custom metadata, validation passes, conditional logic, or side‑effects at parse time.
 
 ### When to Create a PI
 Create a PI when you need to:
@@ -1985,7 +1562,7 @@ Create a PI when you need to:
 * Optionally suppress or transform the immediately following element (`ElementHandler`).
 * Carry operational intent that should not appear in serialized output (set `SuppressSerialization = true`).
 
-Do NOT create a PI just to change how `|dynamic|` values resolve—use a custom `IDynamicSourceResolver` for that (see “Dynamic Elements and Source Resolution”).
+Do NOT create a PI just to change how `|dynamic|` values resolve—use a custom `IDynamicSourceResolver` for that (see "Dynamic Elements and Source Resolution").
 
 ### Parser Registration Model
 The parser exposes two overloads of `RegisterPIProcessor`:
@@ -2084,6 +1661,7 @@ var settings = new XferSerializerSettings { DynamicSourceResolver = new MyDynami
 
 This model keeps the core grammar stable while enabling domain‑specific behaviors.
 
+---
 ## Building XferLang
 
 Information for developers who want to build XferLang from source or contribute to the project.
@@ -2112,12 +1690,14 @@ dotnet pack --configuration Release
 
 ### Project Structure
 
-The XferLang solution contains several projects:
+The XferLang solution contains several projects and folders:
 
 - **ParksComputing.Xfer.Lang** - Main library
 - **ParksComputing.Xfer.Lang.Tests** - Unit tests and integration tests
-- **xferc** - Command-line tools and REPL
 - **XferService** - Example web service implementation (optional)
+- **XferDocBuilder** - Custom tool for generating documentation
+- **examples** - Command-line examples demonstrating various uses of XferLang
+- **tools** - Development tools and utilities
 
 ### Development Commands
 
@@ -2135,6 +1715,7 @@ dotnet test --verbosity normal
 dotnet test --collect:"XPlat Code Coverage"
 ```
 
+---
 ## Community and Resources
 
 Join the XferLang community and access helpful resources for learning and development.
@@ -2153,22 +1734,13 @@ Join the XferLang community and access helpful resources for learning and develo
 - 💡 **Feature Requests:** Suggest improvements via [GitHub Issues](https://github.com/paulmooreparks/Xfer/issues)
 - 📧 **Direct Contact:** Reach out via GitHub for complex questions
 
-## Project Status and Roadmap
-
-The .NET implementation of XferLang is becoming more robust, with a focus on professional-grade features like custom converters and contract resolvers. However, the project as a whole is still experimental.
-
-The future roadmap includes:
-*   Completing the .NET implementation to achieve a production-quality 1.0 release
-*   Reimplementing the core library in Rust
-*   Exposing a C ABI from the Rust implementation
-*   Creating language wrappers (e.g., for C#, Python, JavaScript) that communicate with the C ABI
-
-The goal of moving to a Rust core is to provide a single, high-performance, and memory-safe core for all future XferLang implementations. I'm looking for contributors and collaborators to get that work started.
-
+---
 ## Contributing
 
-This is an open-source project, and contributions are always welcome! If you are interested in helping, please feel free to open an issue or a pull request on GitHub. You can also reach out to me directly via email at [paul@parkscomputing.com](mailto:paul@parkscomputing.com).
+This is an open-source project, and contributions are always welcome! If you are interested in helping, please feel free to open an issue or a pull request on [GitHub](https://github.com/paulmooreparks/Xfer). You may also reach out to me directly via email at [paul@parkscomputing.com](mailto:paul@parkscomputing.com).
 
+---
 ## Grammar
 
 The formal Backus–Naur form (BNF) grammar for XferLang can be found in the XferLang GitHub repository: [xfer.bnf](https://github.com/paulmooreparks/Xfer/blob/master/xfer.bnf).
+

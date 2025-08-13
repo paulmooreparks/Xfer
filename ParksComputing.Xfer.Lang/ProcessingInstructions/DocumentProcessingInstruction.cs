@@ -10,19 +10,62 @@ namespace ParksComputing.Xfer.Lang.ProcessingInstructions;
 /// </summary>
 public class DocumentProcessingInstruction : ProcessingInstruction {
     // Centralized property keys
+    /// <summary>
+    /// Well-known keys used within the document processing instruction's object payload.
+    /// These constants standardize field names for common metadata properties.
+    /// </summary>
     public static class PropertyKeys {
+        /// <summary>
+        /// The XferLang version string targeted by the document (e.g., "1.0").
+        /// </summary>
         public const string XferLang = "xferlang";
+        /// <summary>
+        /// Document title or name.
+        /// </summary>
         public const string Title = "title";
+        /// <summary>
+        /// Short description or summary of the document.
+        /// </summary>
         public const string Description = "description";
+        /// <summary>
+        /// Human-readable version identifier for the document.
+        /// </summary>
         public const string Version = "version";
+        /// <summary>
+        /// Unique document identifier (string or GUID as string).
+        /// </summary>
         public const string Id = "id";
+        /// <summary>
+        /// Primary author/owner of the document.
+        /// </summary>
         public const string Author = "author";
+        /// <summary>
+        /// An array of author names when multiple authors are present.
+        /// </summary>
         public const string Authors = "authors";
+        /// <summary>
+        /// Free-form tags associated with the document.
+        /// </summary>
         public const string Tags = "tags";
+        /// <summary>
+        /// Profile or flavor of the document content (implementation-defined).
+        /// </summary>
         public const string Profile = "profile";
+        /// <summary>
+        /// Target environment (e.g., dev, test, prod).
+        /// </summary>
         public const string Environment = "environment";
+        /// <summary>
+        /// License identifier or text that applies to the document.
+        /// </summary>
         public const string License = "license";
+        /// <summary>
+        /// Creation timestamp (ISO 8601 string in XferLang @...@ form).
+        /// </summary>
         public const string CreatedAt = "createdAt";
+        /// <summary>
+        /// Last updated timestamp (ISO 8601 string in XferLang @...@ form).
+        /// </summary>
         public const string UpdatedAt = "updatedAt";
     }
     /// <summary>

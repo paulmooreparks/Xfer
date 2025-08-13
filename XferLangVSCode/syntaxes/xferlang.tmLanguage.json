@@ -53,6 +53,12 @@
 		"strings": {
 			"patterns": [
 				{
+					"name": "string.quoted.single.explicit.xferlang",
+					"begin": "<'+'+",
+					"end": "'+'+>",
+					"patterns": []
+				},
+				{
 					"name": "string.quoted.triple.double.explicit.xferlang",
 					"begin": "<\"{3,}",
 					"end": "\"{3,}>",
@@ -89,7 +95,7 @@
 					"patterns": [
 						{
 							"name": "meta.interpolation.element.xferlang",
-							"begin": "<",
+							"begin": "<(?=(?:\"+|\\*+|\\^+|#+|&+|~|\\?\\?|\\|+|_+|@|\\{|\\[|\\(|=+))",
 							"end": ">",
 							"patterns": [
 								{ "include": "#strings" },
@@ -98,7 +104,8 @@
 								{ "include": "#booleans" },
 								{ "include": "#null" },
 								{ "include": "#reference" },
-								{ "include": "#identifiers" }
+								{ "include": "#identifiers" },
+								{ "include": "#delimiters" }
 							]
 						}
 					]
@@ -110,7 +117,7 @@
 					"patterns": [
 						{
 							"name": "meta.interpolation.element.xferlang",
-							"begin": "<",
+							"begin": "<(?=(?:\"+|\\*+|\\^+|#+|&+|~|\\?\\?|\\|+|_+|@|\\{|\\[|\\(|=+))",
 							"end": ">",
 							"patterns": [
 								{ "include": "#strings" },
@@ -119,7 +126,8 @@
 								{ "include": "#booleans" },
 								{ "include": "#null" },
 								{ "include": "#reference" },
-								{ "include": "#identifiers" }
+								{ "include": "#identifiers" },
+								{ "include": "#delimiters" }
 							]
 						}
 					]
