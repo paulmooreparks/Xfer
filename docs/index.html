@@ -46,8 +46,13 @@
                     <ul>
                 <li><a href="#elements-and-collections">Elements and Collections</a></li>
                 <li><a href="#specifiers-and-the-andquotno-escapesandquot-rule">Specifiers and the &quot;No Escapes&quot; Rule</a></li>
-                <li><a href="#processing-instructions">Processing Instructions</a></li>
                 <li><a href="#interpolated-text">Interpolated Text</a></li>
+                <li><a href="#processing-instructions">Processing Instructions</a></li>
+                <li><a href="#binding-references-with-let">Binding References with let</a></li>
+                <li><a href="#grouped-let-bindings-with-script">Grouped Let Bindings with script</a></li>
+                <li><a href="#dynamic-elements-and-sources">Dynamic Elements and Sources</a></li>
+                <li><a href="#conditional-element-inclusion-with-if">Conditional Element Inclusion with if</a></li>
+                <li><a href="#character-definitions">Character Definitions</a></li>
                     </ul>
                 </details>
             </li>
@@ -58,11 +63,6 @@
                 <li><a href="#parse-and-serialize">Parse and Serialize</a></li>
                 <li><a href="#object-mapping-xferconvert">Object Mapping (XferConvert)</a></li>
                 <li><a href="#configuration-xferserializersettings">Configuration (XferSerializerSettings)</a></li>
-                <li><a href="#binding-references-with-let">Binding References with let</a></li>
-                <li><a href="#grouped-let-bindings-with-script">Grouped Let Bindings with script</a></li>
-                <li><a href="#dynamic-elements-and-sources">Dynamic Elements and Sources</a></li>
-                <li><a href="#conditional-element-inclusion-with-if">Conditional Element Inclusion with if</a></li>
-                <li><a href="#character-definitions">Character Definitions</a></li>
                     </ul>
                 </details>
             </li>
@@ -266,6 +266,12 @@
 }
 </code></pre>
 <p>Pick the shortest run that avoids ambiguity.</p>
+<section id="interpolated-text"><h3 id="interpolated-text">Interpolated Text</h3>
+<p>Interpolated‑text elements evaluate embedded elements to render a final text element. Like string elements, these will deserialize to a string type.</p>
+<pre><code class="language-xfer">&lt;! dynamicSource { username env &quot;USER&quot; } !&gt;
+&lt;/ Value will render as 'User=paul LoggedIn=True Since 1 Aug 2025 09:30:00' /&gt;
+banner 'User=&lt;|username|&gt; LoggedIn=&lt;~true~&gt; Since &lt;@2025-08-01T09:30:00@&gt;'
+</code></pre>
 <section id="processing-instructions"><h3 id="processing-instructions">Processing Instructions</h3>
 <p>Processing instructions (PIs) are single key/value directives that the parser consumes before continuing to parse. They use the form <code>&lt;! name &lt;value&gt; !&gt;</code>. The built‑in PIs include:</p>
 <ul>
@@ -282,11 +288,60 @@
 &lt;! dynamicSource { apiKey file &quot;secrets/api-key.txt&quot; user env &quot;USER&quot; tag const &quot;2025.08.11&quot; } !&gt;
 &lt;! if defined |apiKey| !&gt; { auth { key |apiKey| user |user| tag |tag| } }
 </code></pre>
-<section id="interpolated-text"><h3 id="interpolated-text">Interpolated Text</h3>
-<p>Interpolated‑text elements evaluate embedded elements to render a final text element. Like string elements, these will deserialize to a string type.</p>
-<pre><code class="language-xfer">&lt;! dynamicSource { username env &quot;USER&quot; } !&gt;
-&lt;/ Value will render as 'User=paul LoggedIn=True Since 1 Aug 2025 09:30:00' /&gt;
-banner 'User=&lt;|username|&gt; LoggedIn=&lt;~true~&gt; Since &lt;@2025-08-01T09:30:00@&gt;'
+<section id="binding-references-with-let"><h3 id="binding-references-with-let">Binding References with <code>let</code></h3>
+<p>You may bind names to element values with the <code>let</code> processing instruction, and you may reference them in your document as reference elements.</p>
+<pre><code class="language-xfer">&lt;! let greeting &quot;world&quot; !&gt;
+message 'Hello &lt;_greeting_&gt;' &lt;/ &lt;_greeting_&gt; is replaced with &quot;world&quot; at parse time /&gt;
+tuple ( _greeting _greeting ) &lt;/ Renders as tuple (&quot;world&quot; &quot;world&quot;) /&gt;
+</code></pre>
+<p>If a reference cannot be resolved at parse time, the reference element is rendered as-is and the parser reports a warning.</p>
+<section id="grouped-let-bindings-with-script"><h3 id="grouped-let-bindings-with-script">Grouped Let Bindings with <code>script</code></h3>
+<p>The <code>script</code> PI groups multiple <code>let</code> operators together.</p>
+<pre><code class="language-xfer">&lt;! script (
+    let x &quot;Hello&quot;
+    let y 'X=&lt;_x_&gt;'
+) !&gt;
+(
+    _x    &lt;/ Renders as &quot;Hello&quot; /&gt;
+    _y    &lt;/ Renders as &quot;X=Hello&quot; /&gt;
+)
+</code></pre>
+<p>In the future, additional keywords will be available for scripting as well.</p>
+<section id="dynamic-elements-and-sources"><h3 id="dynamic-elements-and-sources">Dynamic Elements and Sources</h3>
+<p>Dynamic elements (<code>|name|</code>) resolve from sources configured by <code>dynamicSource</code> or, absent a mapping, from environment variables. The built‑in source types are <code>env</code> to read environment variables, <code>file</code> to read files, and <code>const</code> for constant values.</p>
+<pre><code class="language-xfer">&lt;! dynamicSource {
+    apiKey file &quot;secrets/api-key.txt&quot;
+    user   env  &quot;USER&quot;
+    build  const &quot;2025.08.11&quot;
+} !&gt;
+{ key '|apiKey|' user '|user|' tag '|build|' }
+</code></pre>
+<section id="conditional-element-inclusion-with-if"><h3 id="conditional-element-inclusion-with-if">Conditional Element Inclusion with <code>if</code></h3>
+<p>The <code>if</code> PI evaluates a condition. If the condition is false, the following sibling element is not added to the document. The <code>if</code> processing instruction itself is always stripped from output regardless of evaluation outcome.</p>
+<pre><code class="language-xfer">&lt;! let showDebug ~false !&gt;
+&lt;! if _showDebug !&gt;
+{ debug { level &quot;verbose&quot; } }
+</code></pre>
+<p>Defined vs undefined (existence test) may also be used:</p>
+<pre><code class="language-xfer">&lt;! if defined _showDebug !&gt; { note 'Evaluates as true even if the value is ~false.' }
+</code></pre>
+<p>Behavior &amp; serialization rules:</p>
+<ul>
+<li>If the condition evaluates to false, the target element (the immediately following sibling element) is completely suppressed; that is, it is never added to the parsed document model.</li>
+<li>If the condition evaluates to true, the target element is retained.</li>
+<li>Regardless of outcome (true, false, evaluation error, or unknown operator name) the <code>if</code> processing instruction itself is always stripped from serialization output. It acts only as a directive at parse time.</li>
+<li>An unknown operator name inside the condition currently acts as a no‑op (treated as truthy so the element is preserved) but the PI is still stripped. Future versions may surface a warning; do not rely on serialization visibility for diagnostics.</li>
+<li>Direct reference conditions (<code>&lt;! if _flag !&gt;</code>) test the bound value's truthiness; use <code>defined</code> to distinguish between an undefined binding and a defined but falsy value.</li>
+</ul>
+<p>Example showing outcomes (serialized form shown on right):</p>
+<pre><code class="language-xfer">&lt;! let enabled ~true !&gt;  &lt;! if _enabled !&gt; { feature { status &quot;on&quot; } }   &lt;/ serializes as: { feature { status &quot;on&quot; } } /&gt;
+&lt;! let enabled ~false !&gt; &lt;! if _enabled !&gt; { feature { status &quot;on&quot; } }   &lt;/ serializes as: (nothing emitted) /&gt;
+&lt;! if someUnknownOp[&quot;a&quot; &quot;b&quot;] !&gt; { kept ~true }                         &lt;/ unknown op -&gt; element kept; PI stripped /&gt;
+</code></pre>
+<section id="character-definitions"><h3 id="character-definitions">Character Definitions</h3>
+<p>Define symbolic character aliases for readability (keyword → Unicode code point):</p>
+<pre><code class="language-xfer">&lt;! chardef { bullet \$2022 arrow \$2192 } !&gt;
+{ list (&quot;Item&quot; \bullet &quot;Next&quot; \arrow ) }
 </code></pre>
 <hr />
 <section id="introduction-to-the-net-library"><h2 id="introduction-to-the.net-library">Introduction to the .NET Library</h2>
@@ -346,62 +401,6 @@ var settings = new XferSerializerSettings {
 settings.Converters.Add(new MySpecialConverter());
 </code></pre>
 <p>Note: Advanced serializer extension points (custom converters and custom contract resolvers) are supported and evolving. Keep tests nearby when extending.</p>
-<hr />
-<section id="binding-references-with-let"><h3 id="binding-references-with-let">Binding References with <code>let</code></h3>
-<p>You may bind names to element values with the <code>let</code> processing instruction, and you may reference them in your document as reference elements.</p>
-<pre><code class="language-xfer">&lt;! let greeting &quot;world&quot; !&gt;
-message 'Hello &lt;_greeting_&gt;' &lt;/ &lt;_greeting_&gt; is replaced with &quot;world&quot; at parse time /&gt;
-tuple ( _greeting _greeting ) &lt;/ Renders as tuple (&quot;world&quot; &quot;world&quot;) /&gt;
-</code></pre>
-<p>If a reference cannot be resolved at parse time, the reference element is rendered as-is and the parser reports a warning.</p>
-<section id="grouped-let-bindings-with-script"><h3 id="grouped-let-bindings-with-script">Grouped Let Bindings with <code>script</code></h3>
-<p>The <code>script</code> PI groups multiple <code>let</code> operators together.</p>
-<pre><code class="language-xfer">&lt;! script (
-    let x &quot;Hello&quot;
-    let y 'X=&lt;_x_&gt;'
-) !&gt;
-(
-    _x    &lt;/ Renders as &quot;Hello&quot; /&gt;
-    _y    &lt;/ Renders as &quot;X=Hello&quot; /&gt;
-)
-</code></pre>
-<p>In the future, additional keywords will be available for scripting as well.</p>
-<section id="dynamic-elements-and-sources"><h3 id="dynamic-elements-and-sources">Dynamic Elements and Sources</h3>
-<p>Dynamic elements (<code>|name|</code>) resolve from sources configured by <code>dynamicSource</code> or, absent a mapping, from environment variables. The built‑in source types are <code>env</code> to read environment variables, <code>file</code> to read files, and <code>const</code> for constant values.</p>
-<pre><code class="language-xfer">&lt;! dynamicSource {
-    apiKey file &quot;secrets/api-key.txt&quot;
-    user   env  &quot;USER&quot;
-    build  const &quot;2025.08.11&quot;
-} !&gt;
-{ key '|apiKey|' user '|user|' tag '|build|' }
-</code></pre>
-<section id="conditional-element-inclusion-with-if"><h3 id="conditional-element-inclusion-with-if">Conditional Element Inclusion with <code>if</code></h3>
-<p>The <code>if</code> PI evaluates a condition. If the condition is false, the following sibling element is not added to the document. The <code>if</code> processing instruction itself is always stripped from output regardless of evaluation outcome.</p>
-<pre><code class="language-xfer">&lt;! let showDebug ~false !&gt;
-&lt;! if _showDebug !&gt;
-{ debug { level &quot;verbose&quot; } }
-</code></pre>
-<p>Defined vs undefined (existence test) may also be used:</p>
-<pre><code class="language-xfer">&lt;! if defined _showDebug !&gt; { note 'Evaluates as true even if the value is ~false.' }
-</code></pre>
-<p>Behavior &amp; serialization rules:</p>
-<ul>
-<li>If the condition evaluates to false, the target element (the immediately following sibling element) is completely suppressed; that is, it is never added to the parsed document model.</li>
-<li>If the condition evaluates to true, the target element is retained.</li>
-<li>Regardless of outcome (true, false, evaluation error, or unknown operator name) the <code>if</code> processing instruction itself is always stripped from serialization output. It acts only as a directive at parse time.</li>
-<li>An unknown operator name inside the condition currently acts as a no‑op (treated as truthy so the element is preserved) but the PI is still stripped. Future versions may surface a warning; do not rely on serialization visibility for diagnostics.</li>
-<li>Direct reference conditions (<code>&lt;! if _flag !&gt;</code>) test the bound value's truthiness; use <code>defined</code> to distinguish between an undefined binding and a defined but falsy value.</li>
-</ul>
-<p>Example showing outcomes (serialized form shown on right):</p>
-<pre><code class="language-xfer">&lt;! let enabled ~true !&gt;  &lt;! if _enabled !&gt; { feature { status &quot;on&quot; } }   &lt;/ serializes as: { feature { status &quot;on&quot; } } /&gt;
-&lt;! let enabled ~false !&gt; &lt;! if _enabled !&gt; { feature { status &quot;on&quot; } }   &lt;/ serializes as: (nothing emitted) /&gt;
-&lt;! if someUnknownOp[&quot;a&quot; &quot;b&quot;] !&gt; { kept ~true }                         &lt;/ unknown op -&gt; element kept; PI stripped /&gt;
-</code></pre>
-<section id="character-definitions"><h3 id="character-definitions">Character Definitions</h3>
-<p>Define symbolic character aliases for readability (keyword → Unicode code point):</p>
-<pre><code class="language-xfer">&lt;! chardef { bullet \$2022 arrow \$2192 } !&gt;
-{ list (&quot;Item&quot; \bullet &quot;Next&quot; \arrow ) }
-</code></pre>
 <hr />
 <section id="core-concepts"><h2 id="core-concepts">Core Concepts</h2>
 <section id="elements-and-syntax-forms"><h3 id="elements-and-syntax-forms">Elements and Syntax Forms</h3>
@@ -1690,7 +1689,7 @@ dotnet pack --configuration Release
 <ul>
 <li><strong>ParksComputing.Xfer.Lang</strong> - Main library</li>
 <li><strong>ParksComputing.Xfer.Lang.Tests</strong> - Unit tests and integration tests</li>
-<li><strong>XferService</strong> - Example web service implementation (optional)</li>
+<li><strong>XferService</strong> - Example web service implementation</li>
 <li><strong>XferDocBuilder</strong> - Custom tool for generating documentation</li>
 <li><strong>examples</strong> - Command-line examples demonstrating various uses of XferLang</li>
 <li><strong>tools</strong> - Development tools and utilities</li>
@@ -1734,7 +1733,7 @@ dotnet test --collect:&quot;XPlat Code Coverage&quot;
 </section>
 
         <footer>
-            <p>Documentation generated on 2025-08-13 13:01:18 UTC</p>
+            <p>Documentation generated on 2025-08-13 13:53:09 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

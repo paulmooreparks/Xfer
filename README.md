@@ -308,7 +308,7 @@ Every value is an element. Most elements support three styles:
 ### Keywords vs Identifiers
 - Keywords (object keys) are implicit barewords composed only of letters, digits, and underscore: `[A-Za-z_][A-Za-z0-9_]*`.
 - If a key needs any other character (dash, space, etc.) wrap it with leading & trailing `=` specifier runs: `=first-name=` (lengthen the run if it appears within the key itself).
-- Identifiers (`:name:`) are value elements (never keys). They always use leading and trailing `:`; they cannot contain whitespace or punctuation other than underscore.
+- Identifiers (`:name:`) are value elements (never keys). They always use leading and trailing `:`.
 
 ### Numbers
 Integers (`#` or implicit), longs (`&`), decimals (`*` high precision), doubles (`^`). Alternate bases for integers/longs: hex `$`, binary `%`.
