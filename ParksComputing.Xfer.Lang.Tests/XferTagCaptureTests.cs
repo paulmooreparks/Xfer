@@ -15,22 +15,22 @@ public class XferTagCaptureTests {
 
     private class StringCaptureModel {
         [XferProperty("id")]
-        [XferCaptureTag(nameof(IdTag))]
         public string? Id { get; set; }
+        [XferCaptureTag(nameof(Id))]
         public string? IdTag { get; set; }
     }
 
     private class ListCaptureModel {
         [XferProperty("name")]
-        [XferCaptureTag(nameof(NameTags))]
         public string? Name { get; set; }
+        [XferCaptureTag(nameof(Name))]
         public List<string>? NameTags { get; set; }
     }
 
     private class ArrayCaptureModel {
         [XferProperty("role")]
-        [XferCaptureTag(nameof(RoleTags))]
         public string? Role { get; set; }
+        [XferCaptureTag(nameof(Role))]
         public string[]? RoleTags { get; set; }
     }
 

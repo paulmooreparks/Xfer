@@ -142,6 +142,7 @@
                 <li><a href="#xferpropertyattribute">XferPropertyAttribute</a></li>
                 <li><a href="#xfernumericformatattribute">XferNumericFormatAttribute</a></li>
                 <li><a href="#xferdecimalprecisionattribute">XferDecimalPrecisionAttribute</a></li>
+                <li><a href="#xfercapturetagattribute-and-xfercaptureidattribute">XferCaptureTagAttribute and XferCaptureIdAttribute</a></li>
                 <li><a href="#safety-notes">Safety Notes</a></li>
                 <li><a href="#processing-instructions-and-dynamic-content">Processing Instructions and Dynamic Content</a></li>
                 <li><a href="#built-in-processing-instructions">Built-in Processing Instructions</a></li>
@@ -420,7 +421,7 @@ settings.Converters.Add(new MySpecialConverter());
 <ul>
 <li>Keywords (object keys) are implicit barewords composed only of letters, digits, and underscore: <code>[A-Za-z_][A-Za-z0-9_]*</code>.</li>
 <li>If a key needs any other character (dash, space, etc.) wrap it with leading &amp; trailing <code>=</code> specifier runs: <code>=first-name=</code> (lengthen the run if it appears within the key itself).</li>
-<li>Identifiers (<code>:name:</code>) are value elements (never keys). They always use leading and trailing <code>:</code>; they cannot contain whitespace or punctuation other than underscore.</li>
+<li>Identifiers (<code>:name:</code>) are value elements (never keys). They always use leading and trailing <code>:</code>.</li>
 </ul>
 <section id="numbers"><h3 id="numbers">Numbers</h3>
 <p>Integers (<code>#</code> or implicit), longs (<code>&amp;</code>), decimals (<code>*</code> high precision), doubles (<code>^</code>). Alternate bases for integers/longs: hex <code>$</code>, binary <code>%</code>.</p>
@@ -1379,6 +1380,49 @@ string xfer = XferConvert.Serialize(data);
 <li>Display formatting for user interfaces</li>
 <li>Data export with consistent decimal representation</li>
 </ul>
+<section id="xfercapturetagattribute-and-xfercaptureidattribute"><h3 id="xfercapturetagattribute-and-xfercaptureidattribute">XferCaptureTagAttribute and XferCaptureIdAttribute</h3>
+<p>Capture XferLang metadata (tags and IDs) into sibling CLR properties during deserialization. Place the attribute on the target property and reference the source by CLR property name or by the exact document key. Properties decorated with these attributes are skipped during serialization.</p>
+<pre><code class="language-csharp">using ParksComputing.Xfer.Lang.Attributes;
+
+public class Item
+{
+    [XferProperty(&quot;name&quot;)]
+    public string? Name { get; set; }
+
+    // Tag targets can be string (first tag), List&lt;string&gt;, or string[] (all tags)
+    [XferCaptureTag(nameof(Name))]         // capture tag(s) applied to the 'name' KVP (or: [XferCaptureTag(&quot;name&quot;)])
+    public List&lt;string&gt;? NameTags { get; set; }
+
+    // ID target is a string (nullable allowed)
+    [XferCaptureId(nameof(Name))]          // capture ID applied to the 'name' KVP (or: [XferCaptureId(&quot;name&quot;)])
+    public string? NameId { get; set; }
+}
+
+// Deserialization example
+var xfer = @&quot;{
+    &lt;!tag \&quot;A\&quot;!&gt;
+    &lt;!tag \&quot;B\&quot;!&gt;
+    &lt;!id \&quot;z42\&quot;!&gt;
+    name \&quot;Widget\&quot;
+}&quot;;
+
+var dto = XferConvert.Deserialize&lt;Item&gt;(xfer);
+// dto!.Name == &quot;Widget&quot;
+// dto.NameTags =&gt; [&quot;A&quot;, &quot;B&quot;]
+// dto.NameId   =&gt; &quot;z42&quot;
+
+// Note: Properties decorated with XferCaptureTag or XferCaptureId are not serialized.
+// The attribute argument may be the CLR property name (e.g., nameof(Name)) or the exact document key (e.g., &quot;name&quot;).
+</code></pre>
+<p>Rules and edge cases:</p>
+<ul>
+<li>Target types for tags: string (captures first tag), List<string>, or string[]; for IDs: string only.</li>
+<li>When no tags are present: string target =&gt; null; List<string> =&gt; empty list; string[] =&gt; empty array.</li>
+<li>When no ID is present: target string remains null.</li>
+<li>Property resolution is case-insensitive for CLR names and respects any [XferProperty] rename; if no CLR match is found, the attribute value is treated as the literal document key.</li>
+<li>Tag values themselves are case-sensitive; duplicate tags are de-duplicated at parse time.</li>
+<li>If both [XferCaptureTag] and [XferCaptureId] are applied to the same property, an InvalidOperationException is thrown.</li>
+</ul>
 <section id="safety-notes"><h3 id="safety-notes">Safety Notes</h3>
 <ul>
 <li>Numeric formatting attributes (<code>XferNumericFormatAttribute</code>) are only applied to <code>int</code> and <code>long</code> properties</li>
@@ -1733,7 +1777,7 @@ dotnet test --collect:&quot;XPlat Code Coverage&quot;
 </section>
 
         <footer>
-            <p>Documentation generated on 2025-08-13 13:53:09 UTC</p>
+            <p>Documentation generated on 2025-08-14 12:53:19 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

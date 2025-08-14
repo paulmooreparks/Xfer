@@ -1323,6 +1323,52 @@ string xfer = XferConvert.Serialize(data);
 - Display formatting for user interfaces
 - Data export with consistent decimal representation
 
+### XferCaptureTagAttribute and XferCaptureIdAttribute
+
+Capture XferLang metadata (tags and IDs) into sibling CLR properties during deserialization. Place the attribute on the target property and reference the source by CLR property name or by the exact document key. Properties decorated with these attributes are skipped during serialization.
+
+```csharp
+using ParksComputing.Xfer.Lang.Attributes;
+
+public class Item
+{
+    [XferProperty("name")]
+    public string? Name { get; set; }
+
+    // Tag targets can be string (first tag), List<string>, or string[] (all tags)
+    [XferCaptureTag(nameof(Name))]         // capture tag(s) applied to the 'name' KVP (or: [XferCaptureTag("name")])
+    public List<string>? NameTags { get; set; }
+
+    // ID target is a string (nullable allowed)
+    [XferCaptureId(nameof(Name))]          // capture ID applied to the 'name' KVP (or: [XferCaptureId("name")])
+    public string? NameId { get; set; }
+}
+
+// Deserialization example
+var xfer = @"{
+    <!tag \"A\"!>
+    <!tag \"B\"!>
+    <!id \"z42\"!>
+    name \"Widget\"
+}";
+
+var dto = XferConvert.Deserialize<Item>(xfer);
+// dto!.Name == "Widget"
+// dto.NameTags => ["A", "B"]
+// dto.NameId   => "z42"
+
+// Note: Properties decorated with XferCaptureTag or XferCaptureId are not serialized.
+// The attribute argument may be the CLR property name (e.g., nameof(Name)) or the exact document key (e.g., "name").
+```
+
+Rules and edge cases:
+- Target types for tags: string (captures first tag), List<string>, or string[]; for IDs: string only.
+- When no tags are present: string target => null; List<string> => empty list; string[] => empty array.
+- When no ID is present: target string remains null.
+- Property resolution is case-insensitive for CLR names and respects any [XferProperty] rename; if no CLR match is found, the attribute value is treated as the literal document key.
+- Tag values themselves are case-sensitive; duplicate tags are de-duplicated at parse time.
+- If both [XferCaptureTag] and [XferCaptureId] are applied to the same property, an InvalidOperationException is thrown.
+
 ### Safety Notes
 
 - Numeric formatting attributes (`XferNumericFormatAttribute`) are only applied to `int` and `long` properties

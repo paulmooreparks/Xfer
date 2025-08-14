@@ -49,6 +49,8 @@
                 <details>
                     <summary>ParksComputing.Xfer.Lang.Attributes</summary>
                     <ul>
+                        <li><a href="#type-parkscomputing-xfer-lang-attributes-xfercaptureidattribute">XferCaptureIdAttribute</a></li>
+                        <li><a href="#type-parkscomputing-xfer-lang-attributes-xfercapturetagattribute">XferCaptureTagAttribute</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-attributes-xferdecimalprecisionattribute">XferDecimalPrecisionAttribute</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-attributes-xferevaluatedattribute">XferEvaluatedAttribute</a></li>
                         <li><a href="#type-parkscomputing-xfer-lang-attributes-xfernumericformat">XferNumericFormat</a></li>
@@ -1902,6 +1904,68 @@
 </section>
 </section>
 <section id="namespace-parkscomputing-xfer-lang-attributes"><h2>Namespace: ParksComputing.Xfer.Lang.Attributes</h2>
+<section id="type-parkscomputing-xfer-lang-attributes-xfercaptureidattribute"><h3>Class: XferCaptureIdAttribute</h3>
+<p>Apply this to the ID TARGET property to capture the ID from another property during deserialization. The attribute references the SOURCE property that carries the Xfer key/value pair.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>TargetPropertyName</code></td>
+<td><code>string</code></td>
+<td>The SOURCE identifier: either the CLR property name on the same type, or the exact document key. The decorated target property's type should be string (nullable allowed).</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferCaptureIdAttribute(string sourceName)</code>
+<p>Initializes a new instance of the  class.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>sourceName</code></td>
+<td><code>string</code></td>
+<td>The SOURCE identifier to capture from: either a CLR property name on the same type (case-insensitive, honoring any [XferProperty] rename) or the exact document key.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="type-parkscomputing-xfer-lang-attributes-xfercapturetagattribute"><h3>Class: XferCaptureTagAttribute</h3>
+<p>Apply this to the TAG TARGET property to capture tag(s) from another property during deserialization. The attribute references the SOURCE property that carries the Xfer key/value pair.</p>
+<h4>Properties</h4>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>TargetPropertyName</code></td>
+<td><code>string</code></td>
+<td>The SOURCE identifier: either the CLR property name on the same type, or the exact document key. The decorated target property's type should be string, List<string>, or string[] (nullable allowed).</td>
+</tr>
+</tbody>
+</table>
+<h4>Methods</h4>
+<div class="method-doc">
+<h5>Constructor</h5>
+<code>XferCaptureTagAttribute(string sourceName)</code>
+<p>Initializes a new instance of the  class.</p>
+<h6>Parameters</h6>
+<table class="api-table">
+<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
+<tbody>
+<tr>
+<td><code>sourceName</code></td>
+<td><code>string</code></td>
+<td>The SOURCE identifier to capture from: either a CLR property name on the same type (case-insensitive, honoring any [XferProperty] rename) or the exact document key.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="type-parkscomputing-xfer-lang-attributes-xferdecimalprecisionattribute"><h3>Class: XferDecimalPrecisionAttribute</h3>
 <p>Specifies the maximum number of decimal places to display when serializing decimal and double values to XferLang. This attribute only affects the string representation and does not modify the underlying value.</p>
 <h4>Properties</h4>
@@ -3744,9 +3808,9 @@
 <td>Gets the previous sibling element in the parent's children collection.</td>
 </tr>
 <tr>
-<td><code>Tag</code></td>
-<td><code>string</code></td>
-<td>Optional tag for this element, settable via inline PI: <! tag "tagName" !> Tags allow non-unique categorization of elements for grouping and selection. Each element can have only one tag.</td>
+<td><code>Tags</code></td>
+<td><code>List&lt;string&gt;</code></td>
+<td>Optional tags for this element, set via inline PI(s): <! tag "name" !>. Tags allow non-unique categorization and multiple tags may be applied to a single element.</td>
 </tr>
 </tbody>
 </table>
@@ -6452,6 +6516,11 @@
 <td>Document identifier (string or GUID as string).</td>
 </tr>
 <tr>
+<td><code>DocumentTags</code></td>
+<td><code>ArrayElement</code></td>
+<td>Freeform document-level tags/labels.</td>
+</tr>
+<tr>
 <td><code>Environment</code></td>
 <td><code>StringElement</code></td>
 <td>Environment name (e.g., dev/test/prod).</td>
@@ -6480,11 +6549,6 @@
 <td><code>Properties</code></td>
 <td><code>IReadOnlyDictionary&lt;string, KeyValuePairElement&gt;</code></td>
 <td>Gets all properties as a read-only dictionary.</td>
-</tr>
-<tr>
-<td><code>Tags</code></td>
-<td><code>ArrayElement</code></td>
-<td>Freeform tags/labels.</td>
 </tr>
 <tr>
 <td><code>Title</code></td>
@@ -6963,7 +7027,7 @@
 </div>
 </section>
 <section id="type-parkscomputing-xfer-lang-processinginstructions-tagprocessinginstruction"><h3>Class: TagProcessingInstruction</h3>
-<p>Processing instruction for assigning a single tag to elements in XferLang. The tag processing instruction associates a string tag with an element, enabling element categorization and group selection within the document. Multiple elements can share the same tag, but each element can have only one tag.</p>
+<p>Processing instruction for assigning a single tag to elements in XferLang. The tag processing instruction associates a string tag with an element, enabling element categorization and group selection within the document. Multiple elements can share the same tag, and elements may have multiple tags.</p>
 <h4>Methods</h4>
 <div class="method-doc">
 <h5>Constructor</h5>
@@ -8919,7 +8983,7 @@
 
 
         <footer>
-            <p>Documentation generated on 2025-08-13 13:53:10 UTC</p>
+            <p>Documentation generated on 2025-08-14 12:53:21 UTC</p>
         </footer>
     </main>
     <script>hljs.highlightAll();</script>

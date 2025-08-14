@@ -547,6 +547,15 @@ public class XferConvert {
         var properties = settings.ContractResolver.ResolveProperties(type);
 
         foreach (var property in properties) {
+            // If a property is marked as a capture target (Tag/Id), it should not be serialized.
+            var capTag = property.GetCustomAttribute<XferCaptureTagAttribute>();
+            var capId = property.GetCustomAttribute<XferCaptureIdAttribute>();
+            if (capTag != null && capId != null) {
+                throw new InvalidOperationException($"Property '{type.FullName}.{property.Name}' cannot have both XferCaptureTag and XferCaptureId.");
+            }
+            if (capTag != null || capId != null) {
+                continue; // skip serializing capture-target properties
+            }
             var attribute = property.GetCustomAttribute<XferPropertyAttribute>();
             var evalAttribute = property.GetCustomAttribute<XferEvaluatedAttribute>();
 
@@ -887,53 +896,88 @@ public class XferConvert {
             }
         }
 
-        // Set remaining writable properties (not set via constructor)
+        // Set remaining writable properties (not set via constructor) and apply capture-attributes on target props
         foreach (var prop in properties)
         {
             if (!prop.CanWrite) {
                 continue;
             }
 
-            var attribute = prop.GetCustomAttribute<XferPropertyAttribute>();
-            var propName = attribute?.Name ?? prop.Name;
+            var xferNameAttr = prop.GetCustomAttribute<XferPropertyAttribute>();
+            var propName = xferNameAttr?.Name ?? prop.Name;
             // Only set if not already set by constructor
             if (valueDict.TryGetValue(propName, out var rawValue)) {
                 var propValue = DeserializeValue(rawValue, prop.PropertyType, settings);
                 prop.SetValue(instance, propValue);
+            }
+        }
 
-                // Capture tag metadata if requested via attribute
-                var captureAttr = prop.GetCustomAttribute<XferCaptureTagAttribute>();
-                if (captureAttr != null) {
-                    try {
-                        // Find the KVP for this property to read its tags
-                        List<string> tags = new();
-                        if (objectElement.Dictionary.TryGetValue(propName, out var kvpForTag)) {
-                            if (kvpForTag.Tags != null && kvpForTag.Tags.Count > 0) {
-                                tags.AddRange(kvpForTag.Tags);
-                            }
-                        } else {
-                            // Case-insensitive fallback
-                            var match = objectElement.Dictionary.FirstOrDefault(k => string.Equals(k.Key, propName, StringComparison.OrdinalIgnoreCase));
-                            if (!string.IsNullOrEmpty(match.Key) && match.Value.Tags != null && match.Value.Tags.Count > 0) {
-                                tags.AddRange(match.Value.Tags);
-                            }
-                        }
+        // Second pass: handle capture attributes that now live on the TARGET properties
+        foreach (var targetProp in properties)
+        {
+            if (!targetProp.CanWrite) { continue; }
 
-                        if (!string.IsNullOrEmpty(captureAttr.TargetPropertyName)) {
-                            var targetProp = properties.FirstOrDefault(p => string.Equals(p.Name, captureAttr.TargetPropertyName, StringComparison.Ordinal));
-                            if (targetProp != null && targetProp.CanWrite) {
-                                // Support common shapes: string (first tag), List<string>, string[]
-                                if (targetProp.PropertyType == typeof(string)) {
-                                    targetProp.SetValue(instance, tags.FirstOrDefault());
-                                } else if (targetProp.PropertyType == typeof(List<string>)) {
-                                    targetProp.SetValue(instance, tags);
-                                } else if (targetProp.PropertyType == typeof(string[])) {
-                                    targetProp.SetValue(instance, tags.ToArray());
-                                }
-                            }
-                        }
-                    } catch { /* non-fatal: ignore tag capture errors */ }
-                }
+            var tagCap = targetProp.GetCustomAttribute<XferCaptureTagAttribute>();
+            var idCap = targetProp.GetCustomAttribute<XferCaptureIdAttribute>();
+            if (tagCap != null && idCap != null) {
+                throw new InvalidOperationException($"Property '{targetType.FullName}.{targetProp.Name}' cannot have both XferCaptureTag and XferCaptureId.");
+            }
+
+            if (tagCap != null) {
+                try {
+                    // Resolve the SOURCE: either a CLR property by that name, or treat as document key directly
+                    string configured = tagCap.TargetPropertyName;
+                    string sourcePropName;
+                    var sourceProp = properties.FirstOrDefault(p => string.Equals(p.Name, configured, StringComparison.Ordinal));
+                    if (sourceProp != null) {
+                        var sourceNameAttr = sourceProp.GetCustomAttribute<XferPropertyAttribute>();
+                        sourcePropName = sourceNameAttr?.Name ?? sourceProp.Name;
+                    } else {
+                        sourcePropName = configured; // assume explicit document key
+                    }
+
+                    List<string> tags = new();
+                    if (objectElement.Dictionary.TryGetValue(sourcePropName, out var kvpForTag)) {
+                        if (kvpForTag.Tags != null && kvpForTag.Tags.Count > 0) { tags.AddRange(kvpForTag.Tags); }
+                    } else {
+                        var match = objectElement.Dictionary.FirstOrDefault(k => string.Equals(k.Key, sourcePropName, StringComparison.OrdinalIgnoreCase));
+                        if (!string.IsNullOrEmpty(match.Key) && match.Value.Tags != null && match.Value.Tags.Count > 0) { tags.AddRange(match.Value.Tags); }
+                    }
+
+                    if (targetProp.PropertyType == typeof(string)) {
+                        targetProp.SetValue(instance, tags.FirstOrDefault());
+                    } else if (targetProp.PropertyType == typeof(List<string>)) {
+                        targetProp.SetValue(instance, tags);
+                    } else if (targetProp.PropertyType == typeof(string[])) {
+                        targetProp.SetValue(instance, tags.ToArray());
+                    }
+                } catch { /* non-fatal: ignore tag capture errors */ }
+            }
+
+            if (idCap != null) {
+                try {
+                    string configured = idCap.TargetPropertyName;
+                    string sourcePropName;
+                    var sourceProp = properties.FirstOrDefault(p => string.Equals(p.Name, configured, StringComparison.Ordinal));
+                    if (sourceProp != null) {
+                        var sourceNameAttr = sourceProp.GetCustomAttribute<XferPropertyAttribute>();
+                        sourcePropName = sourceNameAttr?.Name ?? sourceProp.Name;
+                    } else {
+                        sourcePropName = configured; // assume explicit document key
+                    }
+
+                    string? id = null;
+                    if (objectElement.Dictionary.TryGetValue(sourcePropName, out var kvpForId)) {
+                        id = kvpForId.Id;
+                    } else {
+                        var match = objectElement.Dictionary.FirstOrDefault(k => string.Equals(k.Key, sourcePropName, StringComparison.OrdinalIgnoreCase));
+                        if (!string.IsNullOrEmpty(match.Key)) { id = match.Value.Id; }
+                    }
+
+                    if (targetProp.PropertyType == typeof(string)) {
+                        targetProp.SetValue(instance, id);
+                    }
+                } catch { /* non-fatal: ignore id capture errors */ }
             }
         }
         return instance;
