@@ -35,19 +35,26 @@ public class QueryNavigationTests {
         doc.Root = root;
 
         // Header section
-        var header = new ObjectElement { Id = "header", Tag = "section" };
-        var title = new StringElement("Test Document") { Id = "title", Tag = "text" };
-        var subtitle = new StringElement("Subtitle") { Tag = "text" };
+    var header = new ObjectElement { Id = "header" };
+    header.Tags.Add("section");
+    var title = new StringElement("Test Document") { Id = "title" };
+    title.Tags.Add("text");
+    var subtitle = new StringElement("Subtitle");
+    subtitle.Tags.Add("text");
 
         header.AddOrUpdate(new KeyValuePairElement(new KeywordElement("title"), title));
         header.AddOrUpdate(new KeyValuePairElement(new KeywordElement("subtitle"), subtitle));
         root.Add(header);
 
         // Content section
-        var content = new TupleElement { Id = "content", Tag = "section" };
-        var item1 = new StringElement("First Item") { Tag = "item" };
-        var item2 = new IntegerElement(42) { Tag = "item" };
-        var item3 = new BooleanElement(true) { Tag = "item" };
+    var content = new TupleElement { Id = "content" };
+    content.Tags.Add("section");
+    var item1 = new StringElement("First Item");
+    item1.Tags.Add("item");
+    var item2 = new IntegerElement(42);
+    item2.Tags.Add("item");
+    var item3 = new BooleanElement(true);
+    item3.Tags.Add("item");
 
         content.Add(item1);
         content.Add(item2);
@@ -55,8 +62,10 @@ public class QueryNavigationTests {
         root.Add(content);
 
         // Footer section
-        var footer = new ObjectElement { Id = "footer", Tag = "section" };
-        var copyright = new StringElement("© 2023") { Tag = "text" };
+    var footer = new ObjectElement { Id = "footer" };
+    footer.Tags.Add("section");
+    var copyright = new StringElement("© 2023");
+    copyright.Tags.Add("text");
 
         footer.AddOrUpdate(new KeyValuePairElement(new KeywordElement("copyright"), copyright));
         root.Add(footer);
@@ -77,7 +86,7 @@ public class QueryNavigationTests {
         // Assert
         Assert.AreEqual(4, stringElements.Count); // title, subtitle, item1, copyright
         Assert.IsTrue(stringElements.Any(e => e.Id == "title"));
-        Assert.IsTrue(stringElements.Any(e => e.Tag == "text"));
+    Assert.IsTrue(stringElements.Any(e => e.Tags.Contains("text")));
     }
 
     [TestMethod]
@@ -297,8 +306,8 @@ public class QueryNavigationTests {
         // Assert
         Assert.IsNotNull(firstItem);
         Assert.IsNotNull(nextSibling);
-        Assert.AreEqual("item", firstItem.Tag);
-        Assert.AreEqual("item", nextSibling.Tag);
+    Assert.IsTrue(firstItem!.Tags.Contains("item"));
+    Assert.IsTrue(nextSibling!.Tags.Contains("item"));
         Assert.IsInstanceOfType(firstItem, typeof(StringElement));
         Assert.IsInstanceOfType(nextSibling, typeof(IntegerElement));
     }
@@ -321,7 +330,7 @@ public class QueryNavigationTests {
         Assert.IsNotNull(title);
         Assert.IsNotNull(copyright);
         Assert.AreEqual("title", title.Id);
-        Assert.AreEqual("text", copyright.Tag);
+    Assert.IsTrue(copyright!.Tags.Contains("text"));
         Assert.IsInstanceOfType(copyright, typeof(StringElement));
         Assert.AreEqual("© 2023", ((StringElement)copyright).Value);
     }

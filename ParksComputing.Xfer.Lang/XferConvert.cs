@@ -900,6 +900,40 @@ public class XferConvert {
             if (valueDict.TryGetValue(propName, out var rawValue)) {
                 var propValue = DeserializeValue(rawValue, prop.PropertyType, settings);
                 prop.SetValue(instance, propValue);
+
+                // Capture tag metadata if requested via attribute
+                var captureAttr = prop.GetCustomAttribute<XferCaptureTagAttribute>();
+                if (captureAttr != null) {
+                    try {
+                        // Find the KVP for this property to read its tags
+                        List<string> tags = new();
+                        if (objectElement.Dictionary.TryGetValue(propName, out var kvpForTag)) {
+                            if (kvpForTag.Tags != null && kvpForTag.Tags.Count > 0) {
+                                tags.AddRange(kvpForTag.Tags);
+                            }
+                        } else {
+                            // Case-insensitive fallback
+                            var match = objectElement.Dictionary.FirstOrDefault(k => string.Equals(k.Key, propName, StringComparison.OrdinalIgnoreCase));
+                            if (!string.IsNullOrEmpty(match.Key) && match.Value.Tags != null && match.Value.Tags.Count > 0) {
+                                tags.AddRange(match.Value.Tags);
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(captureAttr.TargetPropertyName)) {
+                            var targetProp = properties.FirstOrDefault(p => string.Equals(p.Name, captureAttr.TargetPropertyName, StringComparison.Ordinal));
+                            if (targetProp != null && targetProp.CanWrite) {
+                                // Support common shapes: string (first tag), List<string>, string[]
+                                if (targetProp.PropertyType == typeof(string)) {
+                                    targetProp.SetValue(instance, tags.FirstOrDefault());
+                                } else if (targetProp.PropertyType == typeof(List<string>)) {
+                                    targetProp.SetValue(instance, tags);
+                                } else if (targetProp.PropertyType == typeof(string[])) {
+                                    targetProp.SetValue(instance, tags.ToArray());
+                                }
+                            }
+                        }
+                    } catch { /* non-fatal: ignore tag capture errors */ }
+                }
             }
         }
         return instance;

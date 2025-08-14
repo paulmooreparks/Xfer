@@ -142,13 +142,16 @@ public class XferDocument {
     /// </summary>
     /// <param name="element">The element to process and recurse into.</param>
     private void BuildTagIndexRecursive(Element element) {
-        // Add this element to the tag index if it has a tag
-        if (!string.IsNullOrEmpty(element.Tag)) {
-            if (!_tagIndex.TryGetValue(element.Tag, out var elements)) {
-                elements = new HashSet<Element>();
-                _tagIndex[element.Tag] = elements;
+        // Add this element to the tag index for each tag
+        if (element.Tags != null && element.Tags.Count > 0) {
+            foreach (var tag in element.Tags) {
+                if (string.IsNullOrEmpty(tag)) { continue; }
+                if (!_tagIndex.TryGetValue(tag, out var elements)) {
+                    elements = new HashSet<Element>();
+                    _tagIndex[tag] = elements;
+                }
+                elements.Add(element);
             }
-            elements.Add(element);
         }
 
         // Recursively process all children

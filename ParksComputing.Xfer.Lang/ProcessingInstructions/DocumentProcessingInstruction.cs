@@ -135,8 +135,8 @@ public class DocumentProcessingInstruction : ProcessingInstruction {
         set => SetOrRemove(PropertyKeys.Authors, value);
     }
 
-    /// <summary>Freeform tags/labels.</summary>
-    public ArrayElement? Tags {
+    /// <summary>Freeform document-level tags/labels.</summary>
+    public ArrayElement? DocumentTags {
         get => Get<ArrayElement>(PropertyKeys.Tags);
         set => SetOrRemove(PropertyKeys.Tags, value);
     }

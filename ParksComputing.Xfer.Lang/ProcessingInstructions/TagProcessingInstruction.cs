@@ -12,7 +12,7 @@ namespace ParksComputing.Xfer.Lang.ProcessingInstructions;
 /// Processing instruction for assigning a single tag to elements in XferLang.
 /// The tag processing instruction associates a string tag with an element,
 /// enabling element categorization and group selection within the document.
-/// Multiple elements can share the same tag, but each element can have only one tag.
+/// Multiple elements can share the same tag, and elements may have multiple tags.
 /// </summary>
 public class TagProcessingInstruction : ProcessingInstruction {
     /// <summary>
@@ -38,10 +38,9 @@ public class TagProcessingInstruction : ProcessingInstruction {
             return; // Ignore empty tags
         }
 
-        if (!string.IsNullOrEmpty(element.Tag)) {
-            throw new InvalidOperationException($"Element already has tag '{element.Tag}'. Cannot assign tag '{tagName}' to the same element.");
+        // Add tag if not empty and not already present
+        if (!element.Tags.Contains(tagName)) {
+            element.Tags.Add(tagName);
         }
-
-        element.Tag = tagName;
     }
 }

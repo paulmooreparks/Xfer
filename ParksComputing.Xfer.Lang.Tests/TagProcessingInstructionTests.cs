@@ -25,7 +25,7 @@ public class TagProcessingInstructionTests {
         var kvp = document.Root.Children.OfType<KeyValuePairElement>().First();
 
         // Assert
-        Assert.AreEqual("test-tag", kvp.Tag);
+    CollectionAssert.AreEqual(new[] { "test-tag" }, kvp.Tags.ToArray());
     }
 
     [TestMethod]
@@ -43,7 +43,7 @@ public class TagProcessingInstructionTests {
         var kvp = document.Root.Children.OfType<KeyValuePairElement>().First();
 
         // Assert
-        Assert.AreEqual("category1", kvp.Tag);
+    CollectionAssert.AreEqual(new[] { "category1" }, kvp.Tags.ToArray());
     }
 
     [TestMethod]
@@ -85,7 +85,7 @@ public class TagProcessingInstructionTests {
         var kvp = document.Root.Children.OfType<KeyValuePairElement>().First();
 
         // Assert - The PIs apply to the KVP element (for now, only tag works due to parser bug)
-        Assert.AreEqual("admin", kvp.Tag);
+    CollectionAssert.AreEqual(new[] { "admin" }, kvp.Tags.ToArray());
         // TODO: Fix parser bug where multiple PIs don't all apply
         // Assert.AreEqual("user1", kvp.Id);
 
@@ -105,7 +105,7 @@ public class TagProcessingInstructionTests {
         tagPI.ElementHandler(element);
 
         // Assert
-        Assert.IsNull(element.Tag);
+    Assert.AreEqual(0, element.Tags.Count);
     }
 
     [TestMethod]
@@ -125,23 +125,22 @@ public class TagProcessingInstructionTests {
     }
 
     [TestMethod]
-    public void TagPI_ShouldThrowErrorForDuplicateTagAssignment() {
-        // Arrange - Use correct syntax: PIs as separate siblings
+    public void TagPI_ShouldAllowMultipleTagAssignments() {
+        // Arrange - stacked tag PIs should all apply to the next element
         var xferContent = """
         {
             <!tag "first"!>
             <!tag "second"!>
-            name "This should fail"
+            name "multi-tagged"
         }
         """;
 
-        // Act & Assert
-        var exception = Assert.ThrowsException<InvalidOperationException>(() => {
-            XferParser.Parse(xferContent);
-        });
+        // Act
+        var document = XferParser.Parse(xferContent);
+        var kvp = document.Root.Children.OfType<KeyValuePairElement>().First();
 
-        Assert.IsTrue(exception.Message.Contains("Element already has tag 'first'"));
-        Assert.IsTrue(exception.Message.Contains("Cannot assign tag 'second'"));
+    // Assert - both tags captured
+    CollectionAssert.AreEqual(new[] { "first", "second" }, kvp.Tags.ToArray());
     }
 
     [TestMethod]
@@ -300,17 +299,17 @@ public class TagProcessingInstructionTests {
     [TestMethod]
     public void TagIndex_ShouldRebuildAfterDocumentChanges() {
         // Arrange
-        var document = new XferDocument();
-        var element = new ObjectElement();
-        element.Tag = "initial-tag";
+    var document = new XferDocument();
+    var element = new ObjectElement();
+    element.Tags.Add("initial-tag");
 
         // Act
         document.Add(element);
         var initialCount = document.GetTagElementCount("initial-tag");
 
         // Add another element with the same tag
-        var element2 = new ObjectElement();
-        element2.Tag = "initial-tag";
+    var element2 = new ObjectElement();
+    element2.Tags.Add("initial-tag");
         document.Add(element2);
         var updatedCount = document.GetTagElementCount("initial-tag");
 
@@ -362,9 +361,9 @@ public class TagProcessingInstructionTests {
         Assert.AreEqual(3, electronicsOrMobile.Count); // Smartphone, Laptop, Tablet
 
         // Test ID and tag combination
-        var smartphone = document.GetElementById("prod1");
-        Assert.IsNotNull(smartphone);
-        Assert.AreEqual("electronics", smartphone.Tag);
+    var smartphone = document.GetElementById("prod1");
+    Assert.IsNotNull(smartphone);
+    Assert.IsTrue(smartphone!.Tags.Contains("electronics"));
 
         // Test all tags
         var allTags = document.GetAllTags();

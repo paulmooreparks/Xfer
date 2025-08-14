@@ -58,11 +58,10 @@ public abstract class Element {
     public string? Id { get; set; }
 
     /// <summary>
-    /// Optional tag for this element, settable via inline PI: &lt;! tag "tagName" !&gt;
-    /// Tags allow non-unique categorization of elements for grouping and selection.
-    /// Each element can have only one tag.
+    /// Optional tags for this element, set via inline PI(s): &lt;! tag "name" !&gt;.
+    /// Tags allow non-unique categorization and multiple tags may be applied to a single element.
     /// </summary>
-    public string? Tag { get; set; }
+    public List<string> Tags { get; } = new();
     /// <summary>
     /// Optional parsed value associated with this element (e.g., a numeric primitive after lexical analysis).
     /// Implementations may set during parsing for faster scripting/operator evaluation.
@@ -107,7 +106,7 @@ public abstract class Element {
     public IReadOnlyCollection<Element> FindElementsByTag(string tag) {
         var result = new List<Element>();
 
-        if (string.Equals(Tag, tag, StringComparison.Ordinal)) {
+        if (Tags.Contains(tag)) {
             result.Add(this);
         }
 
