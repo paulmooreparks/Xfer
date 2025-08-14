@@ -491,8 +491,9 @@ public class XferConvert {
             StringElement stringElement when targetType == typeof(object) => stringElement.Value,
             CharacterElement charElement when targetType == typeof(string) => charElement.Value,
             CharacterElement charElement when targetType == typeof(object) => charElement.Value,
-            NullElement nullElement when targetType == typeof(string) => nullElement.Value,
-            NullElement nullElement when targetType == typeof(object) => nullElement.Value,
+            NullElement nullElement when targetType == typeof(string) => null,
+            NullElement nullElement when targetType == typeof(object) => null,
+            NullElement nullElement when targetType.IsClass => null,
             InterpolatedElement evalElement when targetType == typeof(string) => evalElement.Value,
             InterpolatedElement evalElement when targetType == typeof(object) => evalElement.Value,
             DynamicElement phElement when targetType == typeof(string) => phElement.Value,
@@ -896,8 +897,7 @@ public class XferConvert {
             var attribute = prop.GetCustomAttribute<XferPropertyAttribute>();
             var propName = attribute?.Name ?? prop.Name;
             // Only set if not already set by constructor
-            if (valueDict.TryGetValue(propName, out var rawValue))
-            {
+            if (valueDict.TryGetValue(propName, out var rawValue)) {
                 var propValue = DeserializeValue(rawValue, prop.PropertyType, settings);
                 prop.SetValue(instance, propValue);
             }

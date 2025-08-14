@@ -1,0 +1,75 @@
+<! document { title ".NET CI (GitHub Actions)" } !>
+{
+  name ".NET CI"
+
+  on {
+    push { branches [ "master" "v13" ] }
+    pull_request { branches [ "master" ] }
+    workflow_dispatch {
+      inputs {
+        reset_build_number {
+          description "Reset the build number (true/false)"
+          required ~false
+          default "false"
+        }
+      }
+    }
+  }
+
+  permissions {
+    contents "write"
+    actions "read"
+  }
+
+  jobs {
+    build {
+      runs-on "ubuntu-latest"
+      steps [
+        { uses "actions/checkout@v4" with { fetch-depth #0 } }
+        { name "Setup .NET" uses "actions/setup-dotnet@v4" with { dotnet-version "8.x" } }
+        { name "Clear NuGet cache" run "dotnet nuget locals all --clear" }
+        { name "Restore dependencies" run "dotnet restore --configfile nuget.config" }
+        {
+          name "Read version from csproj"
+          id "read-version"
+          env { RESET_BUILD "${{ github.event.inputs.reset_build_number }}" }
+          run <'
+            base=$(grep -oPm1 "(?<=<Version>)[^<]+" ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj)
+            base2=${base%.*}
+            if [[ "$RESET_BUILD" == "true" ]]; then
+              build=1
+            else
+              build=${GITHUB_RUN_NUMBER}
+            fi
+            full="$base2.$build-prerelease"
+            echo "version=$full" >> $GITHUB_OUTPUT
+            echo "VERSION=$full" >> $GITHUB_ENV
+          '>
+        }
+        { name "Clean" run "dotnet clean --configuration Release" }
+        { name "Build" run "dotnet build --no-restore --configuration Release Xfer.sln -p:PackageVersion=$VERSION" }
+        { name "Test" run "dotnet test --no-build --configuration Release Xfer.sln" }
+        { name "Pack with computed version" run "dotnet pack ParksComputing.Xfer.Lang/ParksComputing.Xfer.Lang.csproj -c Release --no-build -o ./nupkgs -p:PackageVersion=$VERSION -p:NuGetVersion=$VERSION" }
+        { name "Upload NuGet package" uses "actions/upload-artifact@v4" with { name "nupkgs" path <'
+          ./nupkgs/*.nupkg
+          ./nupkgs/*.snupkg
+        '>
+        }
+        {
+          name "Tag release"
+          if "github.ref == 'refs/heads/master' && github.event_name == 'push'"
+          run <'
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            if git tag | grep -q "v$VERSION"; then
+              echo "Tag v$VERSION already exists, skipping tag creation."
+              exit 0
+            fi
+            git tag "v$VERSION"
+            git push origin "v$VERSION"
+          '>
+        }
+      ]
+    }
+  }
+}
