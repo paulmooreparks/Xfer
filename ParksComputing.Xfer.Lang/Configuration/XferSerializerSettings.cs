@@ -25,7 +25,7 @@ namespace ParksComputing.Xfer.Lang.Configuration {
         /// Collection of custom converters for handling specific types during serialization.
         /// Converters are checked in order and the first matching converter is used.
         /// </summary>
-        public IList<IXferConverter> Converters { get; } = [];
+    public IList<IXferConverter> Converters { get; } = new List<IXferConverter> { new Converters.KeyedValueConverter() };
 
         /// <summary>
         /// Controls how elements are serialized for compactness vs safety.

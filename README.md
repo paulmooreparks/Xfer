@@ -1369,6 +1369,45 @@ Rules and edge cases:
 - Tag values themselves are case-sensitive; duplicate tags are de-duplicated at parse time.
 - If both [XferCaptureTag] and [XferCaptureId] are applied to the same property, an InvalidOperationException is thrown.
 
+### Using XferKeyedValue for chained keywords
+
+When you have chained keyword/value sequences that conceptually belong to a single property (for example: `script "body"`, `script javascript "body"`, or `script javascript preparse ecmascript2025 "body"`), use the `XferKeyedValue` receiving type.
+
+```csharp
+using ParksComputing.Xfer.Lang;
+using ParksComputing.Xfer.Lang.Attributes;
+
+public sealed class Widget
+{
+    [XferProperty("script")] // map to the document key
+    public XferKeyedValue? Script { get; set; }
+}
+
+// Deserialize
+var dto1 = XferConvert.Deserialize<Widget>("{ script \"do()\" }");
+// dto1!.Script!.Keys => []
+// dto1!.Script!.PayloadAsString => "do()"
+
+var dto2 = XferConvert.Deserialize<Widget>("{ script javascript \"do()\" }");
+// dto2!.Script!.Keys => ["javascript"]
+// dto2!.Script!.PayloadAsString => "do()"
+
+var dto3 = XferConvert.Deserialize<Widget>("{ script javascript preparse ecmascript2025 \"do()\" }");
+// dto3!.Script!.Keys => ["javascript","preparse","ecmascript2025"]
+// dto3!.Script!.PayloadAsString => "do()"
+
+// Serialize
+var kv = new XferKeyedValue(["javascript"], new Elements.StringElement("body"));
+var w = new Widget { Script = kv };
+var xfer = XferConvert.Serialize(w, Formatting.None);
+// Contains: script javascript"body"
+```
+
+Notes:
+- `Keys` holds the flattened keyword chain in order; `Payload` is the terminal element.
+- `PayloadAsString` is provided for convenience when the payload is a string-like element.
+- In compact mode there’s no space before a quoted string: `name"value"`.
+
 ### Safety Notes
 
 - Numeric formatting attributes (`XferNumericFormatAttribute`) are only applied to `int` and `long` properties
